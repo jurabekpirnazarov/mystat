@@ -12,7 +12,7 @@ from django.utils.html import format_html
 from import_export.admin import ImportExportModelAdmin
 
 from .models import Branch, ConsultingPlan, Region, District, SiteSettings, QuestionAnswer, Contact, Sector, \
-    InformationModel, Byulleten, AboutPortal, AdminTOTPDevice
+    InformationModel, Byulleten, AboutPortal, AdminTOTPDevice, SyntheticRecord
 from .resources import SectorResource
 from apps.additional_services.models import Year
 from apps.contracts.models import Contract
@@ -617,3 +617,15 @@ class AdminTOTPDeviceAdmin(admin.ModelAdmin):
         queryset.delete()
         self.message_user(request, f"{count} ta qurilma o'chirildi. Foydalanuvchilar qayta sozlashga majbur.")
     reset_devices.short_description = "Tanlangan qurilmalarni o'chirish (qayta sozlash uchun)"
+
+@admin.register(SyntheticRecord)
+class SyntheticRecordAdmin(admin.ModelAdmin):
+    list_display = ("seed_key", "content_type", "object_id", "created_at")
+    list_filter = ("content_type",)
+    search_fields = ("seed_key",)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False

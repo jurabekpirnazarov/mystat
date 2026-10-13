@@ -292,3 +292,22 @@ class AboutPortal(BaseModel):
 
 
 
+
+
+class SyntheticRecord(models.Model):
+    """Lokal/dev uchun `seed_demo` yaratgan sintetik yozuvlar reyestri.
+    Real yozuvlar bu jadvalga hech qachon tushmaydi; `seed_demo --flush` faqat shu yerdagilarni o'chiradi."""
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.CharField(max_length=64)
+    seed_key = models.CharField(max_length=255, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    content_object = GenericForeignKey("content_type", "object_id")
+
+    class Meta:
+        verbose_name = _("Sintetik yozuv")
+        verbose_name_plural = _("Sintetik yozuvlar")
+        indexes = [models.Index(fields=["content_type", "object_id"])]
+
+    def __str__(self):
+        return self.seed_key

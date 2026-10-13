@@ -1,0 +1,44 @@
+"""Sintetik (demo) yozuvlar bilan ishlash uchun yordamchilar. ISH_REJASI.md S-01."""
+from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
+
+from .models import SyntheticRecord
+
+
+def get_or_create_synthetic(model, seed_key, defaults=None):
+    """`seed_key` bo'yicha sintetik obyektni qaytaradi yoki yaratadi. -> (obj, created)"""
+    record = SyntheticRecord.objects.filter(seed_key=seed_key).first()
+    if record is not None:
+        obj = model._base_manager.filter(pk=record.object_id).first()
+        if obj is not None:
+            return obj, False
+        record.delete()  # obyekt qo'lda o'chirilgan — qayta yaratamiz
+
+    with transaction.atomic():
+        obj = model._base_manager.create(**(defaults or {}))
+        register_synthetic(obj, seed_key)
+    return obj, True
+
+
+def register_synthetic(obj, seed_key):
+    return SyntheticRecord.objects.create(
+        content_type=ContentType.objects.get_for_model(obj.__class__),
+        object_id=str(obj.pk),
+        seed_key=seed_key,
+    )
+
+
+def synthetic_ids(model):
+    """Model bo'yicha sintetik obyektlar PK to'plami (str ko'rinishida). DEBUG=False da doim bo'sh."""
+    if not settings.DEBUG:
+        return set()
+    ct = ContentType.objects.get_for_model(model)
+    return set(SyntheticRecord.objects.filter(content_type=ct).values_list("object_id", flat=True))
+
+
+def is_synthetic(obj):
+    if not settings.DEBUG:
+        return False
+    ct = ContentType.objects.get_for_model(obj.__class__)
+    return SyntheticRecord.objects.filter(content_type=ct, object_id=str(obj.pk)).exists()

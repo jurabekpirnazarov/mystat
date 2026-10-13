@@ -17,6 +17,8 @@ export interface StatisticalClassificationItem {
   file: string | null;
   slug: string | null;
   category: number;
+  category_name?: string;
+  is_synthetic?: boolean;
 }
 
 export interface StatisticalClassificationResponse {
@@ -28,10 +30,24 @@ export interface StatisticalClassificationResponse {
 }
 
 export const getStatisticalClassifications = async (params?: {
-  page?: number;
   search?: string;
   category?: number;
+  limit?: number;
 }): Promise<StatisticalClassificationResponse> => {
-  const response = await getRequest(statistic_classification, params as Record<string, string>);
+  const query: Record<string, string> = { limit: String(params?.limit ?? 500) };
+  if (params?.search) query.search = params.search;
+  if (params?.category) query.category = String(params.category);
+  const response = await getRequest(statistic_classification, query);
   return response as StatisticalClassificationResponse;
+};
+
+export interface StatisticalClassificationCategory {
+  id: number;
+  name: string;
+  items_count: number;
+  is_synthetic?: boolean;
+}
+
+export const getStatisticalClassificationCategories = async (): Promise<StatisticalClassificationCategory[]> => {
+  return (await getRequest(`${statistic_classification}/categories/`)) as StatisticalClassificationCategory[];
 };

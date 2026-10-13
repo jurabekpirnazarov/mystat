@@ -3,6 +3,7 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import { Suspense, lazy, useEffect } from "react";
 import Navbar from "./components/Navbar";
@@ -11,6 +12,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { useAuth } from "./contexts/AuthContext";
 import { OrdersProvider } from "./contexts/OrdersContext";
 import ScrollToTop from "./components/ScrollToTop";
+import ErrorBoundary from "./components/ui/ErrorBoundary";
 
 // Global 401 error handler
 function setupGlobalErrorHandler() {
@@ -85,10 +87,12 @@ function ProtectedRoute({ children }: { children: JSX.Element }) {
 }
 
 function AppRoutes() {
+  const location = useLocation();
 
   return (
     <>
       <ScrollToTop />
+      <ErrorBoundary key={location.pathname}>
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -127,6 +131,7 @@ function AppRoutes() {
           />
         </Routes>
       </Suspense>
+      </ErrorBoundary>
     </>
   );
 }

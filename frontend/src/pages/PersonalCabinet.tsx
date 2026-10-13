@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { useOrder } from "../contexts/OrdersContext";
+import { useNotifications } from "../contexts/NotificationsContext";
+import Overview from "./cabinet/Overview";
+import CabinetNotifications from "./cabinet/Notifications";
+import Payments from "./cabinet/Payments";
+import Requests from "./cabinet/Requests";
+import ActivityPlan from "./cabinet/ActivityPlan";
 // Contract type for contracts list
 interface Contract {
   id: string;
@@ -72,10 +77,12 @@ import {
   HelpCircle,
   LogOut,
   Download,
-  Check,
   ChevronDown,
   ChevronUp,
   ChevronsRight,
+  LayoutDashboard,
+  MessageSquarePlus,
+  CalendarRange,
 } from "lucide-react";
 import { FaTelegramPlane } from "react-icons/fa";
 import { useAuth } from "../contexts/AuthContext";
@@ -93,7 +100,7 @@ interface FormData {
 }
 
 const PersonalCabinet = () => {
-  const [activeTab, setActiveTab] = useState("profile");
+  const [activeTab, setActiveTab] = useState("overview");
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -133,10 +140,13 @@ const PersonalCabinet = () => {
   };
 
   const menuItems = [
+    { id: "overview", label: "Bosh panel", icon: LayoutDashboard },
     { id: "profile", label: "Foydalanuvchi haqida", icon: User },
     { id: "services", label: "Mening xizmatlarim", icon: FileText },
     { id: "contracts", label: "Shartnomalar", icon: FileText },
     { id: "orders", label: "Buyurtmalarim", icon: FileText },
+    { id: "requests", label: "Xizmat so'rovlari", icon: MessageSquarePlus },
+    { id: "plan", label: "Faoliyat rejasi", icon: CalendarRange },
     { id: "payments", label: "To'lovlar", icon: CreditCard },
     { id: "notifications", label: "Xabarnomalar", icon: Bell },
     { id: "support", label: "Qo'llab quvatlash", icon: HelpCircle },
@@ -206,40 +216,7 @@ const PersonalCabinet = () => {
       });
   }, [activeTab])
 
-  const payments = [
-    {
-      id: 1,
-      service: "Start tarifi",
-      amount: "750,000",
-      date: "2024-01-10",
-      status: "To'langan",
-      method: "CLICK",
-    },
-    {
-      id: 2,
-      service: "Pro tarifi",
-      amount: "300,000",
-      date: "2024-01-05",
-      status: "To'langan",
-      method: "Payme",
-    },
-    {
-      id: 3,
-      service: "Premium tarifi",
-      amount: "1,200,000",
-      date: "2024-01-15",
-      status: "Kutilmoqda",
-      method: "CLICK",
-    },
-  ];
-
-  const { notifications, setNotifications } = useOrder();
-  const unreadCount = notifications.filter(n => !n.read).length;
-
-  // Mark a single notification as read
-  const markNotificationRead = (id: number) => {
-    setNotifications((prev) => prev.map((n) => n.id === id ? { ...n, read: true } : n));
-  };
+  const { unreadCount } = useNotifications();
 
   // Toggle service group expansion
   // Handle navigation for services
@@ -275,17 +252,6 @@ const PersonalCabinet = () => {
   const handleSubmit = () => {
     if (isFormValid()) {
       console.log("Anketa yuborildi:", formData);
-      // Add notification for contract creation
-      setNotifications((prev) => [
-        {
-          id: Date.now(),
-          title: "Shartnoma yaratildi",
-          message: "Yangi shartnoma muvaffaqiyatli yaratildi.",
-          date: new Date().toISOString().slice(0, 10),
-          read: false,
-        },
-        ...prev,
-      ]);
       navigate("/cabinet", { state: { name: "contracts", contract: false } });
     }
   };
@@ -361,6 +327,8 @@ const PersonalCabinet = () => {
 
           <div className="lg:col-span-3">
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md">
+              {activeTab === "overview" && <Overview onNavigate={setActiveTab} />}
+
               {/* Profile Tab */}
               {activeTab === "profile" && (
                 <div className="p-6">
@@ -1031,123 +999,13 @@ const PersonalCabinet = () => {
                 </div>
               )}
 
-              {/* Payments Tab */}
-              {activeTab === "payments" && (
-                <div className="p-6">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                    To'lovlar Tarixi
-                  </h2>
+              {activeTab === "payments" && <Payments />}
 
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                      <thead>
-                        <tr className="border-b border-gray-200 dark:border-gray-700">
-                          <th className="pb-3 text-gray-700 dark:text-gray-300">
-                            Xizmat
-                          </th>
-                          <th className="pb-3 text-gray-700 dark:text-gray-300">
-                            Summa
-                          </th>
-                          <th className="pb-3 text-gray-700 dark:text-gray-300">
-                            Sana
-                          </th>
-                          <th className="pb-3 text-gray-700 dark:text-gray-300">
-                            Holat
-                          </th>
-                          <th className="pb-3 text-gray-700 dark:text-gray-300">
-                            Usul
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {payments.map((payment) => (
-                          <tr
-                            key={payment.id}
-                            className="border-b border-gray-100 dark:border-gray-700"
-                          >
-                            <td className="py-3 text-gray-900 dark:text-white">
-                              {payment.service}
-                            </td>
-                            <td className="py-3 text-gray-900 dark:text-white">
-                              {payment.amount} so'm
-                            </td>
-                            <td className="py-3 text-gray-600 dark:text-gray-300">
-                              {payment.date}
-                            </td>
-                            <td className="py-3">
-                              <span
-                                className={`px-2 py-1 rounded-full text-sm ${payment.status === "To'langan"
-                                    ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
-                                    : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400"
-                                  }`}
-                              >
-                                {payment.status}
-                              </span>
-                            </td>
-                            <td className="py-3 text-gray-600 dark:text-gray-300">
-                              {payment.method}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
+              {activeTab === "notifications" && <CabinetNotifications onNavigate={setActiveTab} />}
 
-              {/* Notifications Tab */}
-              {activeTab === "notifications" && (
-                <div className="p-6">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                    Xabarnomalar
-                  </h2>
-                  <div className="space-y-4">
-                    {notifications.map((notification) => {
-                      const isContractNotification = notification.title?.toLowerCase().includes("shartnoma");
-                      return (
-                        <div
-                          key={notification.id}
-                          className={`border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex items-center justify-between cursor-pointer transition hover:shadow-md ${!notification.read
-                              ? "bg-blue-50 dark:bg-blue-900/10"
-                              : ""
-                            }`}
-                          onClick={() => {
-                            if (isContractNotification) {
-                              setActiveTab("contracts");
-                            }
-                          }}
-                        >
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900 dark:text-white">
-                              {notification.title}
-                            </h3>
-                            <p className="text-gray-600 dark:text-gray-300 mt-1">
-                              {notification.message}
-                            </p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                              {notification.date}
-                            </p>
-                          </div>
-                          {!notification.read ? (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                markNotificationRead(notification.id);
-                              }}
-                              className="ml-4 p-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center"
-                              title="O'qildi deb belgilash"
-                            >
-                              <Check className="w-5 h-5" />
-                            </button>
-                          ) : (
-                            <Check className="w-5 h-5 text-green-500 ml-4" />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+              {activeTab === "requests" && <Requests />}
+
+              {activeTab === "plan" && <ActivityPlan />}
 
               {/* Support Tab */}
               {activeTab === "support" && (

@@ -11,6 +11,7 @@ import Footer from "./components/Footer";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { useAuth } from "./contexts/AuthContext";
 import { OrdersProvider } from "./contexts/OrdersContext";
+import { NotificationsProvider } from "./contexts/NotificationsContext";
 import ScrollToTop from "./components/ScrollToTop";
 import ErrorBoundary from "./components/ui/ErrorBoundary";
 
@@ -145,6 +146,7 @@ function App() {
   return (
     <ThemeProvider>
       <OrdersProvider>
+        <NotificationsProvider>
         <Router>
           <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
             <Navbar />
@@ -152,6 +154,7 @@ function App() {
             <Footer />
           </div>
         </Router>
+        </NotificationsProvider>
       </OrdersProvider>
     </ThemeProvider>
   );

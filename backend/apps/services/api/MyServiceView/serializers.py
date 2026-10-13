@@ -20,12 +20,18 @@ class ServiceRequestSerializer(ModelSerializer):
             ]
         read_only_fields = ['id', 'status', 'admin_input_text', 'admin_file', 'created_at', 'updated_at']
 
+    def validate_contract(self, contract):
+        request = self.context.get("request")
+        if request and request.user.id not in (contract.user_id, contract.attached_user_id):
+            raise serializers.ValidationError("Shartnoma sizga tegishli emas.")
+        return contract
+
     def create(self, validated_data):
         instance = ServiceRequestResponse.objects.create(
             contract=validated_data['contract'],
             package_item=validated_data['package_item'],
-            client_input_text=validated_data['client_input_text'],
-            client_file=validated_data['client_file'],
+            client_input_text=validated_data.get('client_input_text'),
+            client_file=validated_data.get('client_file'),  # fayl ixtiyoriy — avval KeyError -> 500
         )
         return instance
 

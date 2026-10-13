@@ -10,11 +10,10 @@ import {
   Menu,
   X,
   HelpCircle,
-  Bell,
   FileText,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
-import { useOrder } from "../contexts/OrdersContext";
+import NotificationBell from "./notifications/NotificationBell";
 import { getRequest } from "../api/request";
 import { profile } from "../api/apiUrls";
 import logo from "../img/stat.png";
@@ -25,8 +24,6 @@ const Navbar = () => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const location = useLocation();
   const { isAuthenticated, user, logout } = useAuth();
-  const { notifications } = useOrder();
-  const unreadCount = notifications.filter(n => !n.read).length;
   const navigate = useNavigate();
 
   // Profile ma'lumotlarini yuklash
@@ -127,21 +124,7 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center space-x-3">
-            <button
-              onClick={() => {
-                navigate("/cabinet", {
-                  state: { name: "notifications", contract: false },
-                });
-              }}
-              className="relative p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
-            >
-              <Bell className="w-5 h-5" />
-              {unreadCount > 0 && (
-                <span className="absolute top-0 right-0 bg-red-600 text-white rounded-full w-[1.15rem] h-[1.15rem] flex items-center justify-center text-xs">
-                  {unreadCount}
-                </span>
-              )}
-            </button>
+            {isAuthenticated && <NotificationBell />}
 
             {isAuthenticated ? (
               <div className="flex items-center space-x-3 relative">

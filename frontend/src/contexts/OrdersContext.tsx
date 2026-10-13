@@ -2,19 +2,9 @@ import React, { createContext, useContext, useState } from "react";
 import { plans } from "../data";
 import { Plan } from "../types";
 
-interface Notification {
-  id: number;
-  title: string;
-  message: string;
-  date: string;
-  read: boolean;
-}
-
 interface OrdersContextType {
   orders: Plan | null;
   addItem: (id: string) => void;
-  notifications: Notification[];
-  setNotifications: React.Dispatch<React.SetStateAction<Notification[]>>;
 }
 
 const OrdersContext = createContext<OrdersContextType | undefined>(undefined);
@@ -25,7 +15,6 @@ export const OrdersProvider: React.FC<{ children: React.ReactNode }> = ({
   const [orders, setOrders] = useState<Plan | null>(
     JSON.parse(localStorage.getItem("orders")!) || null
   );
-  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const addItem = (id: string) => {
     const data = plans.find((item) => item.id === id) || null;
@@ -38,8 +27,6 @@ export const OrdersProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         orders,
         addItem,
-        notifications,
-        setNotifications,
       }}
     >
       {children}

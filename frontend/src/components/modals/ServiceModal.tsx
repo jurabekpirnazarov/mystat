@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useOrder } from "../../contexts/OrdersContext";
+import { useNotifications } from "../../contexts/NotificationsContext";
 import { X } from "lucide-react";
 import { postRequest } from "../../api/request";
 import { contract_create } from "../../api/apiUrls";
@@ -22,7 +22,7 @@ const ServiceModal: React.FC<ModalProps> = ({
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<null | { success: boolean; message: string }>(null);
   const [showRating, setShowRating] = useState(false);
-  const { setNotifications } = useOrder();
+  const { refresh: refreshNotifications } = useNotifications();
 
   if (!isOpen && !pending && !result && !showRating) return null;
   function onContract() {
@@ -45,16 +45,7 @@ const ServiceModal: React.FC<ModalProps> = ({
           setResult(null);
           setShowRating(true);
         }, 2000);
-        setNotifications((prev) => [
-          {
-            id: Date.now(),
-            title: "Shartnoma yaratildi",
-            message: "Yangi shartnoma muvaffaqiyatli yaratildi.",
-            date: new Date().toISOString().slice(0, 10),
-            read: false,
-          },
-          ...prev,
-        ]);
+        refreshNotifications();
       })
       .catch(() => {
         setPending(false);

@@ -19,13 +19,14 @@ class ContractList(ListAPIView):
         if user.is_superuser:
             return Contract.objects.all().order_by('-created_at')
 
-        if hasattr(user, 'role') and user.role == "bugalter":
-            accountant_profile = user.accountant_profile
-
+        if user.role == "bugalter":
+            accountant_profile = getattr(user, "accountant_profile", None)  # profil bo'lmasa 500 emas
             if accountant_profile:
                 branch_ids = accountant_profile.branches.values_list('id', flat=True)
                 return Contract.objects.filter(user__organization__branch__in=branch_ids).distinct().order_by('-created_at')
-        elif hasattr(user, 'role') and user.role == "client":
+            return Contract.objects.none()
+        # Oddiy mijozlar roli "user" ("client" roli ROLE_CHOICES da yo'q edi — mijozlar ro'yxati doim bo'sh qaytardi)
+        if user.role in ("user", "client"):
             return Contract.objects.filter(user=user).order_by('-created_at')
         return Contract.objects.none()
       

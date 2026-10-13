@@ -63,3 +63,30 @@ class ContractCreateNotificationTests(APITestCase):
             response = self.client.post(self.url, {}, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(Contract.objects.filter(contract_number="T-4").exists())
+
+
+class ContractListScopeTests(APITestCase):
+    url = reverse("contracts:contracts-list")
+
+    def setUp(self):
+        self.package = ServicePackage.objects.create(name_uz="P", name_ru="P", name_cry="P")
+        self.client_user = User.objects.create_user(username="mijoz", password="x")  # role="user"
+        self.other = User.objects.create_user(username="boshqa", password="x")
+        self.own = Contract.objects.create(contract_number="L-1", user=self.client_user, package=self.package)
+        Contract.objects.create(contract_number="L-2", user=self.other, package=self.package)
+
+    def _get(self, user):
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {user.tokens['access']}")
+        return self.client.get(self.url)
+
+    def test_regular_user_sees_only_own_contracts(self):
+        response = self._get(self.client_user)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual([c["contract_number"] for c in response.data["results"]], ["L-1"])
+        self.assertIn("is_synthetic", response.data["results"][0])
+
+    def test_accountant_without_profile_gets_empty_list(self):
+        accountant = User.objects.create_user(username="buh_np", password="x", role="bugalter")
+        response = self._get(accountant)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["results"], [])

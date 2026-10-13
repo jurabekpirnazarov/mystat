@@ -187,8 +187,8 @@ const PersonalCabinet = () => {
     // Fetch contracts
     getRequest(contracts_list, undefined, headers)
       .then((response: any) => {
-        console.log(response, "contracts res");
-        setContracts(response?.data?.results || []);
+        // getRequest javob tanasini qaytaradi: { count, results }
+        setContracts(response?.results || []);
       })
       .catch((err) => {
         console.log(err);

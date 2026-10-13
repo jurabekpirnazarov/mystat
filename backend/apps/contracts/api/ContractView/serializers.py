@@ -3,11 +3,13 @@ from rest_framework import serializers
 
 
 from apps.common.models import SiteSettings
+from apps.common.synthetic import SyntheticFlagField
 from apps.contracts.models import Contract
 
 
 class ContractSerializer(serializers.ModelSerializer):
     contract_url = serializers.SerializerMethodField(read_only=True)
+    is_synthetic = SyntheticFlagField()
 
     def get_contract_url(self, obj):
         settings_obj = SiteSettings.load()

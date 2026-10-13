@@ -82,6 +82,26 @@ npm run dev
 Dump'ni lokal Postgres'ga tiklash:
 `pg_restore --no-owner --no-privileges -d consult db/dump/consult.dump`
 
+## Demo (sintetik) ma'lumot
+
+Bo'sh jadvallar va kabinet bo'limlarini to'la holatda ko'rish uchun, **faqat `DEBUG=True` da**:
+
+```bash
+cd backend
+python manage.py seed_demo                 # hamma bo'limlar (qayta ishga tushirish xavfsiz)
+python manage.py seed_demo --only notifications,classifications
+python manage.py seed_demo --dry-run       # yozmasdan ko'rsatadi
+python manage.py seed_demo --flush         # faqat sintetik yozuvlarni o'chiradi
+python manage.py seed_demo --demographics  # sintetik demografiya parquet (asosiy fayl yo'q bo'lsa)
+```
+
+- Real yozuvlar o'zgartirilmaydi va o'chirilmaydi. Har bir sintetik yozuv `common.SyntheticRecord` reyestriga tushadi,
+  `--flush` faqat ularni o'chiradi. Kaskad real yozuvga tegsa, komanda to'xtaydi va hech narsa o'chirmaydi.
+- Demo akkauntlar: `demo_yuridik_1..5`, `demo_jismoniy_1..3`, `demo_bugalter`, `demo_employee` (`@demo.invalid`).
+  Parol `backend/.env` dagi `DEMO_USER_PASSWORD` dan olinadi (har ishga tushirishda shu parolga tenglashtiriladi).
+  Berilmagan bo'lsa, yangi akkauntlarga tasodifiy parol qo'yiladi va konsolga bir marta chiqadi.
+- Sintetik matnlar `[DEMO]` bilan boshlanadi; API `is_synthetic` maydonini qaytaradi, UI'da "Demo" belgisi chiqadi.
+
 ## Celery
 
 `worker` konteyneri `celery -A core worker` ni ishga tushiradi (`core/celery.py`).

@@ -29,12 +29,17 @@ def register_synthetic(obj, seed_key):
     )
 
 
+def registered_ids(model):
+    """Reyestrdagi PK'lar (DEBUG'dan qat'i nazar) — seeder'lar uchun."""
+    ct = ContentType.objects.get_for_model(model)
+    return set(SyntheticRecord.objects.filter(content_type=ct).values_list("object_id", flat=True))
+
+
 def synthetic_ids(model):
     """Model bo'yicha sintetik obyektlar PK to'plami (str ko'rinishida). DEBUG=False da doim bo'sh."""
     if not settings.DEBUG:
         return set()
-    ct = ContentType.objects.get_for_model(model)
-    return set(SyntheticRecord.objects.filter(content_type=ct).values_list("object_id", flat=True))
+    return registered_ids(model)
 
 
 def is_synthetic(obj):

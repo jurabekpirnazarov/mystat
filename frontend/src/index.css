@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Hide react-dropdown-select default icons and borders */
+.react-dropdown-select-dropdown-handle {
+  display: none !important;
+}
+
+.react-dropdown-select-clear {
+  display: none !important;
+}
+
+.react-dropdown-select-separator {
+  display: none !important;
+}
+
+/* Remove react-dropdown-select default border */
+.react-dropdown-select {
+  border: none !important;
+  outline: none !important;
+}
+
+.react-dropdown-select-content {
+  border: none !important;
+  outline: none !important;
+}
+
+.react-dropdown-select:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.react-dropdown-select-content:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Hide search input in dropdown */
+.react-dropdown-select-input {
+  display: none !important;
+}
+
+.react-dropdown-select-dropdown .react-dropdown-select-input {
+  display: none !important;
+}

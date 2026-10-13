@@ -1,0 +1,206 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+    &rsaquo; <a href="{% url 'admin:additional_services_demographicsection_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+    &rsaquo; <a href="{% url 'admin:demographics_bulk_upload' %}">To'plam yuklash</a>
+    &rsaquo; Sheet'larni sozlash
+</div>
+{% endblock %}
+
+{% block extrastyle %}{{ block.super }}
+<style>
+    .info-bar { background:#eff6ff; border-left:4px solid #3b82f6; padding:12px 16px; border-radius:6px; margin-bottom:18px; font-size:13px; color:#1e3a8a; }
+    .sheet-card { background:white; border:1px solid #e5e7eb; border-radius:12px; margin-bottom:18px; box-shadow:0 1px 3px rgba(0,0,0,0.04); overflow:hidden; }
+    .sheet-card.unchecked { opacity:0.55; }
+    .sheet-summary { padding:14px 18px; background:#f9fafb; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; gap:12px; cursor:pointer; list-style:none; }
+    .sheet-summary::-webkit-details-marker { display:none; }
+    .sheet-summary .chevron { transition:transform 0.2s; color:#6b7280; }
+    details[open] .sheet-summary .chevron { transform:rotate(90deg); }
+    .sheet-title { font-size:16px; font-weight:600; margin:0; flex:1; }
+    .sheet-stats { color:#6b7280; font-size:12px; }
+    .badge-exists { background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:9999px; font-size:11px; font-weight:600; margin-left:6px; }
+    .sheet-body { padding:16px 18px; }
+    .basic-row { display:grid; grid-template-columns: 1fr 2fr 90px 130px; gap:10px; align-items:end; margin-bottom:18px; padding-bottom:14px; border-bottom:1px dashed #e5e7eb; }
+    .basic-row label { font-size:11px; color:#6b7280; font-weight:600; display:block; margin-bottom:4px; text-transform:uppercase; }
+    .basic-row input[type=text] { width:100%; padding:7px 10px; border:1px solid #d1d5db; border-radius:6px; font-size:13px; }
+    .basic-row .pub { display:flex; align-items:center; gap:6px; padding-bottom:8px; font-size:13px; }
+
+    .col-section-title { font-size:13px; color:#374151; font-weight:600; margin:14px 0 8px; text-transform:uppercase; letter-spacing:0.05em; }
+    .col-row { display:grid; grid-template-columns: 1.4fr 0.9fr 1.3fr 0.9fr 1fr; gap:10px; padding:10px 12px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; margin-bottom:6px; align-items:center; font-size:12px; }
+    .col-row.is-value { background:#ecfdf5; border-color:#a7f3d0; }
+    .col-row.is-skip { background:#fef2f2; border-color:#fecaca; opacity:0.7; }
+    .col-row label { font-size:10px; color:#6b7280; font-weight:600; display:block; margin-bottom:3px; text-transform:uppercase; }
+    .col-row input[type=text], .col-row select { width:100%; padding:5px 8px; border:1px solid #d1d5db; border-radius:5px; font-size:12px; background:white; }
+    .col-row code { font-family: 'SF Mono', Menlo, monospace; font-size:12px; color:#1e40af; font-weight:600; background:#eff6ff; padding:2px 6px; border-radius:3px; }
+    .col-row .meta-info { font-size:10px; color:#6b7280; margin-top:3px; }
+    .toggles { display:flex; flex-direction:column; gap:3px; font-size:11px; }
+    .toggles label { font-size:11px; color:#374151; text-transform:none; font-weight:500; display:flex; align-items:center; gap:4px; }
+    .options-preview { background:white; padding:8px 10px; border-radius:6px; border:1px solid #e5e7eb; margin-top:6px; font-size:11px; color:#374151; font-family:monospace; word-break:break-word; }
+    .actions-bar { position:sticky; bottom:0; background:white; border-top:2px solid #e5e7eb; padding:14px 20px; display:flex; gap:10px; justify-content:flex-end; margin-top:20px; z-index:10; }
+    .toolbar { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+    .toolbar button { font-size:12px; padding:6px 12px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 1280px; margin: 20px auto; padding: 0 12px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+        <h1 style="margin:0;">📋 Sheet va schemalarni sozlash</h1>
+        <span style="color:#6b7280; font-size:13px;">Fayl: <code>{{ filename }}</code></span>
+    </div>
+
+    <div class="info-bar">
+        <strong>{{ sheets|length }} ta sheet topildi.</strong>
+        Har sheet uchun: bo'lim ma'lumotlari va ustun konfiguratsiyasini ko'rib chiqing.
+        Tizim avtomatik <strong>value column</strong>, <strong>UI turi</strong>, <strong>options</strong> ni aniqlagan — kerak bo'lsa tahrirlang.
+        Submit qilingach DB'ga va wide parquet'ga yoziladi.
+    </div>
+
+    <form method="post" id="bulk-form">
+        {% csrf_token %}
+        <input type="hidden" name="file" value="{{ filename }}">
+
+        <div class="toolbar">
+            <button type="button" onclick="toggleAllSheets(true)" class="button">✓ Hammasini tanlash</button>
+            <button type="button" onclick="toggleAllSheets(false)" class="button">✗ Hammasini bekor qilish</button>
+            <button type="button" onclick="expandAll(true)" class="button">▼ Barchasini kengaytirish</button>
+            <button type="button" onclick="expandAll(false)" class="button">▶ Yopish</button>
+        </div>
+
+        {% for sheet in sheets %}
+        <details class="sheet-card" id="sheet-{{ sheet.idx }}" open>
+            <summary class="sheet-summary">
+                <span class="chevron">▶</span>
+                <input type="checkbox" name="sheet_{{ sheet.idx }}_include" checked
+                       onchange="event.stopPropagation(); document.getElementById('sheet-{{ sheet.idx }}').classList.toggle('unchecked', !this.checked);"
+                       onclick="event.stopPropagation();"
+                       style="width:18px; height:18px; cursor:pointer;">
+                <div style="flex:1;">
+                    <p class="sheet-title">📊 {{ sheet.name }}
+                        {% if sheet.exists %}<span class="badge-exists">Yangilanadi</span>{% endif %}
+                    </p>
+                    <p class="sheet-stats">{{ sheet.row_count }} qator · {{ sheet.columns|length }} ustun · Value column: <code>{{ sheet.value_column_name|default:"—" }}</code></p>
+                </div>
+            </summary>
+
+            <div class="sheet-body">
+                <!-- Section asosiy ma'lumotlari -->
+                <div class="basic-row">
+                    <div>
+                        <label>Slug *</label>
+                        <input type="text" name="sheet_{{ sheet.idx }}_slug" value="{{ sheet.suggested_slug }}" pattern="[a-z0-9_-]+" required>
+                    </div>
+                    <div>
+                        <label>Ko'rinadigan nomi *</label>
+                        <input type="text" name="sheet_{{ sheet.idx }}_display_name" value="{{ sheet.suggested_display_name }}" required>
+                    </div>
+                    <div>
+                        <label>Icon</label>
+                        <input type="text" name="sheet_{{ sheet.idx }}_icon" value="📊" maxlength="4">
+                    </div>
+                    <div class="pub">
+                        <label style="margin:0; font-size:13px;">
+                            <input type="checkbox" name="sheet_{{ sheet.idx }}_publish" checked>
+                            E'lon qilish
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Ustunlar -->
+                <div class="col-section-title">Ustunlar konfiguratsiyasi ({{ sheet.columns|length }} ta)</div>
+                {% for col in sheet.columns %}
+                <div class="col-row {% if col.suggested_role == 'value' %}is-value{% endif %} {% if col.suggested_role == 'skip' %}is-skip{% endif %}" data-col-row="{{ sheet.idx }}-{{ col.idx }}">
+                    <!-- Ustun nomi -->
+                    <div>
+                        <code>{{ col.name }}</code>
+                        <div class="meta-info">{{ col.dtype }} · {{ col.unique_count }} unique</div>
+                        <div class="meta-info" style="margin-top:2px;">{{ col.sample|truncatechars:60 }}</div>
+                    </div>
+
+                    <!-- Rol -->
+                    <div>
+                        <label>Rol</label>
+                        <select name="col_{{ sheet.idx }}_{{ col.idx }}_role"
+                                onchange="updateColRow({{ sheet.idx }}, {{ col.idx }}, this.value);">
+                            <option value="filter" {% if col.suggested_role == "filter" %}selected{% endif %}>🔍 Filter</option>
+                            <option value="value" {% if col.suggested_role == "value" %}selected{% endif %}>📊 Qiymat (value)</option>
+                            <option value="skip" {% if col.suggested_role == "skip" %}selected{% endif %}>✗ Skip</option>
+                        </select>
+                    </div>
+
+                    <!-- Label -->
+                    <div>
+                        <label>Sarlavha (frontda)</label>
+                        <input type="text" name="col_{{ sheet.idx }}_{{ col.idx }}_label" value="{{ col.suggested_label }}">
+                    </div>
+
+                    <!-- UI turi -->
+                    <div>
+                        <label>UI turi</label>
+                        <select name="col_{{ sheet.idx }}_{{ col.idx }}_ui">
+                            {% for ui in ui_types %}
+                            <option value="{{ ui }}" {% if col.suggested_ui == ui %}selected{% endif %}>{{ ui }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Toggles -->
+                    <div class="toggles">
+                        <label>
+                            <input type="checkbox" name="col_{{ sheet.idx }}_{{ col.idx }}_unique" {% if col.suggested_unique %}checked{% endif %}>
+                            Unique extract
+                        </label>
+                        <label>
+                            <input type="checkbox" name="col_{{ sheet.idx }}_{{ col.idx }}_multiple" {% if col.suggested_multiple %}checked{% endif %}>
+                            Multiple
+                        </label>
+                        <label>
+                            <input type="checkbox" name="col_{{ sheet.idx }}_{{ col.idx }}_searchable" {% if col.suggested_searchable %}checked{% endif %}>
+                            Searchable
+                        </label>
+                    </div>
+                </div>
+                {% if col.options_preview %}
+                <div class="options-preview" style="margin-bottom:6px;"><strong>Options:</strong> {{ col.options_preview }}</div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </details>
+        {% endfor %}
+
+        <div class="actions-bar">
+            <a href="{% url 'admin:additional_services_demographicsection_changelist' %}"
+               class="button" style="text-decoration:none;">Bekor qilish</a>
+            <button type="submit" class="default" style="background:#10b981; padding:10px 22px; font-weight:600;">
+                ✓ Saqlash va parquet'ga yozish
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+function toggleAllSheets(state) {
+    document.querySelectorAll('input[name$="_include"]').forEach(function(cb) {
+        cb.checked = state;
+        var card = cb.closest('details');
+        if (card) card.classList.toggle('unchecked', !state);
+    });
+}
+function expandAll(state) {
+    document.querySelectorAll('details.sheet-card').forEach(function(d) {
+        d.open = state;
+    });
+}
+function updateColRow(sheetIdx, colIdx, role) {
+    var row = document.querySelector('[data-col-row="' + sheetIdx + '-' + colIdx + '"]');
+    if (!row) return;
+    row.classList.remove('is-value', 'is-skip');
+    if (role === 'value') row.classList.add('is-value');
+    if (role === 'skip') row.classList.add('is-skip');
+}
+</script>
+{% endblock %}

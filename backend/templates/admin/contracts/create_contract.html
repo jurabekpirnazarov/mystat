@@ -1,0 +1,303 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block title %}Yangi Shartnoma Yaratish{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+    
+    .form-group textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 14px;
+        margin-right: 10px;
+    }
+    
+    .btn-primary {
+        background-color: #007cba;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    .btn:hover {
+        opacity: 0.8;
+    }
+    
+    .search-result {
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+    }
+    
+    .search-result.success {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+    
+    .search-result.error {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+    }
+    
+    .organization-info {
+        margin-top: 10px;
+    }
+    
+    .organization-info h4 {
+        margin: 0 0 10px 0;
+        color: #007cba;
+    }
+    
+    .organization-info p {
+        margin: 5px 0;
+        color: #666;
+    }
+    
+    #search-btn {
+        margin-top: 10px;
+    }
+    
+    .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+    }
+    
+    .alert-success {
+        color: #155724;
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+    }
+    
+    .alert-danger {
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+    }
+    
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Yangi Shartnoma Yaratish</h1>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <form method="post" id="contract-form">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="inn">INN (Soliq to'lovchi identifikatsiya raqami):</label>
+            <input type="text" id="inn" name="inn" required maxlength="20" 
+                   placeholder="Masalan: 123456789">
+            <button type="button" id="search-btn" class="btn btn-secondary">
+                🔍 Tashkilotni qidirish
+            </button>
+            <div id="search-result"></div>
+        </div>
+        
+        <div class="form-group">
+            <label for="package">Xizmat paketi:</label>
+            <select id="package" name="package" required>
+                <option value="">Xizmat paketini tanlang</option>
+                {% for package in packages %}
+                    <option value="{{ package.id }}" data-price="{{ package.price }}">
+                        {{ package.name_uz }} - {{ package.price }} UZS
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="total_amount">Jami summa (UZS):</label>
+            <input type="number" id="total_amount" name="total_amount" step="0.01" 
+                   min="0" required readonly>
+        </div>
+        
+        <div class="form-group">
+            <label for="notes">Izohlar:</label>
+            <textarea id="notes" name="notes" 
+                      placeholder="Shartnoma haqida qo'shimcha ma'lumotlar..."></textarea>
+        </div>
+        
+        <div class="form-group">
+            <input type="checkbox" id="send_to_didox" name="send_to_didox" checked>
+            <label for="send_to_didox" style="display: inline; margin-left: 5px;">
+                DIDOX orqali yuborish
+            </label>
+        </div>
+        
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary" id="submit-btn">
+                📄 Shartnoma yaratish
+            </button>
+            <a href="{% url 'admin:contracts_contract_changelist' %}" class="btn btn-secondary">
+                ❌ Bekor qilish
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const innInput = document.getElementById('inn');
+    const searchBtn = document.getElementById('search-btn');
+    const searchResult = document.getElementById('search-result');
+    const packageSelect = document.getElementById('package');
+    const totalAmountInput = document.getElementById('total_amount');
+    const submitBtn = document.getElementById('submit-btn');
+    const form = document.getElementById('contract-form');
+    
+    let foundOrganization = null;
+    
+    // Package selection handler
+    packageSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        if (selectedOption.value) {
+            const price = selectedOption.getAttribute('data-price');
+            totalAmountInput.value = price;
+        } else {
+            totalAmountInput.value = '';
+        }
+    });
+    
+    // Search organization
+    searchBtn.addEventListener('click', function() {
+        const inn = innInput.value.trim();
+        if (!inn) {
+            alert('INN kiriting!');
+            return;
+        }
+        
+        searchBtn.disabled = true;
+        searchBtn.textContent = '🔄 Qidirilmoqda...';
+        searchResult.innerHTML = '';
+        
+        fetch('{% url "admin:contracts_create_contract" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: 'action=search_organization&inn=' + encodeURIComponent(inn)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                foundOrganization = data.organization;
+                searchResult.className = 'search-result success';
+                searchResult.innerHTML = `
+                    <div class="organization-info">
+                        <h4>✅ Tashkilot topildi</h4>
+                        <p><strong>Nomi:</strong> ${data.organization.name}</p>
+                        <p><strong>INN:</strong> ${data.organization.tin}</p>
+                        <p><strong>Manzil:</strong> ${data.organization.address || 'Ko\'rsatilmagan'}</p>
+                        <p><strong>Egasi:</strong> ${data.organization.owner_name || 'Ko\'rsatilmagan'}</p>
+                    </div>
+                `;
+            } else {
+                foundOrganization = null;
+                searchResult.className = 'search-result error';
+                searchResult.innerHTML = `
+                    <p>❌ ${data.error}</p>
+                `;
+            }
+        })
+        .catch(error => {
+            foundOrganization = null;
+            searchResult.className = 'search-result error';
+            searchResult.innerHTML = '<p>❌ Xatolik yuz berdi: ' + error.message + '</p>';
+        })
+        .finally(() => {
+            searchBtn.disabled = false;
+            searchBtn.textContent = '🔍 Tashkilotni qidirish';
+        });
+    });
+    
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        if (!foundOrganization) {
+            e.preventDefault();
+            alert('Avval tashkilotni qidiring va toping!');
+            return;
+        }
+        
+        if (!packageSelect.value) {
+            e.preventDefault();
+            alert('Xizmat paketini tanlang!');
+            return;
+        }
+        
+        if (!totalAmountInput.value || totalAmountInput.value <= 0) {
+            e.preventDefault();
+            alert('To\'g\'ri summa kiriting!');
+            return;
+        }
+        
+        submitBtn.disabled = true;
+        submitBtn.textContent = '⏳ Yaratilmoqda...';
+        form.classList.add('loading');
+    });
+});
+</script>
+{% endblock %}

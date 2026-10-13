@@ -1,0 +1,104 @@
+name: mystat
+
+services:
+  db:
+    image: postgres:14
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+      - ./db/dump:/dump:ro
+    ports:
+      - "${DB_PUBLIC_PORT:-5433}:5432"
+    healthcheck:
+      # TCP orqali tekshiriladi: dump tiklanayotganda postgres faqat unix-socket'da
+      # ishlaydi, shuning uchun backend restore tugamaguncha kutadi
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 120
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    image: mystat-backend
+    restart: unless-stopped
+    env_file: .env
+    environment: &backend-env
+      DJANGO_SETTINGS_MODULE: core.settings.production
+      DB_ENGINE: django.db.backends.postgresql
+      DB_HOST: db
+      DB_PORT: 5432
+      REDIS_URL: redis://redis:6379/1
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    volumes:
+      - ./backend/media:/app/media
+      - static:/app/staticfiles
+      - backend_logs:/app/logs
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  # Celery worker (contracts.tasks va boshqa @shared_task'lar)
+  worker:
+    image: mystat-backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      <<: *backend-env
+      RUN_MIGRATIONS: "0"
+    command: ["celery", "-A", "core", "worker", "--loglevel=info", "--concurrency=2"]
+    volumes:
+      - ./backend/media:/app/media
+      - backend_logs:/app/logs
+    depends_on:
+      - backend
+
+  # Telegram bot (ixtiyoriy): docker compose --profile bot up -d
+  bot:
+    image: mystat-backend
+    restart: unless-stopped
+    profiles: ["bot"]
+    env_file: .env
+    environment:
+      <<: *backend-env
+      RUN_MIGRATIONS: "0"
+    command: ["python", "manage.py", "runbot"]
+    volumes:
+      - ./backend/media:/app/media
+      - backend_logs:/app/logs
+    depends_on:
+      - backend
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: /
+    restart: unless-stopped
+    environment:
+      ADMIN_URL: ${ADMIN_URL:-markaz}
+    volumes:
+      - ./nginx/default.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - static:/var/www/static:ro
+      - ./backend/media:/var/www/media:ro
+    ports:
+      - "${WEB_PORT:-80}:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
+  static:
+  backend_logs:

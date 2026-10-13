@@ -1,0 +1,199 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/consulting_plan_admin.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .charts-container {
+        display: flex;
+        gap: 20px;
+        margin: 20px 0;
+        flex-wrap: wrap;
+    }
+    .chart-wrapper {
+        flex: 1;
+        min-width: 300px;
+        max-width: 500px;
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .chart-title {
+        text-align: center;
+        margin-bottom: 15px;
+        font-weight: bold;
+        color: #333;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    {% if cl.result_list %}
+    <div class="charts-container">
+        <div class="chart-wrapper">
+            <div class="chart-title">Shartnomalar foizi (Rejaga nisbatan)</div>
+            <canvas id="contractCompletionChart" width="400" height="200"></canvas>
+        </div>
+        <div class="chart-wrapper">
+            <div class="chart-title">To'lovlar foizi (Rejaga nisbatan)</div>
+            <canvas id="paymentCompletionChart" width="400" height="200"></canvas>
+        </div>
+        <div class="chart-wrapper">
+            <div class="chart-title">Shartnomalar soni</div>
+            <canvas id="contractCountChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+    {% endif %}
+    
+    {{ block.super }}
+
+    {% if cl.result_list %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ma'lumotlarni olish
+            const tableRows = document.querySelectorAll('#result_list tbody tr');
+            const labels = [];
+            const contractPercentages = [];
+            const paymentPercentages = [];
+            const contractCounts = [];
+            
+            tableRows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length > 0) {
+                    // Hudud nomi (2-chi ustun)
+                    const districtName = cells[1]?.textContent?.trim() || '';
+                    
+                    // Shartnoma foizi (7-chi ustun)
+                    const contractPercentCell = cells[6]?.querySelector('div div');
+                    let contractPercent = 0;
+                    if (contractPercentCell) {
+                        const percentText = contractPercentCell.textContent;
+                        contractPercent = parseFloat(percentText.replace('%', '')) || 0;
+                    }
+                    
+                    // To'lov foizi (8-chi ustun)
+                    const paymentPercentCell = cells[7]?.querySelector('div div');
+                    let paymentPercent = 0;
+                    if (paymentPercentCell) {
+                        const percentText = paymentPercentCell.textContent;
+                        paymentPercent = parseFloat(percentText.replace('%', '')) || 0;
+                    }
+                    
+                    // Shartnomalar soni (6-chi ustun)
+                    const contractCount = parseInt(cells[5]?.textContent?.trim() || '0');
+                    
+                    if (districtName && districtName !== '-') {
+                        labels.push(districtName);
+                        contractPercentages.push(contractPercent);
+                        paymentPercentages.push(paymentPercent);
+                        contractCounts.push(contractCount);
+                    }
+                }
+            });
+
+            // Shartnomalar foizi diagrammasi
+            const contractCtx = document.getElementById('contractCompletionChart').getContext('2d');
+            new Chart(contractCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Shartnoma foizi (%)',
+                        data: contractPercentages,
+                        backgroundColor: contractPercentages.map(val => {
+                            if (val >= 100) return '#28a745';
+                            if (val >= 75) return '#17a2b8';
+                            if (val >= 50) return '#ffc107';
+                            return '#dc3545';
+                        }),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: Math.max(100, Math.max(...contractPercentages) * 1.1)
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // To'lovlar foizi diagrammasi
+            const paymentCtx = document.getElementById('paymentCompletionChart').getContext('2d');
+            new Chart(paymentCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "To'lov foizi (%)",
+                        data: paymentPercentages,
+                        backgroundColor: paymentPercentages.map(val => {
+                            if (val >= 100) return '#28a745';
+                            if (val >= 75) return '#17a2b8';
+                            if (val >= 50) return '#ffc107';
+                            return '#dc3545';
+                        }),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: Math.max(100, Math.max(...paymentPercentages) * 1.1)
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // Shartnomalar soni diagrammasi
+            const countCtx = document.getElementById('contractCountChart').getContext('2d');
+            new Chart(countCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Shartnomalar soni',
+                        data: contractCounts,
+                        backgroundColor: [
+                            '#FF6384',
+                            '#36A2EB',
+                            '#FFCE56',
+                            '#4BC0C0',
+                            '#9966FF',
+                            '#FF9F40',
+                            '#FF6384',
+                            '#C9CBCF'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+    {% endif %}
+{% endblock %}

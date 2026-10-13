@@ -1,0 +1,49 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+    &rsaquo; <a href="{% url 'admin:additional_services_demographicsection_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+    &rsaquo; Excel to'plam yuklash
+</div>
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 720px; margin: 30px auto;">
+    <div style="background:white; border:1px solid #e5e7eb; border-radius:12px; padding:30px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+        <h1 style="margin-top:0; font-size:24px;">📚 Excel'dan demografik to'plam yuklash</h1>
+        <p style="color:#6b7280; line-height:1.6;">
+            Excel faylni yuklang. Ichidagi <strong>har bir sheet</strong> alohida demografik bo'lim
+            sifatida import qilinadi. Birinchi qator har doim header (ustun nomlari) sifatida olinadi.
+        </p>
+
+        <div style="background:#eff6ff; border-left:4px solid #3b82f6; padding:12px 16px; border-radius:6px; margin:20px 0; font-size:13px;">
+            <strong>📌 Eslatma:</strong>
+            <ul style="margin:8px 0 0 20px; padding:0;">
+                <li>Yuklashdan keyin har sheet uchun slug, nomi va icon ni sozlashingiz mumkin</li>
+                <li>Tizim avtomatik filter schema yaratadi (siz tahrir qilishingiz mumkin)</li>
+                <li>Mavjud slug bo'lsa — eski section yangilanadi</li>
+            </ul>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div style="margin:20px 0;">
+                <label style="display:block; font-weight:600; margin-bottom:8px;">Excel fayl (.xlsx yoki .xls)</label>
+                <input type="file" name="excel_file" accept=".xlsx,.xls" required
+                       style="display:block; width:100%; padding:12px; border:2px dashed #d1d5db; border-radius:8px; background:#f9fafb;">
+            </div>
+
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+                <a href="{% url 'admin:additional_services_demographicsection_changelist' %}"
+                   class="button" style="text-decoration:none;">Bekor qilish</a>
+                <button type="submit" class="default" style="background:#10b981;">
+                    Yuklash va sheet'larni ko'rib chiqish &rarr;
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

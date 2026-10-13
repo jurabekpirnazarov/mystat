@@ -1,0 +1,3 @@
+# Linux konteynerlarda ishlaydigan skriptlar CRLF bilan buzilmasin
+*.sh text eol=lf
+*.template text eol=lf

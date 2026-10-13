@@ -1,0 +1,48 @@
+{% load static i18n %}<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ title|default:"2FA tasdiqlash" }}</title>
+<link rel="stylesheet" href="{% static 'admin/css/custom_auth.css' %}">
+</head>
+<body>
+<div class="auth-page">
+    <div class="auth-brand">🔐 my.stat.uz Admin</div>
+
+    <div class="auth-card">
+        <h1 class="auth-title">{% trans "Ikki bosqichli tasdiqlash" %}</h1>
+        <p class="auth-subtitle">
+            <strong>{{ username }}</strong><br>
+            {% trans "Google Authenticator ilovasidan 6 raqamli kodni kiriting" %}
+        </p>
+
+        {% if error %}
+        <div class="error-box">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="field">
+                <label for="id_otp_code">{% trans "Tasdiqlash kodi" %}</label>
+                <input type="text" name="otp_code" id="id_otp_code"
+                       class="otp-input"
+                       autofocus autocomplete="one-time-code"
+                       inputmode="numeric" pattern="[0-9]{6}"
+                       maxlength="6" placeholder="------" required>
+                {% if form.otp_code.errors %}<p class="field-error">{{ form.otp_code.errors|join:", " }}</p>{% endif %}
+                <p class="help">{% trans "Kod har 30 soniyada yangilanadi" %}</p>
+            </div>
+
+            <div class="submit-row">
+                <button type="submit" class="btn-primary">{% trans "Tasdiqlash" %}</button>
+            </div>
+        </form>
+
+        <div class="auth-footer">
+            <a href="{% url 'admin_login' %}">{% trans "← Boshqa hisob bilan kirish" %}</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

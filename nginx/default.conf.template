@@ -1,0 +1,49 @@
+# Bitta domen:
+#   /                 -> React (SPA, frontend build)
+#   /api/             -> Django
+#   /${ADMIN_URL}     -> Django admin (.env dagi ADMIN_URL)
+#   /static/ /media/  -> Django static va yuklangan fayllar
+
+upstream django {
+    server backend:8000;
+}
+
+server {
+    listen 80;
+    server_name _;
+
+    client_max_body_size 500M;
+
+    location /static/ {
+        alias /var/www/static/;
+        expires 30d;
+        access_log off;
+    }
+
+    location /media/ {
+        alias /var/www/media/;
+        expires 7d;
+    }
+
+    # ADMIN_URL slash'siz yoziladi (masalan: markaz) — Django o'zi '/' qo'shadi
+    location ~ ^/(api|${ADMIN_URL}|__debug__)(/|$) {
+        proxy_pass http://django;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 180s;
+    }
+
+    location / {
+        root /usr/share/nginx/html;
+        try_files $uri $uri/ /index.html;
+    }
+
+    location ~* ^/assets/ {
+        root /usr/share/nginx/html;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+}

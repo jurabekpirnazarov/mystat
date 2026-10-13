@@ -1,0 +1,285 @@
+import logging
+from datetime import date, timedelta
+from django.core.management.base import BaseCommand
+from django.db.models import Q
+from apps.accounts.models import User
+from apps.organizations.models import Organization
+from apps.additional_services.models import Ktut, KtutReportList, ReportList
+from apps.common.utils import send_message
+
+logger = logging.getLogger(__name__)
+
+
+class Command(BaseCommand):
+    help = 'Hisobot muddati 10 kundan kam qolgan foydalanuvchilarga Telegram orqali xabar yuborish'
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--days',
+            type=int,
+            default=10,
+            help='Necha kundan kam qolganlarni ogohlantirish (default: 10)',
+        )
+        parser.add_argument(
+            '--dry-run',
+            action='store_true',
+            help='Xabar yubormasdan, faqat logga yozish',
+        )
+
+    def handle(self, *args, **options):
+        days_threshold = options['days']
+        dry_run = options['dry_run']
+
+        today = date.today()
+
+        self.stdout.write(f"Hisobot muddati tekshiruvi boshlandi: {today}")
+        self.stdout.write(f"Ogohlantirish chegarasi: {days_threshold} kun")
+
+        # Telegram chat_id mavjud bo'lgan userlarni olish
+        users_with_telegram = User.objects.filter(
+            telegram_chat_id__isnull=False
+        ).exclude(telegram_chat_id='')
+        print(users_with_telegram)
+        sent_count = 0
+        error_count = 0
+
+        for user in users_with_telegram:
+            try:
+                # Userga tegishli organizationni olish
+                organization = getattr(user, 'organization', None)
+                if not organization:
+                    continue
+
+                tin = organization.tin
+                if not tin:
+                    continue
+                print(tin, user, user.telegram_chat_id)
+
+                # Ktut orqali korxonaga tegishli hisobotlarni olish
+                try:
+                    ktut = Ktut.objects.get(inn=tin)
+                except Ktut.DoesNotExist:
+                    continue
+
+                # Korxonaga tegishli hisobotlar
+                ktut_report_ids = KtutReportList.objects.filter(
+                    ktut=ktut
+                ).values_list('reportlist_id', flat=True)
+                print(ktut_report_ids)
+                if not ktut_report_ids:
+                    continue
+
+                # Muddati yaqinlashgan hisobotlarni topish
+                upcoming_reports = self.get_upcoming_reports(
+                    ktut_report_ids, today, days_threshold
+                )
+
+                if not upcoming_reports:
+                    continue
+
+                # Xabar tayyorlash
+                message = self.prepare_message(
+                    user, organization, upcoming_reports, today
+                )
+
+                if dry_run:
+                    self.stdout.write(f"[DRY RUN] {user.full_name}: {len(upcoming_reports)} ta hisobot")
+                    logger.info(f"[DRY RUN] Message for {user.full_name}:\n{message}")
+                else:
+                    # Telegram orqali xabar yuborish
+                    result = send_message(user.telegram_chat_id, message)
+                    if result.get('ok'):
+                        sent_count += 1
+                        self.stdout.write(
+                            self.style.SUCCESS(f"Xabar yuborildi: {user.full_name}")
+                        )
+                    else:
+                        error_count += 1
+                        logger.error(f"Telegram xatosi ({user.full_name}): {result}")
+
+            except Exception as e:
+                error_count += 1
+                logger.error(f"Xatolik ({user.id}): {str(e)}", exc_info=True)
+
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"\nNatija: {sent_count} ta xabar yuborildi, {error_count} ta xatolik"
+            )
+        )
+
+    def get_upcoming_reports(self, report_ids, today, days_threshold):
+        """
+        report_type bo'yicha muddati yaqinlashgan hisobotlarni topish.
+        Yilni e'tiborsiz qoldirib, faqat oy/kunni solishtiradi.
+        """
+        upcoming = []
+
+        reports = ReportList.objects.filter(
+            id__in=report_ids,
+            is_active=True,
+            deadline__isnull=False
+        )
+
+        print(f"DEBUG: Jami {reports.count()} ta hisobot topildi")
+
+        for report in reports:
+            print(f"DEBUG: Report ID={report.id}, type={report.report_type}, deadline={report.deadline}")
+
+            deadline_this_period = self.calculate_next_deadline(
+                report, today
+            )
+
+            print(f"DEBUG: Hisoblangan deadline: {deadline_this_period}")
+
+            if deadline_this_period:
+                days_left = (deadline_this_period - today).days
+                print(f"DEBUG: Qolgan kunlar: {days_left}")
+
+                if 0 <= days_left <= days_threshold:
+                    upcoming.append({
+                        'report': report,
+                        'deadline': deadline_this_period,
+                        'days_left': days_left
+                    })
+                    print(f"DEBUG: Hisobot qo'shildi!")
+
+        # Muddati yaqinlashganlari bo'yicha tartiblash
+        upcoming.sort(key=lambda x: x['days_left'])
+
+        return upcoming
+
+    def calculate_next_deadline(self, report, today):
+        """
+        report_type bo'yicha keyingi deadlineni hisoblash.
+        - monthly: har oyda deadline.day kuni
+        - quarterly: 3, 6, 9, 12 oylarda
+        - yearly: faqat deadline.month va deadline.day bo'yicha
+        """
+        if not report.deadline:
+            return None
+
+        report_type = report.report_type
+        deadline_day = report.deadline.day
+        deadline_month = report.deadline.month
+
+        current_year = today.year
+        current_month = today.month
+
+        try:
+            if report_type == 'monthly':
+                # Har oyda deadline_day kuni
+                # Agar bu oyda o'tib ketgan bo'lsa, keyingi oyga
+                try:
+                    this_month_deadline = date(current_year, current_month, deadline_day)
+                except ValueError:
+                    # Oy oxirgi kunlari uchun (masalan, 31-kun fevralda)
+                    import calendar
+                    last_day = calendar.monthrange(current_year, current_month)[1]
+                    this_month_deadline = date(current_year, current_month, min(deadline_day, last_day))
+
+                if this_month_deadline >= today:
+                    return this_month_deadline
+                else:
+                    # Keyingi oy
+                    next_month = current_month + 1
+                    next_year = current_year
+                    if next_month > 12:
+                        next_month = 1
+                        next_year += 1
+                    try:
+                        return date(next_year, next_month, deadline_day)
+                    except ValueError:
+                        import calendar
+                        last_day = calendar.monthrange(next_year, next_month)[1]
+                        return date(next_year, next_month, min(deadline_day, last_day))
+
+            elif report_type == 'quarterly':
+                # Kvartal oylari: 3, 6, 9, 12
+                quarterly_months = [3, 6, 9, 12]
+
+                for qm in quarterly_months:
+                    try:
+                        q_deadline = date(current_year, qm, deadline_day)
+                    except ValueError:
+                        import calendar
+                        last_day = calendar.monthrange(current_year, qm)[1]
+                        q_deadline = date(current_year, qm, min(deadline_day, last_day))
+
+                    if q_deadline >= today:
+                        return q_deadline
+
+                # Bu yilda qolmadi, keyingi yilning 1-kvartali
+                try:
+                    return date(current_year + 1, 3, deadline_day)
+                except ValueError:
+                    return date(current_year + 1, 3, 28)
+
+            elif report_type == 'yearly':
+                # Faqat deadline.month va deadline.day bo'yicha
+                try:
+                    this_year_deadline = date(current_year, deadline_month, deadline_day)
+                except ValueError:
+                    import calendar
+                    last_day = calendar.monthrange(current_year, deadline_month)[1]
+                    this_year_deadline = date(current_year, deadline_month, min(deadline_day, last_day))
+
+                if this_year_deadline >= today:
+                    return this_year_deadline
+                else:
+                    # Keyingi yil
+                    try:
+                        return date(current_year + 1, deadline_month, deadline_day)
+                    except ValueError:
+                        import calendar
+                        last_day = calendar.monthrange(current_year + 1, deadline_month)[1]
+                        return date(current_year + 1, deadline_month, min(deadline_day, last_day))
+
+            else:
+                # report_type aniqlanmagan bo'lsa, deadline bo'yicha
+                return None
+
+        except Exception as e:
+            logger.error(f"Deadline hisoblashda xatolik: {e}")
+            return None
+
+    def prepare_message(self, user, organization, upcoming_reports, today):
+        """Telegram xabarini tayyorlash"""
+
+        message_lines = [
+            f"<b>Hurmatli {user.full_name}!</b>",
+            f"",
+            f"<b>{organization.name}</b> korxonangiz uchun quyidagi hisobotlar muddati yaqinlashmoqda:",
+            f""
+        ]
+
+        for i, item in enumerate(upcoming_reports, 1):
+            report = item['report']
+            deadline = item['deadline']
+            days_left = item['days_left']
+
+            # Qolgan kunlar uchun emoji
+            if days_left == 0:
+                urgency = "BUGUN!"
+            elif days_left == 1:
+                urgency = "ERTAGA!"
+            elif days_left <= 3:
+                urgency = f"{days_left} kun qoldi"
+            else:
+                urgency = f"{days_left} kun qoldi"
+
+            report_name = report.formsname_uz or report.formsname or report.type_uz or report.type
+
+            message_lines.append(
+                f"{i}. <b>{report_name}</b>\n"
+                f"   Muddat: {deadline.strftime('%d.%m.%Y')} ({urgency})"
+            )
+
+        message_lines.extend([
+            f"",
+            f"Iltimos, hisobotlarni o'z vaqtida topshiring.",
+            f"",
+            f"<i>my.stat.uz</i>"
+        ])
+
+        return "\n".join(message_lines)
+

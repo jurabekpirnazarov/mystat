@@ -1,0 +1,74 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block title %}DIDOX Hujjatlari Tekshiruvi{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label='contracts' %}">Contracts</a>
+    &rsaquo; <a href="{% url 'admin:contracts_contract_changelist' %}">Contracts</a>
+    &rsaquo; DIDOX Tekshiruvi
+</div>
+{% endblock %}
+
+{% block content %}
+<h1>📄 DIDOX Hujjatlari Tekshiruvi</h1>
+
+<div class="module">
+    <p>
+        Bu funksiya DIDOX tizimidan imzo kutayotgan hujjatlarni tekshiradi va 
+        tegishli foydalanuvchilarga Telegram orqali bildirishnoma yuboradi.
+    </p>
+    
+    <form method="post" action="">
+        {% csrf_token %}
+        
+        <fieldset class="module aligned">
+            <div class="form-row">
+                <div>
+                    <label for="id_force_check">
+                        <input type="checkbox" name="force_check" id="id_force_check" value="1">
+                        Barcha hujjatlarni tekshirish (oxirgi tekshiruv sanasini e'tiborsiz qoldirish)
+                    </label>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="submit-row">
+            <input type="submit" value="📄 Tekshiruvni Boshlash" class="default" name="_save">
+            <a href="{% url 'admin:contracts_contract_changelist' %}" class="button cancel-link">Bekor qilish</a>
+        </div>
+    </form>
+
+    <div class="help">
+        <h3>Ma'lumot:</h3>
+        <ul>
+            <li><strong>Oddiy tekshiruv:</strong> Oxirgi tekshiruv sanasidan keyin yangilangan hujjatlarni tekshiradi</li>
+            <li><strong>To'liq tekshiruv:</strong> Barcha aktiv hujjatlarni tekshiradi (ko'p vaqt olishi mumkin)</li>
+            <li><strong>Bildirishnoma:</strong> Faqat imzo kutayotgan hujjatlar (status=1) uchun yuboriladi</li>
+            <li><strong>Takrorlash:</strong> Bir xil hujjat uchun 24 soat ichida faqat bitta bildirishnoma yuboriladi</li>
+        </ul>
+    </div>
+</div>
+
+<style>
+.help {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 5px;
+}
+.help h3 {
+    margin-top: 0;
+    color: #495057;
+}
+.help ul li {
+    margin-bottom: 5px;
+}
+.cancel-link {
+    margin-left: 10px;
+}
+</style>
+{% endblock %}

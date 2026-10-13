@@ -1,0 +1,62 @@
+# Monorepo deploy: backend/ va frontend/ faqat o'zgarganda alohida deploy qilinadi.
+# Serverda monorepo bitta joyga clone qilingan bo'lishi kerak: $PROJECT_PATH
+# (systemd va nginx yo'llarini yangilash — README.md, "Production" bo'limi)
+
+stages:
+  - deploy
+
+variables:
+  PROJECT_PATH: "/var/www/mystat"
+  REPO_URL: "https://gitlab-ci-token:${CI_JOB_TOKEN}@tester.stat.uz/consalt/mystat.git"
+
+.update_repo: &update_repo
+  - cd $PROJECT_PATH
+  - git remote set-url origin "$REPO_URL"
+  - git fetch origin main
+  - git reset --hard origin/main
+  # .env, venv, media, node_modules va _archive saqlanib qoladi
+  - git clean -fd -e .env -e venv -e media -e node_modules -e _archive
+
+deploy-backend:
+  stage: deploy
+  resource_group: production
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      changes:
+        - backend/**/*
+        - .gitlab-ci.yml
+  script:
+    - echo "🚀 Backend deploy..."
+    - *update_repo
+    - cd backend
+    - source venv/bin/activate
+    - pip install --upgrade pip
+    - pip install -r requirements/prod.txt
+    - mkdir -p logs
+    - python manage.py migrate --noinput
+    - python manage.py collectstatic --noinput --clear
+    - sudo systemctl restart apiconsult
+    - sudo systemctl restart consultbot
+    - sudo systemctl restart nginx
+    - echo "✅ Backend deploy tugadi"
+  environment:
+    name: production
+
+deploy-frontend:
+  stage: deploy
+  resource_group: production
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      changes:
+        - frontend/**/*
+        - .gitlab-ci.yml
+  script:
+    - echo "🚀 Frontend deploy..."
+    - *update_repo
+    - cd frontend
+    - npm install --legacy-peer-deps
+    - npm run build
+    - sudo systemctl restart nginx
+    - echo "✅ Frontend deploy tugadi"
+  environment:
+    name: production

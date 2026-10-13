@@ -1,0 +1,215 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+  <h1 style="margin-bottom:18px;">{{ title }}</h1>
+
+<form method="get" style="margin-bottom:18px; display:flex; align-items:center; gap:12px;">
+  <!-- Yil select -->
+  <div>
+    <label for="year_select" style="font-weight:600; margin-right:6px;">Yil:</label>
+    <select id="year_select" name="year" autocomplete="off" style="padding:6px 8px;">
+      <option value="">-- Tanlang --</option>
+      {% for y in years_list %}
+        <option value="{{ y }}" {% if year_filter == y %}selected{% endif %}>{{ y }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <!-- Viloyat select -->
+  <div>
+    <label for="region_select" style="font-weight:600; margin-right:6px;">Viloyat:</label>
+    <select id="region_select" name="region" autocomplete="off" style="padding:6px 8px;">
+      <option value="">-- Tanlang --</option>
+      {% for r in region_list %}
+        <option value="{{ r.id }}" {% if region_filter == r.id %}selected{% endif %}>
+          {{ r.name }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <!-- Buttons -->
+  <div>
+    <button id="filter_button" type="submit" class="filter-button">
+    Filter
+</button>
+   <a id="refresh_link" href="{% url 'admin:contracts_contractstats_changelist' %}" class="refresh-button">
+    Refresh
+</a>
+
+  </div>
+</form>
+    <div class="object-tools" style="margin-bottom:16px;">
+    <a class="export-button" href="{% url 'admin:contractstat_export_xlsx' %}?year={{ year_filter }}{% if region_filter %}&region={{ region_filter }}{% endif %}">
+        Excel ga eksport
+    </a>
+
+<a class="export-button" style="background:#FF8C00;" href="{% url 'admin:contractstat_export_yearly_xlsx' %}?year={{ year_filter }}">
+    Yillik Reestr
+</a>
+</div>
+<style>
+    .refresh-button {
+    display: inline-block;
+    background-color: #f0f0f0; /* och kul rang */
+    color: #333;
+    font-weight: 600;
+    padding: 6px 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: Arial, sans-serif;
+}
+
+.refresh-button:hover {
+    background-color: #e0e0e0; /* biroz qorayadi */
+    border-color: #999;
+    color: #000;
+    transform: translateY(-1px);
+}
+
+.refresh-button:active {
+    background-color: #d0d0d0;
+    transform: translateY(0);
+}
+    .filter-button {
+    background-color: #1E90FF; /* Dodger Blue */
+    color: #fff;
+    font-weight: 600;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: Arial, sans-serif;
+}
+
+.filter-button:hover {
+    background-color: #1C86EE; /* biroz qoraygan ko‘k */
+    transform: translateY(-1px);
+}
+
+.filter-button:active {
+    background-color: #1874CD; /* yana qorayadi */
+    transform: translateY(0);
+}
+.export-button {
+    display: inline-block;
+    background: linear-gradient(135deg, #4caf50, #45a049); /* chiroyli yashil gradient */
+    color: #fff;
+    font-weight: 600;
+    padding: 8px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    font-family: Arial, sans-serif;
+    margin-left: 30px;
+}
+
+.export-button:hover {
+    background: linear-gradient(135deg, #45a049, #4caf50); /* hover effekt */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 10px rgba(0,0,0,0.25);
+}
+
+.export-button:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+</style>
+  <div style="overflow:auto; border:1px solid #e0e0e0; border-radius:6px;">
+    <table style="width:100%; border-collapse:collapse; min-width:1100px;">
+      <thead style="background:#f7f7f9;">
+        <tr>
+          <th style="border:1px solid #e6e6e6; padding:10px; position:sticky; left:0; background:#f7f7f9; z-index:2;">Region</th>
+
+          {% for m in months %}
+            <th style="border:1px solid #e6e6e6; padding:8px; text-align:center;">{{ m }}<br><small>Summa</small></th>
+          {% endfor %}
+
+          <th style="border:1px solid #e6e6e6; padding:10px; text-align:center; background:#f0f8ff;">Jami Soni</th>
+          <th style="border:1px solid #e6e6e6; padding:10px; text-align:center; background:#f0f8ff;">Jami Summasi</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for r in regions %}
+          <tr style="background:{% cycle '#ffffff' '#fbfbfd' %};">
+            <td style="border:1px solid #eee; padding:10px; font-weight:600; position:sticky; left:0; background:{% cycle '#ffffff' '#fbfbfd' %}; z-index:1;">
+              {{ r.name }}
+              {# link to view contracts for this region #}
+              <div style="font-size:12px; margin-top:6px;">
+                <a href="?region={{ r.id }}&year={{ year_filter }}" style="color:#2a6fdb; text-decoration:none;">Ko'rish</a>
+              </div>
+            </td>
+
+            {# monthly_amounts is a list of 12 numbers #}
+            {% for amt in r.monthly_amounts %}
+              <td style="border:1px solid #eee; padding:8px; text-align:right; white-space:nowrap;">{{ amt|floatformat:2 }}</td>
+            {% endfor %}
+
+            <td style="border:1px solid #eee; padding:10px; text-align:right; font-weight:700;">{{ r.total_count }}</td>
+            <td style="border:1px solid #eee; padding:10px; text-align:right; font-weight:700;">{{ r.total_amount|floatformat:2 }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+
+      <tfoot>
+        {% comment %} If you added an 'all' row in backend, display it here as the totals row {% endcomment %}
+        {% for r in regions %}
+          {% if r.id == 'all' %}
+            <tr style="background:#f2f9f2;">
+              <td style="border:1px solid #e6e6e6; padding:10px; font-weight:800;">Summa (Butun Respublika)</td>
+              {% for amt in r.monthly_amounts %}
+                <td style="border:1px solid #e6e6e6; padding:8px; text-align:right; font-weight:700;">{{ amt|floatformat:2 }}</td>
+              {% endfor %}
+              <td style="border:1px solid #e6e6e6; padding:10px; text-align:right; font-weight:800;">{{ r.total_count }}</td>
+              <td style="border:1px solid #e6e6e6; padding:10px; text-align:right; font-weight:800;">{{ r.total_amount|floatformat:2 }}</td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </tfoot>
+    </table>
+  </div>
+
+  <hr style="margin:26px 0 18px; border:none; border-top:1px solid #eee;">
+
+  {% if selected_region %}
+    <h2 style="margin-bottom:8px;">Region: {{ selected_region.name }}</h2>
+    <p style="margin-top:0; color:#555;">{{ contracts.count }} contracts found for selected filters.</p>
+
+    <table style="width:100%; border-collapse:collapse; border:1px solid #e6e6e6;">
+      <thead style="background:#fafafa;">
+        <tr>
+          <th style="border:1px solid #e6e6e6; padding:8px;">ID</th>
+          <th style="border:1px solid #e6e6e6; padding:8px;">User</th>
+          <th style="border:1px solid #e6e6e6; padding:8px;">Email</th>
+          <th style="border:1px solid #e6e6e6; padding:8px;">Organization</th>
+          <th style="border:1px solid #e6e6e6; padding:8px;">District</th>
+          <th style="border:1px solid #e6e6e6; padding:8px;">Created at</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in contracts %}
+          <tr>
+            <td style="border:1px solid #eee; padding:8px;">{{ c.id }}</td>
+            <td style="border:1px solid #eee; padding:8px;">{{ c.user.username }}</td>
+            <td style="border:1px solid #eee; padding:8px;">{{ c.user.email }}</td>
+            <td style="border:1px solid #eee; padding:8px;">{{ c.user.organization.name|default_if_none:"" }}</td>
+            <td style="border:1px solid #eee; padding:8px;">{{ c.user.organization.district.name|default_if_none:"" }}</td>
+            <td style="border:1px solid #eee; padding:8px;">{{ c.created_at|date:"Y-m-d H:i" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" style="padding:12px; text-align:center;">No contracts found for this region.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+
+{% endblock %}

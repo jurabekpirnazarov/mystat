@@ -1,0 +1,84 @@
+{% load static i18n %}<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ title|default:"2FA sozlash" }}</title>
+<link rel="stylesheet" href="{% static 'admin/css/custom_auth.css' %}">
+</head>
+<body>
+<div class="auth-page">
+    <div class="auth-brand">🔐 my.stat.uz Admin</div>
+
+    <div class="auth-card wide">
+        <h1 class="auth-title">{% trans "Ikki bosqichli tasdiqlashni sozlash" %}</h1>
+        <p class="auth-subtitle">
+            {% if is_reset %}
+            {% trans "Eski qurilma o'chirildi. Yangi QR kodni skan qiling." %}
+            {% else %}
+            {% trans "Google Authenticator yoki Authy ilovasi orqali quyidagi QR kodni skan qiling." %}
+            {% endif %}
+        </p>
+
+        <div class="setup-grid">
+            <div class="qr-block">
+                <img src="{{ qr_data_url }}" alt="2FA QR kodi" class="qr-img">
+                <div class="qr-caption">
+                    <strong>{{ issuer }}</strong> · {{ username }}
+                </div>
+            </div>
+
+            <div class="setup-info">
+                <div class="setup-step">
+                    <h3>{% trans "1-qadam: Ilovani o'rnating" %}</h3>
+                    <p>{% trans "Telefoningizga Google Authenticator yoki Authy ilovasini o'rnating." %}</p>
+                </div>
+
+                <div class="setup-step">
+                    <h3>{% trans "2-qadam: QR'ni skan qiling" %}</h3>
+                    <p>{% trans "Ilovada \"+\" tugmasini bosing va chap tomondagi QR ni skan qiling." %}</p>
+                </div>
+
+                <div class="setup-step">
+                    <h3>{% trans "3-qadam: Manual kirish (ixtiyoriy)" %}</h3>
+                    <p>{% trans "QR ishlamasa, secret'ni qo'lda kiriting:" %}</p>
+                    <code class="secret-code">{{ secret }}</code>
+                </div>
+            </div>
+        </div>
+
+        {% if error %}
+        <div class="error-box">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" novalidate class="verify-form">
+            {% csrf_token %}
+            <div class="field">
+                <label for="id_otp_code">{% trans "4-qadam: ilovadagi 6 raqamli kodni kiriting" %}</label>
+                <input type="text" name="otp_code" id="id_otp_code"
+                       class="otp-input"
+                       autofocus autocomplete="one-time-code"
+                       inputmode="numeric" pattern="[0-9]{6}"
+                       maxlength="6" placeholder="------" required>
+                {% if form.otp_code.errors %}<p class="field-error">{{ form.otp_code.errors|join:", " }}</p>{% endif %}
+            </div>
+
+            <div class="submit-row">
+                <button type="submit" class="btn-primary">{% trans "Tasdiqlash va kirish" %}</button>
+            </div>
+        </form>
+
+        <div class="auth-footer">
+            {% if can_reset %}
+            <form method="get" action="{% url 'admin_2fa_setup' %}" style="display:inline;">
+                <input type="hidden" name="reset" value="1">
+                <button type="submit" class="link-button">{% trans "🔄 Secretni qayta yaratish" %}</button>
+            </form>
+            <span class="auth-footer-divider">·</span>
+            {% endif %}
+            <a href="{% url 'admin_login' %}">{% trans "← Boshqa hisob bilan kirish" %}</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

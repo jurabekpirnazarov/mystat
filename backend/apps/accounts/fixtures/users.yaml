@@ -1,0 +1,45 @@
+# USERS
+- model: "accounts.User"
+  pk: 1
+  fields:
+    email: "angelina@gmail.com"
+    username: "angelina"
+    first_name: "Angelina"
+    last_name: "Jolie"
+    role: "admin"
+    is_staff: true
+    is_superuser: true
+    date_joined: "2018-01-01 00:00:00+00:00"
+    last_login: "2018-01-01 00:00:00+00:00"
+    phone_number: "998997980727"
+    password: "pbkdf2_sha256$120000$Q3ICPM6omVjp$liGZrVdJWPLpkne0vjBLnJr4S+v49AoVABreMeAwNBU=" # password
+
+- model: "accounts.User"
+  pk: 2
+  fields:
+    email: "alix@gmail.com"
+    username: "alix"
+    first_name: "Alix"
+    last_name: "Jolie"
+    role: "user"
+    is_staff: false
+    is_superuser: false
+    date_joined: "2018-01-01 00:00:00+00:00"
+    last_login: "2018-01-01 00:00:00+00:00"
+    phone_number: "998997980728"
+    password: "pbkdf2_sha256$120000$Q3ICPM6omVjp$liGZrVdJWPLpkne0vjBLnJr4S+v49AoVABreMeAwNBU=" # password
+
+- model: "accounts.User"
+  pk: 3
+  fields:
+    email: "admin@gmail.com"
+    username: "admin"
+    first_name: "admin"
+    last_name: "admin"
+    role: "user"
+    is_staff: true
+    is_superuser: true
+    date_joined: "2018-01-01 00:00:00+00:00"
+    last_login: "2018-01-01 00:00:00+00:00"
+    phone_number: "998997980729"
+    password: "pbkdf2_sha256$120000$Q3ICPM6omVjp$liGZrVdJWPLpkne0vjBLnJr4S+v49AoVABreMeAwNBU=" # password

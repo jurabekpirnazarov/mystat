@@ -1,0 +1,83 @@
+{% load static i18n %}<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ title|default:"Admin login" }}</title>
+<link rel="stylesheet" href="{% static 'admin/css/custom_auth.css' %}">
+{% if recaptcha_version == "v2" %}
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+{% elif recaptcha_version == "v3" and recaptcha_site_key %}
+<script src="https://www.google.com/recaptcha/api.js?render={{ recaptcha_site_key }}"></script>
+{% endif %}
+</head>
+<body>
+<div class="auth-page">
+    <div class="auth-brand">🔐 my.stat.uz Admin</div>
+
+    <div class="auth-card">
+        <h1 class="auth-title">{% trans "Admin paneliga kirish" %}</h1>
+        <p class="auth-subtitle">{% trans "Foydalanuvchi ma'lumotlaringizni va ikki bosqichli tasdiqlashni bajaring." %}</p>
+
+        {% if error %}
+        <div class="error-box">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" id="login-form" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+
+            <div class="field">
+                <label for="id_username">{% trans "Foydalanuvchi nomi" %}</label>
+                <input type="text" name="username" id="id_username" autofocus autocomplete="username" required>
+                {% if form.username.errors %}<p class="field-error">{{ form.username.errors|join:", " }}</p>{% endif %}
+            </div>
+
+            <div class="field">
+                <label for="id_password">{% trans "Parol" %}</label>
+                <input type="password" name="password" id="id_password" autocomplete="current-password" required>
+                {% if form.password.errors %}<p class="field-error">{{ form.password.errors|join:", " }}</p>{% endif %}
+            </div>
+
+            <input type="hidden" name="recaptcha_response" id="id_recaptcha_response">
+
+            {% if recaptcha_site_key %}
+            <div class="field">
+                {% if recaptcha_version == "v2" %}
+                <div class="recaptcha-row">
+                    <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+                </div>
+                {% else %}
+                <p class="recaptcha-v3-note">{% trans "Bot-larga qarshi himoya yoqilgan (reCAPTCHA v3)" %}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <div class="submit-row">
+                <button type="submit" class="btn-primary" id="login-submit">{% trans "Kirish" %}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if recaptcha_version == "v3" and recaptcha_site_key %}
+<script>
+(function() {
+    var form = document.getElementById('login-form');
+    if (!form) return;
+    form.addEventListener('submit', function(ev) {
+        if (form.dataset.tokenSet === '1') return;
+        ev.preventDefault();
+        grecaptcha.ready(function() {
+            grecaptcha.execute('{{ recaptcha_site_key }}', { action: 'admin_login' }).then(function(token) {
+                document.getElementById('id_recaptcha_response').value = token;
+                form.dataset.tokenSet = '1';
+                form.submit();
+            });
+        });
+    });
+})();
+</script>
+{% endif %}
+</body>
+</html>

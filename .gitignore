@@ -1,0 +1,16 @@
+.env
+_archive/
+*.dump
+db/dump/*
+!db/dump/.gitkeep
+.idea
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+
+# Lokal/yaratiladigan fayllar
+backend/logs/
+backend/datas/
+backend/media/demo/
+backend/media/demographics/
+backend/media/contracts/

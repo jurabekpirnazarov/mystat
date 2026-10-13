@@ -1,0 +1,61 @@
+/* Custom styles for ConsultingPlan admin */
+.field-get_contract_completion_percentage,
+.field-get_payment_completion_percentage,
+.field-get_region_completion_percentage,
+.field-get_region_payment_percentage {
+    min-width: 120px !important;
+}
+
+.progress-bar {
+    width: 100px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid #dee2e6;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+    display: inline-block;
+}
+
+.progress-bar-fill {
+    height: 22px;
+    color: white;
+    text-align: center;
+    line-height: 22px;
+    font-size: 11px;
+    font-weight: bold;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
+    transition: width 0.3s ease;
+    min-width: fit-content;
+    padding: 0 4px;
+    box-sizing: border-box;
+}
+
+/* Chart containers */
+.charts-container {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.chart-wrapper {
+    background: white;
+    border: 1px solid #dee2e6;
+}
+
+.chart-title {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .charts-container {
+        flex-direction: column;
+    }
+    
+    .chart-wrapper {
+        min-width: auto;
+        max-width: none;
+    }
+}

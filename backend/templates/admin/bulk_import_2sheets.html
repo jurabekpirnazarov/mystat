@@ -1,0 +1,85 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block content %}
+  <div class="module">
+    <h2>{{ title }}</h2>
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      <fieldset class="module aligned">
+        <div class="form-row">
+          {{ form.import_file.label_tag }} {{ form.import_file }}
+          <div><small>{{ form.import_file.help_text }}</small></div>
+        </div>
+        <div class="form-row">
+          {{ form.groups_sheet.label_tag }} {{ form.groups_sheet }}
+          <div><small>{{ form.groups_sheet.help_text }}</small></div>
+        </div>
+        <div class="form-row">
+          {{ form.countries_sheet.label_tag }} {{ form.countries_sheet }}
+          <div><small>{{ form.countries_sheet.help_text }}</small></div>
+        </div>
+        <div class="form-row">
+          <label for="{{ form.dry_run.id_for_label }}">Preview (dry_run)</label>
+          {{ form.dry_run }}
+          <div><small>{{ form.dry_run.help_text }}</small></div>
+        </div>
+      </fieldset>
+      <div class="submit-row">
+        <input type="submit" value="Yuklash va ishlov berish" class="default">
+      </div>
+    </form>
+  </div>
+
+  {% if preview %}
+    <div class="module">
+      <h3>Dry-run natijalari</h3>
+
+      <h4>CountryGroup ({{ groups_errors|length }} xato)</h4>
+      {% if groups_errors %}
+        <table class="admin-table">
+          <thead><tr><th>Row</th><th>Error</th></tr></thead>
+          <tbody>
+            {% for e in groups_errors %}
+              <tr>
+                <td>{{ e.row|default:"—" }}</td>
+                <td>
+                  <pre style="white-space:pre-wrap">{{ e.error }}</pre>
+                  {% if e.traceback %}
+                    <details><summary>Traceback</summary><pre>{{ e.traceback }}</pre></details>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p style="color:#080;">Xato topilmadi.</p>
+      {% endif %}
+
+      <h4>Country ({{ countries_errors|length }} xato)</h4>
+      {% if countries_errors %}
+        <table class="admin-table">
+          <thead><tr><th>Row</th><th>Error</th></tr></thead>
+          <tbody>
+            {% for e in countries_errors %}
+              <tr>
+                <td>{{ e.row|default:"—" }}</td>
+                <td>
+                  <pre style="white-space:pre-wrap">{{ e.error }}</pre>
+                  {% if e.traceback %}
+                    <details><summary>Traceback</summary><pre>{{ e.traceback }}</pre></details>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p style="color:#080;">Xato topilmadi.</p>
+      {% endif %}
+
+      <p>OK bo‘lsa, <b>Preview (dry_run)</b> belgisi olib tashlang va formani qayta yuboring.</p>
+    </div>
+  {% endif %}
+{% endblock %}

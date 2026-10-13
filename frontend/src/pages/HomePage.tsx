@@ -1,9 +1,7 @@
 import { useEffect } from "react";
 import Banner from "../components/Banner";
-// import StatsDashboard from "../components/StatsDashboard";
 import { useLocation } from "react-router-dom";
 import TariffComponent from "../components/TariffComponent";
-import UserChart from "../components/charts/UserChart";
 import Interactive from "../components/Interactive";
 import CalendarReport from "../components/CalendarReport";
 import FloatingSupport from "../components/FloatingSupport";
@@ -23,7 +21,6 @@ const HomePage = () => {
           <Interactive />
           <TariffComponent />
           {/* <ServiceGrid /> */}
-          {/* <StatsDashboard /> */}
           {/* <UserChart /> */}
           {/* <UsageCapabilities /> */}
           <CalendarReport/>

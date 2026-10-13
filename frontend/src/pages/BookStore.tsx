@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import BookStep1 from "../components/BookStep1";
 import RatingModal from '../components/modals/RatingModal';
-import BookOrder from '../components/BookOrder';
 import {
   ShoppingCart,
   Plus,
@@ -22,6 +21,9 @@ const typedGetRequest = getRequest as GetRequestType;
 const typedPostRequest = postRequest as PostRequestType;
 import { book_list, book_order_create, payment_for_book } from "../api/apiUrls";
 import { useServiceId } from "../utils/useServiceId";
+
+// Backend BookOption.book_type qiymatlari
+type BookType = "electron" | "print" | "disk";
 
 interface ApiResponseType<T> {
   results: T[];
@@ -51,7 +53,7 @@ interface Book {
   year: number;
   file_url: string;
   image_url: string;
-  category?: "electron" | "bosma" | "disk";
+  category?: BookType;
   price?: number;
   description?: string;
   author?: string;
@@ -64,7 +66,7 @@ interface Book {
 interface CartItem {
   bookId: number;
   quantity: number;
-  category: "electron" | "bosma" | "disk";
+  category: BookType;
 }
 
 const BookStore: React.FC = () => {
@@ -110,7 +112,7 @@ const BookStore: React.FC = () => {
   };
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(getInitialStep());
 
-  const [activeTab, setActiveTab] = useState<"electron" | "bosma" | "disk">(
+  const [activeTab, setActiveTab] = useState<BookType>(
     "electron"
   );
   const [selectedYear, setSelectedYear] = useState("2024");
@@ -137,7 +139,6 @@ const BookStore: React.FC = () => {
   );
 
   const [showModal, setShowModal] = useState(false);
-  const [showBookOrder, setShowBookOrder] = useState(false);
   const [modalProgress, setModalProgress] = useState(0);
   const [showCartModal, setShowCartModal] = useState(false);
   const [books, setBooks] = useState<Book[]>([]);
@@ -147,6 +148,7 @@ const BookStore: React.FC = () => {
     "Buyurtmangiz savatga qo'shildi"
   );
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showBookOrder, setShowBookOrder] = useState(false);
   const [orderResponse, setOrderResponse] = useState<{
     id: number;
     total_price: string;
@@ -260,6 +262,21 @@ const BookStore: React.FC = () => {
     }
   }, [orderResponse, selectedPaymentProvider, setCurrentStep, setDiskCart, setElektronCart, setBosmaCart, setModalMessage, setModalProgress, setPaymentStatus, setPaymentUrl, setShowModal, setShowPaymentModal]);
 
+  // Bosma/disk buyurtmalar uchun yetkazib berish sahifasiga o'tish
+  useEffect(() => {
+    if (!showBookOrder) return;
+    navigate('/book-order', {
+      state: {
+        cart: [...bosmaCart, ...diskCart],
+        books,
+        totalPrice: getCartTotal(),
+        orderResponse
+      },
+      replace: true
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- faqat showBookOrder yoqilganda bir marta
+  }, [showBookOrder]);
+
   useEffect(() => {
     const state = location.state as { selectedProvider?: "click" | "payme" };
     if (state?.selectedProvider) {
@@ -372,7 +389,7 @@ const BookStore: React.FC = () => {
     switch (activeTab) {
       case "electron":
         return electronCart;
-      case "bosma":
+      case "print":
         return bosmaCart;
       case "disk":
         return diskCart;
@@ -389,7 +406,7 @@ const BookStore: React.FC = () => {
       case "electron":
         setElektronCart(newCart);
         break;
-      case "bosma":
+      case "print":
         setBosmaCart(newCart);
         break;
       case "disk":
@@ -1571,19 +1588,6 @@ const BookStore: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
-
-      {/* Navigate to BookOrder page when showBookOrder is true */}
-      {showBookOrder && (
-        navigate('/book-order', {
-          state: {
-            cart: [...bosmaCart, ...diskCart],
-            books,
-            totalPrice: getCartTotal(),
-            orderResponse
-          },
-          replace: true
-        })
       )}
 
       {/* Success Modal */}

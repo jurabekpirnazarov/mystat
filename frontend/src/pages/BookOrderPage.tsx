@@ -12,7 +12,7 @@ interface LocationState {
 const BookOrderPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [pageData, setPageData] = useState<LocationState>(() => {
+  const [pageData] = useState<LocationState>(() => {
     // Check if we have state from location
     if (location.state) {
       // Save state to localStorage
@@ -45,13 +45,6 @@ const BookOrderPage: React.FC = () => {
     navigate('/books');
   };
 
-  const handleSubmit = (provider: "click" | "payme") => {
-    localStorage.removeItem('bookOrderPageData');
-    navigate('/books', { 
-      state: { selectedProvider: provider }
-    });
-  };
-
   // If page data is empty (after redirect), don't render anything
   if (!pageData.cart || !pageData.books) {
     return null;
@@ -63,7 +56,6 @@ const BookOrderPage: React.FC = () => {
         cart={pageData.cart}
         books={pageData.books}
         onClose={handleClose}
-        onSubmit={handleSubmit}
         totalPrice={pageData.totalPrice}
         formatPrice={formatPrice}
         orderResponse={pageData.orderResponse}

@@ -33,7 +33,7 @@ const BookOrder: React.FC<BookOrderProps> = ({
   const [customerName, setCustomerName] = useState(user?.name || '');
   const [isMapSelected, setIsMapSelected] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'pending' | 'success' | 'failed' | null>(null);
-  const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
+  const [, setPaymentUrl] = useState<string | null>(null);
   useEffect(() => {
     if (user?.name) {
       setCustomerName(user.name);

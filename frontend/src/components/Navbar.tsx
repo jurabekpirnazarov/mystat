@@ -9,13 +9,10 @@ import {
   User,
   Menu,
   X,
-  Moon,
-  Sun,
   HelpCircle,
   Bell,
   FileText,
 } from "lucide-react";
-import { useTheme } from "../contexts/ThemeContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useOrder } from "../contexts/OrdersContext";
 import { getRequest } from "../api/request";
@@ -27,7 +24,6 @@ const Navbar = () => {
   const [profileData, setProfileData] = useState<any>(null);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const location = useLocation();
-  const { theme, toggleTheme } = useTheme();
   const { isAuthenticated, user, logout } = useAuth();
   const { notifications } = useOrder();
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -146,16 +142,6 @@ const Navbar = () => {
                 </span>
               )}
             </button>
-            {/* <button
-              onClick={toggleTheme}
-              className="p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
-            >
-              {theme === "light" ? (
-                <Moon className="w-5 h-5" />
-              ) : (
-                <Sun className="w-5 h-5" />
-              )}
-            </button> */}
 
             {isAuthenticated ? (
               <div className="flex items-center space-x-3 relative">

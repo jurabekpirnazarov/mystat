@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, RefreshCw, Globe } from 'lucide-react';
+import { Search, RefreshCw } from 'lucide-react';
 
 function OrganizationsKtut() {
   const [stir, setStir] = useState('');

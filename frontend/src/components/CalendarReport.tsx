@@ -157,17 +157,6 @@ const CalendarReport: React.FC<ReportsCalendarProps> = () => {
     });
   };
 
-  const getTypeColor = (type: string) => {
-    const colors = {
-      monthly: 'bg-blue-500',
-      quarterly: 'bg-emerald-500',
-      weekly: 'bg-purple-500',
-      yearly: 'bg-orange-500',
-      annual: 'bg-orange-500'
-    };
-    return colors[type as keyof typeof colors] || 'bg-gray-500';
-  };
-
   const getTypeLabel = (type: string) => {
     const labels = {
       monthly: 'Oylik',
@@ -415,7 +404,6 @@ const CalendarReport: React.FC<ReportsCalendarProps> = () => {
                                   {report.type_uz || report.type}
                                 </h4>
                                 <div className="flex items-center gap-2">
-                                  {/* <div className={`w-4 h-4 rounded-full ${getTypeColor(report.report_type)} flex-shrink-0 shadow-sm`}></div> */}
                                   <ChevronDown 
                                     className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
                                   />

@@ -24,7 +24,6 @@ export interface Store {
 }
 
 interface LocationSelectorProps {
-  stores: Store[];
   onSelectStore: (store: Store) => void;
   onClose: () => void;
 }
@@ -37,16 +36,11 @@ interface ClusterPoint {
   id: string;
 }
 
-interface PostalLocationsResponse {
-  results: Store[];
-  count: number;
-}
-
-export default function LocationSelector({ stores, onSelectStore, onClose }: LocationSelectorProps) {
+export default function LocationSelector({ onSelectStore, onClose }: LocationSelectorProps) {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const markersRef = useRef<L.Marker[]>([]);
-  const [clusters, setClusters] = useState<ClusterPoint[]>([]);
+  const [, setClusters] = useState<ClusterPoint[]>([]);
   const [currentZoom, setCurrentZoom] = useState(6);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStoreForConfirm, setSelectedStoreForConfirm] = useState<Store | null>(null);

@@ -26,7 +26,7 @@ const CpiDetails: React.FC = () => {
   const previousValue = priceIndexData[priceIndexData.length - 2].value;
   const monthlyChange = ((currentValue - previousValue) / previousValue * 100).toFixed(1);
 
-  const formatTooltip = (value: number, name: string) => {
+  const formatTooltip = (value: number) => {
     return [`${value.toFixed(1)}%`, 'tanlangan davrga nisbatan, %'];
   };
 

@@ -1,4 +1,6 @@
 from django.urls import path, include
+
+from apps.accounts.cabinet_views import CabinetSummaryAPIView, MyPaymentsAPIView
 from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView, TokenBlacklistView
 from apps.accounts.views import (
     LogoutAPIView,
@@ -40,6 +42,8 @@ urlpatterns = [
     path("update/email/<str:email>/", UserUpdateView.as_view(), name="update"),
     path('me/', UserRetrieveUpdate.as_view(), name="me"),
     path('me/package-items/', UserPackageItemsGroupedView.as_view(), name="me_package_items"),
+    path("me/summary/", CabinetSummaryAPIView.as_view(), name="me_summary"),
+    path("me/payments/", MyPaymentsAPIView.as_view(), name="me_payments"),
     path('2fa/send/', TwoFactorAuthView.as_view()),
     path('2fa/check/', CheckTwoFactorAuthView.as_view()),
     path('subscribe/', SubscribeView.as_view(), name='subscribers'),

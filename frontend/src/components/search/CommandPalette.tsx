@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CornerDownLeft, FileText, HelpCircle, Layers, LayoutGrid, Library, Search, X } from "lucide-react";
+import { BookOpen, CornerDownLeft, FileText, HelpCircle, Layers, LayoutGrid, Library, Search, X } from "lucide-react";
 import { globalSearch, type SearchGroup, type SearchItem } from "../../api/support";
 
 // Statik sahifalar — serverga so'rovsiz, darhol qidiriladi
@@ -20,10 +20,25 @@ const PAGES: SearchItem[] = [
   { id: "p-faq", title: "Ko'p so'raladigan savollar", subtitle: "Sahifa", url: "/questions" },
   { id: "p-contact", title: "Aloqa", subtitle: "Sahifa", url: "/contact" },
   { id: "p-cabinet", title: "Shaxsiy kabinet", subtitle: "Sahifa", url: "/cabinet" },
+  { id: "p-tariffs", title: "Tariflarni taqqoslash va narx kalkulyatori", subtitle: "Sahifa", url: "/tariffs" },
+  { id: "p-market", title: "Bozor tahlili (HS kodi bo'yicha)", subtitle: "Eksport, import, narxlar", url: "/market-report" },
+  { id: "p-partners", title: "Hamkor va raqobatchilarni qidirish", subtitle: "Korxonalar", url: "/partners" },
+  { id: "p-consult", title: "Konsultatsiya", subtitle: "Mutaxassis bilan uchrashuv", url: "/consultation" },
+  { id: "p-citizens", title: "Fuqarolar uchun", subtitle: "Bepul xizmatlar", url: "/citizens" },
+  { id: "p-regions", title: "Mening hududim", subtitle: "Viloyat va tuman profili", url: "/regions" },
+  { id: "p-salary", title: "Mening maoshim", subtitle: "Ish haqi taqqoslash", url: "/my-salary" },
+  { id: "p-prices", title: "Narxlar monitoringi va savat", subtitle: "Sahifa", url: "/prices" },
+  { id: "p-learn", title: "Statistika oddiy tilda", subtitle: "Maqolalar", url: "/learn" },
+  { id: "p-glossary", title: "Statistik atamalar lug'ati", subtitle: "Sahifa", url: "/glossary" },
+  { id: "p-surveys", title: "Aholi so'rovnomalari", subtitle: "Sahifa", url: "/surveys" },
+  { id: "p-names", title: "Ismlar statistikasi", subtitle: "Sahifa", url: "/names" },
+  { id: "p-answers", title: "Savol bering — savol-javoblar", subtitle: "Sahifa", url: "/answers" },
+  { id: "p-dev", title: "Ochiq ma'lumotlar API", subtitle: "Dasturchilar uchun", url: "/developers" },
 ];
 
 const ICONS: Record<string, typeof Search> = {
   pages: LayoutGrid, services: Layers, faq: HelpCircle, reports: FileText, books: Library, classifications: Layers,
+  articles: BookOpen, glossary: BookOpen,
 };
 
 const norm = (s: string) => s.toLowerCase().replace(/[‘’ʼʻ`']/g, "");

@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Clock, CreditCard, CheckCircle, ChevronsRight, Search, Filter, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import OfferTermsModal from "../components/modals/OfferTermsModal";
+import NewServices from "../components/NewServices";
 import { getRequest } from "../api/request";
 import { interactive_services } from "../api/apiUrls";
 import { services } from "../data";
@@ -153,6 +154,8 @@ const AllServices = () => {
             Yuridik va jismoniy shaxslar uchun to'liq xizmatlar to'plami
           </p>
         </div>
+
+        <NewServices />
 
         {/* Search and Filter Section */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 border border-gray-200 dark:border-gray-700">

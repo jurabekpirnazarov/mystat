@@ -54,6 +54,7 @@ def _contains(fields, q):
     return ci_contains(fields, q)
 
 
+
 def global_search(query, user):
     from apps.additional_services.models import ReportList
     from apps.additional_services.models.staticclassification_model import StatisticClassification
@@ -100,6 +101,14 @@ def global_search(query, user):
             {"id": c.id, "title": c.name_uz, "subtitle": c.analog_uz, "url": "/statistical-classifications"}
             for c in classifications
         ]))
+
+    from apps.citizens.models import Article, GlossaryTerm
+    articles = Article.objects.filter(_contains(["title_uz", "summary_uz", "title_ru"], q), is_published=True)[:PER_GROUP]
+    groups.append(("articles", "Maqolalar", [
+        {"id": a.id, "title": a.title_uz, "subtitle": a.summary_uz[:120], "url": f"/learn/{a.slug}"} for a in articles]))
+    terms = GlossaryTerm.objects.filter(_contains(["term_uz", "term_ru", "definition_uz"], q))[:PER_GROUP]
+    groups.append(("glossary", "Lug'at", [
+        {"id": t.id, "title": t.term_uz, "subtitle": t.definition_uz[:120], "url": f"/glossary#{t.slug}"} for t in terms]))
 
     return [{"type": t, "label": label, "items": items} for t, label, items in groups if items]
 

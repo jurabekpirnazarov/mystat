@@ -1,0 +1,83 @@
+{% extends "admin/base_site.html" %}
+
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<style>
+  .an-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:20px; }
+  .an-card { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:14px; }
+  .an-card b { display:block; font-size:22px; margin-top:4px; }
+  .an-sec { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:14px; margin-bottom:16px; }
+  .an-row { display:flex; align-items:center; gap:8px; margin:4px 0; font-size:13px; }
+  .an-row span.l { width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .an-bar { height:10px; background:#2563eb; border-radius:4px; }
+  .an-two { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width: 900px) { .an-two { grid-template-columns:1fr; } }
+  .an-note { color:#6b7280; font-size:12px; }
+</style>
+<h1 style="margin-bottom:12px;">{{ title }}</h1>
+<form method="get" style="display:flex; flex-wrap:wrap; gap:10px; align-items:end; margin-bottom:16px;">
+  <label>Dan <input type="date" name="from" value="{{ data.period.from|date:'Y-m-d' }}"></label>
+  <label>Gacha <input type="date" name="to" value="{{ data.period.to|date:'Y-m-d' }}"></label>
+  <label><input type="checkbox" name="demo" value="1" {% if data.include_demo %}checked{% endif %}> Demo ma'lumotni ko'rsatish</label>
+  <button type="submit" class="btn btn-primary">Ko'rsatish</button>
+  <a class="btn btn-outline-secondary" href="?{{ query }}&export=xlsx">Excel</a>
+</form>
+{% if not data.include_demo %}<p class="an-note">Sintetik (seed_demo) yozuvlar hisobga kirmagan.</p>{% endif %}
+
+<div class="an-grid">
+  <div class="an-card">Foydalanuvchilar (jami)<b>{{ data.totals.users|floatformat:"0g" }}</b></div>
+  <div class="an-card">Yangi foydalanuvchilar<b>{{ data.totals.new_users|floatformat:"0g" }}</b></div>
+  <div class="an-card">Shartnomalar<b>{{ data.totals.contracts|floatformat:"0g" }}</b><span class="an-note">{{ data.totals.contracts_sum|floatformat:"0g" }} so'm</span></div>
+  <div class="an-card">Faol paketlar<b>{{ data.totals.active_packages|floatformat:"0g" }}</b></div>
+  <div class="an-card">Limit ishlatilishi<b>{{ data.totals.limit_uses|floatformat:"0g" }}</b></div>
+  <div class="an-card">Kitob buyurtmalari<b>{{ data.totals.book_orders|floatformat:"0g" }}</b><span class="an-note">{{ data.totals.book_orders_sum|floatformat:"0g" }} so'm</span></div>
+</div>
+
+<div class="an-two">
+  <div class="an-sec">
+    <h3>Yangi foydalanuvchilar — oylar bo'yicha</h3>
+    {% for m in data.users_by_month %}
+      <div class="an-row"><span class="l">{{ m.month }}</span><div class="an-bar" style="width:{% widthratio m.count max_month 300 %}px"></div><span>{{ m.count }}</span></div>
+    {% empty %}<p class="an-note">Davrda yo'q</p>{% endfor %}
+  </div>
+  <div class="an-sec">
+    <h3>Voronka</h3>
+    {% for f in data.funnel %}
+      <div class="an-row"><span class="l">{{ f.step }}</span><div class="an-bar" style="width:{% widthratio f.pct 100 300 %}px; background:#16a34a"></div><span>{{ f.count }} ({{ f.pct }}%)</span></div>
+    {% endfor %}
+    <p class="an-note">"Tarif ko'rdi" bosqichi yo'q — sahifa ko'rishlari saqlanmaydi.</p>
+  </div>
+</div>
+
+<div class="an-two">
+  <div class="an-sec">
+    <h3>Shartnomalar — hududlar bo'yicha</h3>
+    {% for r in data.contracts_by_region %}
+      <div class="an-row"><span class="l">{{ r.region }}</span><div class="an-bar" style="width:{% widthratio r.count max_region 300 %}px; background:#f97316"></div><span>{{ r.count }} · {{ r.sum|floatformat:"0g" }}</span></div>
+    {% empty %}<p class="an-note">Davrda yo'q</p>{% endfor %}
+  </div>
+  <div class="an-sec">
+    <h3>Shartnomalar — oylar bo'yicha</h3>
+    {% for m in data.contracts_by_month %}
+      <div class="an-row"><span class="l">{{ m.month }}</span><span>{{ m.count }} ta · {{ m.sum|floatformat:"0g" }} so'm</span></div>
+    {% empty %}<p class="an-note">Davrda yo'q</p>{% endfor %}
+  </div>
+</div>
+
+<div class="an-two">
+  <div class="an-sec">
+    <h3>Xizmatlar bo'yicha limit ishlatilishi</h3>
+    {% for u in data.limit_usage %}<div class="an-row"><span class="l">{{ u.service|striptags }}</span><span>{{ u.count }}</span></div>{% empty %}<p class="an-note">Yo'q</p>{% endfor %}
+  </div>
+  <div class="an-sec">
+    <h3>So'rovlar holati</h3>
+    <p>Xizmat so'rovlari: {% for k, v in data.requests.service_requests.items %}{{ k }} — {{ v }}{% if not forloop.last %}, {% endif %}{% empty %}yo'q{% endfor %}</p>
+    <p>Individual buyurtmalar: {% for k, v in data.requests.custom_requests.items %}{{ k }} — {{ v }}{% if not forloop.last %}, {% endif %}{% empty %}yo'q{% endfor %}</p>
+    <p>Individual buyurtma o'rtacha bajarilish vaqti: {{ data.requests.custom_avg_days|default:"—" }} kun</p>
+    <h3>Reytinglar</h3>
+    {% for r in data.ratings %}<div class="an-row"><span class="l">{{ r.service__name_uz }}</span><span>{{ r.avg|floatformat:1 }} ★ ({{ r.n }})</span></div>{% empty %}<p class="an-note">Yo'q</p>{% endfor %}
+  </div>
+</div>
+{% endblock %}

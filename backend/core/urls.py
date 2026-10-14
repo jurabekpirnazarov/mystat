@@ -7,6 +7,7 @@ from django.conf.urls.static import static
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
 from apps.common.admin_auth import admin_login_view, admin_2fa_verify, admin_2fa_setup
+from apps.analytics.dashboard import analytics_dashboard
 
 # Admin URL prefiksi .env'dan — masalan 'markaz/', 'boshqaruv/'
 ADMIN_URL = settings.ADMIN_URL
@@ -16,6 +17,7 @@ urlpatterns = [
     path(ADMIN_URL + 'login/', admin_login_view, name='admin_login'),
     path(ADMIN_URL + '2fa/verify/', admin_2fa_verify, name='admin_2fa_verify'),
     path(ADMIN_URL + '2fa/setup/', admin_2fa_setup, name='admin_2fa_setup'),
+    path(ADMIN_URL + 'analytics/', analytics_dashboard, name='admin-analytics'),  # A-01
     path(ADMIN_URL, admin.site.urls),
 
 ]

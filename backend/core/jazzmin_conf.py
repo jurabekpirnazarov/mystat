@@ -45,6 +45,7 @@ JAZZMIN_SETTINGS = {
     "topmenu_links": [
         # Url that gets reversed (Permissions can be added)
         {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "Analitika", "url": "admin-analytics"},  # A-01
 
         # external url that opens in a new window (Permissions can be added)
 

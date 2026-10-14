@@ -184,3 +184,28 @@ class MyPaymentsAPIView(APIView):
                 "provider": getattr(payable, "provider", None) or "click",
             })
         return Response(result)
+
+
+class PreferencesAPIView(APIView):
+    """U-15: GET/PATCH /api/accounts/me/preferences/ — {onboarding_done: bool, data: {...}}."""
+    permission_classes = [IsAuthenticated]
+
+    def _payload(self, pref):
+        return {"onboarding_done": pref.onboarding_done_at is not None, "onboarding_done_at": pref.onboarding_done_at,
+                "data": pref.data}
+
+    def get(self, request):
+        from .models import UserPreference
+        pref, _ = UserPreference.objects.get_or_create(user=request.user)
+        return Response(self._payload(pref))
+
+    def patch(self, request):
+        from .models import UserPreference
+        pref, _ = UserPreference.objects.get_or_create(user=request.user)
+        if "onboarding_done" in request.data:
+            pref.onboarding_done_at = timezone.now() if request.data.get("onboarding_done") else None
+        data = request.data.get("data")
+        if isinstance(data, dict) and len(str(data)) <= 4000:
+            pref.data = {**pref.data, **data}
+        pref.save()
+        return Response(self._payload(pref))

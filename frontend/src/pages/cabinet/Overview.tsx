@@ -6,6 +6,8 @@ import useApi from "../../hooks/useApi";
 import { EmptyState, ErrorState, Skeleton, StatCard } from "../../components/ui";
 import { formatDateTime, monthLabel, timeAgo } from "../../utils/format";
 import { fetchMyReports } from "../../api/myReports";
+import { fetchPrefill } from "../../hooks/usePrefill";
+import { profileCompleteness } from "../../utils/profile";
 
 interface Props {
   onNavigate: (tab: string) => void;
@@ -99,6 +101,24 @@ function UpcomingReports({ onNavigate }: Props) {
   );
 }
 
+/** U-15: profil to'liq bo'lmasa bosh panelda eslatma. */
+function ProfileProgress({ onNavigate }: Props) {
+  const { data } = useApi(fetchPrefill, []);
+  if (!data) return null;
+  const { percent, missing } = profileCompleteness(data.fields);
+  if (percent >= 100) return null;
+  return (
+    <section className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/60 dark:bg-blue-900/20 p-4 flex flex-wrap items-center gap-4">
+      <div className="flex-1 min-w-[220px]">
+        <p className="text-sm font-medium text-gray-900 dark:text-white">Profil {percent}% to'ldirilgan</p>
+        <div className="mt-1.5 h-2 rounded-full bg-white dark:bg-gray-700 overflow-hidden"><div className="h-full bg-blue-600" style={{ width: `${percent}%` }} /></div>
+        <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">Yetishmayapti: {missing.map((m) => m.label).join(", ")}</p>
+      </div>
+      <button type="button" onClick={() => onNavigate("profile")} className="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm">Profilni to'ldirish</button>
+    </section>
+  );
+}
+
 export default function Overview({ onNavigate }: Props) {
   const { data, loading, error, reload } = useApi(fetchCabinetSummary, []);
 
@@ -119,6 +139,7 @@ export default function Overview({ onNavigate }: Props) {
 
   return (
     <div className="p-4 sm:p-6 space-y-6">
+      <ProfileProgress onNavigate={onNavigate} />
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <StatCard label="Faol paket" value={data.package?.name_uz ?? "—"} icon={Package} hint={data.package ? "joriy tarif" : "paket tanlanmagan"} />
         <StatCard label="Shartnomalar" value={data.contracts.total} icon={FileText} hint={`${activeContracts} ta jarayonda`} />

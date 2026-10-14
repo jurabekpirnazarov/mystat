@@ -96,3 +96,16 @@ class ActivityPlanTests(CabinetBase):
         data = self.client.get("/api/services/activity-plans/", {"year": 2026}).data
         self.assertEqual([p["plan_count"] for p in data], [5])
         self.assertEqual(data[0]["service_name"], "S")
+
+
+class PreferencesTests(APITestCase):
+    """U-15: tanishtiruv bir marta ko'rsatiladi — holat profilda saqlanadi."""
+
+    def test_onboarding_flag_persists(self):
+        user = User.objects.create_user(username="pref_user", password="x")
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {user.tokens['access']}")
+        self.assertFalse(self.client.get("/api/accounts/me/preferences/").data["onboarding_done"])
+        self.client.patch("/api/accounts/me/preferences/", {"onboarding_done": True, "data": {"tour": "v1"}}, format="json")
+        data = self.client.get("/api/accounts/me/preferences/").data
+        self.assertTrue(data["onboarding_done"])
+        self.assertEqual(data["data"], {"tour": "v1"})

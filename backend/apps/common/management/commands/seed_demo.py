@@ -50,6 +50,8 @@ ALLOWED_CASCADE = {
     "open_api.ApiUsage",
     "notifications.IndicatorSubscription",
     "consultations.ConsultationBooking",
+    "accounts.UserPreference",
+    "book_market.BookFavorite",
 }
 
 

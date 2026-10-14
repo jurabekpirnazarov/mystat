@@ -247,3 +247,15 @@ class Employee(BaseModel):
     class Meta:
         verbose_name = _("Xodim")
         verbose_name_plural = _("Xodimlar")
+
+
+class UserPreference(models.Model):
+    """U-15: foydalanuvchi sozlamalari — tanishtiruv ko'rsatilganmi va boshqa UI holati."""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="preference")
+    onboarding_done_at = models.DateTimeField(null=True, blank=True)
+    data = models.JSONField(default=dict, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Foydalanuvchi sozlamasi")
+        verbose_name_plural = _("Foydalanuvchi sozlamalari")

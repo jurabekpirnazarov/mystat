@@ -5,7 +5,7 @@ from decimal import Decimal
 from decouple import config
 from django.utils import timezone
 
-from apps.accounts.models import User
+from apps.accounts.models import User, UserPreference
 from apps.common.models import District, Sector
 from apps.common.synthetic import registered_ids
 from apps.contracts.models import Contract, ContractStatusLog
@@ -90,6 +90,8 @@ class DemoUsersSeeder(Seeder):
             district = districts[(i * 3) % len(districts)]
             user = self._user(username, first, last, user_type="legal_entity", location=district,
                               phone_number=f"998000000{i + 1:03d}")
+            if i < 3:  # U-15: birinchi uchtasi tanishtiruvni ko'rgan, qolganlarida birinchi kirishda chiqadi
+                self.make(UserPreference, f"pref:{username}", user=user, onboarding_done_at=timezone.now())
             org = self.make(
                 Organization, f"org:{username}",
                 user=user, name=f"{DEMO_PREFIX} {org_name}", tin=f"000000{i + 101:03d}",

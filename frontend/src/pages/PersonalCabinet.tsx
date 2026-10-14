@@ -19,6 +19,7 @@ import CitizenQuestions from "./cabinet/CitizenQuestions";
 import ApiKeys from "./cabinet/ApiKeys";
 import Subscriptions from "./cabinet/Subscriptions";
 import Consultations from "./cabinet/Consultations";
+import OnboardingTour from "../components/OnboardingTour";
 import {
   User,
   FileText,
@@ -330,6 +331,8 @@ const PersonalCabinet = () => {
           </div>
         </div>
       </div>
+
+      <OnboardingTour citizen={isCitizen} onNavigate={setActiveTab} />
 
       <PaymentModal
         isOpen={isModalOpen}

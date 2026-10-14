@@ -8,16 +8,103 @@
 
 ## Bajarilish holati
 
-| Sana | Vazifa | Natija |
+> Oxirgi yangilanish: 2026-10-14. Har bir vazifa alohida git commit'da (`git log --oneline`). Loyiha 2026-10-13 da git repo qilindi. Masofaviy repo yo'q, shuning uchun branch/MR o'rniga `main` da ketma-ket commit'lar qilingan.
+
+### Yakuniy tekshiruv (2026-10-14)
+
+| Tekshiruv | Natija |
+|---|---|
+| `manage.py test` | **76 test, hammasi o'tdi**, skip yo'q (boshida 6 ta test bo'lgan va runner yiqilardi) |
+| `manage.py check` | Faqat CKEditor 4 ogohlantirishi (xavfsizlik, keyinga qoldirilgan) |
+| `makemigrations --check` | O'zgarish yo'q |
+| `npm run typecheck` | **0 xato** (boshida 37) |
+| `eslint src` | **0 xato**, 9 ogohlantirish (Fast Refresh) (boshida 85 xato) |
+| `vite build` | O'tadi; 500 KB dan katta chunk yo'q (OrgInfoPage 635 → 19 KB) |
+| `console.log` | 0 (boshida 159) |
+
+### Vazifalar holati
+
+| Vazifa | Holat | Izoh |
 |---|---|---|
-| 2026-10-13 | F-01 | `OrganizationAPI/__init__.py` dagi yo'q modul importi olib tashlandi. `one_id/tests.py` boshqa loyihadan ko'chirilgan (`apps.users` ga tayanadi) — `@skip` bilan belgilandi, Q-05 da qayta yoziladi. `manage.py test` ishlaydi |
-| 2026-10-13 | B-01 | `apiUrls.ts` → `/accounts/TokenRefresh` (slash'siz). Interceptor bir vaqtdagi 401'lar uchun bitta umumiy refresh so'rovini ishlatadi (backend refresh'ni aylantirib, eskisini blacklist qiladi). `storage.ts` token'larni konsolga yozmaydi. Backend test: `accounts/tests/test_token_refresh.py`. Brauzerda 1 daqiqalik access token bilan qo'lda tekshiruv **hali qilinmagan** |
-| 2026-10-13 | B-02 | `OrganizationListView.get_queryset`: mehmon → bo'sh, foydalanuvchi → o'z korxonasi, `is_staff` → hammasi. 4 ta test |
-| 2026-10-13 | B-03 | Buxgalter/filial bo'lmasa xabar o'tkazib yuboriladi va `warning` log yoziladi. Telegram xatosi javobni buzmaydi, yuborish `transaction.on_commit` da. 4 ta test |
+| F-01 | ✅ | Runner tuzatildi; OneID testlari Q-05 da loyihaga moslab qayta yozildi |
+| F-02 | ✅ | `asgi.py` → `core.settings.production` |
+| F-03 | ✅ | `notifications` namespace, takroriy CKEditor sozlamalari, `PARLER_LANGUAGES` |
+| F-04 | ✅ | 37 → 0. Buglar: "Bosma" tab savati ishlamas edi (`print`/`bosma`), render ichida `navigate()` |
+| F-05 | ✅ | 85 → 0 xato; `any` o'rniga tiplar. Tiplashda topilgan buglar pastda |
+| B-01 | ✅ | Refresh URL + bitta umumiy refresh promise. Brauzerda qo'lda tekshirilmagan |
+| B-02 | ✅ | |
+| B-03 | ✅ | |
+| B-04 | ✅ | `external-trade/trade-flows/` + `dynamics/`, 1 soat kesh (birinchi so'rov ~1,7 s, keshdan 45 ms) |
+| B-05 | ✅ | `notifications/me` filtrlari, `unread-count/`; `NotificationsContext` |
+| B-06 | ✅ | DIDOX (15 daq), hisobot eslatmalari va U-13 eslatmalari (09:00); `docker-compose` ga `beat` servisi. Production systemd unit'i yo'q (README) |
+| B-07 | ✅ | `starts_at`/`expires_at`; 4 ta real paket NULL (muddatsiz). E-kitob, byulleten, STIR → 403 |
+| B-08 | ✅ | `seed_demo --demographics` (214 704 qator); `data_source()`: real > sintetik (faqat DEBUG) |
+| S-01..S-09 | ✅ | `seed_demo` (`--only/--flush/--dry-run`). Real bazada flush'dan keyin barcha jadvallardagi sonlar seed'dan oldingi holat bilan **bayt-ma-bayt bir xil** |
+| S-03 | ✅ (o'zgartirilgan) | Model kodlar daraxti emas, klassifikator **hujjatlari** ro'yxati — 6 kategoriya, 16 hujjat |
+| S-04 | ✅ (o'zgartirilgan) | Ilova `ServiceRequestResponse` ni ishlatadi; `ServiceRequests` admin uchun to'ldirildi |
+| U-01..U-08 | ✅ | |
+| U-07 | ✅ (o'zgartirilgan) | Daraxt o'rniga kategoriyalar + 3 tilda qidiruv + tafsilot + CSV (S-03 ga qarang) |
+| U-09 | ✅ | `/foreign-trade` (bo'sh zaglushka edi) va `/trade-flows`: choropleth xarita, top-20, dinamika |
+| U-10..U-13 | ✅ | Ctrl+K qidiruv, Stat AI (FAQ), operator chat (`ContactReply`), oy kalendari + eslatma + .ics |
+| U-14 | ⚠️ qisman | Statik tuzatishlar (lang, alt, aria, focus-visible, skip-link, reduced-motion). **Lighthouse o'lchanmagan** (brauzer yo'q) |
+| **U-15** (yangi) | ✅ | Demografiya sahifasi `/demographics`, `/statistical-data` — frontend'da umuman yo'q edi |
+| Q-01 | ⚠️ qisman | `PersonalCabinet.tsx` 1129 → 291. **`BookStore.tsx` (1744) va `ExternalTrade.tsx` (1391) bo'linmadi**: ularda to'lov/xarid oqimi bor, testsiz va brauzersiz xatti-harakat saqlanishini kafolatlab bo'lmaydi |
+| Q-02 | ✅ | |
+| Q-03 | ✅ | Chart.js → Recharts; `chart.js`, `react-chartjs-2`, `highcharts*` olib tashlandi |
+| Q-04 | ✅ | 14 ta ishlatilmaydigan fayl o'chirildi |
+| Q-05 | ✅ | 76 test (≥30) |
+| Q-06 | ✅ | CI `test` bosqichi; Docker executor kerak (OS-11) |
+| Q-07 | ⚠️ qisman | parler va takroriy import-export olib tashlandi, tqdm 2.2.3 → 4.66.5. **drf-yasg qoldi**: Click to'lov view'lari ishlatadi (2.2-bo'lim) |
 
-Tekshiruv (2026-10-13): `manage.py test` — 17 test, 11 o'tdi, 6 skip; `check` — faqat eski 2 ogohlantirish; `makemigrations --check` — o'zgarish yo'q; frontend `tsc` 37 / `eslint` 92 (avvalgidek, yangi xato yo'q), `vite build` o'tadi.
+### Ish davomida topilgan va tuzatilgan buglar (rejada yo'q edi)
 
-> Loyiha hali git repo emas, shuning uchun 3-bo'limdagi "bitta vazifa = bitta branch" qoidasi qo'llanilmadi.
+| Bug | Ta'siri |
+|---|---|
+| `ContractList` faqat `role == "client"` ga ro'yxat qaytarardi — bunday rol yo'q | Mijozlar (898 ta `user`) kabinetda o'z shartnomalarini hech qachon ko'rmas edi |
+| Kabinet `response.data.results` ni o'qirdi (`getRequest` allaqachon javob tanasini qaytaradi) | Shartnomalar ro'yxati ikkinchi sabab bilan ham bo'sh edi |
+| `common/platform-stat/` `random.randint` va qattiq yozilgan raqamlar qaytarardi | `/statistics` soxta "45 600 foydalanuvchi" va mavjud bo'lmagan "Soliq/Audit" xizmatlarini ko'rsatardi |
+| `/demographics` marshruti yo'q edi | `/services` dagi demografiya xizmati bo'sh oq sahifaga olib borardi |
+| `/foreign-trade`, `/statistical-data` — matnli zaglushka | |
+| Sharhlarda `user_name`/`rating` o'qilardi (API: `user`/`value`) | Barcha sharhlar "Anonim" va har doim 5 yulduz |
+| Login'dan keyin ism `ООО "Технологии"` bo'lib qolardi | login javobida `name` yo'q — AuthContext'dagi zaxira nom chiqardi |
+| `state.clearAll()` (kerak: `methods.clearAll()`) | Tashqi savdo filtridagi "tozalash" tugmasi TypeError berardi |
+| `service-request` POST `validated_data['client_file']` | Fayl biriktirilmasa 500 |
+| `bugalter` profili yo'q bo'lsa `ContractList` 500 | |
+| Mavjud bo'lmagan marshrutlar | Oq ekran (endi 404 sahifasi) |
+
+### Topilgan, lekin tegilmagan (xavfsizlik/to'lov — 2-bo'lim)
+
+- `services/service-request/` GET: `?package_item=` yoki `?contract=` bilan **boshqa foydalanuvchilarning so'rovlari qaytadi** (`Q(...) | Q(package_item=...) | Q(contract=...)`).
+- `service-response/<pk>/` PATCH: `IsAttachedUser` mijozning o'ziga ham ruxsat beradi — mijoz o'z so'roviga "admin javobi" yozishi mumkin.
+- OneID view'lari `print()` orqali kod va auth ma'lumotlarini (PINFL) log'ga chiqaradi.
+- OneID: frontend callback `accounts/oneid/` ga POST yuboradi, backend esa faqat GET qabul qiladi. egov.uz kalitlarisiz tekshirib bo'lmadi.
+- `User.image_url` mavjud bo'lmagan `settings.LOCAL_BASE_URL/PROD_BASE_URL` ni ishlatadi (hozircha avatarli foydalanuvchi yo'q).
+- Paketni aniqlashda `UserServicePackage...first()` tartibsiz: foydalanuvchida bir nechta paket bo'lsa, tasodifiy biri olinadi.
+
+### Ma'lumot sifati muammolari (bazada)
+
+- Tashqi savdo: **2023-yil qiymatlari boshqa yillardan ~16 marta kichik** (masalan, 2024 vs 2023 "+776%"). Birlik farqi bo'lishi mumkin.
+- 2021-yil yo'q, 2022-yil faqat `M1`.
+- "Boshqa davlatlar" (kod 999) eksportning ~50% i — reytingdan ajratildi.
+- Hisobot muddatlari (`ReportList.deadline`) 2025-yilda qotib qolgan — kalendar ularni `report_type` bo'yicha takrorlaydi.
+
+### Yangi ochiq savollar
+
+| ID | Savol | Hozirgi default |
+|---|---|---|
+| OS-10 | `TradeData.value` birligi qanday (ming AQSh $?) | UI'da "ming AQSh $" (`TRADE_VALUE_UNIT`, bitta joyda o'zgartiriladi) |
+| OS-11 | GitLab'da Docker executor'li runner bormi? | CI test job'lari `python:3.12`/`node:20` image va `postgres:14` service bilan yozildi; runner bo'lmasa `CI_TESTS_DISABLED=true` |
+| OS-12 | Frontend ko'p tilli bo'ladimi (i18n)? | Hozir faqat o'zbek (lotin); yangi UI ham shunday |
+| OS-13 | Production'da Celery worker/beat uchun systemd unit qo'shiladimi? | Hozircha faqat docker-compose'da bor |
+
+### Qo'lda tekshirish kerak (brauzerda)
+
+1. `/trade-flows` — xarita chizilishi va davlat bosilganda dinamika.
+2. `/demographics` — filtrlar, grafik, Excel eksport.
+3. Kabinet: demo akkaunt bilan (`backend/.env` ga `DEMO_USER_PASSWORD=...` qo'yib, `python manage.py seed_demo --only demo_users` ni ishga tushiring) — bosh panel, xabarnomalar, so'rovlar, faoliyat rejasi, to'lovlar.
+4. Ctrl+K qidiruv, Stat AI va operator chat (javobni admin'da `Contact` → inline orqali yozib).
+5. Token yangilanishi: lokal `SIMPLE_JWT` access muddatini 1 daqiqaga qo'yib.
+6. Mobil (360 px) ko'rinish va Lighthouse.
 
 ---
 

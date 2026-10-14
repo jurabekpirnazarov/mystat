@@ -104,9 +104,14 @@ python manage.py seed_demo --demographics  # sintetik demografiya parquet (asosi
 
 ## Celery
 
-`worker` konteyneri `celery -A core worker` ni ishga tushiradi (`core/celery.py`).
-Celery Beat (davriy vazifalar, masalan `contracts.tasks.periodic_didox_check`) hozircha sozlanmagan —
-jadval kelishilgach `CELERY_BEAT_SCHEDULE` va `beat` servisi qo'shiladi.
+- `worker` konteyneri `celery -A core worker` ni, `beat` konteyneri `celery -A core beat` ni ishga tushiradi (`core/celery.py`).
+- Jadval `core/settings/base.py` dagi `CELERY_BEAT_SCHEDULE` da:
+  - DIDOX hujjatlari holatini tekshirish — har `BEAT_DIDOX_CHECK_MINUTES` daqiqada (default 15);
+  - hisobot muddati eslatmalari (Telegram) — har kuni `BEAT_REPORT_NOTIFY_HOUR:MINUTE` da (default 09:00, Asia/Tashkent).
+- Lokal (`docker`siz, Redis o'chiq) rejimda beat ishga tushirilmaydi; vazifalarni qo'lda: `python manage.py check_didox_documents`,
+  `python manage.py send_report_notifications --dry-run`.
+- **Production (systemd):** hozirgi serverda faqat `apiconsult` va `consultbot` unitlari bor. Celery worker va beat uchun
+  alohida unit qo'shish kerak (`celery -A core worker`, `celery -A core beat`), aks holda jadval ishlamaydi.
 
 ## Production (GitLab CI)
 

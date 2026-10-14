@@ -65,6 +65,20 @@ services:
     depends_on:
       - backend
 
+  # Celery Beat — davriy vazifalar jadvali (CELERY_BEAT_SCHEDULE, core/settings/base.py)
+  beat:
+    image: mystat-backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      <<: *backend-env
+      RUN_MIGRATIONS: "0"
+    command: ["celery", "-A", "core", "beat", "--loglevel=info", "--schedule=/tmp/celerybeat-schedule"]
+    volumes:
+      - backend_logs:/app/logs
+    depends_on:
+      - worker
+
   # Telegram bot (ixtiyoriy): docker compose --profile bot up -d
   bot:
     image: mystat-backend

@@ -407,6 +407,23 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 
+# Celery Beat jadvali (B-06). Vaqtlar .env dan o'zgartiriladi; jadval egasi bilan tasdiqlanadi (ISH_REJASI OS-05).
+from celery.schedules import crontab  # noqa: E402
+
+CELERY_BEAT_SCHEDULE = {
+    "didox-documents-check": {
+        "task": "apps.contracts.tasks.periodic_didox_check",
+        "schedule": config("BEAT_DIDOX_CHECK_MINUTES", default=15, cast=int) * 60,
+    },
+    "report-deadline-notifications": {
+        "task": "apps.additional_services.tasks.send_report_notifications_task",
+        "schedule": crontab(
+            hour=config("BEAT_REPORT_NOTIFY_HOUR", default=9, cast=int),
+            minute=config("BEAT_REPORT_NOTIFY_MINUTE", default=0, cast=int),
+        ),
+    },
+}
+
 DIDOX_BASE_URL = config('DIDOX_BASE_URL', default='https://api.didox.com')
 DIDOX_PARTNER_TOKEN = config('DIDOX_PARTNER_TOKEN', default='')
 DIDOX_USER_PINFL = config('DIDOX_USER_PINFL', default='')

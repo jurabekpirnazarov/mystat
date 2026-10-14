@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNotifications } from "../../contexts/NotificationsContext";
 import { X } from "lucide-react";
-import { postRequest } from "../../api/request";
-import { contract_create } from "../../api/apiUrls";
+import { createContract } from "../../api/contracts";
+import ContractConfirm from "./ContractConfirm";
 import RatingModal from "./RatingModal";
 import { createRating } from "../../api/rating";
 
@@ -18,7 +18,11 @@ const ServiceModal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
   onOffer,
+  id,
 }) => {
+  // Avval doim 1-paket uchun shartnoma yaratilardi (service_package_id: 1) — endi tanlangan tarif
+  const packageId = Number(id) || 1;
+  const [step, setStep] = useState<"choose" | "confirm">("choose");
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<null | { success: boolean; message: string }>(null);
   const [showRating, setShowRating] = useState(false);
@@ -26,18 +30,10 @@ const ServiceModal: React.FC<ModalProps> = ({
 
   if (!isOpen && !pending && !result && !showRating) return null;
   function onContract() {
-    const token = localStorage.getItem("access_token");
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
-    
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-    
     setPending(true);
-    postRequest(contract_create, { service_package_id: 1 }, headers)
+    createContract(packageId)
       .then(() => {
+        setStep("choose");
         setPending(false);
         setResult({ success: true, message: "Shartnoma muvaffaqiyatli yaratildi! Shartnomani shaxsiy kabinetdan olishingiz mumkin." });
         // 2 soniyadan keyin rating ko'rsatish
@@ -55,6 +51,7 @@ const ServiceModal: React.FC<ModalProps> = ({
 
   function handleResultClose() {
     setResult(null);
+    setStep("choose");
     onClose();
   }
 
@@ -107,15 +104,22 @@ const ServiceModal: React.FC<ModalProps> = ({
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-xl font-semibold">Xizmat parametlari</h2>
+              <h2 className="text-xl font-semibold">{step === "confirm" ? "Shartnoma tuzish" : "Xizmat parametlari"}</h2>
               <button
-                onClick={onClose}
+                onClick={() => {
+                  setStep("choose");
+                  onClose();
+                }}
                 className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 dark:text-gray-300 dark:hover:text-white text-gray-500 hover:text-gray-700"
               >
                 <X size={20} />
               </button>
             </div>
 
+            {step === "confirm" ? (
+              <ContractConfirm packageId={packageId} pending={pending} onBack={() => setStep("choose")} onConfirm={onContract} />
+            ) : (
+            <>
             {/* Body */}
             <div className="p-6 space-y-6">
               <div className="space-y-4">
@@ -148,15 +152,15 @@ const ServiceModal: React.FC<ModalProps> = ({
                 Oferta orqali xizmatdan foydalanish
               </button>
               <button
-                onClick={() => {
-                  onContract();
-                }}
+                onClick={() => setStep("confirm")}
                 className="px-4 py-2 w-1/2 text-sm font-medium text-white rounded-lg transition-colors duration-200 cursor-pointer dark:bg-blue-600 dark:hover:bg-blue-700 bg-blue-600 hover:bg-blue-700"
                 disabled={pending}
               >
                 Shartnoma orqali xizmatdan foydalanish
               </button>
             </div>
+            </>
+            )}
           </div>
         </div>
       )}

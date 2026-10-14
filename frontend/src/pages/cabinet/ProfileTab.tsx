@@ -1,5 +1,6 @@
 import type { UserProfile } from "../../types/api";
 import type { useAuth } from "../../contexts/AuthContext";
+import OrganizationInfo from "./OrganizationInfo";
 
 interface Props {
   profileData: UserProfile | null;
@@ -123,14 +124,7 @@ export default function ProfileTab({ profileData, profileLoading, user }: Props)
         </div>
       </div>
 
-      <div className="mt-6 flex space-x-4">
-        <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
-          Ma'lumotlarni Yangilash
-        </button>
-        <button className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
-          Parolni O'zgartirish
-        </button>
-      </div>
+      <OrganizationInfo />
     </div>
   );
 }

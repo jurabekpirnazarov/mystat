@@ -8,6 +8,7 @@ from apps.services.api.MyServiceView.views import (
 )
 from apps.services.api.views import RegisterOrganizationDetailAPIView, ClassifyItemListAPIView
 from apps.services.api.ActivityPlanView.views import ActivityPlanListAPIView
+from apps.services.api.TariffView.views import TariffCompareView, TariffRecommendView
 
 app_name = "services"
 
@@ -18,6 +19,8 @@ urlpatterns = [
     path('<int:pk>/', ServiceDetailAPIView.as_view(), name='service-detail'),
     path('item/', ServiceItemAPIView.as_view(), name='service-item'),
     path('package/', ServicePackageAPIView.as_view(), name='service-package'),
+    path('tariff-compare/', TariffCompareView.as_view(), name='tariff-compare'),
+    path('tariff-recommend/', TariffRecommendView.as_view(), name='tariff-recommend'),
     path('register-organization-detail/<int:stir_number>/', RegisterOrganizationDetailAPIView.as_view(), name='register-organization'),
     path('classify-item/', ClassifyItemListAPIView.as_view(), name='classify-item'),
     path("rating-create", ServiceRatingCreateView.as_view(), name='service-rating-create'),

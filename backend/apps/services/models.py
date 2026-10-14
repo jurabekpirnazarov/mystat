@@ -85,6 +85,11 @@ class ServicePackage(BaseModel):
     is_enterprise = models.BooleanField(default=False, verbose_name=_("Korxona paketimi"))
 
     @property
+    def name(self):
+        """Shartnoma kodi (`service_package.name`) uchun: modelda `name` maydoni yo'q edi → AttributeError/500."""
+        return self.name_uz or self.name_ru or self.name_cry
+
+    @property
     def price(self):
         from apps.common.models import SiteSettings
         settings = SiteSettings.load()

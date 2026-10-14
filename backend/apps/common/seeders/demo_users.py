@@ -8,7 +8,7 @@ from django.utils import timezone
 from apps.accounts.models import User
 from apps.common.models import District, Sector
 from apps.common.synthetic import registered_ids
-from apps.contracts.models import Contract
+from apps.contracts.models import Contract, ContractStatusLog
 from apps.organizations.models import Organization
 from apps.services.models import PackageServiceItem, ServicePackage, UserServicePackage, UserServicePackageItemUse
 
@@ -113,6 +113,7 @@ class DemoUsersSeeder(Seeder):
                 notes=f"{DEMO_PREFIX} sintetik shartnoma", didox_contract_data={"_id": f"demo-{i + 1}"},
             )
             self.backdate(contract, "start_date", days_ago(60 - i * 5))
+            self._history(contract, username, 60 - i * 5)
 
             now = timezone.now()
             usp = self.make(
@@ -122,6 +123,17 @@ class DemoUsersSeeder(Seeder):
             )
             self.backdate(usp, "created_at", days_ago(58 - i * 5))
             self._uses(usp, package, usage, username)
+
+    def _history(self, contract, username, age):
+        """K-08: demo shartnoma holat tarixi (yaratildi → DIDOX → mijoz imzosi → agentlik imzosi)."""
+        steps = [("created", False, False), ("pending", False, False), ("pending", True, False),
+                 ("processing", True, True)]
+        if contract.status == "completed":
+            steps.append(("completed", True, True))
+        for n, (status, by_client, by_admin) in enumerate(steps):
+            log = self.make(ContractStatusLog, f"status:{username}:{n}", contract=contract, status=status,
+                            signed_by_client=by_client, signed_by_admin=by_admin)
+            self.backdate(log, "created_at", days_ago(age - n, hour=10 + n))
 
     def _uses(self, usp, package, ratio, username):
         for psi in PackageServiceItem.objects.filter(package=package).order_by("id"):

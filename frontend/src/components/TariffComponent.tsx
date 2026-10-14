@@ -1,5 +1,5 @@
 import { Check, X, Eye, Star, Zap, Rocket, Crown } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ServiceModal from "./modals/ServiceModal";
 import OfferTermsModal from "./modals/OfferTermsModal";
 import { useOrder } from "../contexts/OrdersContext";
@@ -155,6 +155,9 @@ const TariffComponent = () => {
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Yuridik va jismoniy shaxslar uchun konsalting xizmatlari
           </h2>
+          <Link to="/tariffs" className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline">
+            Tariflarni taqqoslash va narx kalkulyatori →
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">

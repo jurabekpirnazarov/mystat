@@ -62,3 +62,19 @@ class ContractStats(Contract):
         proxy = True
         verbose_name = "Contract (by region)"
         verbose_name_plural = "Contracts (by region)"
+
+class ContractStatusLog(models.Model):
+    """K-08: shartnoma holati tarixi. `signals.py` holat o'zgarganda yozadi (DIDOX tekshiruvi, admin, API)."""
+    contract = models.ForeignKey(Contract, on_delete=models.CASCADE, related_name="status_logs")
+    status = models.CharField(max_length=50, verbose_name=_("Holat"))
+    signed_by_client = models.BooleanField(default=False)
+    signed_by_admin = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("created_at", "id")
+        verbose_name = _("Shartnoma holati tarixi")
+        verbose_name_plural = _("Shartnoma holati tarixi")
+
+    def __str__(self):
+        return f"{self.contract_id}: {self.status}"

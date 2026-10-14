@@ -10,6 +10,7 @@ from apps.common.models import SiteSettings
 from ...models import Contract
 from apps.accounts.models import User
 from apps.services.models import Service, ServicePackage
+from apps.services.pricing import package_price
 from ...utils import  create_didox_client, DidoxAPIError
 from ..utils import generate_financial_report, num_to_words_uz
 
@@ -19,8 +20,38 @@ logger = logging.getLogger(__name__)
 
 
 
+def _region_name(org):
+    if org and org.district_id and org.district.region_id:
+        return org.district.region.name
+    return 'Toshkent'
+
+
+def build_template_context(user, org, service_package, contract_number, price):
+    """007 shartnoma shabloni o'zgaruvchilari (yaratish va K-08 oldindan ko'rish uchun umumiy)."""
+    return {
+        'contractNum': contract_number,
+        'day': timezone.now().day,
+        'month': UZ_MONTHS.get(timezone.now().month, ''),
+        'city': _region_name(org),
+        'region': org.branch.region.name if org.branch and getattr(org.branch, 'region', None) else _region_name(org),
+        'shefName': getattr(org.branch, 'director_name', '') if org.branch else '',
+        'orgName': org.name if org else '',
+        'directorName': getattr(org, 'director_name', None) or user.full_name,
+        'serviceName': service_package.name if service_package else 'Konsalting xizmati',
+        'serviceValue': f"{float(price):,.2f}",
+        'servicePercent': '12',
+        'serviceAmount': f"{float(price) * 0.12:,.2f}",
+        'serviceOverallScore': f"{float(price) * 1.12:,.2f}",
+        'amountNum': f"{float(price):,.2f}",
+        'amountChar': num_to_words_uz(str(int(price))),
+        'ijrochi': user.full_name if user else ''
+    }
+
+
 class ContractCreateSerializer(serializers.Serializer):
     service_package_id = serializers.IntegerField(required=True)
+    # K-01: foydalanuvchi rekvizitlarni ko'rib tasdiqlamaguncha shartnoma yaratilmaydi
+    requisites_confirmed = serializers.BooleanField(required=True)
     document_type = serializers.ChoiceField(
         choices=[('000', 'Standard'), ('007', 'Free-form')],
         default='007',
@@ -34,7 +65,12 @@ class ContractCreateSerializer(serializers.Serializer):
     )
 
     class Meta:
-        fields = ['service_package_id', 'document_type', 'parts']
+        fields = ['service_package_id', 'requisites_confirmed', 'document_type', 'parts']
+
+    def validate_requisites_confirmed(self, value):
+        if not value:
+            raise serializers.ValidationError("Rekvizitlarni tekshirib tasdiqlang.")
+        return value
 
     def validate_service_package_id(self, value):
         """Validate service package exists and user has access"""
@@ -220,10 +256,7 @@ class ContractCreateSerializer(serializers.Serializer):
         org = user.organization
 
         service_package = ServicePackage.objects.get(id=service_package_id)
-        sector = service_package.prices.filter(sector=org.sector).first()
-        price = service_package.price
-        if sector:
-            price = price * sector.bhm_count
+        price = package_price(service_package, org.sector)["price"]
 
         contract_number = f"CONTRACT-{uuid.uuid4().hex[:8].upper()}"
 
@@ -235,24 +268,7 @@ class ContractCreateSerializer(serializers.Serializer):
                     template_parts = self._load_contract_template_parts()
                     if template_parts:
                         # Prepare context for template rendering
-                        template_context = {
-                            'contractNum': contract_number,
-                            'day': timezone.now().day,
-                            'month': UZ_MONTHS.get(timezone.now().month, ''),
-                            'city': org.district.region.name if org and hasattr(org, 'district') and org.district and hasattr(org.district, 'region') else 'Toshkent',
-                            'region': org.branch.region.name if org.branch and hasattr(org.branch, 'region') and org.branch.region else org.district.region.name if org and hasattr(org, 'district') and org.district and hasattr(org.district, 'region') else 'Toshkent',
-                            'shefName': org.branch.director_name if org.branch and hasattr(org.branch, 'director_name') else '',
-                            'orgName': org.name if org else '',
-                            'directorName': org.director_name if org and hasattr(org, 'director_name') else user.full_name,
-                            'serviceName': service_package.name if service_package else 'Konsalting xizmati',
-                            'serviceValue': f"{float(price):,.2f}",
-                            'servicePercent': '12',
-                            'serviceAmount': f"{float(price) * 0.12:,.2f}",
-                            'serviceOverallScore': f"{float(price) * 1.12:,.2f}",
-                            'amountNum': f"{float(price):,.2f}",
-                            'amountChar': num_to_words_uz(str(int(price))),
-                            'ijrochi': user.full_name if user else ''
-                        }
+                        template_context = build_template_context(user, org, service_package, contract_number, price)
                         parts_data = self._render_template_parts(template_parts, template_context)
 
                 didox_payload = self._prepare_didox_007_payload(

@@ -1,5 +1,16 @@
 import { Download } from "lucide-react";
 import type { Contract, FormData } from "./types";
+import usePrefill from "../../hooks/usePrefill";
+import PrefillBadge from "../../components/forms/PrefillBadge";
+import ContractTimeline from "./ContractTimeline";
+
+const PREFILL_MAP: Record<keyof FormData, string[]> = {
+  stir: ["tin"],
+  companyName: ["org_name"],
+  directorName: ["full_name"],
+  address: ["address"],
+  phoneNumber: ["org_phone", "phone"],
+};
 
 interface Props {
   contracts: Contract[] | null;
@@ -14,6 +25,13 @@ interface Props {
 
 /** Q-01: PersonalCabinet.tsx dan ajratilgan bo'lim. */
 export default function ContractsTab({ contracts, formData, handleInputChange, isFormValid, handleSubmit, isAgreed, setIsAgreed, tabName }: Props) {
+  // K-01: korxona ma'lumotlari profil/KTUT'dan, har maydonda manba belgisi
+  const { sources, edited, markEdited } = usePrefill(PREFILL_MAP, formData, handleInputChange, !!tabName?.contract);
+  const change = (field: keyof FormData, value: string) => {
+    markEdited(field);
+    handleInputChange(field, value);
+  };
+  const badge = (field: keyof FormData) => <PrefillBadge field={sources[field]} edited={edited.has(field) && !!sources[field]} />;
   return (
     (tabName?.contract ? (
       <div className="p-6 bg-white shadow-lg rounded-lg">
@@ -25,13 +43,13 @@ export default function ContractsTab({ contracts, formData, handleInputChange, i
           {/* STIR */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Korxona STIRi <span className="text-red-500">*</span>
+              Korxona STIRi <span className="text-red-500">*</span>{badge("stir")}
             </label>
             <input
               type="text"
               value={formData.stir}
               onChange={(e) =>
-                handleInputChange("stir", e.target.value)
+                change("stir", e.target.value)
               }
               placeholder="STIR raqamini kiriting"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -41,13 +59,13 @@ export default function ContractsTab({ contracts, formData, handleInputChange, i
           {/* Korxona nomi */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Korxona nomi <span className="text-red-500">*</span>
+              Korxona nomi <span className="text-red-500">*</span>{badge("companyName")}
             </label>
             <input
               type="text"
               value={formData.companyName}
               onChange={(e) =>
-                handleInputChange("companyName", e.target.value)
+                change("companyName", e.target.value)
               }
               placeholder="Korxona nomini kiriting"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -58,13 +76,13 @@ export default function ContractsTab({ contracts, formData, handleInputChange, i
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Direktor F.I.Sh{" "}
-              <span className="text-red-500">*</span>
+              <span className="text-red-500">*</span>{badge("directorName")}
             </label>
             <input
               type="text"
               value={formData.directorName}
               onChange={(e) =>
-                handleInputChange("directorName", e.target.value)
+                change("directorName", e.target.value)
               }
               placeholder="Direktor familiya, ism, sharifini kiriting"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -74,12 +92,12 @@ export default function ContractsTab({ contracts, formData, handleInputChange, i
           {/* Manzil */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Manzil <span className="text-red-500">*</span>
+              Manzil <span className="text-red-500">*</span>{badge("address")}
             </label>
             <textarea
               value={formData.address}
               onChange={(e) =>
-                handleInputChange("address", e.target.value)
+                change("address", e.target.value)
               }
               placeholder="To'liq manzilni kiriting"
               rows={3}
@@ -90,13 +108,13 @@ export default function ContractsTab({ contracts, formData, handleInputChange, i
           {/* Telefon raqam */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Telefon raqam <span className="text-red-500">*</span>
+              Telefon raqam <span className="text-red-500">*</span>{badge("phoneNumber")}
             </label>
             <input
               type="tel"
               value={formData.phoneNumber}
               onChange={(e) =>
-                handleInputChange("phoneNumber", e.target.value)
+                change("phoneNumber", e.target.value)
               }
               placeholder="+998 XX XXX XX XX"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -177,6 +195,9 @@ export default function ContractsTab({ contracts, formData, handleInputChange, i
         </h2>
 
         <div className="space-y-4">
+          {Array.isArray(contracts) && contracts.length === 0 && (
+            <p className="text-sm text-gray-500 dark:text-gray-400">Hali shartnomalar yo'q. Tarifni tanlab shartnoma tuzishingiz mumkin.</p>
+          )}
           {Array.isArray(contracts) && contracts.map((contract: Contract) => {
             const buyer = contract.didox_contract_data?.pending_document?.document_json?.buyer;
             const seller = contract.didox_contract_data?.pending_document?.document_json?.seller;
@@ -234,6 +255,7 @@ export default function ContractsTab({ contracts, formData, handleInputChange, i
                     <span className="font-semibold">Izoh:</span> {contract.notes}
                   </div>
                 )}
+                <ContractTimeline contractId={contract.id} />
               </div>
             );
           })}

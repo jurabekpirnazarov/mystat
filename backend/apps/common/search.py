@@ -36,11 +36,22 @@ def stems(text):
     return {w[:5] for w in normalize(text).split() if len(w) >= 3 and w not in STOP_WORDS}
 
 
-def _contains(fields, q):
+def case_variants(q):
+    """Baza `C` collation'da: UPPER() kirill harflarini o'zgartirmaydi, shuning uchun `icontains`
+    kirillchada katta-kichik harfni farqlaydi. Asosiy variantlar bilan qidiramiz."""
+    return {q, q.lower(), q.upper(), q.capitalize(), q.title()}
+
+
+def ci_contains(fields, q):
     cond = Q()
     for f in fields:
-        cond |= Q(**{f"{f}__icontains": q})
+        for v in case_variants(q):
+            cond |= Q(**{f"{f}__icontains": v})
     return cond
+
+
+def _contains(fields, q):
+    return ci_contains(fields, q)
 
 
 def global_search(query, user):

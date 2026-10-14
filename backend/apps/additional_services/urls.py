@@ -8,6 +8,7 @@ from apps.additional_services.views.trade_data_views import TradeDataAPIView
 from apps.additional_services.api_endpoints.StaticClassificationAPI.views import StatisticClassificationCategoryAPIView
 from apps.additional_services.api_endpoints.KtutReportAPI.calendar import ReportCalendarAPIView, ReportReminderAPIView
 from apps.additional_services.api_endpoints.KtutReportAPI.my_reports import MyReportsAPIView, ReportGuideAPIView
+from apps.additional_services.api_endpoints.ExternalTradeAPI.market_report import HsSearchAPIView, MarketReportAPIView
 
 app_name = "additional_services"
 
@@ -21,6 +22,8 @@ urlpatterns = [
     path('statistic-classification/categories/', StatisticClassificationCategoryAPIView.as_view(), name='statistic-classification-categories'),
     path('reportlist/calendar/', ReportCalendarAPIView.as_view(), name='reportlist-calendar'),
     path('my-reports/', MyReportsAPIView.as_view(), name='my-reports'),
+    path('market-report/', MarketReportAPIView.as_view(), name='market-report'),
+    path('hs-search/', HsSearchAPIView.as_view(), name='hs-search'),
     path('report-guide/<str:report_id>/', ReportGuideAPIView.as_view(), name='report-guide'),
     path('reportlist/<str:report_id>/remind/', ReportReminderAPIView.as_view(), name='reportlist-remind'),
     path('reportlist/<int:stir_number>', KtutReportListAPIView.as_view()),

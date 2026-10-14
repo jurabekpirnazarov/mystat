@@ -73,6 +73,7 @@ const Reglaments = lazy(() => import("./pages/Reglaments"));
 const BookOrderPage = lazy(() => import("./pages/BookOrderPage"));
 const BookOrderMapPage = lazy(() => import("./pages/BookOrderMapPage"));
 const TariffCompare = lazy(() => import("./pages/TariffCompare"));
+const MarketReport = lazy(() => import("./pages/MarketReport"));
 
 // Loading component
 const PageLoader = () => (
@@ -116,6 +117,7 @@ function AppRoutes() {
           <Route path="/reports" element={<Reports />} />
           <Route path="/tariff/:id" element={<TariffDetailPage />} />
           <Route path="/tariffs" element={<TariffCompare />} />
+          <Route path="/market-report" element={<MarketReport />} />
           <Route path="/orginfo" element={<OrgInfoPage />} />
           <Route path="/cpi-calculator" element={<CpiCalculator />} />
           <Route path="/statistical-classifications" element={<StatisticalClassifications />} />

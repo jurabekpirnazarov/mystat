@@ -11,6 +11,22 @@ from django.conf import settings
 
 PARQUET_DIR = Path(settings.MEDIA_ROOT) / "demographics"
 PARQUET_PATH = PARQUET_DIR / "data.parquet"
+# Faqat lokal dev: `seed_demo --demographics` yaratadi (B-08)
+SYNTHETIC_PATH = PARQUET_DIR / "data.synthetic.parquet"
+
+
+def data_source() -> str | None:
+    """"real" | "synthetic" | None. Sintetik fayl faqat DEBUG=True va asosiy fayl yo'q bo'lsa ishlatiladi."""
+    if PARQUET_PATH.exists():
+        return "real"
+    if settings.DEBUG and SYNTHETIC_PATH.exists():
+        return "synthetic"
+    return None
+
+
+def _read_path() -> Path | None:
+    source = data_source()
+    return PARQUET_PATH if source == "real" else SYNTHETIC_PATH if source == "synthetic" else None
 
 
 def _ensure_dir():
@@ -30,12 +46,13 @@ def _normalize_for_parquet(df: pd.DataFrame) -> pd.DataFrame:
 
 def read_section_df(slug: str) -> pd.DataFrame:
     """Berilgan section qatorlarini qaytaradi (parquet'da yo'q bo'lsa, bo'sh DF)."""
-    if not PARQUET_PATH.exists():
+    path = _read_path()
+    if path is None:
         return pd.DataFrame()
     try:
-        df = pd.read_parquet(PARQUET_PATH, filters=[("section", "=", slug)])
+        df = pd.read_parquet(path, filters=[("section", "=", slug)])
     except Exception:
-        df = pd.read_parquet(PARQUET_PATH)
+        df = pd.read_parquet(path)
         df = df[df["section"] == slug] if "section" in df.columns else pd.DataFrame()
     # Faqat shu section'da ishlatiladigan ustunlarni qoldiramiz
     if not df.empty:

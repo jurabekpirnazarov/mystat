@@ -71,3 +71,43 @@ class TradeFlowsApiTests(APITestCase):
     def test_dynamics(self):
         data = self.client.get(self.url + "dynamics/", {"flow": "export"}).data
         self.assertEqual([(d["year"], d["value"]) for d in data], [(2024, 150.0), (2025, 200.0)])
+
+
+class DemographicsDataSourceTests(APITestCase):
+    def setUp(self):
+        import tempfile
+        from pathlib import Path
+        from unittest.mock import patch
+        from apps.additional_services.api_endpoints.DemographicsAPI import writer
+        self.dir = Path(tempfile.mkdtemp())
+        self.real, self.synthetic = self.dir / "data.parquet", self.dir / "data.synthetic.parquet"
+        for name, value in (("PARQUET_PATH", self.real), ("SYNTHETIC_PATH", self.synthetic)):
+            p = patch.object(writer, name, value)
+            p.start()
+            self.addCleanup(p.stop)
+        self.writer = writer
+
+    def tearDown(self):
+        import shutil
+        shutil.rmtree(self.dir, ignore_errors=True)
+
+    def _touch(self, path):
+        import pandas as pd
+        pd.DataFrame({"section": ["s"], "v": [1]}).to_parquet(path)
+
+    def test_synthetic_is_never_used_in_production(self):
+        from django.test import override_settings
+        self._touch(self.synthetic)
+        with override_settings(DEBUG=False):
+            self.assertIsNone(self.writer.data_source())
+            self.assertTrue(self.writer.read_section_df("s").empty)
+        with override_settings(DEBUG=True):
+            self.assertEqual(self.writer.data_source(), "synthetic")
+            self.assertEqual(len(self.writer.read_section_df("s")), 1)
+
+    def test_real_file_wins(self):
+        from django.test import override_settings
+        self._touch(self.synthetic)
+        self._touch(self.real)
+        with override_settings(DEBUG=True):
+            self.assertEqual(self.writer.data_source(), "real")

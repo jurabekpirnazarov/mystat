@@ -60,7 +60,8 @@ const TariffDetailPage = lazy(() => import("./pages/TariffDetailPage"));
 const OrgInfoPage = lazy(() => import("./pages/OrgInfoPage"));
 const BookStore = lazy(() => import("./pages/BookStore"));
 const ExternalTrade = lazy(() => import("./pages/ExternalTrade"));
-const StatisticalData = lazy(() => import("./pages/StatisticalData"));
+const Demographics = lazy(() => import("./pages/Demographics"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 const TradeFlows = lazy(() => import("./pages/TradeFlows"));
 const OrganizationsRegistr = lazy(() => import("./pages/OrganizationsRegistr"));
 const Organizations = lazy(() => import("./pages/Organizations"));
@@ -106,7 +107,8 @@ function AppRoutes() {
           <Route path="/book-order" element={<BookOrderPage />} />
           <Route path="/book-order/map" element={<BookOrderMapPage />} />
           <Route path="/ex-trade" element={<ExternalTrade />} />
-          <Route path="/statistical-data" element={<StatisticalData />} />
+          <Route path="/statistical-data" element={<Demographics />} />
+          <Route path="/demographics" element={<Demographics />} />
           <Route path="/foreign-trade" element={<TradeFlows />} />
           <Route path="/trade-flows" element={<TradeFlows />} />
           <Route path="/organizations-register" element={<OrganizationsRegistr />} />
@@ -131,6 +133,7 @@ function AppRoutes() {
               </ProtectedRoute>
             }
           />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
       </ErrorBoundary>

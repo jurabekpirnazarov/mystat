@@ -34,8 +34,11 @@ class DemographicsSchemaView(APIView):
                 "value_column": schema.get("value_column", {}),
                 "filters": schema.get("filters", []),
             })
+        source = writer.data_source()
         return Response({
             "sections": sections,
+            "data_available": source is not None,
+            "is_synthetic": source == "synthetic",
         })
 
 
@@ -55,8 +58,10 @@ class DemographicsDataView(APIView):
             return Response({"detail": "Section topilmadi"}, status=404)
 
         df = writer.read_section_df(slug)
+        source = writer.data_source()
         if df.empty:
-            return Response({"total": 0, "count": 0, "rows": []})
+            return Response({"total": 0, "count": 0, "rows": [], "data_available": source is not None,
+                             "is_synthetic": source == "synthetic"})
 
         schema = section.filter_schema or {}
         payload = request.data or {}
@@ -84,6 +89,8 @@ class DemographicsDataView(APIView):
             "returned": len(rows),
             "rows": rows,
             "value_column": value_col,
+            "data_available": True,
+            "is_synthetic": source == "synthetic",
         })
 
 

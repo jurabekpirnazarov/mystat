@@ -273,20 +273,6 @@ export const getSitcSubgroups = async (groupId: number): Promise<SitcSection[]> 
   }
 };
 
-// Get available trade flows
-export const getTradeFlows = async (): Promise<any[]> => {
-  try {
-    console.log('getTradeFlows: Fetching trade flows from API');
-    const { trade_flows_api } = await import('./apiUrls');
-    const response = await getRequest(trade_flows_api) as any;
-    console.log('getTradeFlows: Response:', response);
-    return response?.results || response || [];
-  } catch (error) {
-    console.error('Error fetching trade flows:', error);
-    return [];
-  }
-};
-
 // Get trade data using POST request
 export const getTradeData = async (params: TradeDataRequest): Promise<TradeDataResponse[]> => {
   try {

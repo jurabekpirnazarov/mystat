@@ -2,6 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from apps.additional_services.api_endpoints.ExternalTradeAPI.newviews import TradeDataGetView
+from apps.additional_services.api_endpoints.ExternalTradeAPI.flows import TradeFlowDynamicsAPIView, TradeFlowsAPIView
 
 from .views import (
     CountryGroupViewSet, CountryViewSet, TradeDataExportView, TradeDataGetDataView, UnitViewSet, RegionViewSet,
@@ -22,5 +23,7 @@ router.register(r'products', ProductViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('trade-data/', TradeDataGetView.as_view(), name='trade-data-list'),
+    path('trade-flows/', TradeFlowsAPIView.as_view(), name='trade-flows'),
+    path('trade-flows/dynamics/', TradeFlowDynamicsAPIView.as_view(), name='trade-flows-dynamics'),
     
 ]

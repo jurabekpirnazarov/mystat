@@ -61,7 +61,7 @@ const OrgInfoPage = lazy(() => import("./pages/OrgInfoPage"));
 const BookStore = lazy(() => import("./pages/BookStore"));
 const ExternalTrade = lazy(() => import("./pages/ExternalTrade"));
 const StatisticalData = lazy(() => import("./pages/StatisticalData"));
-const ForeignTrade = lazy(() => import("./pages/ForeignTrade"));
+const TradeFlows = lazy(() => import("./pages/TradeFlows"));
 const OrganizationsRegistr = lazy(() => import("./pages/OrganizationsRegistr"));
 const Organizations = lazy(() => import("./pages/Organizations"));
 const OrganizationsKtut = lazy(() => import("./pages/OrganizationsKtut"));
@@ -107,7 +107,8 @@ function AppRoutes() {
           <Route path="/book-order/map" element={<BookOrderMapPage />} />
           <Route path="/ex-trade" element={<ExternalTrade />} />
           <Route path="/statistical-data" element={<StatisticalData />} />
-          <Route path="/foreign-trade" element={<ForeignTrade />} />
+          <Route path="/foreign-trade" element={<TradeFlows />} />
+          <Route path="/trade-flows" element={<TradeFlows />} />
           <Route path="/organizations-register" element={<OrganizationsRegistr />} />
           <Route path="/organizations" element={<Organizations />} />
           <Route path="/organizations-ktut" element={<OrganizationsKtut />} />

@@ -1,110 +1,121 @@
-# my.stat.uz — ish rejasi: tuzatish, sintetik ma'lumot va UI'ni boyitish
+# my.stat.uz — ilovani yangilash rejasi (Claude Code uchun topshiriq)
 
-> **Sana:** 2026-10-13
-> **Asos:** `PROEKT_TAHLIL.md` (loyiha tahlili) va `README.md`. Fayl yo'llari va raqamlar o'sha tahlildan olingan; tahlilda aniq yo'l ko'rsatilmagan joylarda "(aniqlash kerak)" deb yozilgan.
-> **Kim uchun:** har bir vazifa Claude Code'ga alohida topshiriq sifatida berilishi uchun yozilgan. Vazifani berishda: "`ISH_REJASI.md` dagi `F-03` ni bajar" deyish yetarli.
+> **Versiya:** 2 · 2026-10-14 (1-versiya 2026-10-13 dagi tuzatish va sintetik ma'lumot rejasi edi; bu versiya uni yangi xizmatlar, fuqarolar uchun alohida yechimlar va "har sahifada ma'lumot bo'lsin" talabi bilan to'liq qayta yozadi)
+> **Asos:** `PROEKT_TAHLIL.md` (loyiha tahlili) va `README.md`. Fayl yo'llari va raqamlar o'sha tahlildan olingan. Tahlilda aniq yo'l ko'rsatilmagan joylarda "(aniqlash kerak)" deb yozilgan, Claude Code ularni kodni o'qib topadi.
+> **Qanday ishlatiladi:** har bir vazifa alohida topshiriq. Claude Code'ga "`ISH_REJASI.md` dagi `K-02` ni bajar" deyish yetarli. Butun yangilanishni bosqichma-bosqich qilish tartibi 15-bo'limda.
+
+### Qisqacha: nima qilinadi
+
+1. **Buzuq joylar tuzatiladi** (token yangilash, 500 xatolar, `trade-flows`, xabarnomalar, Celery Beat).
+2. **Har sahifa ma'lumot bilan ochiladi.** Real ma'lumot bo'lmagan joyga bazaga **sintetik namuna** yoziladi va UI'da "Namuna ma'lumot" deb belgilanadi (4-bo'limdagi jadval har sahifa uchun manbani ko'rsatadi).
+3. **Korxonalar uchun yangi xizmatlar:** autofill, tarmoq benchmarki, bozor tahlili hisoboti, hamkor/raqobatchi qidiruvi, hisobot topshirish yordamchisi, buyurtma asosida statistik ma'lumot va boshqalar.
+4. **Fuqarolar va tadqiqotchilar uchun alohida yechimlar:** ma'lumotlar API'si, hududiy profil, kengaytirilgan inflyatsiya kalkulyatori, fuqaro kabineti, "Mening maoshim", narxlar monitoringi va boshqalar.
+5. **Ichki/admin:** analitika paneli, ko'rsatkichlarga obuna va avtomatik xabarlar, konsultant bilan onlayn konsultatsiya.
+6. **Xavfsizlik va onlayn to'lov hozircha o'zgartirilmaydi** (2-bo'lim).
 
 ---
 
 ## Bajarilish holati
 
-> Oxirgi yangilanish: 2026-10-14. Har bir vazifa alohida git commit'da (`git log --oneline`). Loyiha 2026-10-13 da git repo qilindi. Masofaviy repo yo'q, shuning uchun branch/MR o'rniga `main` da ketma-ket commit'lar qilingan.
+> Oxirgi yangilanish: 2026-10-14 (2-versiya). Har bir vazifa yoki vazifalar guruhi alohida git commit'da (`git log --oneline`). Masofaviy repo yo'q, shuning uchun branch/MR o'rniga `main` da ketma-ket commit'lar. 1-versiya vazifalari (F, B, S-01..S-09, U-01..U-14, Q) bajarilgan holati git tarixidagi oldingi `ISH_REJASI.md` da; quyida qisqacha.
 
-### Yakuniy tekshiruv (2026-10-14)
+### Yakuniy tekshiruv
 
 | Tekshiruv | Natija |
 |---|---|
-| `manage.py test` | **76 test, hammasi o'tdi**, skip yo'q (boshida 6 ta test bo'lgan va runner yiqilardi) |
+| `manage.py test` | **160 test, hammasi o'tdi** (1-versiya oxirida 76) |
 | `manage.py check` | Faqat CKEditor 4 ogohlantirishi (xavfsizlik, keyinga qoldirilgan) |
 | `makemigrations --check` | O'zgarish yo'q |
-| `npm run typecheck` | **0 xato** (boshida 37) |
-| `eslint src` | **0 xato**, 9 ogohlantirish (Fast Refresh) (boshida 85 xato) |
-| `vite build` | O'tadi; 500 KB dan katta chunk yo'q (OrgInfoPage 635 → 19 KB) |
-| `console.log` | 0 (boshida 159) |
+| `npx tsc --noEmit` | 0 xato |
+| `eslint src` | 0 xato, 9 eski ogohlantirish (Fast Refresh) |
+| `npm test` (vitest, yangi) | 11 test: autofill qoidasi, inflyatsiya stsenariylari, maosh persentili |
+| `vite build` | O'tadi; 500 KB dan katta chunk yo'q |
+| `seed_demo` | Ikki marta ketma-ket — ikkinchisida yangi yozuv yo'q; `--flush --dry-run` real yozuvlarga tegmaydi |
 
-### Vazifalar holati
+### 2-versiya vazifalari
 
 | Vazifa | Holat | Izoh |
 |---|---|---|
-| F-01 | ✅ | Runner tuzatildi; OneID testlari Q-05 da loyihaga moslab qayta yozildi |
-| F-02 | ✅ | `asgi.py` → `core.settings.production` |
-| F-03 | ✅ | `notifications` namespace, takroriy CKEditor sozlamalari, `PARLER_LANGUAGES` |
-| F-04 | ✅ | 37 → 0. Buglar: "Bosma" tab savati ishlamas edi (`print`/`bosma`), render ichida `navigate()` |
-| F-05 | ✅ | 85 → 0 xato; `any` o'rniga tiplar. Tiplashda topilgan buglar pastda |
-| B-01 | ✅ | Refresh URL + bitta umumiy refresh promise. Brauzerda qo'lda tekshirilmagan |
-| B-02 | ✅ | |
-| B-03 | ✅ | |
-| B-04 | ✅ | `external-trade/trade-flows/` + `dynamics/`, 1 soat kesh (birinchi so'rov ~1,7 s, keshdan 45 ms) |
-| B-05 | ✅ | `notifications/me` filtrlari, `unread-count/`; `NotificationsContext` |
-| B-06 | ✅ | DIDOX (15 daq), hisobot eslatmalari va U-13 eslatmalari (09:00); `docker-compose` ga `beat` servisi. Production systemd unit'i yo'q (README) |
-| B-07 | ✅ | `starts_at`/`expires_at`; 4 ta real paket NULL (muddatsiz). E-kitob, byulleten, STIR → 403 |
-| B-08 | ✅ | `seed_demo --demographics` (214 704 qator); `data_source()`: real > sintetik (faqat DEBUG) |
-| S-01..S-09 | ✅ | `seed_demo` (`--only/--flush/--dry-run`). Real bazada flush'dan keyin barcha jadvallardagi sonlar seed'dan oldingi holat bilan **bayt-ma-bayt bir xil** |
-| S-03 | ✅ (o'zgartirilgan) | Model kodlar daraxti emas, klassifikator **hujjatlari** ro'yxati — 6 kategoriya, 16 hujjat |
-| S-04 | ✅ (o'zgartirilgan) | Ilova `ServiceRequestResponse` ni ishlatadi; `ServiceRequests` admin uchun to'ldirildi |
-| U-01..U-08 | ✅ | |
-| U-07 | ✅ (o'zgartirilgan) | Daraxt o'rniga kategoriyalar + 3 tilda qidiruv + tafsilot + CSV (S-03 ga qarang) |
-| U-09 | ✅ | `/foreign-trade` (bo'sh zaglushka edi) va `/trade-flows`: choropleth xarita, top-20, dinamika |
-| U-10..U-13 | ✅ | Ctrl+K qidiruv, Stat AI (FAQ), operator chat (`ContactReply`), oy kalendari + eslatma + .ics |
-| U-14 | ⚠️ qisman | Statik tuzatishlar (lang, alt, aria, focus-visible, skip-link, reduced-motion). **Lighthouse o'lchanmagan** (brauzer yo'q) |
-| **U-15** (yangi) | ✅ | Demografiya sahifasi `/demographics`, `/statistical-data` — frontend'da umuman yo'q edi |
-| Q-01 | ⚠️ qisman | `PersonalCabinet.tsx` 1129 → 291. **`BookStore.tsx` (1744) va `ExternalTrade.tsx` (1391) bo'linmadi**: ularda to'lov/xarid oqimi bor, testsiz va brauzersiz xatti-harakat saqlanishini kafolatlab bo'lmaydi |
-| Q-02 | ✅ | |
-| Q-03 | ✅ | Chart.js → Recharts; `chart.js`, `react-chartjs-2`, `highcharts*` olib tashlandi |
-| Q-04 | ✅ | 14 ta ishlatilmaydigan fayl o'chirildi |
-| Q-05 | ✅ | 76 test (≥30) |
-| Q-06 | ✅ | CI `test` bosqichi; Docker executor kerak (OS-11) |
-| Q-07 | ⚠️ qisman | parler va takroriy import-export olib tashlandi, tqdm 2.2.3 → 4.66.5. **drf-yasg qoldi**: Click to'lov view'lari ishlatadi (2.2-bo'lim) |
+| S-07 (yangilangan) | ✅ | `demo_tadqiqotchi`, 5 ta `demo_konsultant_*`; demo korxonalarga OKED bo'limi |
+| S-09 (yangilangan) | ✅ | "Namuna" yorlig'i (bosilganda tushuntirish), `SampleBanner`, `data_source`, PNG/PDF'da "NAMUNA" suv belgisi |
+| S-10 | ✅ (o'zgartirilgan) | KTUT'da OKED/hudud **yo'q** (faqat STIR, nom, soxta OKPO). Guruh belgilari `EnterpriseIndicator` ning o'zida; benchmark guruhi **anonim** namuna korxonalar (STIR `P…`), real korxonaga o'ylab topilgan raqam biriktirilmadi. 21 203 qator |
+| S-11 | ✅ | 14 hudud × 10 ko'rsatkich × 2018–2025 (yillik + choraklik), 369 tuman × 4 ko'rsatkich |
+| S-12 | ✅ | 108 shakl uchun yo'riqnoma, top-20 ga namunaviy PDF (o'z PDF yozuvchimiz — `common/pdf.py`, bog'liqliksiz). Demo korxonalar sintetik KTUT yozuvi orqali 6 shaklga bog'langan |
+| S-13 | ✅ | 6 tarif, 15 buyurtma, bajarilganlariga NAMUNA XLSX |
+| S-14 | ✅ | 5 konsultant, ~700 slot, 12 band qilish |
+| S-15 | ✅ | 12 maqola + 40 atama (uz, ru sarlavha/ta'rif, kirill — transliteratsiya), ish haqi, 25 mahsulot narxi, ~200 ism, 4 so'rovnoma (1 720 namuna javob), 20 fuqaro savoli |
+| S-16 | ✅ | 2 API kalit (faqat xesh), 30 kunlik foydalanish, 22 obuna, 10 hodisa, 4 saqlangan filtr |
+| U-15 | ✅ | `UserPreference`, bir martalik tanishtiruv (korxona/fuqaro), profil to'ldirilganligi |
+| U-16 | ✅ (o'zgartirilgan) | Taqqoslash, saqlangan filtrlar va eksport (≤10 000 qator) **/trade-flows** da. `/ex-trade` (to'lov oqimi bor, 1 391 qator) ga tegilmadi |
+| U-17 | ✅ | Qidiruv, saralash, sevimlilar, "Menga eng yaqin" pochta; to'lov oqimi o'zgarmagan |
+| K-01 | ✅ | `me/prefill/`, `me/registry-diff/` (3 s timeout, 24 soat kesh), manba belgilari, shartnoma uchun "Rekvizitlarni tasdiqlayman" (backend ham talab qiladi) |
+| K-02 | ✅ | Faqat agregat, kichik guruhda respublikaga kengayadi, PDF |
+| K-03 | ✅ (o'zgartirilgan) | Hammasi real. "Imkoniyatlar" (jahon importi) uchun bazada jahon savdosi yo'q — o'rniga O'zbekiston eksporti o'sayotgan/qisqarayotgan bozorlar |
+| K-04 | ✅ (o'zgartirilgan) | Manba — sanoat mahsulotlari reyestri (39 ming korxona: hudud, tuman, faoliyat turi). **"O'lcham" filtri qo'shilmadi** (real xodimlar soni yo'q). Eksportda telefon/PINFL yo'q |
+| K-05 | ✅ | Topshirilganlik holati yo'q (`submitted-report` qattiq yozilgan stub, OS-11) — faqat muddatlar |
+| K-06 | ✅ (o'zgartirilgan) | Alohida `CustomDataRequest` (mavjud `ServiceRequestResponse` shartnoma+paket talab qiladi va GET ruxsatida tegilmagan muammo bor) |
+| K-07 | ✅ | `/cabinet/organization`; tashqi savdoda korxona kesimi yo'q — blok chiqmaydi |
+| K-08 | ✅ | `ContractStatusLog` (signal), vaqt chizig'i, oldindan ko'rish (bazaga yozmaydi). Lokalda shartnoma shabloni (`datas/contractContentTemplate.json`) yo'q — qisqa shartlar ko'rsatiladi |
+| K-09 | ✅ | `services/pricing.py` — yagona formula (shartnoma ham ishlatadi), taqqoslash, "Menga qaysi paket mos?" |
+| FQ-01 | ✅ | `/api/open/v1/` (6 endpoint), 401/429, CSV BOM, alohida hujjat `/api/open/docs/`, kabinetda kalitlar |
+| FQ-02 | ✅ | Real (sanoat korxonalari, tashqi savdo, tumanlar) + namuna; xarita, infografika PNG, ikki hududni solishtirish |
+| FQ-03 | ✅ | Ochiq CPI qatori, 3 stsenariy, URL'da parametrlar |
+| FQ-04 | ✅ | Fuqaro bosh paneli, korxona bo'limlari yashiriladi, sevimlilar. Endpoint: `/api/citizens/me/summary/` |
+| FQ-05..FQ-10 | ✅ | Maosh brauzerdan chiqmaydi; savat `localStorage` da; so'rovnoma — bitta foydalanuvchi bitta javob; "Muhammad" = "Мухаммад"; ochiq savol-javob faqat rozilik bilan |
+| FQ-07 | ✅ (o'zgartirilgan) | `Article`/`GlossaryTerm` `common` emas, yangi `citizens` app'da; `<Term>` 10 joyda |
+| FQ-11 | ✅ (o'zgartirilgan) | `vite-plugin-pwa` o'rniga o'z `sw.js` (kesh qoidalari aniq nazoratda). **Lighthouse o'lchanmagan** |
+| A-01 | ✅ | `/<admin>/analytics/`; voronkada "tarif ko'rdi" yo'q (sahifa ko'rishlari saqlanmaydi) |
+| A-02 | ✅ | Obunalar, hodisalar (CPI yangi davri — signal), Celery (har soat, oylik dayjest), Telegram — mavjud `/start <token>` |
+| A-03 | ✅ | Faqat korxonalar (OS-17), 24 soat qoidasi, eslatmalar; baho band qilishning o'zida (ServiceRating xizmatga bog'langan) |
 
-### Ish davomida topilgan va tuzatilgan buglar (rejada yo'q edi)
+### 2-versiyada topilgan va tuzatilgan buglar
 
 | Bug | Ta'siri |
 |---|---|
-| `ContractList` faqat `role == "client"` ga ro'yxat qaytarardi — bunday rol yo'q | Mijozlar (898 ta `user`) kabinetda o'z shartnomalarini hech qachon ko'rmas edi |
-| Kabinet `response.data.results` ni o'qirdi (`getRequest` allaqachon javob tanasini qaytaradi) | Shartnomalar ro'yxati ikkinchi sabab bilan ham bo'sh edi |
-| `common/platform-stat/` `random.randint` va qattiq yozilgan raqamlar qaytarardi | `/statistics` soxta "45 600 foydalanuvchi" va mavjud bo'lmagan "Soliq/Audit" xizmatlarini ko'rsatardi |
-| `/demographics` marshruti yo'q edi | `/services` dagi demografiya xizmati bo'sh oq sahifaga olib borardi |
-| `/foreign-trade`, `/statistical-data` — matnli zaglushka | |
-| Sharhlarda `user_name`/`rating` o'qilardi (API: `user`/`value`) | Barcha sharhlar "Anonim" va har doim 5 yulduz |
-| Login'dan keyin ism `ООО "Технологии"` bo'lib qolardi | login javobida `name` yo'q — AuthContext'dagi zaxira nom chiqardi |
-| `state.clearAll()` (kerak: `methods.clearAll()`) | Tashqi savdo filtridagi "tozalash" tugmasi TypeError berardi |
-| `service-request` POST `validated_data['client_file']` | Fayl biriktirilmasa 500 |
-| `bugalter` profili yo'q bo'lsa `ContractList` 500 | |
-| Mavjud bo'lmagan marshrutlar | Oq ekran (endi 404 sahifasi) |
+| `ServicePackage` da `name` yo'q, shartnoma kodi `service_package.name` ni ishlatadi | Standart (007) shartnoma yaratish har doim 500 |
+| `ServiceModal` doim `service_package_id: 1` yuborardi | Qaysi tarif tanlansa ham 1-paket uchun shartnoma |
+| CPI kalkulyatori ikki oyning **oylik** indeksini ayirardi | Davr inflyatsiyasi butunlay noto'g'ri (masalan 100.58 va 100.66 → 0.08%) |
+| Kitob ro'yxati `book.name`/`book.price` o'qirdi (API: `name_uz`, `options[].price`) | Barcha kitoblar nomsiz va "Bepul" |
+| Baza `C` collation — `icontains` kirillchada katta-kichik harfni farqlaydi | Kirillcha qidiruv ("хлоп" → "Хлопок") topmasdi; global qidiruv ham |
+| `BaseModel.delete()` yumshoq o'chirish, limit hisobi esa barcha yozuvlarni sanaydi | Limitni "qaytarish" ishlamaydi (konsultatsiyada `hard_delete` ishlatildi; boshqa joylarda e'tibor kerak) |
+| `index.html` dagi `/vite.svg` favicon mavjud emas | Favicon 404 |
+| OKED nomlarida lotin matnga kirill "А" aralashgan | "ISHLАB" kabi nomlar — `common/text.fix_lookalikes` bilan ko'rsatishda tozalanadi |
 
-### Topilgan, lekin tegilmagan (xavfsizlik/to'lov — 2-bo'lim)
+### Ma'lumot bo'yicha kuzatuvlar
 
-- `services/service-request/` GET: `?package_item=` yoki `?contract=` bilan **boshqa foydalanuvchilarning so'rovlari qaytadi** (`Q(...) | Q(package_item=...) | Q(contract=...)`).
-- `service-response/<pk>/` PATCH: `IsAttachedUser` mijozning o'ziga ham ruxsat beradi — mijoz o'z so'roviga "admin javobi" yozishi mumkin.
-- OneID view'lari `print()` orqali kod va auth ma'lumotlarini (PINFL) log'ga chiqaradi.
-- OneID: frontend callback `accounts/oneid/` ga POST yuboradi, backend esa faqat GET qabul qiladi. egov.uz kalitlarisiz tekshirib bo'lmadi.
-- `User.image_url` mavjud bo'lmagan `settings.LOCAL_BASE_URL/PROD_BASE_URL` ni ishlatadi (hozircha avatarli foydalanuvchi yo'q).
-- Paketni aniqlashda `UserServicePackage...first()` tartibsiz: foydalanuvchida bir nechta paket bo'lsa, tasodifiy biri olinadi.
+- **TradeData.value — "ming AQSh $"** ekani narxlar bilan tasdiqlandi (paxta tolasi ~1 770–2 700 $/t) — OS-10 yopilishi mumkin.
+- KTUT: 65 540 yozuv, lekin faqat STIR va nom; `okpo` soxta ("2134rf34r"), 5 ta "ktut1..5" test yozuvi.
+- `submitted-report` endpoint'i qattiq yozilgan raqamlar qaytaradi.
 
-### Ma'lumot sifati muammolari (bazada)
+### Yangi pullik xizmatlar uchun paket limiti (OS-14)
 
-- Tashqi savdo: **2023-yil qiymatlari boshqa yillardan ~16 marta kichik** (masalan, 2024 vs 2023 "+776%"). Birlik farqi bo'lishi mumkin.
-- 2021-yil yo'q, 2022-yil faqat `M1`.
-- "Boshqa davlatlar" (kod 999) eksportning ~50% i — reytingdan ajratildi.
-- Hisobot muddatlari (`ReportList.deadline`) 2025-yilda qotib qolgan — kalendar ularni `report_type` bo'yicha takrorlaydi.
+Admin'da `PackageService` shu slug'lar bilan qo'shilsa va paketlarga limit berilsa, limit ishlaydi; qo'shilmaguncha xizmatlar limitsiz:
 
-### Yangi ochiq savollar
+| Slug | Xizmat |
+|---|---|
+| `benchmark` | Tarmoq benchmarki (bir kunda bir xil hisobot qayta sanalmaydi) |
+| `market-report` | Bozor tahlili — to'liq versiya/PDF |
+| `partners-export` | Hamkorlar ro'yxatini Excel'ga eksport |
+| `consultation` | Konsultatsiya band qilish |
+
+### Ochiq savollar (yangilari)
 
 | ID | Savol | Hozirgi default |
 |---|---|---|
-| OS-10 | `TradeData.value` birligi qanday (ming AQSh $?) | UI'da "ming AQSh $" (`TRADE_VALUE_UNIT`, bitta joyda o'zgartiriladi) |
-| OS-11 | GitLab'da Docker executor'li runner bormi? | CI test job'lari `python:3.12`/`node:20` image va `postgres:14` service bilan yozildi; runner bo'lmasa `CI_TESTS_DISABLED=true` |
-| OS-12 | Frontend ko'p tilli bo'ladimi (i18n)? | Hozir faqat o'zbek (lotin); yangi UI ham shunday |
-| OS-13 | Production'da Celery worker/beat uchun systemd unit qo'shiladimi? | Hozircha faqat docker-compose'da bor |
+| OS-18 | Shartnoma shabloni `datas/contractContentTemplate.json` repoda yo'q — serverdagi faylni repoga qo'shamizmi? | Oldindan ko'rishda qisqa shartlar |
+| OS-19 | Korxona o'lchami (xodimlar soni) uchun real manba bormi? | K-04 da o'lcham filtri yo'q |
+| OS-20 | Jahon savdosi ma'lumoti (K-03 "imkoniyatlar") olinadimi? | O'zbekiston eksporti dinamikasi bilan |
+| OS-21 | Production'da `TELEGRAM_BOT_TOKEN`, `EMAIL_HOST` sozlanganmi? | Sozlanmagan kanal jim o'tkaziladi |
+| OS-22 | Nginx'da `sw.js` uchun `Cache-Control: no-cache` | Qo'shilishi kerak (aks holda PWA yangilanishi kechikadi) |
 
 ### Qo'lda tekshirish kerak (brauzerda)
 
-1. `/trade-flows` — xarita chizilishi va davlat bosilganda dinamika.
-2. `/demographics` — filtrlar, grafik, Excel eksport.
-3. Kabinet: demo akkaunt bilan (`backend/.env` ga `DEMO_USER_PASSWORD=...` qo'yib, `python manage.py seed_demo --only demo_users` ni ishga tushiring) — bosh panel, xabarnomalar, so'rovlar, faoliyat rejasi, to'lovlar.
-4. Ctrl+K qidiruv, Stat AI va operator chat (javobni admin'da `Contact` → inline orqali yozib).
-5. Token yangilanishi: lokal `SIMPLE_JWT` access muddatini 1 daqiqaga qo'yib.
-6. Mobil (360 px) ko'rinish va Lighthouse.
+1. Kabinet (korxona: `demo_yuridik_2`): bosh panel, tanishtiruv (`demo_yuridik_4/5` da chiqadi), Hisobotlarim, Benchmark (PDF), Individual ma'lumot, Konsultatsiyalarim, Obunalarim, API kalitlarim, korxona pasporti.
+2. Shartnoma oqimi: tarif → "Shartnoma orqali" → rekvizitlar va matn → tasdiqlash (DIDOX lokal muhitda ishlamaydi).
+3. Fuqaro (`demo_jismoniy_1`): bosh panel, Savollarim; ochiq sahifalar `/citizens`, `/regions`, `/cpi-calculator`, `/my-salary`, `/prices`, `/learn`, `/surveys`, `/names`, `/answers`.
+4. Xodim (`demo_employee`): Individual ma'lumot va Savollarim — "Xodim navbati"; konsultant (`demo_konsultant_1`): "Mening jadvalim".
+5. Admin: `/<admin>/analytics/`, Excel eksport.
+6. PWA (production build), mobil ko'rinish, Lighthouse.
 
 ---
 
@@ -113,14 +124,18 @@
 1. [Maqsad va chegaralar](#1-maqsad-va-chegaralar)
 2. [Hozircha tegilmaydigan narsalar](#2-hozircha-tegilmaydigan-narsalar)
 3. [Claude Code uchun umumiy qoidalar](#3-claude-code-uchun-umumiy-qoidalar)
-4. [Vazifalar jadvali (qisqa ko'rinish)](#4-vazifalar-jadvali)
-5. [0-bosqich: ishchi muhit va sifat poydevori](#5-0-bosqich-ishchi-muhit-va-sifat-poydevori)
-6. [1-bosqich: buzuq joylarni tuzatish](#6-1-bosqich-buzuq-joylarni-tuzatish)
-7. [2-bosqich: sintetik ma'lumot (bazada)](#7-2-bosqich-sintetik-malumot)
-8. [3-bosqich: UI'ni boyitish va yangi imkoniyatlar](#8-3-bosqich-uini-boyitish)
-9. [4-bosqich: kod sifati va texnik qarz](#9-4-bosqich-kod-sifati)
-10. [Ochiq savollar (egasi hal qiladi)](#10-ochiq-savollar)
-11. [Tavsiya etilgan bajarish tartibi](#11-bajarish-tartibi)
+4. [Ma'lumot qamrovi: har sahifa nima bilan to'ladi](#4-malumot-qamrovi)
+5. [Vazifalar jadvali](#5-vazifalar-jadvali)
+6. [0-bosqich: ishchi muhit va sifat poydevori (F)](#6-0-bosqich-ishchi-muhit-va-sifat-poydevori)
+7. [1-bosqich: buzuq joylarni tuzatish (B)](#7-1-bosqich-buzuq-joylarni-tuzatish)
+8. [2-bosqich: sintetik ma'lumot (S)](#8-2-bosqich-sintetik-malumot)
+9. [3-bosqich: UI'ni boyitish (U)](#9-3-bosqich-uini-boyitish)
+10. [4-bosqich: korxonalar uchun xizmatlar (K)](#10-4-bosqich-korxonalar-uchun-xizmatlar)
+11. [5-bosqich: fuqarolar va tadqiqotchilar uchun (FQ)](#11-5-bosqich-fuqarolar-va-tadqiqotchilar-uchun)
+12. [6-bosqich: ichki va admin imkoniyatlari (A)](#12-6-bosqich-ichki-va-admin-imkoniyatlari)
+13. [7-bosqich: kod sifati (Q)](#13-7-bosqich-kod-sifati)
+14. [Ochiq savollar](#14-ochiq-savollar)
+15. [Bajarish tartibi](#15-bajarish-tartibi)
 
 ---
 
@@ -128,15 +143,28 @@
 
 **Maqsad:**
 1. Ishlamayotgan yoki buzuq joylarni tuzatish (xavfsizlik va onlayn to'lovdan tashqari).
-2. Bo'sh jadvallar va "faqat dizayn" bo'lgan sahifalarni **bazada saqlanadigan vaqtinchalik sintetik ma'lumot** bilan to'ldirish, shunda har bir sahifa ishlab turgan holda ko'rinadi.
-3. Frontend'ni boyitish: kabinet, bosh sahifa, ochiq ma'lumot sahifalariga yangi bloklar, grafiklar, qidiruv va qulayliklar qo'shish.
+2. Platformada **bo'sh sahifa qolmasligi**: real ma'lumot bo'lmagan har bir sahifa, blok va bo'lim bazadagi sintetik namuna bilan to'ladi va bu foydalanuvchiga ochiq aytiladi.
+3. Korxonalar uchun bazadagi mavjud ma'lumotga tayanadigan yangi pullik/limitli xizmatlar qo'shish.
+4. Fuqarolar (OneID orqali kiruvchi jismoniy shaxslar) va tadqiqotchilar uchun alohida, bepul va sodda yechimlar qo'shish.
+5. UI'ni boyitish: kabinetlar, bosh sahifa, grafiklar, qidiruv, mobil moslashuv.
+
+**Foydalanuvchi guruhlari va ularga tegishli bo'limlar:**
+
+| Guruh | Kiradi | Asosiy bo'limlar |
+|---|---|---|
+| Mehmon | — | Ochiq ma'lumotlar, hududiy profil (FQ-02), inflyatsiya kalkulyatori (FQ-03), maqolalar (FQ-07), narxlar (FQ-06) |
+| Fuqaro (jismoniy shaxs) | OneID | Fuqaro kabineti (FQ-04) va 11-bo'limdagi barcha xizmatlar |
+| Tadqiqotchi | Login yoki OneID | Ma'lumotlar API'si va yuklab olish (FQ-01) |
+| Korxona (yuridik shaxs) | Login | Korxona kabineti va 10-bo'limdagi xizmatlar |
+| Buxgalter, xodim, konsultant | Login | So'rovlarga javob, konsultatsiya jadvali (A-03) |
+| Admin | Admin panel | Analitika (A-01), kontent, sintetik ma'lumot boshqaruvi |
 
 **Ustuvorlik belgilari:**
 
 | Belgi | Ma'nosi |
 |---|---|
 | **P0** | Birinchi navbatda. Foydalanuvchiga to'g'ridan-to'g'ri xato ko'rsatadi yoki boshqa vazifalarni to'sadi |
-| **P1** | Muhim. Bo'sh/yolg'on ma'lumot ko'rsatadigan joylar, asosiy UI ishlari |
+| **P1** | Muhim. Bo'sh/yolg'on ma'lumot ko'rsatadigan joylar, asosiy yangi xizmatlar |
 | **P2** | Foydali, lekin kutishi mumkin |
 
 ---
@@ -192,12 +220,74 @@ Har bir vazifada amal qilinadi:
    - Frontend: `npx tsc --noEmit`, `npx eslint src`, `npx vite build`. Yangi xato qo'shilmasligi kerak (eski xatolar F-04/F-05 da tozalanadi).
 6. **Ko'p tillilik:** yangi model matn maydonlari loyihadagi uslubda `_uz`, `_ru`, `_cry` bo'ladi. Frontend matnlari mavjud tarjima mexanizmi orqali (aniqlash kerak: `i18n` fayllari qayerda).
 7. **API uslubi:** yangi endpoint'lar kebab-case va oxirida slash bilan (`/api/<app>/<resource>/`). Eski endpoint'lar nomi o'zgartirilmaydi (frontend buzilmasligi uchun).
-8. **UI kutubxonalari:** yangi komponentlar Tailwind + mavjud MUI bilan; yangi grafiklar **Recharts** bilan (4-bosqichda bitta kutubxonaga o'tish rejasi bor, yangi Chart.js/Highcharts kodi qo'shilmaydi).
+8. **UI kutubxonalari:** yangi komponentlar Tailwind + mavjud MUI bilan; yangi grafiklar **Recharts** bilan (Q-03 da bitta kutubxonaga o'tish rejasi bor, yangi Chart.js/Highcharts kodi qo'shilmaydi).
 9. Har vazifadagi **"Qabul mezonlari"** bajarilmaguncha vazifa tugagan hisoblanmaydi.
+10. **Bo'sh sahifa bo'lmaydi.** Har bir yangi sahifa yoki blok uchun vazifada "Ma'lumot" qatori bor: real manba yoki sintetik seeder. Vazifa o'z seeder'ini (`seed_demo` ichida) qo'shmaguncha tugagan hisoblanmaydi. Sintetik yozuv UI'da S-09 dagi "Namuna ma'lumot" belgisi bilan chiqadi.
+11. **Yagona istisno:** to'lov jadvallari (`Transaction`, `Order`). Ularga sintetik yozuv qo'shilmaydi (2.2), to'lovlar tarixi bo'sh bo'lsa tushuntiruvchi bo'sh holat ko'rsatiladi.
+12. **Pul hisoblanadigan yangi xizmatlar** (buyurtma asosida ma'lumot, konsultatsiya) narxni faqat **ko'rsatadi** va so'rovni yaratadi. To'lov mavjud oqim bo'yicha (shartnoma + bank o'tkazmasi + admin) qoladi, onlayn to'lov qo'shilmaydi.
 
 ---
 
-## 4. Vazifalar jadvali
+## 4. Ma'lumot qamrovi
+
+Har bir sahifa va blok nima bilan to'lishi. "Real" — production dump'idagi ma'lumot. "Sintetik" — `seed_demo` yozadigan namuna (faqat `DEBUG=True` muhitda), UI'da belgilanadi.
+
+### 4.1. Mavjud sahifalar
+
+| Sahifa / blok | Real ma'lumot (tahlil bo'yicha) | Bo'sh joy | Sintetik namuna | Vazifa |
+|---|---|---|---|---|
+| Tashqi savdo | 3,58 mln yozuv | `trade-flows` endpoint yo'q | Kerak emas | B-04, U-09 |
+| Demografiya | Sxema bor, parquet lokalda yo'q | Lokal dev'da hamma grafik | Sintetik parquet | B-08 |
+| KTUT, korxonalar | 65 540 korxona | — | Kerak emas | — |
+| Hisobotlar, kalendar | 108 shakl, 225 768 bog'lanish | Shakl namunasi, yo'riqnoma | Yo'riqnomalar | S-12, K-05 |
+| Sanoat mahsulotlari | 53 319 | — | Kerak emas | — |
+| CPI kalkulyatori | 311 yozuv | — | Kerak emas | FQ-03 |
+| Statistik klassifikatorlar | 0 | Butun sahifa | Daraxt, ~250 element | S-03, U-07 |
+| Byulletenlar | 11 | — | Kerak emas | — |
+| Kitob do'koni | 116 kitob, 1450 pochta | — | Kerak emas | U-17 |
+| FAQ, portal haqida | 10 FAQ | — | Kerak emas | — |
+| Kabinet: xizmatlarim, paket | 4 paket | Demo foydalanuvchida | Demo paketlar, limit ishlatilishi | S-07 |
+| Kabinet: shartnomalar | 62 | Demo foydalanuvchida | Demo shartnomalar (DIDOX/Telegram'siz) | S-07 |
+| Kabinet: to'lovlar tarixi | `Transaction` 10 | Ko'pchilikda | **Yo'q** (istisno, 3.11) | U-04 |
+| Kabinet: xabarnomalar | 8 | Ko'pchilikda | Har demo foydalanuvchiga 10–20 | S-06 |
+| Kabinet: xizmat so'rovlari | 0 so'rov, 6 javob | Butun bo'lim | ~40 so'rov va javoblar | S-04 |
+| Kabinet: faoliyat rejasi | 0 | Butun bo'lim | ~30 reja | S-05 |
+| Operator chat, murojaatlar | 10 murojaat | Javoblar | 15 murojaat + javoblar | S-08, U-12 |
+| Stat AI chat | FAQ + katalog | — | Kerak emas | U-11 |
+| Email obuna | 0 | — | 20 obunachi | S-08 |
+
+### 4.2. Yangi xizmatlar
+
+| Xizmat | Real ma'lumot | Sintetik namuna | Vazifa |
+|---|---|---|---|
+| Autofill | Profil, `Organization`, KTUT | Demo korxonalar | K-01, S-07 |
+| Tarmoq benchmarki | KTUT (OKED, hudud) | Korxona ko'rsatkichlari (tushum, xodimlar, mahsulot hajmi) | K-02, S-10 |
+| Bozor tahlili hisoboti | Tashqi savdo, HS, davlatlar | Kerak emas | K-03 |
+| Hamkor/raqobatchi qidiruvi | KTUT | O'lcham (xodimlar soni) uchun S-10 | K-04 |
+| Hisobot topshirish yordamchisi | KTUT↔hisobot bog'lanishi | Shakl namunalari, yo'riqnomalar | K-05, S-12 |
+| Buyurtma asosida ma'lumot | `ServiceRequests` moduli | Narx jadvali, namunaviy buyurtmalar | K-06, S-13 |
+| Korxona pasporti | KTUT, hisobotlar, sanoat | S-10 ko'rsatkichlari | K-07 |
+| Shartnoma vaqt chizig'i | 62 shartnoma | Demo shartnomalar holat tarixi | K-08, S-07 |
+| Tarif taqqoslash | 4 paket, 17 narx | Kerak emas | K-09 |
+| Ma'lumotlar API'si | Ochiq ko'rsatkichlar | Demo API kalit va foydalanish logi | FQ-01, S-16 |
+| Hududiy profil | 14 hudud, 369 tuman, KTUT | Hududiy ko'rsatkichlar (ish haqi, ishsizlik, YaHM va h.k.) | FQ-02, S-11 |
+| Inflyatsiya kalkulyatori | CPI 311 yozuv | Kerak emas | FQ-03 |
+| Fuqaro kabineti | OneID profil | Demo fuqarolar, sevimlilar | FQ-04, S-07 |
+| Mening maoshim | — | Ish haqi taqsimoti (hudud × tarmoq) | FQ-05, S-15 |
+| Narxlar monitoringi | CPI (indeks) | Mahsulot narxlari hudud bo'yicha | FQ-06, S-15 |
+| Statistika oddiy tilda | — | Maqolalar, lug'at | FQ-07, S-15 |
+| So'rovnomalar | — | 3–5 so'rovnoma, javoblar | FQ-08, S-15 |
+| Ismlar statistikasi | — | Ismlar yil/hudud bo'yicha | FQ-09, S-15 |
+| Fuqaro savoli | Murojaat moduli | Namunaviy savol-javoblar | FQ-10, S-15 |
+| Admin analitika | Hammasi real | Sintetik yozuvlar almashtirgich bilan | A-01 |
+| Ko'rsatkichlarga obuna | `Subscribe` (0) | Obunalar, "yangilandi" hodisalari | A-02, S-16 |
+| Onlayn konsultatsiya | — | Konsultantlar, vaqt jadvali, bandlar | A-03, S-14 |
+
+---
+
+## 5. Vazifalar jadvali
+
+`OS-..` — 14-bo'limdagi ochiq savollar.
 
 | ID | Vazifa | Bosqich | Ustuvorlik | Bog'liqlik |
 |---|---|---|---|---|
@@ -217,12 +307,19 @@ Har bir vazifada amal qilinadi:
 | S-01 | Sintetik yozuvlar reyestri (`SyntheticRecord`) | 2 | P0 | F-01 |
 | S-02 | `seed_demo` management komandasi (karkas) | 2 | P0 | S-01 |
 | S-03 | Statistik klassifikatorlar | 2 | P1 | S-02 |
-| S-04 | Xizmat so'rovlari va javoblari | 2 | P1 | S-02 |
-| S-05 | Faoliyat rejalari (`ActivityPlans`) | 2 | P1 | S-02 |
-| S-06 | Xabarnomalar | 2 | P1 | S-02 |
-| S-07 | Demo foydalanuvchilar va paketlar | 2 | P1 | S-02 |
-| S-08 | Email obunalar, murojaatlar, reytinglar | 2 | P2 | S-02 |
-| S-09 | Sintetik ma'lumot belgisi UI'da | 2 | P1 | S-02 |
+| S-04 | Xizmat so'rovlari va javoblari | 2 | P1 | S-07 |
+| S-05 | Faoliyat rejalari (`ActivityPlans`) | 2 | P1 | S-07 |
+| S-06 | Xabarnomalar | 2 | P1 | S-07 |
+| S-07 | Demo foydalanuvchilar (korxona va fuqaro) va paketlar | 2 | P0 | S-02 |
+| S-08 | Email obunalar, murojaatlar, reytinglar | 2 | P2 | S-07 |
+| S-09 | "Namuna ma'lumot" belgisi UI'da | 2 | P0 | S-02 |
+| S-10 | Korxona ko'rsatkichlari (benchmark uchun) | 2 | P1 | S-07 |
+| S-11 | Hududiy ko'rsatkichlar | 2 | P1 | S-02 |
+| S-12 | Hisobot shakllari namunalari va yo'riqnomalar | 2 | P1 | S-02 |
+| S-13 | Buyurtma asosida ma'lumot: narxlar va namunaviy buyurtmalar | 2 | P1 | S-07 |
+| S-14 | Konsultantlar va vaqt jadvali | 2 | P2 | S-07 |
+| S-15 | Fuqarolar uchun kontent va ma'lumot to'plamlari | 2 | P1 | S-02 |
+| S-16 | API kalitlar va ko'rsatkichlarga obunalar | 2 | P2 | S-07 |
 | U-01 | Umumiy UI to'plami: skeleton, bo'sh holat, xato chegarasi | 3 | P0 | — |
 | U-02 | Kabinet: bosh panel (dashboard) | 3 | P1 | U-01, S-07 |
 | U-03 | Kabinet: xabarnomalar markazi | 3 | P1 | B-05, S-06 |
@@ -234,22 +331,46 @@ Har bir vazifada amal qilinadi:
 | U-09 | Tashqi savdo: savdo oqimlari vizualizatsiyasi | 3 | P1 | B-04 |
 | U-10 | Global qidiruv | 3 | P2 | S-03 |
 | U-11 | "Stat AI" chat: FAQ/katalog bo'yicha javob | 3 | P2 | — |
-| U-12 | "Operator" chat: murojaatni bazaga yozish | 3 | P2 | — |
-| U-13 | Hisobot kalendari: eslatma va oy ko'rinishi | 3 | P2 | — |
+| U-12 | "Operator" chat: murojaatni bazaga yozish | 3 | P2 | S-08 |
+| U-13 | Hisobot kalendari: oy ko'rinishi va eslatma | 3 | P2 | B-06 |
 | U-14 | Mobil moslashuv va kirish qulayligi (a11y) | 3 | P2 | U-01 |
-| Q-01 | Katta frontend fayllarini bo'lish | 4 | P2 | F-04 |
-| Q-02 | `OrgInfoPage` chunk'ini kichraytirish | 4 | P2 | — |
-| Q-03 | Grafik kutubxonalarini Recharts'ga keltirish | 4 | P2 | Q-01 |
-| Q-04 | Dublikat va ishlatilmaydigan fayllarni tozalash | 4 | P2 | — |
-| Q-05 | Backend testlari: asosiy oqimlar | 4 | P1 | F-01, S-02 |
-| Q-06 | CI'ga tekshiruv bosqichlari | 4 | P1 | F-01, F-04 |
-| Q-07 | Backend tozalash: `drf-yasg`, `requirements`, vaqtinchalik fayllar | 4 | P2 | — |
-
-> `OS-..` — 10-bo'limdagi ochiq savollar.
+| U-15 | Profilni to'ldirish darajasi va onboarding | 3 | P2 | K-01 |
+| U-16 | Tashqi savdo: taqqoslash, saqlangan filtrlar, eksport | 3 | P2 | U-09 |
+| U-17 | Kitob do'koni: qidiruv, filtr, eng yaqin pochta | 3 | P2 | F-04 |
+| K-01 | Formalarni avtomatik to'ldirish (autofill) | 4 | P1 | B-02, S-07 |
+| K-02 | Tarmoq benchmarki | 4 | P1 | S-10 |
+| K-03 | Bozor tahlili hisoboti (HS kodi bo'yicha PDF) | 4 | P1 | B-04 |
+| K-04 | Hamkor/raqobatchi qidiruvi | 4 | P1 | S-10 |
+| K-05 | Hisobot topshirish yordamchisi | 4 | P1 | S-12, U-13 |
+| K-06 | Buyurtma asosida statistik ma'lumot | 4 | P1 | S-13, U-05 |
+| K-07 | Korxona pasporti sahifasi | 4 | P2 | K-01, S-10 |
+| K-08 | Shartnoma holati vaqt chizig'i va oldindan ko'rish | 4 | P1 | B-03 |
+| K-09 | Tarif taqqoslash va narx kalkulyatori | 4 | P1 | — |
+| FQ-01 | Ochiq ma'lumotlar API'si va yuklab olish | 5 | P1 | S-16 |
+| FQ-02 | Hududiy profil va infografika | 5 | P1 | S-11, B-08 |
+| FQ-03 | Inflyatsiya kalkulyatori: maosh, ijara, kredit | 5 | P1 | — |
+| FQ-04 | Fuqaro kabineti (OneID) | 5 | P1 | S-07 |
+| FQ-05 | "Mening maoshim": o'rtacha bilan taqqoslash | 5 | P2 | S-15 |
+| FQ-06 | Narxlar monitoringi va "savat" kalkulyatori | 5 | P2 | S-15 |
+| FQ-07 | "Statistika oddiy tilda": maqolalar va lug'at | 5 | P1 | S-15 |
+| FQ-08 | Aholi so'rovnomalari | 5 | P2 | S-15 |
+| FQ-09 | Ismlar statistikasi | 5 | P2 | S-15 |
+| FQ-10 | Fuqaro savoli: statistik ma'lumot so'rash | 5 | P2 | S-15, U-12 |
+| FQ-11 | O'rnatiladigan ilova (PWA) | 5 | P2 | U-14 |
+| A-01 | Admin analitika paneli | 6 | P1 | S-07 |
+| A-02 | Ko'rsatkichlarga obuna, email va Telegram xabarlar | 6 | P2 | B-05, B-06, S-16 |
+| A-03 | Konsultant bilan onlayn konsultatsiya | 6 | P2 | S-14 |
+| Q-01 | Katta frontend fayllarini bo'lish | 7 | P2 | F-04 |
+| Q-02 | `OrgInfoPage` chunk'ini kichraytirish | 7 | P2 | — |
+| Q-03 | Grafik kutubxonalarini Recharts'ga keltirish | 7 | P2 | Q-01 |
+| Q-04 | Dublikat va ishlatilmaydigan fayllarni tozalash | 7 | P2 | — |
+| Q-05 | Backend testlari: asosiy oqimlar | 7 | P1 | F-01, S-02 |
+| Q-06 | CI'ga tekshiruv bosqichlari | 7 | P1 | F-01, F-04 |
+| Q-07 | Backend tozalash: `drf-yasg`, `requirements`, vaqtinchalik fayllar | 7 | P2 | — |
 
 ---
 
-## 5. 0-bosqich: ishchi muhit va sifat poydevori
+## 6. 0-bosqich: ishchi muhit va sifat poydevori
 
 Maqsad: keyingi ishlarni tekshirib bo'ladigan holga keltirish (testlar ishlasin, tip xatolari yangi xatolarni yashirmasin).
 
@@ -343,7 +464,7 @@ Maqsad: keyingi ishlarni tekshirib bo'ladigan holga keltirish (testlar ishlasin,
 
 ---
 
-## 6. 1-bosqich: buzuq joylarni tuzatish
+## 7. 1-bosqich: buzuq joylarni tuzatish
 
 ### B-01 · Token yangilash URL'i · **P0**
 
@@ -510,7 +631,7 @@ Maqsad: keyingi ishlarni tekshirib bo'ladigan holga keltirish (testlar ishlasin,
 
 ---
 
-## 7. 2-bosqich: sintetik ma'lumot
+## 8. 2-bosqich: sintetik ma'lumot
 
 ### Asosiy tamoyillar
 
@@ -641,14 +762,14 @@ python manage.py seed_demo --demographics       # B-08 parquet
 
 ---
 
-### S-07 · Demo foydalanuvchilar va paketlar · **P1**
+### S-07 · Demo foydalanuvchilar (korxona va fuqaro) va paketlar · **P0**
 
 **Maqsad:** UI'ni barcha rollar bo'yicha "to'la" holatda ko'rish, real foydalanuvchi akkauntiga kirmasdan.
 
 **Fayllar:** `backend/apps/accounts/models.py`, `organizations/models.py`, `services/models.py`, `contracts/models.py`, `common/seeders/demo_users.py`
 
 **Qadamlar:**
-1. Rollar bo'yicha demo akkauntlar: `demo_yuridik_1..5` (yuridik shaxs), `demo_jismoniy_1..3`, `demo_bugalter`, `demo_employee`. Username `demo_` bilan boshlanadi, email `@demo.invalid` domenida.
+1. Rollar bo'yicha demo akkauntlar: `demo_yuridik_1..5` (yuridik shaxs), `demo_jismoniy_1..3` (fuqaro, OneID'siz parol bilan kiradi, `User.role` jismoniy shaxs), `demo_tadqiqotchi`, `demo_bugalter`, `demo_employee`; konsultantlar S-14 da. Username `demo_` bilan boshlanadi, email `@demo.invalid` domenida.
 2. Parol `.env` dagi `DEMO_USER_PASSWORD` dan olinadi; o'zgaruvchi bo'lmasa, komanda tasodifiy parol yaratib konsolga **bir marta** chiqaradi. Parol kodga yozilmaydi.
 3. Har yuridik demo foydalanuvchiga `Organization` (o'ylab topilgan nom, `[DEMO]` prefiksi, demo STIR diapazoni, real `Region`/`District` ga bog'lanadi).
 4. 4 ta mavjud paketdan turlicha `UserServicePackage` (B-07 qilingan bo'lsa, muddatlari bilan) va `UserServicePackageItemUse` yozuvlari: kimdir limitning 20% ini, kimdir 85% ini ishlatgan.
@@ -675,21 +796,152 @@ python manage.py seed_demo --demographics       # B-08 parquet
 
 ---
 
-### S-09 · Sintetik ma'lumot belgisi UI'da · **P1**
+### S-09 · "Namuna ma'lumot" belgisi UI'da · **P0**
 
-**Fayllar:** tegishli serializer'lar (S-03..S-08 modellari), `frontend/src/components/common/DemoBadge.tsx` (yangi)
+**Fayllar:** tegishli serializer'lar (S-03..S-08 modellari), `frontend/src/components/common/SampleBadge.tsx`, `SampleBanner.tsx` (yangi)
 
 **Qadamlar:**
 1. Sintetik obyekt qaytaradigan serializer'larga `is_synthetic` maydoni (S-01 `synthetic_ids` orqali, N+1 so'rovsiz).
-2. Frontend'da kichik "Demo" yorlig'i komponenti: kartochka, jadval qatori, sahifa sarlavhasi (butun sahifa sintetik bo'lsa).
-3. `DEBUG=False` da maydon doim `false` va yorliq chiqmaydi.
+2. Frontend'da ikki komponent: kichik "Namuna" yorlig'i (kartochka, jadval qatori, grafik sarlavhasi) va sahifa tepasidagi banner "Bu bo'limdagi ma'lumotlar namuna sifatida ko'rsatilmoqda" (butun sahifa yoki asosiy blok sintetik bo'lsa). Yorliq ustiga bosilganda qisqa tushuntirish.
+3. Agregat endpoint'lar (benchmark, hududiy profil, ish haqi va h.k.) javobida `data_source: "real" | "synthetic" | "mixed"` maydoni; frontend shunga qarab belgi qo'yadi.
+4. Grafik va PNG/PDF eksportlarda ham "NAMUNA" yozuvi qoladi (skrinshot real ma'lumot deb tarqalmasligi uchun).
+5. `DEBUG=False` da maydon doim `false` va yorliq chiqmaydi.
 
 **Qabul mezonlari:**
-- Klassifikatorlar, so'rovlar, xabarnomalar, demografiya (sintetik fayl) sahifalarida yorliq ko'rinadi.
+- 4-bo'limdagi jadvalda "Sintetik namuna" ustuni to'ldirilgan har bir sahifada yorliq yoki banner ko'rinadi.
+- Real ma'lumotli sahifalarda (tashqi savdo, KTUT, CPI) belgi chiqmaydi.
 
 ---
 
-## 8. 3-bosqich: UI'ni boyitish
+### Yangi xizmatlar uchun seeder'lar (S-10..S-16)
+
+Umumiy talab: har bir yangi model **alohida jadval** (real jadvallarga ustun qo'shilmaydi, faqat yangi jadvallar). Ko'rsatkichlar realistik oraliqda, qat'iy `random seed` bilan, hudud va tumanlar real `Region`/`District` jadvallaridan olinadi. Yangi jadvallardagi hamma qatorlar S-01 reyestriga tushadi, shuning uchun `--flush` ularni to'liq tozalaydi. Keyinchalik real manba paydo bo'lsa (OS-13), xuddi shu jadvalga import qilinadi va namuna `--flush` bilan olib tashlanadi.
+
+### S-10 · Korxona ko'rsatkichlari · **P1**
+
+**Kerak:** K-02 benchmark, K-04 o'lcham filtri, K-07 pasport.
+
+**Model (yangi, `additional_services` yoki yangi `analytics` app):**
+```text
+EnterpriseIndicator
+  stir          CharField, index   (KTUT STIR'iga mos)
+  year          PositiveSmallIntegerField
+  revenue       Decimal  (ming so'm)
+  employees     PositiveIntegerField
+  output_value  Decimal  (ishlab chiqarilgan mahsulot, ming so'm)
+  export_value  Decimal  (ming USD, nullable)
+  unique(stir, year)
+```
+
+**Seed:**
+1. Demo korxonalar (S-07) uchun 2019–2025 yillar ko'rsatkichlari, yildan yilga ±5–20% o'zgarish bilan.
+2. Benchmark guruhlari bo'sh qolmasligi uchun: KTUT'dagi **real** korxonalardan har (OKED bo'limi × hudud) guruhidan ko'pi bilan 30 tasiga sintetik ko'rsatkich. Real korxona nomi va STIR'i ishlatiladi, lekin ko'rsatkichlar o'ylab topilgan, shuning uchun UI'da ular **faqat guruh o'rtachasi** sifatida ko'rinadi, alohida begona korxona ko'rsatkichi hech qachon chiqmaydi (K-02, K-04).
+3. Taqsimot: xodimlar soni log-normal (ko'p kichik, kam katta korxona), tushum xodimlar soniga proporsional + shovqin.
+
+**Qabul mezonlari:** har demo korxonaning OKED×hudud guruhida kamida 10 ta yozuv bor; `--flush` dan keyin jadval bo'sh.
+
+### S-11 · Hududiy ko'rsatkichlar · **P1**
+
+**Kerak:** FQ-02 hududiy profil, FQ-05, bosh sahifa.
+
+**Model:**
+```text
+RegionIndicator
+  region        FK Region
+  district      FK District, nullable   (tuman darajasi uchun)
+  indicator     CharField (choices: avg_salary, unemployment_rate, grp_per_capita,
+                births, deaths, migration_net, retail_turnover, housing_built, ...)
+  year          PositiveSmallIntegerField
+  period        CharField ("Y", "Q1".."Q4")
+  value         Decimal
+  unit          CharField
+```
+
+**Seed:** 14 hudud × 8–10 ko'rsatkich × 2018–2025, yillik va choraklik; tumanlar uchun asosiy 4 ko'rsatkich. Toshkent shahri yuqoriroq ish haqi va YaHM bilan, hududlar o'rtasida realistik farq. Agar biror ko'rsatkich real manbada bo'lsa (masalan, aholi soni demografiyada), u sintetikdan **ustun** turadi va sintetigi yaratilmaydi.
+
+### S-12 · Hisobot shakllari namunalari va yo'riqnomalar · **P1**
+
+**Kerak:** K-05 hisobot topshirish yordamchisi, U-13.
+
+**Model:**
+```text
+ReportGuide
+  report        FK ReportList (108 ta real shakl)
+  summary_uz/_ru/_cry      TextField  (kim topshiradi, nima uchun)
+  steps_uz/_ru/_cry        TextField  (Markdown, to'ldirish qadamlari)
+  common_errors_uz/_ru/_cry TextField
+  sample_file   FileField, nullable   (namunaviy to'ldirilgan shakl PDF)
+  legal_basis   CharField
+```
+
+**Seed:** eng ko'p korxonaga biriktirilgan 20 ta shakl uchun yo'riqnoma (`KtutReportList` bo'yicha sanab tanlanadi), qolganlari uchun umumiy shablon matn. Namunaviy PDF `media/demo/report_samples/` ga generatsiya qilinadi (reportlab yoki oddiy HTML→PDF), sahifasida "NAMUNA" suv belgisi.
+
+### S-13 · Buyurtma asosida ma'lumot: narxlar va namunaviy buyurtmalar · **P1**
+
+**Kerak:** K-06.
+
+**Model:**
+```text
+CustomRequestTariff
+  data_type       CharField (choices: trade, enterprise, industry, demography, prices, other)
+  base_bhm        Decimal   (asosiy narx, BHM'da)
+  per_indicator_bhm Decimal
+  per_year_bhm    Decimal
+  per_region_bhm  Decimal
+  urgency_multiplier Decimal (shoshilinch uchun, masalan 1.5)
+```
+`ServiceRequests` ga bog'langan `CustomRequestSpec` (ma'lumot turi, ko'rsatkichlar, yillar, hududlar, format, muddat, hisoblangan narx).
+
+**Seed:** har ma'lumot turi uchun tarif; demo korxonalardan 15 ta buyurtma turli holatda, bajarilganlariga namunaviy XLSX natija fayli (`media/demo/custom_requests/`).
+
+### S-14 · Konsultantlar va vaqt jadvali · **P2**
+
+**Kerak:** A-03.
+
+**Model:**
+```text
+Consultant      user FK, mavzular (M2M Service), bio_uz/_ru/_cry, foto, faol
+ConsultationSlot consultant FK, starts_at, duration_min, format (online|ofis), is_booked
+ConsultationBooking slot FK (unique), user FK, mavzu, savol, holat (band, o'tdi, bekor),
+                    meeting_url, izoh, limit_use FK UserServicePackageItemUse (nullable)
+```
+
+**Seed:** 5 ta demo konsultant (`demo_konsultant_1..5`, `employee` roli), keyingi 30 kun uchun ish kunlari 10:00–17:00 oralig'ida slotlar, o'tgan va kelgusi 12 ta band qilish.
+
+### S-15 · Fuqarolar uchun kontent va ma'lumot to'plamlari · **P1**
+
+**Kerak:** FQ-05..FQ-10.
+
+| Model | Maydonlar (qisqa) | Seed hajmi |
+|---|---|---|
+| `SalaryDistribution` | hudud, tarmoq (OKED bo'limi), yil, median, o'rtacha, p25, p75, p90 | 14 hudud × 15 tarmoq × 2020–2025 |
+| `ConsumerPrice` | mahsulot (non, go'sht, guruch, yog', tuxum, kartoshka, sut, benzin, ...), hudud, sana (oylik), narx, birlik | 25 mahsulot × 14 hudud × 36 oy |
+| `Article` | sarlavha/matn uz/ru/cry, mavzu, muqova, o'qish vaqti, chop etilgan sana, `is_published` | 12 maqola ("Inflyatsiya nima?", "YaIM qanday hisoblanadi?", "Ishsizlik darajasi", ...) |
+| `GlossaryTerm` | atama, ta'rif uz/ru/cry, misol | 40 atama |
+| `Survey`, `SurveyQuestion`, `SurveyAnswer` | so'rovnoma, savollar (bitta/ko'p tanlov, shkala), javoblar (anonim, hudud, yosh guruhi) | 4 so'rovnoma, har biriga 300–800 sintetik javob |
+| `NameStat` | ism, jins, yil, hudud, soni | eng ommabop 200 ism × 2015–2025 × 14 hudud |
+| `CitizenQuestion` | savol, toifa, javob, javob bergan xodim, holat | 20 savol-javob |
+
+Ism statistikasi va so'rovnoma natijalari **to'liq sintetik**: UI'da sahifa tepasida doimiy banner "Bu bo'limdagi ma'lumotlar namuna" (S-09). Maqolalar matni Claude Code tomonidan yozilgan oddiy ta'riflar, statistik raqam o'z ichiga olmaydi (yoki "namuna raqam" deb belgilanadi).
+
+### S-16 · API kalitlar va ko'rsatkichlarga obunalar · **P2**
+
+**Kerak:** FQ-01, A-02.
+
+**Model:**
+```text
+ApiKey          user FK, nom, prefix (8 belgi, ko'rinadi), key_hash, kunlik_limit, faol, created_at, last_used_at
+ApiUsage        api_key FK, sana, endpoint, so'rovlar_soni      (kunlik agregat)
+IndicatorSubscription user FK, ko'rsatkich (choices: cpi, trade, demography, region:<id>, report:<id>),
+                kanal (in_app|email|telegram), faol
+IndicatorUpdateEvent  ko'rsatkich, sarlavha, sana, havola
+```
+
+**Seed:** demo tadqiqotchiga 2 ta API kalit (kalitning o'zi bazada faqat hash sifatida, seed tugaganda bir marta konsolga chiqadi), so'nggi 30 kunlik foydalanish statistikasi; demo foydalanuvchilarga 3–5 obuna; 10 ta "ko'rsatkich yangilandi" hodisasi.
+
+---
+
+## 9. 3-bosqich: UI'ni boyitish
 
 Umumiy talablar: barcha yangi bloklar 3 tilda, tungi/kunduzgi rejimda (`ThemeContext`), 360 px kenglikdan boshlab moslashadi. Har bir sahifada yuklanish, bo'sh va xato holatlari bor (U-01).
 
@@ -921,7 +1173,491 @@ Umumiy talablar: barcha yangi bloklar 3 tilda, tungi/kunduzgi rejimda (`ThemeCon
 
 ---
 
-## 9. 4-bosqich: kod sifati
+### U-15 · Profilni to'ldirish darajasi va onboarding · **P2**
+
+**Ma'lumot:** foydalanuvchi profili; demo foydalanuvchilar S-07 da turli to'ldirilganlik darajasida.
+
+**Qadamlar:**
+1. Kabinetda "Profil 60% to'ldirilgan" ko'rsatkichi va yetishmayotgan maydonlar ro'yxati (K-01 bilan bir bosishda to'ldirish).
+2. Birinchi kirishda 4–5 qadamli qisqa tanishtiruv (xizmatlar, tariflar, hisobotlarim, xabarnomalar); yopilgani profilda saqlanadi.
+
+**Qabul mezonlari:** tanishtiruv bir marta chiqadi; foiz maydonlar to'ldirilganda yangilanadi.
+
+---
+
+### U-16 · Tashqi savdo: taqqoslash, saqlangan filtrlar, eksport · **P2**
+
+**Ma'lumot:** real tashqi savdo; saqlangan filtrlar namunasi demo foydalanuvchilar uchun `seed_demo` da.
+
+**Qadamlar:**
+1. Ikki davlat yoki ikki yilni yonma-yon taqqoslash.
+2. Login qilgan foydalanuvchi uchun filtrlarni saqlash ("Mening so'rovlarim"), yangi model `SavedTradeQuery` (foydalanuvchi, nom, filtr JSON).
+3. Joriy jadvalni CSV/XLSX ga eksport (maksimum 10 000 qator, server'da cheklanadi).
+
+**Qabul mezonlari:** saqlangan filtr ochilganda bir xil natija; eksport chegarasi ishlaydi.
+
+---
+
+### U-17 · Kitob do'koni: qidiruv, filtr, eng yaqin pochta · **P2**
+
+**Ma'lumot:** real kitoblar va pochta nuqtalari; sevimlilar namunasi demo foydalanuvchilar uchun.
+
+**Qadamlar:**
+1. Nom, yil, tur (elektron/bosma/disk) bo'yicha qidiruv va filtr; saralash (yangi, narx).
+2. "Sevimlilar" ro'yxati.
+3. Pochta xaritasida "Menga eng yaqin" (geolokatsiya ruxsati bilan, 1450 nuqtadan masofa bo'yicha).
+4. To'lov qismi o'zgarmaydi (2.2).
+
+**Qabul mezonlari:** filtr holati URL'da; geolokatsiya rad etilsa xarita odatdagidek ishlaydi.
+
+---
+
+## 10. 4-bosqich: korxonalar uchun xizmatlar
+
+Korxonalar uchun yangi xizmatlar bazada allaqachon bor ma'lumotga tayanadi: KTUT (65 540 korxona), korxona↔hisobot bog'lanishi (225 768), tashqi savdo (3,58 mln), sanoat (53 319). Real ma'lumot yetmaydigan joyda (korxona ko'rsatkichlari, yo'riqnomalar, tariflar) 8-bo'limdagi seeder'lar namuna yozadi.
+
+### 10.1. Formalarni avtomatik to'ldirish (autofill): yondashuv
+
+**Qisqa javob: ha, foydali, lekin "avtomatik to'ldirish + foydalanuvchi tasdiqlaydi" ko'rinishida.** Qiymat jim qo'yib yuborilmaydi: har bir to'ldirilgan maydon yonida manba belgisi turadi va foydalanuvchi uni o'zgartira oladi.
+
+**Nima beradi:**
+- Shartnoma rekvizitlaridagi xatolar kamayadi (korxona nomi, STIR, manzil, rahbar, bank). Shartnoma DOCX'da yuridik hujjat bo'lgani uchun bu eng katta foyda.
+- Foydalanuvchi vaqti tejaladi: bir xil ma'lumot (STIR, telefon, manzil) har formada qayta yozilmaydi.
+- Ma'lumot bir manbadan keladi, shuning uchun hisobotlarda bir korxona ikki xil nom bilan chiqmaydi.
+
+**Qayerdan to'ldiriladi:**
+
+| Manba | Qaysi maydonlar | Izoh |
+|---|---|---|
+| Foydalanuvchi profili (`User`) | F.I.Sh., telefon, email | Har doim mavjud |
+| `Organization` (1:1) | Korxona nomi, STIR, manzil, hudud/tuman, bank rekvizitlari | Profil to'ldirilgan bo'lsa |
+| KTUT jadvali (bazada) | Nomi, OKED, hudud, tuman, mulkchilik shakli | STIR bo'yicha, ichki baza, tashqi so'rov yo'q |
+| Tashqi reyestr (`REGISTER_BASE_URL`) | Rahbar, manzil, ustav fondi | Ishlamasa, KTUT yoki qo'lda kiritishga qaytadi |
+| OneID (jismoniy shaxs) | F.I.Sh., manzil | Faqat OneID orqali kirganda |
+| Oldingi buyurtma/shartnoma | Yetkazish manzili, pochta bo'limi, bank rekvizitlari | "Oxirgi marta ishlatilgan" |
+
+**Qaysi formalarga:** profil va korxona ma'lumoti, shartnoma yaratish, xizmat so'rovi (U-05), kitob buyurtmasi (manzil + eng yaqin pochta bo'limi), murojaat/operator chat (U-12).
+
+**Xavflar va ularga yechim:**
+
+| Xavf | Yechim |
+|---|---|
+| Reyestrdagi ma'lumot eskirgan bo'lishi mumkin, shartnomaga noto'g'ri rekvizit tushadi | Shartnoma yaratishdan oldin "Rekvizitlarni tekshiring" bosqichi; foydalanuvchi tasdiqlamaguncha shartnoma yaratilmaydi |
+| Begona STIR kiritib boshqa korxona ma'lumotini ko'rish | Autofill faqat foydalanuvchining **o'z** `Organization` STIR'i bo'yicha ishlaydi; boshqa STIR uchun faqat ochiq KTUT maydonlari (nom, OKED, hudud). Rahbar PINFL'i va telefonlar hech qachon to'ldirilmaydi |
+| STIR bo'yicha korxona ma'lumoti pullik xizmat (paket limiti hisoblanadi) | Autofill uchun ichki chaqiruv limitni **sarflamaydi**; u alohida endpoint, xizmat endpoint'i emas |
+| Tashqi reyestr ishlamay qolsa forma qotib qoladi | 3 soniya timeout, keyin KTUT'dan yoki qo'lda; xato forma ishini to'xtatmaydi |
+| Foydalanuvchi to'ldirilgan qiymatni o'zgartirgani yo'qoladi | Qo'lda o'zgartirilgan maydon "Tahrirlangan" deb belgilanadi va qayta to'ldirishda so'ralmasdan ustidan yozilmaydi (Stat Hisobot loyihasidagi prefill qoidasi bilan bir xil) |
+
+### K-01 · Formalarni avtomatik to'ldirish · **P1**
+
+**Ma'lumot:** real (profil, `Organization`, KTUT); demo korxonalar S-07 dan.
+
+**Fayllar:** backend: yangi `GET /api/organizations/me/prefill/` (`organizations` app'ida); `Organization` va KTUT modellari; tashqi reyestr chaqiruvchi kod (aniqlash kerak). Frontend: yangi `frontend/src/hooks/usePrefill.ts`, `frontend/src/components/forms/PrefillBadge.tsx`; shartnoma, profil, kitob buyurtmasi, xizmat so'rovi formalari.
+
+**Qadamlar:**
+1. Endpoint `request.user` uchun maydonlar ro'yxatini qaytaradi: `{ field, value, source: "profile|organization|ktut|registry|last_order", fetched_at }`. Manbalar ustuvorligi: profil/organization (foydalanuvchi o'zi kiritgan) > reyestr > KTUT > oxirgi buyurtma.
+2. Tashqi reyestrga so'rov 3 soniya timeout bilan, natija 24 soat keshlanadi. Bu chaqiruv paket limitini (`UserServicePackageItemUse`) **yozmaydi**.
+3. Faqat o'z korxonasi. Boshqa STIR uchun autofill yo'q (10.1-bo'lim jadvali).
+4. Frontend hook bo'sh maydonlarni to'ldiradi, foydalanuvchi o'zgartirgan maydonni belgilaydi va ustidan yozmaydi. Har to'ldirilgan maydon yonida kichik manba belgisi (tooltip: "KTUT bazasidan, 2026-10-14").
+5. Shartnoma formasida yaratishdan oldin "Rekvizitlarni tasdiqlayman" belgilash katagi.
+6. Kitob buyurtmasida: oxirgi yetkazish manzili va brauzer geolokatsiyasi (ruxsat berilsa) bo'yicha eng yaqin pochta bo'limi (1450 nuqtadan, U-17 bilan umumiy funksiya).
+7. Profil sahifasida "Ma'lumotlarni reyestrdan yangilash" tugmasi: farqlarni ko'rsatadi (eski → yangi), foydalanuvchi qaysilarini qabul qilishni tanlaydi.
+
+**Qabul mezonlari:**
+- Demo yuridik foydalanuvchida shartnoma formasi ochilganda korxona maydonlari to'la, har birida manba belgisi.
+- Tashqi reyestr o'chiq bo'lsa ham forma 3 soniyadan keyin ishlaydi (KTUT yoki bo'sh).
+- Qo'lda o'zgartirilgan maydon qayta to'ldirishda saqlanib qoladi (frontend test).
+- Autofill so'rovi `UserServicePackageItemUse` ga yozuv qo'shmaydi (backend test).
+
+---
+
+### K-02 · Tarmoq benchmarki · **P1**
+
+**Nima:** korxona o'z ko'rsatkichlarini (tushum, xodimlar soni, mahsulot hajmi, eksport, xodim boshiga tushum) shu OKED va hududdagi korxonalar bilan solishtiradi: guruh medianasi, kvartillar va korxonaning qaysi foizilda turgani.
+
+**Ma'lumot:** guruh — KTUT (real OKED va hudud); ko'rsatkichlar — `EnterpriseIndicator` (S-10, sintetik namuna). Korxonaning o'z ko'rsatkichlari: S-10 dan yoki foydalanuvchi qo'lda kiritadi (kiritilgani faqat o'ziga ko'rinadi).
+
+**Fayllar:** backend: `GET /api/analytics/benchmark/?year=&level=oked_section|oked_division&geo=region|country`; frontend: kabinetda yangi "Benchmark" bo'limi (`pages/cabinet/Benchmark.tsx`).
+
+**Qadamlar:**
+1. Foydalanuvchi `Organization` STIR'i → KTUT'dan OKED va hudud. Guruh: shu OKED + shu hudud; guruhda 10 dan kam korxona bo'lsa avtomatik kengaytiriladi (OKED bo'limi → butun respublika) va UI'da qaysi daraja tanlangani aytiladi.
+2. Javob faqat agregat: median, p25, p75, guruh hajmi va foydalanuvchining o'z qiymati/persentili. Begona korxonaning alohida qiymati qaytarilmaydi.
+3. UI: har ko'rsatkich uchun "quti" grafik (p25–p75 oraliq, median chizig'i, korxona nuqtasi), yillar bo'yicha dinamika (korxona vs guruh medianasi), qisqa matnli xulosa ("Xodim boshiga tushum bo'yicha guruhning yuqori 30% idasiz").
+4. Paket limiti: har bir benchmark hisoboti `UserServicePackageItemUse` ga yoziladi (yangi `Service` yozuvi "Tarmoq benchmarki" admin orqali qo'shiladi; qaysi paketga kirishi OS-14).
+5. PDF eksport (jsPDF, lazy-load).
+
+**Qabul mezonlari:**
+- Demo korxona uchun barcha grafiklar to'la va "Namuna ma'lumot" belgisi bor.
+- API javobida begona STIR yo'q (test).
+- Limit tugaganda 403 va "Paketni kengaytirish" havolasi.
+
+---
+
+### K-03 · Bozor tahlili hisoboti · **P1**
+
+**Nima:** tanlangan mahsulot (HS kodi) bo'yicha bir sahifalik hisobot: eksport va import hajmi yillar bo'yicha, asosiy hamkor davlatlar, o'rtacha narx dinamikasi (qiymat ÷ og'irlik), bozor konsentratsiyasi, o'sayotgan va qisqarayotgan bozorlar. PDF ko'rinishida yuklab olinadi.
+
+**Ma'lumot:** to'liq real — tashqi savdo (3,58 mln yozuv, 7330 HS, 251 davlat, 8 yil). Sintetik kerak emas. Og'irlik bo'lmagan yozuvlar narx hisobidan chiqariladi va bu hisobotda yoziladi.
+
+**Fayllar:** backend: `GET /api/additional-services/market-report/?hs=&years=&flow=`; PDF generatsiya (server tomonda, mavjud kutubxonalar bilan; agar yo'q bo'lsa `weasyprint` emas, frontend jsPDF bilan); frontend: `/market-report` sahifasi va tashqi savdo sahifasidan havola.
+
+**Qadamlar:**
+1. HS kodi qidiruvi (kod yoki nom bo'yicha, 3 tilda, avtomatik taklif).
+2. Agregatlar bitta so'rovda hisoblanadi va 24 soat keshlanadi (B-04 dagi indekslardan foydalaniladi).
+3. Hisobot bloklari: asosiy raqamlar, dinamika grafigi, top-10 davlat (eksport/import), narx dinamikasi, Herfindahl indeksi (konsentratsiya) sodda tushuntirish bilan, "Imkoniyatlar" (importi o'sayotgan, lekin O'zbekiston ulushi kichik davlatlar).
+4. Ko'rish bepul (qisqa versiya), to'liq PDF paket limiti bilan (K-02 dagi kabi yangi `Service`).
+
+**Qabul mezonlari:**
+- 3 ta turli HS kodi uchun hisobot raqamlari SQL bilan qo'lda tekshirilganga teng.
+- Kesh bilan qayta ochish 300 ms dan tez.
+
+---
+
+### K-04 · Hamkor/raqobatchi qidiruvi · **P1**
+
+**Nima:** KTUT bo'yicha korxonalarni hudud, tuman, OKED, mulkchilik shakli va o'lcham (xodimlar soni oralig'i) bo'yicha filtrlash, ro'yxatni Excel'ga eksport qilish.
+
+**Ma'lumot:** KTUT (real, 65 540). O'lcham filtri `EnterpriseIndicator` (S-10) dan, faqat oraliq sifatida ("1–10", "11–50", "51–250", "250+"); aniq raqam ko'rsatilmaydi. O'lchami yo'q korxonalar "Noma'lum" guruhida.
+
+**Fayllar:** backend: `GET /api/additional-services/ktut/search/` (mavjud KTUT endpoint'ini kengaytirish yoki yangi); frontend: `/partners` sahifasi.
+
+**Qadamlar:**
+1. Filtrlar paneli, natijalar jadvali (nom, STIR, OKED, hudud/tuman, o'lcham oralig'i), sahifalash (50 tadan).
+2. Xaritada ko'rinish (tuman markazi bo'yicha klaster, aniq manzil yo'q).
+3. Eksport: XLSX, bir martada ko'pi bilan 1000 qator, har eksport paket limitidan yechiladi. Telefon, PINFL va rahbar ma'lumotlari eksportga **kirmaydi**.
+4. "Saqlangan qidiruvlar" (U-16 dagi model bilan bir xil yondashuv).
+
+**Qabul mezonlari:**
+- Filtrlar birgalikda to'g'ri ishlaydi (test); 65 ming qatorda javob 500 ms dan tez (indekslar bilan).
+- Eksport faylida shaxsiy ma'lumot ustunlari yo'q.
+
+---
+
+### K-05 · Hisobot topshirish yordamchisi · **P1**
+
+**Nima:** korxona o'z STIR'i bo'yicha qaysi hisobotlarni qachon topshirishi kerakligini ko'radi; har shakl uchun namuna, to'ldirish yo'riqnomasi, keng tarqalgan xatolar va muddatdan oldin eslatma.
+
+**Ma'lumot:** majburiy hisobotlar va muddatlar — real (`KtutReportList` 225 768, `ReportList` 108). Yo'riqnoma va namunalar — `ReportGuide` (S-12, sintetik namuna). Topshirilgan/topshirilmagan holat — `submitted-report` mavjud bo'lsa (OS-11).
+
+**Fayllar:** backend: `GET /api/additional-services/my-reports/`, `GET /api/additional-services/report-guide/<report_id>/`; `send_report_notifications` (B-06). Frontend: kabinetda "Hisobotlarim" bo'limi, hisobot kartochkasi.
+
+**Qadamlar:**
+1. Ro'yxat: "Shu oy", "Kechikkan", "Yil bo'yicha" kalendar; har qatorda shakl nomi, muddat, qolgan kunlar (rangli).
+2. Hisobot kartochkasi: kim topshiradi, qadamlar, keng tarqalgan xatolar, namunaviy PDF, huquqiy asos.
+3. Eslatma sozlamasi: muddatdan N kun oldin in-app (A-02 dan keyin email/Telegram) xabarnoma; Celery Beat task'i.
+4. Kabinet bosh panelida (U-02) "Yaqin muddatlar" kartochkasi.
+5. STIR'i KTUT'da yo'q foydalanuvchida tushuntiruvchi bo'sh holat va "Hisobot kalendari" umumiy sahifasiga havola.
+
+**Qabul mezonlari:**
+- Demo korxonada kamida 3 ta hisobot, har birida yo'riqnoma va namuna ko'rinadi.
+- Eslatma task'i belgilangan kunda xabarnoma yaratadi (test, vaqt mock).
+
+---
+
+### K-06 · Buyurtma asosida statistik ma'lumot · **P1**
+
+**Nima:** korxona katalogda yo'q individual ma'lumotni buyurtma qiladi (masalan, "2020–2025 yillarda Farg'ona vodiysida to'qimachilik korxonalari soni va ishlab chiqarish hajmi"). Narx forma to'ldirilayotganda avtomatik hisoblanadi, buyurtma xodimga tushadi, natija fayli kabinetga keladi.
+
+**Ma'lumot:** mavjud `ServiceRequests` / `ServiceDeliverables` moduli; tariflar va namunaviy buyurtmalar — S-13.
+
+**Fayllar:** `backend/apps/services/` (so'rov API'si kengaytiriladi), yangi `CustomRequestTariff`, `CustomRequestSpec`; frontend: U-05 dagi "Yangi so'rov" formasiga "Individual ma'lumot" turi.
+
+**Qadamlar:**
+1. Forma: ma'lumot turi, ko'rsatkichlar (ko'p tanlov), yillar oralig'i, hududlar, format (XLSX/PDF), shoshilinchlik, izoh. K-01 autofill bilan korxona ma'lumotlari to'ladi.
+2. Narx kalkulyatori backend'da: `base + indicators × per_indicator + years × per_year + regions × per_region`, shoshilinch bo'lsa ko'paytuvchi; BHM qiymati `SiteSettings` dan. Frontend faqat backend natijasini ko'rsatadi.
+3. Buyurtma yuborilganda: so'rov `ServiceRequests` ga, spetsifikatsiya va narx `CustomRequestSpec` ga; mas'ul xodimga xabarnoma.
+4. Xodim interfeysi (U-05 dagi employee qismi): narxni tasdiqlash yoki o'zgartirish, natija faylini yuklash.
+5. To'lov: **onlayn to'lov qo'shilmaydi.** Narx tasdiqlangach, buyurtma mavjud oqim bo'yicha (shartnomaga qo'shimcha yoki paket limiti) davom etadi; UI'da "To'lov bo'yicha menejer bog'lanadi" matni.
+
+**Qabul mezonlari:**
+- Bir xil parametrlar bilan frontend va backend narxi bir xil (test).
+- Demo korxona buyurtma yaratadi → demo xodim natija yuklaydi → korxona kabinetda faylni yuklab oladi.
+
+---
+
+### K-07 · Korxona pasporti sahifasi · **P1**
+
+**Ma'lumot:** real KTUT, hisobotlar, sanoat; ko'rsatkichlar bloki S-10 (namuna).
+
+**Nega:** korxona haqidagi ma'lumot hozir bir necha sahifaga tarqalgan (`/organizations-ktut`, `/orginfo`, `/industry`, hisobotlar). Bitta sahifa foydalanuvchi uchun ham, xodim uchun ham qulay.
+
+**Fayllar:** frontend: yangi `/cabinet/organization` sahifasi; mavjud API'lar: KTUT, `submitted-report`, sanoat mahsulotlari, `my-reports` (K-05).
+
+**Qadamlar:**
+1. Bloklar: asosiy ma'lumot (KTUT), hisobotlar (K-05 qisqacha), ishlab chiqaradigan mahsulotlari (sanoat jadvali, agar STIR bo'yicha bog'lanish bo'lsa), tashqi savdo faoliyati (agar ma'lumotda korxona kesimi bo'lsa; bo'lmasa blok chiqmaydi), shartnomalar va paket.
+2. "PDF qilib yuklab olish" (jsPDF allaqachon bor; Q-02 dagi lazy-load bilan).
+3. Faqat o'z korxonasi. Boshqa korxonalar uchun mavjud ochiq sahifalar o'zgarishsiz qoladi.
+
+**Qabul mezonlari:** demo korxona sahifasi to'la; ma'lumoti yo'q blok yashiriladi, xato chiqarmaydi.
+
+---
+
+### K-08 · Shartnoma holati vaqt chizig'i va oldindan ko'rish · **P1**
+
+**Ma'lumot:** real shartnomalar; demo shartnomalar va holat tarixi S-07 dan.
+
+**Fayllar:** `backend/apps/contracts/` (serializer, holat tarixi), frontend kabinetdagi shartnomalar bo'limi.
+
+**Qadamlar:**
+1. Har shartnoma uchun qadamlar chizig'i: yaratildi → DIDOX'ga yuborildi → mijoz imzoladi → agentlik imzoladi → to'langan summa / jami (faqat o'qish, `payed_amount` dan) → paket faol.
+2. Holat tarixi saqlanmasa: `ContractStatusLog` modeli (shartnoma, holat, vaqt), DIDOX tekshiruvi (B-06) holat o'zgarganda yozadi. Mavjud real shartnomalar uchun tarix bo'sh boshlanadi, joriy holat ko'rsatiladi.
+3. Yaratishdan oldin shartnoma matnini oldindan ko'rish (DOCX'dan HTML yoki PDF ko'rinish; backend'da mavjud docxtpl natijasi asosida). Bu ko'rinish bazaga shartnoma yozmaydi.
+4. Holat o'zgarganda xabarnoma (B-05).
+
+**Qabul mezonlari:**
+- Demo shartnomalarda vaqt chizig'i to'g'ri bosqichda turadi.
+- Oldindan ko'rish `Contract` jadvaliga yozuv qo'shmaydi, DIDOX va Telegram chaqirilmaydi (test).
+- `payment/` kodida diff yo'q.
+
+---
+
+### K-09 · Tarif taqqoslash va narx kalkulyatori · **P1**
+
+**Ma'lumot:** real (4 paket, 17 sektor narxi, `SiteSettings`). Sintetik kerak emas.
+
+**Fayllar:** `/services`, `/tariff/:id` sahifalari; mavjud `services/package/`, `ServicePackagePrice`, `SiteSettings` (BHM qiymati).
+
+**Qadamlar:**
+1. 4 ta paketni yonma-yon taqqoslash jadvali: har xizmat bo'yicha limit (40 element), narx.
+2. Kalkulyator: foydalanuvchi sektorini tanlaydi (login bo'lsa `Organization` dan avtomatik, K-01) → `BHM soni × BHM qiymati` va sektor narxi bo'yicha yakuniy summa.
+3. "Menga qaysi paket mos?" 3 savolli yordamchi (oyiga nechta e-kitob, byulleten, korxona ma'lumoti kerak) → tavsiya.
+4. "Shartnoma tuzish" tugmasi mavjud oqimga olib boradi (to'lov qismi o'zgarmaydi).
+
+**Qabul mezonlari:** kalkulyator natijasi backend narx hisobi bilan bir xil (narx backend'dan keladi, frontend'da formula takrorlanmaydi).
+
+---
+
+## 11. 5-bosqich: fuqarolar va tadqiqotchilar uchun
+
+**Yondashuv:** fuqaro uchun platforma korxona kabinetining kichraytirilgan nusxasi emas, alohida tajriba bo'lishi kerak: sodda til, telefon uchun qulay, ro'yxatdan o'tmasdan ko'p narsa ochiq, raqamlar shaxsiy hayotga bog'lab tushuntiriladi ("maoshingiz", "hududingiz", "savatingiz"). Bu bo'limdagi xizmatlar **bepul** (FQ-01 API kunlik limit bilan).
+
+**Navigatsiya:** saytda yangi "Fuqarolar uchun" bo'limi (asosiy menyuda), ichida: Mening hududim (FQ-02), Inflyatsiya kalkulyatori (FQ-03), Mening maoshim (FQ-05), Narxlar (FQ-06), Statistika oddiy tilda (FQ-07), So'rovnomalar (FQ-08), Ismlar (FQ-09), Savol bering (FQ-10). OneID bilan kirgan foydalanuvchi bosh sahifasi — fuqaro kabineti (FQ-04).
+
+### FQ-01 · Ochiq ma'lumotlar API'si va yuklab olish · **P1**
+
+**Nima:** tadqiqotchi, jurnalist va dasturchilar ochiq ko'rsatkichlarni API kalit bilan oladi; har ochiq jadvalni CSV/XLSX qilib yuklab olish mumkin.
+
+**Ma'lumot:** real ochiq ma'lumotlar (CPI, tashqi savdo agregatlari, hisobot shakllari ro'yxati, klassifikatorlar, demografiya) va S-11 hududiy ko'rsatkichlar. API kalitlar va foydalanish — S-16.
+
+**Fayllar:** yangi `backend/apps/open_api/` (URL `api/open/v1/`), `ApiKey`, `ApiUsage`; frontend: `/developers` sahifasi (hujjat, kalit olish), kabinetda "API kalitlarim".
+
+**Qadamlar:**
+1. Faqat o'qish endpoint'lari: `cpi/`, `trade/summary/`, `regions/indicators/`, `classifications/`, `reports/forms/`, `demographics/` (agregat). Sahifalash, `?format=json|csv`.
+2. Kalit: login yoki OneID foydalanuvchisi kabinetda yaratadi; bazada faqat hash, kalit bir marta ko'rsatiladi; bekor qilish mumkin.
+3. Kunlik limit kalit bo'yicha (default 1000 so'rov), `ApiUsage` ga kunlik hisob, limitdan oshganda 429. Bu xizmat kvotasi; saytning umumiy rate limiti (tahlil 10.7, 2.1-bo'lim) baribir keyinga qoldirilgan.
+4. `drf-spectacular` bilan alohida ochiq hujjat sahifasi (`/api/open/docs/`), har endpoint uchun misol so'rov.
+5. Saytdagi ochiq jadvallar yonida "Yuklab olish (CSV/XLSX)" tugmasi; fayl tagida manba va sana; namuna ma'lumot bo'lsa fayl nomi `_NAMUNA` bilan tugaydi va birinchi qatorda izoh.
+6. Kabinetda kalit bo'yicha 30 kunlik foydalanish grafigi.
+
+**Qabul mezonlari:**
+- Kalitsiz so'rov 401, noto'g'ri kalit 401, limitdan oshganda 429 (testlar).
+- CSV Excel'da to'g'ri ochiladi (UTF-8 BOM).
+- Demo tadqiqotchi kabinetida kalitlar va foydalanish grafigi ko'rinadi.
+
+---
+
+### FQ-02 · Hududiy profil va infografika · **P1**
+
+**Nima:** har viloyat va tuman uchun bir sahifalik "pasport": aholi, tug'ilish/o'lim, o'rtacha ish haqi, ishsizlik, korxonalar soni va asosiy tarmoqlar, sanoat, tashqi savdo. Xarita orqali tanlanadi, rasm yoki PDF sifatida ulashiladi.
+
+**Ma'lumot:** real — `Region`/`District`, KTUT (korxonalar soni va tarmoqlar hudud bo'yicha), demografiya (B-08). Sintetik — `RegionIndicator` (S-11) yetishmayotgan ko'rsatkichlar uchun. Har ko'rsatkich yonida manba belgisi (real/namuna).
+
+**Fayllar:** backend: `GET /api/common/regions/<id>/profile/`, `GET /api/common/districts/<id>/profile/`; frontend: `/regions` (xarita) va `/regions/:id` sahifalari.
+
+**Qadamlar:**
+1. Xarita (Leaflet): 14 hudud, ko'rsatkich tanlanadi (aholi, ish haqi, korxonalar soni), rang shkalasi va legenda.
+2. Profil sahifasi: 6–8 ta `StatCard`, respublika o'rtachasi bilan taqqoslash (yuqori/past belgisi), dinamika grafiklari, tumanlar reytingi jadvali.
+3. "Infografika" ko'rinishi: bitta vertikal karta (telefon ekraniga mos), PNG sifatida yuklab olish (html2canvas allaqachon bor) va havola ulashish.
+4. Ikki hududni yonma-yon taqqoslash rejimi.
+
+**Qabul mezonlari:**
+- 14 hudud profili to'liq ochiladi; ma'lumot manbasi har ko'rsatkichda ko'rinadi.
+- PNG eksport mobil'da ishlaydi.
+
+---
+
+### FQ-03 · Inflyatsiya kalkulyatori: maosh, ijara, kredit · **P1**
+
+**Nima:** mavjud CPI kalkulyatori kengaytiriladi. Uch tayyor stsenariy: "Maoshim 2020-yilda X edi, bugungi narxlarda qancha?", "Ijara haqi inflyatsiyadan tez o'sdimi?", "Kredit/omonat foizi inflyatsiyani qoplaydimi?" (real foiz stavkasi). Natija grafik va sodda matn bilan, havola orqali ulashiladi.
+
+**Ma'lumot:** real CPI (311 yozuv). Sintetik kerak emas.
+
+**Fayllar:** `/cpi-calculator` sahifasi (kengaytiriladi), mavjud `price-index` API. Hozir CPI login talab qiladi: kalkulyator uchun **agregat indekslar** endpoint'i mehmonga ochiladi (OS-15; default: ochiladi, chunki bu ommaviy statistika).
+
+**Qadamlar:**
+1. Stsenariy tanlash tablari; har birida 2–3 maydon.
+2. Hisob: summa × (CPI_oxiri / CPI_boshi); kredit uchun real stavka = (1+nominal)/(1+inflyatsiya) − 1.
+3. Grafik: summa xarid qobiliyatining oyma-oy o'zgarishi.
+4. Parametrlar URL'da; "Natijani ulashish" tugmasi.
+5. Natija ostida "Inflyatsiya nima?" maqolasiga havola (FQ-07).
+
+**Qabul mezonlari:** 3 ta stsenariy natijasi qo'lda hisoblangan bilan bir xil (frontend unit test); URL bilan ochilganda bir xil natija.
+
+---
+
+### FQ-04 · Fuqaro kabineti (OneID) · **P1**
+
+**Nima:** OneID orqali kirgan jismoniy shaxs uchun alohida bosh panel. Korxona bo'limlari (shartnoma, paket, benchmark) ko'rinmaydi.
+
+**Ma'lumot:** OneID profili; demo fuqarolar `demo_jismoniy_1..3` (S-07), sevimlilar va obunalar (S-16).
+
+**Fayllar:** `frontend/src/pages/cabinet/` (rolga qarab boshqa layout), backend: `GET /api/accounts/me/citizen-summary/`, yangi `FavoriteIndicator` modeli (foydalanuvchi, ko'rsatkich turi, parametrlar JSON).
+
+**Qadamlar:**
+1. Bloklar: "Mening hududim" (OneID manzilidan yoki tanlangan hudud, FQ-02 qisqacha), sevimli ko'rsatkichlar (har biri mini grafik bilan), obunalarim (A-02), kitob buyurtmalarim, savollarim (FQ-10), so'rovnomalar (FQ-08).
+2. Har ochiq ko'rsatkich sahifasida "Sevimlilarga qo'shish" yulduzchasi.
+3. Rol bo'yicha marshrut himoyasi: fuqaro korxona sahifasiga kirsa tushuntirish va "Korxona sifatida kirish" havolasi.
+
+**Qabul mezonlari:**
+- Demo fuqaro bilan kirilganda faqat fuqaro bloklari, hammasi to'la.
+- Korxona foydalanuvchisi kabineti o'zgarmagan.
+
+---
+
+### FQ-05 · "Mening maoshim": o'rtacha bilan taqqoslash · **P2**
+
+**Nima:** foydalanuvchi hudud, tarmoq va maoshini kiritadi, natijada o'z hududi va tarmog'idagi taqsimotda qayerda turganini ko'radi (median, kvartillar), boshqa hududlar bilan taqqoslash va yillar bo'yicha o'sish.
+
+**Ma'lumot:** `SalaryDistribution` (S-15, to'liq sintetik namuna; real manba bo'lsa OS-13). Kiritilgan maosh **saqlanmaydi** (hisob brauzerda, faqat agregat backend'dan olinadi).
+
+**Qadamlar:** forma → taqsimot grafigi (p25/median/p75/p90 va foydalanuvchi chizig'i) → "Sizning maoshingiz hududingizdagi xodimlarning taxminan X% idan yuqori" → hududlar xaritasi. Sahifa tepasida "Namuna ma'lumot" banneri.
+
+**Qabul mezonlari:** network so'rovlarida foydalanuvchi kiritgan maosh yuborilmaydi; persentil hisobi unit test bilan.
+
+---
+
+### FQ-06 · Narxlar monitoringi va "savat" kalkulyatori · **P2**
+
+**Nima:** asosiy iste'mol mahsulotlari narxlari hudud bo'yicha va oyma-oy; foydalanuvchi o'z "savati"ni tuzadi (non 10 dona, go'sht 3 kg ...) va uning narxi qanday o'zgarganini, qaysi hududda arzonroq ekanini ko'radi.
+
+**Ma'lumot:** `ConsumerPrice` (S-15, sintetik namuna); umumiy indeks real CPI bilan yonma-yon ko'rsatiladi.
+
+**Qadamlar:** mahsulot kartochkalari (oxirgi narx, oylik o'zgarish, mini grafik) → hududlar taqqoslash xaritasi → savat konstruktori (brauzerda saqlanadi, `localStorage`, try/catch bilan) → savat narxi dinamikasi grafigi.
+
+**Qabul mezonlari:** savat sahifa yangilanganda saqlanadi; ma'lumot bo'lmagan hudud uchun "Ma'lumot yo'q", xato emas.
+
+---
+
+### FQ-07 · "Statistika oddiy tilda": maqolalar va lug'at · **P1**
+
+**Nima:** asosiy statistik tushunchalarni oddiy tilda tushuntiruvchi qisqa maqolalar (rasm/grafik bilan) va atamalar lug'ati. Saytdagi murakkab atamalar ustiga sichqoncha olib borilganda (yoki bosilganda) lug'atdan qisqa ta'rif chiqadi.
+
+**Ma'lumot:** `Article`, `GlossaryTerm` (S-15). Admin'da tahrirlanadi (mavjud CKEditor bilan; CKEditor almashtirish keyinga qoldirilgan).
+
+**Fayllar:** backend: `common` ga `Article`, `GlossaryTerm` va ochiq API; frontend: `/learn`, `/learn/:slug`, `/glossary`, `<Term>` komponenti.
+
+**Qadamlar:** maqolalar ro'yxati (mavzu bo'yicha filtr, o'qish vaqti) → maqola sahifasi (bog'liq ko'rsatkichlarga havolalar) → lug'at (alifbo bo'yicha, qidiruv) → `<Term id="inflation">` komponentini CPI, demografiya va hududiy profil sahifalarida 5–10 joyda ishlatish.
+
+**Qabul mezonlari:** 3 tilda ochiladi; `<Term>` mobil'da bosish bilan ishlaydi.
+
+---
+
+### FQ-08 · Aholi so'rovnomalari · **P2**
+
+**Nima:** fuqarolar qisqa so'rovnomalarda qatnashadi (masalan, "Uy xo'jaligi xarajatlari", "Raqamli xizmatlardan foydalanish"); yopilgan so'rovnoma natijalari hamma uchun ochiq grafiklarda.
+
+**Ma'lumot:** `Survey`, `SurveyQuestion`, `SurveyAnswer` (S-15, javoblar sintetik). Haqiqiy foydalanuvchi javoblari ham shu jadvalga yoziladi, natijalarda "namuna javoblar"dan alohida hisoblanadi.
+
+**Qadamlar:** faol so'rovnomalar ro'yxati → qadamma-qadam forma (progress bar) → bitta foydalanuvchi bitta javob (OneID bo'yicha) → natijalar sahifasi (ustunli grafiklar, hudud va yosh guruhi bo'yicha filtr). Admin'da so'rovnoma yaratish.
+
+**Qabul mezonlari:** takroriy javob bloklanadi; natijalar sahifasida "N ta namuna javob, M ta haqiqiy javob" ko'rinadi.
+
+---
+
+### FQ-09 · Ismlar statistikasi · **P2**
+
+**Nima:** "Ismingiz qanchalik ommabop?" — ism kiritiladi, yillar bo'yicha yangi tug'ilganlarga qo'yilishi grafigi, hududlar xaritasi, yilning eng ommabop 10 ta ismi. Fuqarolar orasida tez tarqaladigan, saytga trafik olib keladigan xizmat.
+
+**Ma'lumot:** `NameStat` (S-15, to'liq sintetik namuna; real ma'lumot FHDYo organlaridan kelishi mumkin, OS-16).
+
+**Qadamlar:** ism qidiruvi (lotin/kirill moslashtirish) → grafik va xarita → top-10 jadvali yil va jins bo'yicha → ulashish kartochkasi (PNG). "Namuna ma'lumot" banneri.
+
+**Qabul mezonlari:** "Muhammad" va "Мухаммад" bir xil natija beradi; 3 harfdan kam so'rovga natija yo'q.
+
+---
+
+### FQ-10 · Fuqaro savoli: statistik ma'lumot so'rash · **P2**
+
+**Nima:** fuqaro bepul savol yuboradi ("Tumanimizda nechta maktab bor?"), xodim javob beradi; javob berilgan savollar (fuqaro ruxsati bilan) ochiq "Savol-javob" bazasiga qo'shiladi va Stat AI (U-11) ularni ham qidiradi.
+
+**Ma'lumot:** `CitizenQuestion` (S-15). Operator chat (U-12) bilan bir xil xodim interfeysi.
+
+**Qadamlar:** forma (toifa, savol, hudud) → kabinetda holat → xodim javobi → "Ochiq bazaga qo'shishga roziman" belgisi → `/answers` ochiq sahifasi.
+
+**Qabul mezonlari:** demo fuqaro savoli → demo xodim javobi → ochiq sahifada ko'rinadi (rozilik bo'lsa).
+
+---
+
+### FQ-11 · O'rnatiladigan ilova (PWA) · **P2**
+
+**Nima:** sayt telefon bosh ekraniga o'rnatiladi; oxirgi ko'rilgan ochiq sahifalar internetsiz ham ochiladi.
+
+**Qadamlar:** `vite-plugin-pwa`, manifest (nom, ikonkalar, rang), statik fayllar va ochiq GET so'rovlari uchun "stale-while-revalidate" kesh; login talab qiladigan so'rovlar keshlanmaydi.
+
+**Qabul mezonlari:** Lighthouse PWA tekshiruvi o'tadi; kabinet ma'lumotlari keshda saqlanmaydi.
+
+---
+
+## 12. 6-bosqich: ichki va admin imkoniyatlari
+
+### A-01 · Admin analitika paneli · **P1**
+
+**Ma'lumot:** real jadvallar; sintetik yozuvlar almashtirgich bilan qo'shiladi (default o'chiq).
+
+**Nega:** hozir admin'da faqat `ContractStats` (hududlar kesimida) bor. Rahbariyatga bitta ko'rinishdagi panel kerak.
+
+**Fayllar:** `backend/templates/admin/` (Jazzmin bosh sahifasi yoki alohida admin view), `common` yoki yangi `analytics` moduli.
+
+**Qadamlar:**
+1. Ko'rsatkichlar: yangi foydalanuvchilar (oy bo'yicha), shartnomalar soni va summasi hudud/oy bo'yicha, faol paketlar, xizmatlar bo'yicha limit ishlatilishi, kitob buyurtmalari, xizmat so'rovlari holati va o'rtacha javob vaqti, reytinglar.
+2. Voronka: ro'yxatdan o'tdi → tarif ko'rdi → shartnoma yaratdi → imzoladi → paket faol.
+3. Davr filtri, Excel eksport.
+4. Sintetik yozuvlar (S-01) hisobdan chiqarilishi uchun "Demo ma'lumotni ko'rsatish" almashtirgichi, default o'chiq.
+
+**Qabul mezonlari:** raqamlar SQL bilan qo'lda sanalganiga teng (2–3 ko'rsatkich uchun test); sahifa 2 soniyadan tez ochiladi.
+
+---
+
+### A-02 · Ko'rsatkichlarga obuna, email va Telegram xabarlar · **P2**
+
+**Nima:** foydalanuvchi (korxona yoki fuqaro) tanlangan ko'rsatkichga obuna bo'ladi (CPI, tashqi savdo, hududi, hisobot muddati); ko'rsatkich yangilanganda in-app, email yoki Telegram orqali xabar oladi. Oylik avtomatik qisqa hisobot (sevimli ko'rsatkichlar bo'yicha email).
+
+**Ma'lumot:** `IndicatorSubscription`, `IndicatorUpdateEvent` (S-16); mavjud `Subscribe` (email obuna) shu tizimga birlashtiriladi.
+
+**Fayllar:** `notifications`, Telegram bot (`runbot`), `accounts` (Telegram chat ID), Celery task'lar (B-06).
+
+**Qadamlar:**
+1. Har ko'rsatkich sahifasida "Obuna bo'lish" tugmasi, kanal tanlash.
+2. Telegram'ni ulash: kabinetda bir martalik kod → botga `/start <kod>` → chat ID bog'lanadi.
+3. Admin ma'lumot import qilganda yoki yangi davr qo'shganda `IndicatorUpdateEvent` yaratiladi (admin action yoki import signal), Celery task obunachilarga yuboradi.
+4. Oylik digest: har oyning 1-kuni, sevimli ko'rsatkichlar bo'yicha qisqa email (HTML shablon).
+5. Token/email sozlanmagan muhitda kanal jim o'tkazib yuboriladi, in-app ishlayveradi.
+
+**Qabul mezonlari:** demo foydalanuvchida obunalar ro'yxati va kelgan xabarlar ko'rinadi; token yo'q lokal muhitda hech narsa yiqilmaydi; obunadan chiqish bir bosishda.
+
+---
+
+### A-03 · Konsultant bilan onlayn konsultatsiya · **P2**
+
+**Nima:** korxona (paket limiti bilan) yoki fuqaro (agar egasi ruxsat bersa, OS-17) statistik konsultant bilan vaqt band qiladi; onlayn uchrashuv havolasi kabinetga keladi; konsultatsiyadan keyin baholash.
+
+**Ma'lumot:** `Consultant`, `ConsultationSlot`, `ConsultationBooking` (S-14).
+
+**Fayllar:** yangi `backend/apps/consultations/` (yoki `services` ichida), frontend: `/consultation` (konsultantlar va kalendar), kabinetda "Konsultatsiyalarim", konsultant uchun "Mening jadvalim".
+
+**Qadamlar:**
+1. Konsultantlar ro'yxati (mavzular, bio) → bo'sh slotlar kalendari → band qilish formasi (mavzu, savol; K-01 autofill).
+2. Band qilish tranzaksiyada: slot `is_booked`, paket bo'lsa `UserServicePackageItemUse` yoziladi; limit yo'q bo'lsa 403 va tarif havolasi. Onlayn to'lov qo'shilmaydi.
+3. Konsultant jadvali: slot qo'shish (takrorlanuvchi), band qilishlar, uchrashuv havolasini kiritish, izoh.
+4. Eslatmalar: 24 soat va 1 soat oldin (Celery Beat).
+5. Bekor qilish 24 soatgacha bepul (limit qaytariladi), keyin limit qaytmaydi (qoida OS-17).
+6. Konsultatsiyadan keyin 1–5 baho (mavjud reyting modeli bilan).
+
+**Qabul mezonlari:** ikki foydalanuvchi bir slotni bir vaqtda band qila olmaydi (test, `select_for_update`); demo korxona band qiladi, demo konsultant jadvalida ko'radi.
+
+---
+
+## 13. 7-bosqich: kod sifati
 
 ### Q-01 · Katta frontend fayllarini bo'lish · **P2**
 
@@ -984,11 +1720,11 @@ Click callback testlari bu rejaga kirmaydi (to'lov kodi o'zgartirilmaydi), lekin
 
 ---
 
-## 10. Ochiq savollar
+## 14. Ochiq savollar
 
 Bu savollar egasi tomonidan hal qilinadi. Javob kelguncha vazifalar ko'rsatilgan **default** bilan bajariladi.
 
-| ID | Savol | Default | Ta'sir qiladigan vazifa |
+| ID | Savol | Default | Vazifa |
 |---|---|---|---|
 | OS-01 | KTUT, sanoat mahsulotlari, CPI, klassifikatorlar uchun paket limiti kerakmi yoki faqat login yetarlimi? | Hozirgidek: faqat login | B-07, U-02 |
 | OS-02 | Paket muddati qanday hisoblanadi: `duration_days` dan yoki kalendar oyi (`year`/`month`) bo'yicha? | `starts_at + duration_days`, mavjud paketlar muddatsiz | B-07 |
@@ -999,29 +1735,50 @@ Bu savollar egasi tomonidan hal qilinadi. Javob kelguncha vazifalar ko'rsatilgan
 | OS-07 | Bazadagi begona jadvallar (`test`, `uz`, `my_stat_uz_platforma_uchun`) va ishlatilmaydigan `chat`, `monitoring` app'lari o'chiriladimi? | Tegilmaydi (qaytarib bo'lmaydigan amal, egasining aniq ruxsati kerak) | — |
 | OS-08 | Ichki rol tizimi (`Role`/`Permission`, bo'sh) kerakmi yoki `User.role` yetarlimi? | `User.role` qoladi, jadvallar to'ldirilmaydi | S-07 |
 | OS-09 | Sintetik ma'lumot test serverida ham kerakmi (DEBUG=False)? | Yo'q, faqat lokal/dev | S-02 |
+| OS-10 | Autofill tashqi reyestrga murojaat qilsinmi yoki faqat ichki KTUT bazasidanmi? | Avval ichki KTUT, reyestr faqat profilni yangilashda | K-01 |
+| OS-11 | "Hisobotlarim" uchun topshirilgan/topshirilmagan holatini qayerdan olamiz (`submitted-report` yetarlimi)? | `submitted-report` bo'lsa ko'rsatiladi, bo'lmasa faqat muddatlar | K-05 |
+| OS-12 | Admin analitika Jazzmin ichida bo'lsinmi yoki alohida sahifa? | Jazzmin bosh sahifasidagi blok + alohida admin view | A-01 |
+| OS-13 | Korxona ko'rsatkichlari, hududiy ko'rsatkichlar, ish haqi va narxlar uchun real manba (qo'mitaning ichki bazasi, ochiq portal) bormi? | Bo'lmaguncha sintetik namuna (S-10, S-11, S-15) | K-02, FQ-02, FQ-05, FQ-06 |
+| OS-14 | Yangi pullik xizmatlar (benchmark, bozor tahlili PDF, hamkor eksporti, konsultatsiya) qaysi paketlarga va qancha limit bilan kiradi? | Admin'da yangi `Service` sifatida qo'shiladi, paketlarga 0 limit bilan; admin o'zi belgilaydi | K-02, K-03, K-04, A-03 |
+| OS-15 | CPI agregat indekslari mehmonga ochilsinmi? | Ha, faqat kalkulyator uchun agregat | FQ-03 |
+| OS-16 | Ismlar statistikasi uchun real ma'lumot olish mumkinmi? | Bo'lmaguncha namuna, banner bilan | FQ-09 |
+| OS-17 | Fuqarolar konsultatsiya band qila oladimi va bekor qilish qoidasi qanday? | Faqat korxonalar; 24 soatgacha bepul bekor qilish | A-03 |
 
 ---
 
-## 11. Bajarish tartibi
+## 15. Bajarish tartibi
 
-Tavsiya etilgan ketma-ketlik. Bir qatordagi vazifalarni parallel bajarish mumkin.
+Tavsiya etilgan ketma-ketlik. Har qadam alohida PR'lar to'plami; bir qatordagi vazifalarni parallel bajarish mumkin. Har qadam oxirida `seed_demo` qayta ishga tushirilib, 4-bo'limdagi jadval bo'yicha sahifalar ko'zdan kechiriladi.
 
 | Qadam | Vazifalar | Natija |
 |---|---|---|
 | 1 | F-01, B-01, B-02, B-03 | Testlar ishlaydi, foydalanuvchi chiqarib yuborilmaydi, 500'lar yo'q |
-| 2 | F-04, S-01, U-01 | Tip xatolari yo'q, sintetik reyestr va UI poydevori tayyor |
-| 3 | S-02, S-07 | `seed_demo` va demo akkauntlar |
-| 4 | S-03, S-04, S-05, S-06, S-09, B-05 | Bo'sh jadvallar to'ldi, xabarnomalar API'da |
-| 5 | U-02, U-03, U-04, U-05, U-07 | Kabinet va klassifikatorlar to'liq |
-| 6 | B-04, U-08, U-09, B-06 | Tashqi savdo oqimlari, bosh sahifa, Celery Beat |
-| 7 | Q-05, Q-06 | Testlar va CI himoyasi |
-| 8 | B-07, B-08, U-06, U-10..U-14, S-08 | Qo'shimcha imkoniyatlar |
-| 9 | F-02, F-03, F-05, Q-01..Q-04, Q-07 | Tozalash va optimallashtirish |
+| 2 | F-04, S-01, S-02, S-09, U-01 | Sintetik ma'lumot karkasi, "Namuna" belgisi, UI poydevori |
+| 3 | S-07, S-03..S-06, S-08, B-05 | Mavjud bo'sh sahifalar to'ldi |
+| 4 | U-02..U-08, B-04, U-09, B-06 | Kabinet, bosh sahifa, tashqi savdo oqimlari, Celery Beat |
+| 5 | K-01, K-09, K-08, S-12, K-05 | Autofill, tarif kalkulyatori, shartnoma holati, hisobot yordamchisi |
+| 6 | S-10, K-02, K-03, K-04, S-13, K-06, K-07 | Korxonalar uchun yangi xizmatlar |
+| 7 | S-11, S-15, FQ-04, FQ-02, FQ-03, FQ-07 | Fuqarolar bo'limi: kabinet, hududim, kalkulyator, maqolalar |
+| 8 | S-16, FQ-01, FQ-05, FQ-06, FQ-08, FQ-09, FQ-10 | API va qolgan fuqaro xizmatlari |
+| 9 | A-01, A-02, S-14, A-03 | Admin analitika, obunalar, konsultatsiya |
+| 10 | Q-05, Q-06 | Testlar va CI himoyasi |
+| 11 | B-07, B-08, U-10..U-17, FQ-11 | Qo'shimcha imkoniyatlar |
+| 12 | F-02, F-03, F-05, Q-01..Q-04, Q-07 | Tozalash va optimallashtirish |
 
-### Claude Code'ga topshiriq berish namunasi
+### Claude Code'ga topshiriq berish namunalari
 
+Bitta vazifa:
 ```text
-mystat repo'sida ISH_REJASI.md dagi S-02 vazifasini bajar.
+mystat repo'sida ISH_REJASI.md dagi K-02 vazifasini bajar.
 3-bo'limdagi umumiy qoidalarga va 2-bo'limdagi tegilmaydigan joylarga amal qil.
+Vazifaning "Ma'lumot" qatoridagi seeder bo'lmasa, avval uni qo'sh.
 Qabul mezonlarini tekshirib, natijasini PR tavsifida yoz.
+```
+
+Butun qadam:
+```text
+mystat repo'sida ISH_REJASI.md 15-bo'limdagi 6-qadamni bajar:
+har vazifa uchun alohida branch va PR, jadvaldagi tartibda.
+Har PR'dan keyin seed_demo ni qayta ishga tushirib, 4-bo'limdagi tegishli sahifalar
+ma'lumot bilan ochilishini tekshir.
 ```

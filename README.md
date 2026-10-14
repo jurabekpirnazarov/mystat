@@ -97,21 +97,44 @@ python manage.py seed_demo --demographics  # sintetik demografiya parquet (asosi
 
 - Real yozuvlar o'zgartirilmaydi va o'chirilmaydi. Har bir sintetik yozuv `common.SyntheticRecord` reyestriga tushadi,
   `--flush` faqat ularni o'chiradi. Kaskad real yozuvga tegsa, komanda to'xtaydi va hech narsa o'chirmaydi.
-- Demo akkauntlar: `demo_yuridik_1..5`, `demo_jismoniy_1..3`, `demo_bugalter`, `demo_employee` (`@demo.invalid`).
+- Demo akkauntlar: `demo_yuridik_1..5`, `demo_jismoniy_1..3`, `demo_tadqiqotchi`, `demo_konsultant_1..5`,
+  `demo_bugalter`, `demo_employee` (`@demo.invalid`).
   Parol `backend/.env` dagi `DEMO_USER_PASSWORD` dan olinadi (har ishga tushirishda shu parolga tenglashtiriladi).
   Berilmagan bo'lsa, yangi akkauntlarga tasodifiy parol qo'yiladi va konsolga bir marta chiqadi.
-- Sintetik matnlar `[DEMO]` bilan boshlanadi; API `is_synthetic` maydonini qaytaradi, UI'da "Demo" belgisi chiqadi.
+- Sintetik matnlar `[DEMO]` bilan boshlanadi; API `is_synthetic` / `data_source` maydonini qaytaradi, UI'da "Namuna"
+  belgisi yoki banneri chiqadi, PDF/PNG eksportlarda "NAMUNA" suv belgisi.
+- Seeder'lar (`--only` uchun nomlar): `demo_users`, `classifications`, `service_requests`, `activity_plans`, `notifications`,
+  `misc`, `enterprise_indicators`, `region_indicators`, `report_guides`, `custom_requests`, `citizens`,
+  `api_subscriptions` (demo API kalitlari faqat yaratilganda konsolga bir marta chiqadi), `consultations`.
+
+## Testlar
+
+```bash
+cd backend && python manage.py test        # Django test runner
+cd frontend && npm test                     # vitest (sof funksiyalar: autofill, inflyatsiya, maosh persentili)
+```
 
 ## Celery
 
 - `worker` konteyneri `celery -A core worker` ni, `beat` konteyneri `celery -A core beat` ni ishga tushiradi (`core/celery.py`).
 - Jadval `core/settings/base.py` dagi `CELERY_BEAT_SCHEDULE` da:
   - DIDOX hujjatlari holatini tekshirish — har `BEAT_DIDOX_CHECK_MINUTES` daqiqada (default 15);
-  - hisobot muddati eslatmalari (Telegram) — har kuni `BEAT_REPORT_NOTIFY_HOUR:MINUTE` da (default 09:00, Asia/Tashkent).
+  - hisobot muddati eslatmalari (Telegram) — har kuni `BEAT_REPORT_NOTIFY_HOUR:MINUTE` da (default 09:00, Asia/Tashkent);
+  - ko'rsatkich yangilanishlari obunachilarga — har soat; oylik dayjest — har oyning 1-kuni 10:00;
+  - konsultatsiya eslatmalari (24 soat va 1 soat oldin) — har 15 daqiqa.
 - Lokal (`docker`siz, Redis o'chiq) rejimda beat ishga tushirilmaydi; vazifalarni qo'lda: `python manage.py check_didox_documents`,
   `python manage.py send_report_notifications --dry-run`.
 - **Production (systemd):** hozirgi serverda faqat `apiconsult` va `consultbot` unitlari bor. Celery worker va beat uchun
   alohida unit qo'shish kerak (`celery -A core worker`, `celery -A core beat`), aks holda jadval ishlamaydi.
+
+## PWA
+
+`frontend/public/sw.js` faqat production build'da ro'yxatdan o'tadi. Nginx'da `sw.js` uchun keshni o'chiring,
+aks holda yangi versiya foydalanuvchilarga kech yetadi:
+
+```nginx
+location = /sw.js { add_header Cache-Control "no-cache"; }
+```
 
 ## Production (GitLab CI)
 

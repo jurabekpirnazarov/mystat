@@ -8,3 +8,10 @@ createRoot(document.getElementById("root")!).render(
       <App />
     </AuthProvider>
 );
+
+// FQ-11: o'rnatiladigan ilova (PWA). Faqat production build'da — dev'da HMR bilan to'qnashmasligi uchun.
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+  });
+}

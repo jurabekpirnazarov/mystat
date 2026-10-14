@@ -171,3 +171,16 @@ class OrderItem(BaseModel):
 
 
 
+
+
+class BookFavorite(models.Model):
+    """U-17: foydalanuvchining sevimli kitoblari."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="book_favorites")
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="favorited_by")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "book")
+        ordering = ("-created_at",)
+        verbose_name = _("Sevimli kitob")
+        verbose_name_plural = _("Sevimli kitoblar")

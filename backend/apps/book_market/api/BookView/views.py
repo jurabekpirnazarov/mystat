@@ -55,6 +55,18 @@ class BookListAPIView(generics.ListAPIView):
         if option_filter_q:
             qs = qs.filter(option_filter_q).distinct()
 
+        # U-17: nom bo'yicha qidiruv va saralash (yangi / narx)
+        q = (request.query_params.get('q') or '').strip()
+        if q:
+            from apps.common.search import ci_contains
+            qs = qs.filter(ci_contains(("name_uz", "name_ru", "name_cry"), q))
+        ordering = request.query_params.get('ordering')
+        if ordering == 'new':
+            qs = qs.order_by('-year', '-id')
+        elif ordering in ('price', '-price'):
+            from django.db.models import Min
+            qs = qs.annotate(min_price=Min('options__price')).order_by(ordering.replace('price', 'min_price'), 'id')
+
         qs = qs.prefetch_related(Prefetch('options', queryset=option_qs))
         return qs
 

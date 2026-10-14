@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { Heart, Search } from "lucide-react";
+import { addBookFavorite, fetchBookFavorites, removeBookFavorite } from "../api/books";
 import BookStep1 from "../components/BookStep1";
 import RatingModal from '../components/modals/RatingModal';
 import {
@@ -40,11 +42,12 @@ interface OrderResponse {
 
 interface ApiBookResponse {
   id: number;
-  name: string;
+  name_uz: string;
+  name_ru?: string;
   year: number;
-  file_url: string;
+  base_file: string | null;
   image_url: string;
-  price: number;
+  options: { id: number; book_type: string; price: string | null }[];
 }
 
 interface Book {
@@ -115,7 +118,45 @@ const BookStore: React.FC = () => {
   const [activeTab, setActiveTab] = useState<BookType>(
     "electron"
   );
-  const [selectedYear, setSelectedYear] = useState("2024");
+  // U-17: filtr holati URL'da (ulashish va orqaga qaytish uchun)
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedYear, setSelectedYearState] = useState(searchParams.get("year") ?? "2024");
+  const query = searchParams.get("q") ?? "";
+  const sort = searchParams.get("sort") ?? "";
+  const onlyFavorites = searchParams.get("fav") === "1";
+  const [queryInput, setQueryInput] = useState(query);
+  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const updateParams = useCallback((patch: Record<string, string | null>) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      Object.entries(patch).forEach(([k, v]) => (v ? next.set(k, v) : next.delete(k)));
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
+  const setSelectedYear = (year: string) => {
+    setSelectedYearState(year);
+    updateParams({ year: year || null });
+  };
+  useEffect(() => {
+    if (!localStorage.getItem("access_token")) return;
+    fetchBookFavorites().then((ids) => setFavorites(new Set(ids))).catch(() => setFavorites(new Set()));
+  }, []);
+  const toggleFavorite = async (bookId: number) => {
+    const has = favorites.has(bookId);
+    const flip = (on: boolean) => setFavorites((prev) => {
+      const n = new Set(prev);
+      if (on) n.add(bookId);
+      else n.delete(bookId);
+      return n;
+    });
+    flip(!has);
+    try {
+      if (has) await removeBookFavorite(bookId);
+      else await addBookFavorite(bookId);
+    } catch {
+      flip(has);
+    }
+  };
 
   // Har bir tab uchun alohida savatlar
   const getCartFromStorage = (key: string): CartItem[] => {
@@ -339,21 +380,32 @@ const BookStore: React.FC = () => {
       if (selectedYear) {
         queryParams.year = selectedYear;
       }
+      if (query) {
+        queryParams.q = query;
+      }
+      if (sort) {
+        queryParams.ordering = sort;
+      }
 
 
       typedGetRequest<ApiResponseType<ApiBookResponse>>(`${book_list}`, queryParams)
         .then((data) => {
 
           if (data && data.results) {
-            const transformedBooks: Book[] = data.results.map((book) => ({
-              id: book.id,
-              name: book.name,
-              year: book.year,
-              file_url: book.file_url,
-              image_url: book.image_url,
-              category: activeTab,
-              price: book.price,
-            }));
+            // API: name_uz va options[] (tanlangan tur narxi). Avval book.name/book.price o'qilardi —
+            // ular javobda yo'q edi, shuning uchun nomlar bo'sh va hamma kitob "Bepul" ko'rinardi.
+            const transformedBooks: Book[] = data.results.map((book) => {
+              const option = book.options?.find((o) => o.book_type === activeTab) ?? book.options?.[0];
+              return {
+                id: book.id,
+                name: book.name_uz || book.name_ru || "",
+                year: book.year,
+                file_url: book.base_file ?? "",
+                image_url: book.image_url,
+                category: activeTab,
+                price: option?.price ? Number(option.price) : undefined,
+              };
+            });
             setBooks(transformedBooks);
           } else {
             setBooks([]);
@@ -367,7 +419,7 @@ const BookStore: React.FC = () => {
           setLoading(false);
         });
     }
-  }, [currentStep, activeTab, selectedYear]);
+  }, [currentStep, activeTab, selectedYear, query, sort]);
 
   const tabs = [
     { id: "electron", label: "Elektron nashrlar" },
@@ -375,7 +427,7 @@ const BookStore: React.FC = () => {
     { id: "disk", label: "Diskdagi nashrlar" },
   ] as const;
 
-  const filteredBooks = books;
+  const filteredBooks = onlyFavorites ? books.filter((b) => favorites.has(b.id)) : books;
 
   // Hozirgi tab bo'yicha savatni olish
   const getCurrentCart = () => {
@@ -717,7 +769,39 @@ const BookStore: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-4 sm:mb-0">
             {tabs.find((tab) => tab.id === activeTab)?.label.toUpperCase()}
           </h1>
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <form
+              onSubmit={(e) => { e.preventDefault(); updateParams({ q: queryInput.trim() || null }); }}
+              className="relative"
+            >
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                value={queryInput}
+                onChange={(e) => setQueryInput(e.target.value)}
+                placeholder="Nomi bo'yicha qidirish"
+                aria-label="Kitob nomi bo'yicha qidirish"
+                className="pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+            </form>
+            <select
+              aria-label="Saralash"
+              value={sort}
+              onChange={(e) => updateParams({ sort: e.target.value || null })}
+              className="px-3 py-2 border border-gray-300 rounded-lg"
+            >
+              <option value="">Saralash</option>
+              <option value="new">Avval yangilari</option>
+              <option value="price">Arzonroq</option>
+              <option value="-price">Qimmatroq</option>
+            </select>
+            <button
+              type="button"
+              aria-pressed={onlyFavorites}
+              onClick={() => updateParams({ fav: onlyFavorites ? null : "1" })}
+              className={`inline-flex items-center gap-1 px-3 py-2 rounded-lg border ${onlyFavorites ? "border-rose-400 text-rose-600 bg-rose-50" : "border-gray-300 text-gray-700"}`}
+            >
+              <Heart className={`w-4 h-4 ${onlyFavorites ? "fill-current" : ""}`} /> Sevimlilar
+            </button>
             <label
               htmlFor="year-filter"
               className="text-sm font-medium text-gray-700"
@@ -754,6 +838,15 @@ const BookStore: React.FC = () => {
                 className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group flex flex-col h-full"
               >
                 <div className="relative overflow-hidden bg-gray-100 rounded-t-xl">
+                  <button
+                    type="button"
+                    onClick={() => toggleFavorite(book.id)}
+                    aria-pressed={favorites.has(book.id)}
+                    aria-label={favorites.has(book.id) ? "Sevimlilardan olib tashlash" : "Sevimlilarga qo'shish"}
+                    className="absolute top-2 right-2 z-10 p-2 rounded-full bg-white/90 shadow"
+                  >
+                    <Heart className={`w-4 h-4 ${favorites.has(book.id) ? "fill-rose-500 text-rose-500" : "text-gray-500"}`} />
+                  </button>
                   <div className="aspect-[3/4] w-full">
                     <img
                       src={

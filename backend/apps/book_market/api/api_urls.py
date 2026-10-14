@@ -13,6 +13,8 @@ from .Location.views import (
     PostalLocationAPIView
 )
 
+from .extras import BookFavoritesView, NearestPostalView
+
 app_name = "book_market"
 
 
@@ -24,6 +26,8 @@ urlpatterns = [
     path('years/', BookYearsAPIView.as_view(), name='book-years'),
     path("orders/payment-link/", OrderPaymentLinkAPIView.as_view(), name="order-payment-link"),
     path('postal-location/', PostalLocationAPIView.as_view(), name='location-list'),
+    path('postal-location/nearest/', NearestPostalView.as_view(), name='location-nearest'),
+    path('favorites/', BookFavoritesView.as_view(), name='book-favorites'),
     path('orders/', OrderListView.as_view(), name='order-list'),
     path('attach-postal/', AttachPostalToOrder.as_view(), name='attach-postal'),
     path('e-books/', ElectronBookAPIView.as_view(), name='e-books'),

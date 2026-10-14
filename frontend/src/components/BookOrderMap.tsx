@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { X } from 'lucide-react';
+import { LocateFixed, X } from 'lucide-react';
+import { fetchNearestPostal } from '../api/books';
 import { postal_locations } from '../api/apiUrls';
 import { getRequest } from '../api/request';
 
@@ -48,6 +49,36 @@ export default function LocationSelector({ onSelectStore, onClose }: LocationSel
   const [filteredStores, setFilteredStores] = useState<Store[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // U-17: "Menga eng yaqin" — geolokatsiya ruxsati bilan; rad etilsa xarita odatdagidek ishlaydi
+  const [distances, setDistances] = useState<Record<number, number>>({});
+  const [geoMessage, setGeoMessage] = useState<string | null>(null);
+
+  const findNearest = () => {
+    if (!navigator.geolocation) {
+      setGeoMessage("Brauzer joylashuvni aniqlay olmaydi.");
+      return;
+    }
+    setGeoMessage("Joylashuv aniqlanmoqda…");
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const nearest = await fetchNearestPostal(pos.coords.latitude, pos.coords.longitude, 5);
+          setDistances(Object.fromEntries(nearest.map((n) => [n.id, n.distance_km])));
+          const ids = new Set(nearest.map((n) => n.id));
+          setFilteredStores([
+            ...nearest.map((n) => allStores.find((st) => st.id === n.id)).filter((st): st is Store => !!st),
+            ...allStores.filter((st) => !ids.has(st.id)),
+          ]);
+          if (mapRef.current && nearest[0]) mapRef.current.setView([nearest[0].lat, nearest[0].lng], 13, { animate: true });
+          setGeoMessage(null);
+        } catch {
+          setGeoMessage("Eng yaqin bo'limlarni yuklab bo'lmadi.");
+        }
+      },
+      () => setGeoMessage("Joylashuv ruxsati berilmadi — bo'limni xaritadan yoki ro'yxatdan tanlang."),
+      { timeout: 10000 }
+    );
+  };
 
   useEffect(() => {
     const fetchPostalLocations = async () => {
@@ -279,6 +310,14 @@ export default function LocationSelector({ onSelectStore, onClose }: LocationSel
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+          <button
+            type="button"
+            onClick={findNearest}
+            className="mt-2 inline-flex items-center gap-1.5 text-sm text-blue-600 hover:underline"
+          >
+            <LocateFixed size={16} /> Menga eng yaqin bo'limlar
+          </button>
+          {geoMessage && <p className="text-xs text-gray-500 mt-1" role="status">{geoMessage}</p>}
           <p className="text-sm text-gray-500 mt-2">На карте или из списка</p>
         </div>
 
@@ -303,7 +342,10 @@ export default function LocationSelector({ onSelectStore, onClose }: LocationSel
               className="w-full text-left p-4 hover:bg-gray-50 transition-colors"
             >
               <h3 className="font-medium text-sm mb-1">{store.name}</h3>
-              <p className="text-xs text-gray-500">Indeks: {store.index}</p>
+              <p className="text-xs text-gray-500">
+                Indeks: {store.index}
+                {distances[store.id] !== undefined && <span className="ml-2 text-blue-600">≈ {distances[store.id]} km</span>}
+              </p>
             </button>
           ))}
         </div>

@@ -1,4 +1,5 @@
 from .views import (
+    HomeStatsAPIView,
     GoodsignPasswordAuthView, GoodsignCompanyLoginView,
     QuestionAnswerAPIView, BranchListAPIView, SiteStatAPIView,
     PlatFormStatAPIView, ContactCreateAPIView,
@@ -18,6 +19,7 @@ urlpatterns = [
     path('branches/', BranchListAPIView.as_view(), name='branch-list'),
     path('site-stat/', SiteStatAPIView.as_view(), name='site-stat'),
     path('platform-stat/', PlatFormStatAPIView.as_view(), name='platform-stat'),
+    path('home-stats/', HomeStatsAPIView.as_view(), name='home-stats'),
     path('contact-create/', ContactCreateAPIView.as_view(), name='contact-create'),
     path('information/', InformationListCreateView.as_view(), name='information-list-create'),
     path('information/<int:pk>/', InformationDetailView.as_view(), name='information-detail'),

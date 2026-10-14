@@ -11,7 +11,6 @@ from apps.services.models import Service, ServiceRequests, UserServicePackage, P
     UserServicePackageItemUse
 from django.utils.timezone import now
 from django.core.cache import cache
-import random
 from rest_framework.generics import ListCreateAPIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import InformationModel
@@ -147,8 +146,9 @@ class SiteStatAPIView(APIView):
         if not data:
             users_count = User.objects.count()
             service_count = Service.objects.count()
-            todays_services = ServiceRequests.objects.filter(created_at__date=today).count()
-            current_year_services = ServiceRequests.objects.filter(created_at__gte=year_start).count()
+            # Haqiqiy foydalanish — paket limitidan foydalanishlar (ServiceRequests modeli ilovada ishlatilmaydi)
+            todays_services = UserServicePackageItemUse.objects.filter(created_at__date=today).count()
+            current_year_services = UserServicePackageItemUse.objects.filter(created_at__gte=year_start).count()
 
             data = {
                 "users_count": users_count,
@@ -161,67 +161,18 @@ class SiteStatAPIView(APIView):
 
 
 class PlatFormStatAPIView(APIView):
-	def get(self, request):
-		tax_data = {
-			"physical": random.randint(2000, 3000),
-			"legal": random.randint(1500, 2000),
-		}
-		tax_data["all"] = tax_data["physical"] + tax_data["legal"]
+    """?stat_type=daily|weekly|monthly|yearly — xizmatlardan foydalanish davri. Real ma'lumot, 10 daqiqa kesh."""
 
-		business_data = {
-			"physical": random.randint(700, 900),
-			"legal": random.randint(2000, 2300),
-		}
-		business_data["all"] = business_data["physical"] + business_data["legal"]
+    def get(self, request):
+        from apps.common.platform_stats import service_stats, user_stats
 
-		report_data = {
-			"physical": random.randint(500, 700),
-			"legal": random.randint(1800, 2000),
-		}
-		report_data["all"] = report_data["physical"] + report_data["legal"]
-
-		consult_data = {
-			"physical": random.randint(350, 450),
-			"legal": random.randint(1100, 1300),
-		}
-		consult_data["all"] = consult_data["physical"] + consult_data["legal"]
-
-		audition_data = {
-			"physical": random.randint(150, 250),
-			"legal": random.randint(900, 1100),
-		}
-		audition_data["all"] = audition_data["physical"] + audition_data["legal"]
-
-		# Foydalanuvchilar soni statistikasi (mock)
-		user_stats = {
-			"daily": {"label": "Kunlik", "value": 195, "desc": "o'rtacha"},
-			"weekly": {"label": "Haftalik", "value": 1365, "desc": "o'rtacha"},
-			"monthly": {"label": "Oylik", "value": 5850, "desc": "o'rtacha"},
-			"yearly": {"label": "Yillik", "value": 70200, "desc": "prognoz"},
-			"main": {
-				"total": 45600,
-				"active": 32400,
-				"new": 890,
-				"growth": "+12.5%"
-			},
-			"chart_data": {
-				"labels": ["Yan", "Fev", "Mart", "Apr", "May", "Iyun"],
-				"values": [10, 40, 25, 50, 30, 70]
-			}
-		}
-
-		data = {
-			"success": True,
-			"service_stats": [
-				{"label": "Soliq Ma'lumotlari", "info": tax_data},
-				{"label": "Biznes Ro'yxati", "info": business_data},
-				{"label": "Hisobot Tayyorlash", "info": report_data},
-				{"label": "Konsalting", "info": consult_data},
-				{"label": "Audit Xizmatlari", "info": audition_data},
-			],
-			"user_stats": user_stats
-		}
-		return Response(data, status=status.HTTP_200_OK)
+        stat_type = request.query_params.get("stat_type", "monthly")
+        cache_key = f"platform_stats:{stat_type}"
+        data = cache.get(cache_key)
+        if data is None:
+            data = {"success": True, "service_stats": service_stats(stat_type), "user_stats": user_stats()}
+            cache.set(cache_key, data, timeout=600)
+        return Response(data, status=status.HTTP_200_OK)
 
 
 class ContactCreateAPIView(CreateAPIView):
@@ -450,3 +401,36 @@ class MyDownloadedByulletens(APIView):
 class AboutPortalListView(ListAPIView):
     queryset = AboutPortal.objects.all()
     serializer_class = AboutPortalSerializer
+
+
+class HomeStatsAPIView(APIView):
+    """GET /api/common/home-stats/ — bosh sahifadagi "Raqamlarda platforma" bloki (U-08). 1 soat kesh."""
+
+    def get(self, request):
+        data = cache.get("home_stats")
+        if data is None:
+            from django.db import connection
+            from apps.additional_services.models import IndustrialProduct, Ktut
+            from apps.book_market.models import Book
+
+            # 3,5 mln qatorli jadval uchun COUNT(*) o'rniga PostgreSQL statistikasi (taxminiy, tez)
+            trade_records = None
+            if connection.vendor == "postgresql":
+                with connection.cursor() as cursor:
+                    cursor.execute("SELECT reltuples::bigint FROM pg_class WHERE relname = 'additional_services_tradedata'")
+                    row = cursor.fetchone()
+                    trade_records = int(row[0]) if row and row[0] and row[0] > 0 else None
+            if trade_records is None:
+                from apps.additional_services.models import TradeData
+                trade_records = TradeData.objects.count()
+
+            data = {
+                "enterprises": Ktut.objects.count(),
+                "trade_records": trade_records,
+                "industrial_products": IndustrialProduct.objects.count(),
+                "books": Book.objects.filter(is_active=True).count(),
+                "services": Service.objects.filter(is_active=True).count(),
+                "users": User.objects.count(),
+            }
+            cache.set("home_stats", data, timeout=3600)
+        return Response(data)

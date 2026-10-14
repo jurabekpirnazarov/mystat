@@ -35,3 +35,30 @@ class SyntheticRegistryTests(TestCase):
         demo, _ = get_or_create_synthetic(QuestionAnswer, "faq:4", self.defaults)
         self.assertEqual(synthetic_ids(QuestionAnswer), set())
         self.assertFalse(is_synthetic(demo))
+
+
+class PlatformStatTests(TestCase):
+    def test_real_counts_and_shape(self):
+        from django.core.cache import cache
+        from apps.accounts.models import User
+        from apps.common.models import District, Region
+        from apps.services.models import (PackageService, PackageServiceItem, ServicePackage,
+                                          UserServicePackage, UserServicePackageItemUse)
+        cache.clear()
+        legal = User.objects.create_user(username="ps_legal", password="x", user_type="legal_entity")
+        User.objects.create_user(username="ps_ind", password="x")
+        region = Region.objects.create(name="R", code="1")
+        district = District.objects.create(name="D", region=region, code="11")
+        package = ServicePackage.objects.create(name_uz="P", name_ru="P", name_cry="P")
+        ps = PackageService.objects.create(name_uz="<p>E-kitob</p>", name_ru="E", name_cry="E")
+        psi = PackageServiceItem.objects.create(package=package, package_service=ps, name_uz="a", name_ru="a", name_cry="a", limit=5)
+        usp = UserServicePackage.objects.create(region=region, district=district, year=2026, month=1, service=package, created_by_user=legal)
+        UserServicePackageItemUse.objects.create(usp=usp, psi=psi, is_success=True)
+
+        data = self.client.get("/api/common/platform-stat/?stat_type=monthly").json()
+        self.assertEqual(data["service_stats"], [{"label": "E-kitob", "info": {"physical": 0, "legal": 1, "all": 1}}])
+        self.assertEqual(data["user_stats"]["main"]["total"], 2)
+        self.assertEqual(data["user_stats"]["main"]["new"], 2)
+        self.assertEqual(len(data["user_stats"]["chart_data"]["values"]), 6)
+        # Ikki marta chaqirilganda bir xil (avval random edi)
+        self.assertEqual(self.client.get("/api/common/platform-stat/?stat_type=monthly").json(), data)

@@ -36,6 +36,12 @@ class RegisterOrganizationDetailAPIView(GenericAPIView):
         if not user_package or not user_package.service:
             return Response({"detail": "UserServicePackage topilmadi"}, status=status.HTTP_404_NOT_FOUND)
 
+        if user_package.is_expired:
+            return Response(
+                {"detail": "Paket muddati tugagan", "expires_at": user_package.expires_at},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         try:
             with transaction.atomic():
                 try:

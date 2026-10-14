@@ -198,10 +198,29 @@ class UserServicePackage(BaseModel):
     month = models.IntegerField(verbose_name=_("Oy"))
     service = models.ForeignKey(ServicePackage, on_delete=models.CASCADE, related_name='user_service_packages', verbose_name=_("Servis"))
     created_by_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_service_package_users', verbose_name=_("Tomonidan yaratilgan"))
+    # B-07: mavjud (eski) yozuvlarda NULL — muddatsiz hisoblanadi
+    starts_at = models.DateField(null=True, blank=True, verbose_name=_("Boshlanish sanasi"))
+    expires_at = models.DateField(null=True, blank=True, verbose_name=_("Tugash sanasi"),
+                                  help_text=_("Bo'sh bo'lsa — muddatsiz. Yangi paketda boshlanish + paket muddati (kun)."))
 
     class Meta:
         verbose_name = _("Foydalanuvchi Servis Paket Plan")
         verbose_name_plural = _("Foydalanuvchi Servis Paket planlar")
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            from datetime import timedelta
+            from django.utils import timezone
+            if self.starts_at is None:
+                self.starts_at = timezone.localdate()
+            if self.expires_at is None and self.service_id and self.service.duration_days:
+                self.expires_at = self.starts_at + timedelta(days=self.service.duration_days)
+        super().save(*args, **kwargs)
+
+    @property
+    def is_expired(self):
+        from django.utils import timezone
+        return self.expires_at is not None and self.expires_at < timezone.localdate()
 
 
 class UserServicePackageItemUse(BaseModel):

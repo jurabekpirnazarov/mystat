@@ -162,6 +162,12 @@ class BookDownloadAPIView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+        if user_package.is_expired:
+            return Response(
+                {"detail": "Paket muddati tugagan", "expires_at": user_package.expires_at},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         # 3️⃣ 🔥 JSONField ichidan book_id bo‘yicha DUBLIKAT TEKSHIRUV
         already_used = UserServicePackageItemUse.objects.filter(
             usp=user_package,

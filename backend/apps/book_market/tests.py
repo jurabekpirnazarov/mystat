@@ -59,3 +59,22 @@ class EBookLimitTests(APITestCase):
         response = self.download(self.books[0])
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(UserServicePackageItemUse.objects.filter(usp=self.usp).count(), 1)
+
+
+class PackageExpiryTests(EBookLimitTests):
+    """B-07: muddati o'tgan paket bilan foydalanib bo'lmaydi; eski (muddatsiz) paketlar ishlayveradi."""
+
+    def test_new_package_gets_expiry_from_duration(self):
+        from datetime import timedelta
+        self.assertEqual(self.usp.expires_at, self.usp.starts_at + timedelta(days=self.usp.service.duration_days))
+
+    def test_expired_package_is_forbidden(self):
+        from datetime import date
+        UserServicePackage.objects.filter(pk=self.usp.pk).update(expires_at=date(2020, 1, 1))
+        response = self.download(self.books[0])
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertFalse(UserServicePackageItemUse.objects.filter(usp=self.usp).exists())
+
+    def test_package_without_expiry_still_works(self):
+        UserServicePackage.objects.filter(pk=self.usp.pk).update(starts_at=None, expires_at=None)
+        self.assertEqual(self.download(self.books[0]).status_code, status.HTTP_201_CREATED)

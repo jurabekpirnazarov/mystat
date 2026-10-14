@@ -106,7 +106,14 @@ class ServiceRequestsAdmin(admin.ModelAdmin):
 
 @admin.register(UserServicePackage)
 class UserServicePackageAdmin(admin.ModelAdmin):
-    list_display = ('service', 'created_by_user_id')
+    list_display = ('service', 'created_by_user_id', 'starts_at', 'expires_at', 'status_label')
+    list_filter = ('service',)
+
+    @admin.display(description="Holat")
+    def status_label(self, obj):
+        if obj.expires_at is None:
+            return "Muddatsiz"
+        return "Tugagan" if obj.is_expired else "Faol"
 
 
 @admin.register(UserServicePackageItemUse)

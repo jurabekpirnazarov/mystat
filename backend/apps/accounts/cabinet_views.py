@@ -136,8 +136,9 @@ class CabinetSummaryAPIView(APIView):
 
 def _plain(html):
     """PackageService.name_uz — RichTextField; ro'yxatda teglarsiz ko'rsatamiz."""
+    import html as html_lib
     from django.utils.html import strip_tags
-    return strip_tags(html or "").strip()
+    return " ".join(html_lib.unescape(strip_tags(html or "")).split())
 
 
 class MyPaymentsAPIView(APIView):

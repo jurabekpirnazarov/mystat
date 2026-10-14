@@ -2,6 +2,7 @@
 
 Javob shakli frontend (`pages/Statistics.tsx`) kutganidek saqlangan.
 """
+import html
 from datetime import timedelta
 
 from django.db.models import Count, Q
@@ -30,7 +31,7 @@ def service_stats(stat_type, top=5):
     )
     return [
         {
-            "label": strip_tags(row["psi__package_service__name_uz"] or "").strip() or "—",
+            "label": " ".join(html.unescape(strip_tags(row["psi__package_service__name_uz"] or "")).split()) or "—",
             "info": {"physical": row["physical"], "legal": row["legal"], "all": row["all"]},
         }
         for row in rows

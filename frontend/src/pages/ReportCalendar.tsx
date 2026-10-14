@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReportMonthCalendar from '../components/reports/ReportMonthCalendar';
 import { Search } from 'lucide-react';
 import BookStep1 from '../components/BookStep1';
 import ReportsCalendarDetail from './ReportsCalendarDetail';
@@ -327,6 +328,9 @@ const ReportCalendar: React.FC = () => {
             </button>
           </div>
         </div>
+      </div>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+        <ReportMonthCalendar />
       </div>
     </div>
   );

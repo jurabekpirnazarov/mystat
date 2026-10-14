@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from django.utils import timezone
 
+from apps.additional_services.models import SavedQuery
 from apps.common.models import SyntheticRecord
 from apps.common.synthetic import register_synthetic
 from apps.notifications.models import IndicatorSubscription, IndicatorUpdateEvent
@@ -85,6 +86,15 @@ class ApiSubscriptionsSeeder(Seeder):
                     continue
                 self.make(IndicatorSubscription, f"sub:{username}:{indicator}:{channel}", user=user, indicator=indicator,
                           channel=channel, title=str(names[indicator]))
+
+        # U-16 / K-04: saqlangan filtrlar namunasi
+        saved = [("demo_yuridik_1", "trade", "Eksport: paxta (52), 2025", {"flow": "export", "year": 2025, "hs": "52"}),
+                 ("demo_yuridik_1", "trade", "Import: Xitoy bilan Rossiya", {"flow": "import", "compare": 643}),
+                 ("demo_yuridik_2", "partners", "Samarqand: to'qimachilik", {"q": "tekstil"}),
+                 ("demo_yuridik_2", "trade", "Eksport 2025 vs 2024", {"flow": "export", "year": 2025, "year2": 2024})]
+        for n, (username, kind, name, params) in enumerate(saved):
+            if users.get(username):
+                self.make(SavedQuery, f"saved:{n}", user=users[username], kind=kind, name=name, params=params)
 
         for i, (indicator, title, link) in enumerate(EVENTS):
             event = self.make(IndicatorUpdateEvent, f"event:{i}", indicator=indicator, title=title, link=link,

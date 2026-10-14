@@ -150,3 +150,78 @@ class TradeFlowDynamicsAPIView(APIView):
                 data.append({"year": year, "period": month, "period_label": period_label(month), "value": float(value)})
             cache.set(key, data, CACHE_SECONDS)
         return Response(data)
+
+
+EXPORT_MAX_ROWS = 10_000
+
+
+class TradeFlowsExportAPIView(APIView):
+    """GET external-trade/trade-flows/export/?year=&flow=&hs=&detail=country|hs4&file=csv|xlsx — U-16.
+
+    Server ko'pi bilan 10 000 qator qaytaradi; kesilgan bo'lsa fayl oxirida aytiladi.
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        import csv
+        import io
+
+        from django.db.models.functions import Substr
+        from django.http import HttpResponse
+
+        periods = latest_periods()
+        flow = request.query_params.get("flow", "export")
+        if flow not in FLOWS or not periods:
+            return Response({"detail": "flow: export yoki import"}, status=400)
+        try:
+            year = int(request.query_params.get("year") or max(periods))
+        except ValueError:
+            return Response({"detail": "year butun son"}, status=400)
+        if year not in periods:
+            return Response({"detail": f"{year}-yil uchun ma'lumot yo'q"}, status=404)
+        hs = "".join(ch for ch in (request.query_params.get("hs") or "") if ch.isdigit())[:6]
+        detail = request.query_params.get("detail", "country")
+        qs = TradeData.objects.filter(year_id=year, month=periods[year], trade_type=FLOWS[flow])
+        if hs:
+            qs = qs.filter(product__code__startswith=hs)
+        if detail == "hs4":
+            rows = (qs.annotate(hs4=Substr("product__code", 1, 4)).values("country__name_uz", "hs4")
+                    .annotate(total=Sum("value"), qty=Sum("quantity")).order_by("-total"))
+            header = ["Davlat", "HS4", "Qiymat (ming AQSh $)", "Miqdor"]
+            keys = ("country__name_uz", "hs4")
+        else:
+            rows = (qs.values("country__name_uz", "country__ctrana")
+                    .annotate(total=Sum("value"), qty=Sum("quantity")).order_by("-total"))
+            header = ["Davlat", "ISO kod", "Qiymat (ming AQSh $)", "Miqdor"]
+            keys = ("country__name_uz", "country__ctrana")
+        data = [[r[keys[0]], r[keys[1]], float(r["total"] or 0), float(r["qty"] or 0)]
+                for r in rows[:EXPORT_MAX_ROWS + 1]]
+        truncated = len(data) > EXPORT_MAX_ROWS
+        data = data[:EXPORT_MAX_ROWS]
+        note = (f"Manba: my.stat.uz, tashqi savdo, {year}-yil {period_label(periods[year])}, {flow}"
+                + (f", HS {hs}*" if hs else "") + (f". Natija {EXPORT_MAX_ROWS} qatorda kesildi." if truncated else "."))
+        name = f"tashqi-savdo-{flow}-{year}{'-' + hs if hs else ''}"
+        if request.query_params.get("file") == "xlsx":  # "format" — DRF parametri, shuning uchun "file"
+            from openpyxl import Workbook
+            wb = Workbook()
+            ws = wb.active
+            ws.append(header)
+            for row in data:
+                ws.append(row)
+            ws.append([])
+            ws.append([note])
+            buf = io.BytesIO()
+            wb.save(buf)
+            resp = HttpResponse(buf.getvalue(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            resp["Content-Disposition"] = f'attachment; filename="{name}.xlsx"'
+        else:
+            out = io.StringIO()
+            writer = csv.writer(out)
+            writer.writerow(header)
+            writer.writerows(data)
+            writer.writerow([note])
+            resp = HttpResponse(("\ufeff" + out.getvalue()).encode("utf-8"), content_type="text/csv; charset=utf-8")
+            resp["Content-Disposition"] = f'attachment; filename="{name}.csv"'
+        resp["X-Rows"] = str(len(data))
+        resp["X-Truncated"] = "1" if truncated else "0"
+        return resp

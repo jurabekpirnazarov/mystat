@@ -2,8 +2,10 @@ import { useCallback, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import SubscribeButton from "../components/SubscribeButton";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { ArrowDownRight, ArrowUpRight, Globe2, Hash, Layers, TrendingUp, X } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Download, Globe2, Hash, Layers, TrendingUp, X } from "lucide-react";
+import SavedQueries from "../components/SavedQueries";
 import {
+  downloadTradeExport,
   fetchTradeDynamics,
   fetchTradeFlows,
   TRADE_VALUE_UNIT,
@@ -23,6 +25,10 @@ export default function TradeFlows() {
   const year = Number(params.get("year")) || undefined;
   const hs = (params.get("hs") ?? "").replace(/\D/g, "").slice(0, 6);
   const countryId = Number(params.get("country")) || null;
+  // U-16: taqqoslash — ikkinchi davlat (compare) yoki ikkinchi yil (year2)
+  const compareId = Number(params.get("compare")) || null;
+  const year2 = Number(params.get("year2")) || null;
+  const [exportMsg, setExportMsg] = useState<string | null>(null);
   const [hsInput, setHsInput] = useState(hs);
 
   const update = useCallback(
@@ -39,10 +45,27 @@ export default function TradeFlows() {
 
   const flows = useApi(() => fetchTradeFlows({ flow, year, hs: hs.length >= 2 ? hs : undefined }), [flow, year, hs]);
   const dynamics = useApi(() => fetchTradeDynamics(flow, countryId), [flow, countryId]);
+  const dynamics2 = useApi(() => (compareId ? fetchTradeDynamics(flow, compareId) : Promise.resolve(null)), [flow, compareId]);
+  const flows2 = useApi(() => (year2 ? fetchTradeFlows({ flow, year: year2, hs: hs.length >= 2 ? hs : undefined }) : Promise.resolve(null)), [flow, year2, hs]);
+  const doExport = async (detail: "country" | "hs4", format: "csv" | "xlsx") => {
+    setExportMsg("Tayyorlanmoqda…");
+    try {
+      const r = await downloadTradeExport({ flow, year, hs: hs.length >= 2 ? hs : undefined, detail, format });
+      setExportMsg(r.truncated ? `Yuklandi: ${r.rows} qator (server chegarasi — 10 000 qator).` : `Yuklandi: ${r.rows} qator.`);
+    } catch {
+      setExportMsg("Eksport qilib bo'lmadi.");
+    }
+  };
 
   const data = flows.data;
   const top = useMemo(() => (data?.countries ?? []).slice(0, 20), [data]);
   const selected = data?.countries.find((c) => c.country_id === countryId) ?? null;
+  const compared = data?.countries.find((c) => c.country_id === compareId) ?? null;
+  const year2Values = useMemo(() => new Map((flows2.data?.countries ?? []).map((c) => [c.country_id, c.value])), [flows2.data]);
+  const chartData = useMemo(() => {
+    const second = new Map((dynamics2.data ?? []).map((p) => [p.year, p.value]));
+    return (dynamics.data ?? []).map((p) => ({ ...p, value2: second.get(p.year) ?? null }));
+  }, [dynamics.data, dynamics2.data]);
   const flowLabel = flow === "export" ? "Eksport" : "Import";
   const onSelect = useCallback((id: number | null) => update({ country: id }), [update]);
 
@@ -111,6 +134,29 @@ export default function TradeFlows() {
               Davr: {data.year}-yil {data.period_label}
             </span>
           )}
+          <select
+            aria-label="Taqqoslash yili"
+            value={year2 ?? ""}
+            onChange={(e) => update({ year2: e.target.value || null })}
+            className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm px-3 py-2"
+          >
+            <option value="">Yil bilan taqqoslash…</option>
+            {(data?.years ?? []).filter((y) => y !== data?.year).slice().reverse().map((y) => <option key={y} value={y}>{y}</option>)}
+          </select>
+          <div className="flex items-center gap-1">
+            <Download className="w-4 h-4 text-gray-500" aria-hidden="true" />
+            <button type="button" onClick={() => doExport("country", "csv")} className="px-2 py-1 rounded border text-xs">CSV</button>
+            <button type="button" onClick={() => doExport("country", "xlsx")} className="px-2 py-1 rounded border text-xs">XLSX</button>
+            <button type="button" onClick={() => doExport("hs4", "xlsx")} className="px-2 py-1 rounded border text-xs" title="Davlat × HS4, ko'pi bilan 10 000 qator">Davlat×HS4</button>
+          </div>
+          {exportMsg && <span role="status" className="text-xs text-gray-500">{exportMsg}</span>}
+        </div>
+        <div className="mb-6 max-w-sm">
+          <SavedQueries
+            kind="trade"
+            current={{ flow, year, hs: hs || undefined, country: countryId ?? undefined, compare: compareId ?? undefined, year2: year2 ?? undefined }}
+            onApply={(p) => setParams(new URLSearchParams(Object.entries(p).map(([k, v]) => [k, String(v)])), { replace: true })}
+          />
         </div>
 
         {flows.loading && !data ? (
@@ -160,6 +206,7 @@ export default function TradeFlows() {
                         <th className="py-2 pr-2 font-medium text-right">Qiymat</th>
                         <th className="py-2 pr-2 font-medium w-40">Ulush</th>
                         <th className="py-2 font-medium text-right">O'zgarish</th>
+                        {year2 && <th className="py-2 pl-2 font-medium text-right">{year2}-yil</th>}
                       </tr>
                     </thead>
                     <tbody>
@@ -190,6 +237,11 @@ export default function TradeFlows() {
                               </span>
                             )}
                           </td>
+                          {year2 && (
+                            <td className="py-2 pl-2 text-right tabular-nums text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                              {year2Values.has(c.country_id) ? fmt(year2Values.get(c.country_id) as number) : "—"}
+                            </td>
+                          )}
                         </tr>
                       ))}
                     </tbody>
@@ -202,6 +254,15 @@ export default function TradeFlows() {
                 <h2 className="font-semibold text-gray-900 dark:text-white mb-3">
                   {selected ? `${selected.country_name}: ` : ""}{flowLabel.toLowerCase()} dinamikasi
                 </h2>
+                <select
+                  aria-label="Taqqoslash uchun davlat"
+                  value={compareId ?? ""}
+                  onChange={(e) => update({ compare: e.target.value || null })}
+                  className="mb-2 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm px-2 py-1.5"
+                >
+                  <option value="">Boshqa davlat bilan taqqoslash…</option>
+                  {top.filter((c) => c.country_id !== countryId).map((c) => <option key={c.country_id} value={c.country_id}>{c.country_name}</option>)}
+                </select>
                 {dynamics.loading && !dynamics.data ? (
                   <Skeleton variant="chart" />
                 ) : dynamics.error ? (
@@ -209,15 +270,16 @@ export default function TradeFlows() {
                 ) : (
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={dynamics.data ?? []} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                      <LineChart data={chartData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
                         <XAxis dataKey="year" tick={{ fontSize: 12, fill: "#6b7280" }} axisLine={false} tickLine={false} />
                         <YAxis tickFormatter={(v: number) => compact(v)} tick={{ fontSize: 11, fill: "#6b7280" }} axisLine={false} tickLine={false} width={64} />
                         <Tooltip
-                          formatter={(v: number) => [`${fmt(v)} ${TRADE_VALUE_UNIT}`, flowLabel]}
+                          formatter={(v: number, key) => [`${fmt(v)} ${TRADE_VALUE_UNIT}`, key === "value2" ? compared?.country_name ?? "Taqqoslash" : selected?.country_name ?? flowLabel]}
                           labelFormatter={(y, payload) => `${y}-yil ${payload?.[0]?.payload?.period_label ?? ""}`}
                         />
                         <Line type="monotone" dataKey="value" stroke="#2563eb" strokeWidth={2.5} dot={{ r: 3 }} isAnimationActive={false} />
+                        {compareId && <Line type="monotone" dataKey="value2" stroke="#f97316" strokeWidth={2.5} dot={{ r: 3 }} isAnimationActive={false} connectNulls />}
                       </LineChart>
                     </ResponsiveContainer>
                   </div>

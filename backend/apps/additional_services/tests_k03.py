@@ -75,3 +75,18 @@ class MarketReportTests(APITestCase):
     def test_hs_search(self):
         self.assertEqual(self.client.get("/api/additional-services/hs-search/", {"q": "5201"}).data[0]["code"], "520100")
         self.assertEqual(self.client.get("/api/additional-services/hs-search/", {"q": "хлоп"}).data[0]["code"], "52")
+
+
+class TradeExportTests(MarketReportTests):
+    """U-16: eksport — CSV BOM, server chegarasi."""
+
+    def test_export_csv_and_limit(self):
+        from unittest.mock import patch
+        url = "/api/additional-services/external-trade/trade-flows/export/"
+        r = self.client.get(url, {"flow": "export", "year": 2025})
+        self.assertEqual(r.status_code, 200)
+        self.assertTrue(r.content.startswith("﻿".encode()))
+        self.assertEqual(r["X-Rows"], "3")
+        with patch("apps.additional_services.api_endpoints.ExternalTradeAPI.flows.EXPORT_MAX_ROWS", 2):
+            r = self.client.get(url, {"flow": "export", "year": 2025, "file": "xlsx"})
+        self.assertEqual((r["X-Rows"], r["X-Truncated"]), ("2", "1"))

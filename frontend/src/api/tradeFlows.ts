@@ -47,6 +47,21 @@ export const fetchTradeFlows = async (params: { flow: TradeFlow; year?: number; 
   return (await axiosT.get<TradeFlowsResponse>(BASE, { params: query })).data;
 };
 
+/** U-16: joriy jadvalni yuklab olish (server ko'pi bilan 10 000 qator qaytaradi). */
+export const downloadTradeExport = async (params: { flow: TradeFlow; year?: number; hs?: string; detail: "country" | "hs4"; format: "csv" | "xlsx" }) => {
+  const query: Record<string, string> = { flow: params.flow, detail: params.detail, file: params.format };
+  if (params.year) query.year = String(params.year);
+  if (params.hs) query.hs = params.hs;
+  const res = await axiosT.get(`${BASE}export/`, { params: query, responseType: "blob" });
+  const url = URL.createObjectURL(res.data as Blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `tashqi-savdo-${params.flow}-${params.year ?? ""}.${params.format}`;
+  a.click();
+  URL.revokeObjectURL(url);
+  return { rows: Number(res.headers["x-rows"] ?? 0), truncated: res.headers["x-truncated"] === "1" };
+};
+
 export const fetchTradeDynamics = async (flow: TradeFlow, country?: number | null) => {
   const query: Record<string, string> = { flow };
   if (country) query.country = String(country);

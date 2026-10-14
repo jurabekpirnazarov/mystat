@@ -3,11 +3,68 @@
 # (systemd va nginx yo'llarini yangilash — README.md, "Production" bo'limi)
 
 stages:
+  - test
   - deploy
 
 variables:
   PROJECT_PATH: "/var/www/mystat"
   REPO_URL: "https://gitlab-ci-token:${CI_JOB_TOKEN}@tester.stat.uz/consalt/mystat.git"
+
+# ---------------------------------------------------------------------------
+# Tekshiruvlar (Q-06). Docker executor kerak: python/node image + postgres service.
+# Faqat shell runner bo'lsa, CI/CD Variables'da CI_TESTS_DISABLED=true qo'yib vaqtincha o'chirish mumkin.
+# Test yiqilsa, deploy ishga tushmaydi (needs).
+# ---------------------------------------------------------------------------
+.tests_rules: &tests_rules
+  - if: '$CI_TESTS_DISABLED == "true"'
+    when: never
+  - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  - if: '$CI_COMMIT_BRANCH == "main"'
+
+test-backend:
+  stage: test
+  image: python:3.12-slim
+  services:
+    - name: postgres:14
+      alias: postgres
+  variables:
+    POSTGRES_DB: consult_ci
+    POSTGRES_USER: ci
+    POSTGRES_PASSWORD: ci
+    DJANGO_SETTINGS_MODULE: core.settings.develop
+    DB_ENGINE: django.db.backends.postgresql
+    DB_NAME: consult_ci
+    DB_USER: ci
+    DB_PASSWORD: ci
+    DB_HOST: postgres
+    DB_PORT: "5432"
+    SECRET_KEY: ci-only-not-secret
+    # settings PROVIDERS Click kalitlarini default'siz o'qiydi
+    CLICK_URL: https://example.invalid
+    MERCHANT_ID: "0"
+    MERCHANT_SERVICE_ID: "0"
+    MERCHANT_USER_ID: "0"
+    CLICK_SECRET_KEY: ci
+    RETURN_URL: https://example.invalid
+  rules: *tests_rules
+  script:
+    - cd backend
+    - pip install -q -r requirements/develop.txt
+    - mkdir -p logs
+    - python manage.py check
+    - python manage.py makemigrations --check --dry-run
+    - python manage.py test --noinput
+
+test-frontend:
+  stage: test
+  image: node:20
+  rules: *tests_rules
+  script:
+    - cd frontend
+    - npm ci --legacy-peer-deps
+    - npm run typecheck
+    - npx eslint src
+    - npx vite build
 
 .update_repo: &update_repo
   - cd $PROJECT_PATH
@@ -19,6 +76,9 @@ variables:
 
 deploy-backend:
   stage: deploy
+  needs:
+    - job: test-backend
+      optional: true
   resource_group: production
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
@@ -44,6 +104,9 @@ deploy-backend:
 
 deploy-frontend:
   stage: deploy
+  needs:
+    - job: test-frontend
+      optional: true
   resource_group: production
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'

@@ -127,11 +127,11 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD', default=''),
         'HOST': config('DB_HOST', default=''),
         'PORT': config('DB_PORT', default=''),
-        'OPTIONS': {
-            'sslmode': 'prefer',
-        }
     }
 }
+# sslmode faqat PostgreSQL uchun (SQLite noma'lum opsiyada yiqiladi — CI testlari SQLite'da ishlaydi)
+if DATABASES['default']['ENGINE'].endswith('postgresql'):
+    DATABASES['default']['OPTIONS'] = {'sslmode': 'prefer'}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

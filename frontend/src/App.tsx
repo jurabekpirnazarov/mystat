@@ -75,6 +75,7 @@ const BookOrderMapPage = lazy(() => import("./pages/BookOrderMapPage"));
 const TariffCompare = lazy(() => import("./pages/TariffCompare"));
 const MarketReport = lazy(() => import("./pages/MarketReport"));
 const Partners = lazy(() => import("./pages/Partners"));
+const OrganizationPassport = lazy(() => import("./pages/OrganizationPassport"));
 
 // Loading component
 const PageLoader = () => (
@@ -133,6 +134,14 @@ function AppRoutes() {
             element={
               <ProtectedRoute>
                 <PersonalCabinet />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cabinet/organization"
+            element={
+              <ProtectedRoute>
+                <OrganizationPassport />
               </ProtectedRoute>
             }
           />

@@ -9,6 +9,7 @@ from apps.services.limits import consume, limit_status
 from .geo import region_name_uz
 from .models import EnterpriseIndicator
 from .stats import percentile_rank, quantile
+from apps.common.text import sector_label
 
 MIN_GROUP = 10
 BENCHMARK_SLUG = "benchmark"
@@ -125,7 +126,7 @@ class BenchmarkView(APIView):
             "level": level,
             "group": {
                 "oked_section": section.code,
-                "oked_name": (section.name_uz or section.name or "").replace("а", "a").replace("А", "A").strip().capitalize(),
+                "oked_name": sector_label(section, with_code=False),
                 "region": region_name_uz(region) if level == "region" else "Respublika bo'yicha",
                 "size": len(group_rows),
             },

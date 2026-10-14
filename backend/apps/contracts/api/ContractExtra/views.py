@@ -9,6 +9,7 @@ from apps.contracts.api.ContractCreate.serializers import ContractCreateSerializ
 from apps.contracts.models import Contract
 from apps.services.models import ServicePackage, UserServicePackage
 from apps.services.pricing import package_price
+from apps.common.text import sector_label
 
 PREVIEW_NUMBER = "(raqam shartnoma yaratilganda beriladi)"
 
@@ -94,7 +95,7 @@ class ContractPreviewView(APIView):
             "requisites": {
                 "name": org.name, "tin": org.tin, "address": org.address,
                 "district": org.district.name if org.district_id else None,
-                "sector": f"{org.sector.code} · {org.sector.name_uz or org.sector.name}" if org.sector_id else None,
+                "sector": sector_label(org.sector),
                 "director": request.user.full_name,
                 "seller": org.branch.name if org.branch_id else None,
             },

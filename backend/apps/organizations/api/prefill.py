@@ -17,6 +17,7 @@ from rest_framework.views import APIView
 
 from apps.additional_services.models import IndustrialProduct, Ktut
 from apps.book_market.models import OrderBook
+from apps.common.text import sector_label
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +90,7 @@ def build_prefill(user):
             put("region", org.district.region.name, "organization", now)
             put("region_id", org.district.region_id, "organization", now)
         if org.sector_id:
-            put("sector", f"{org.sector.code} · {(org.sector.name_uz or org.sector.name or '').strip()}", "organization", now)
+            put("sector", sector_label(org.sector), "organization", now)
             put("sector_id", org.sector_id, "organization", now)
 
         registry, fetched = _registry_lookup(org.tin)

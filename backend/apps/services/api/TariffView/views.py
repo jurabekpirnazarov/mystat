@@ -12,6 +12,7 @@ from rest_framework.views import APIView
 from apps.common.models import Sector
 from apps.services.models import PackageServiceItem, ServicePackage, ServicePackagePrice
 from apps.services.pricing import package_price
+from apps.common.text import fix_lookalikes
 
 # "Menga qaysi paket mos?" savollari -> PackageService.slug
 NEEDS = {
@@ -22,7 +23,7 @@ NEEDS = {
 
 
 def _clean(html):
-    text = strip_tags(html or "").replace("&nbsp;", " ")
+    text = fix_lookalikes(strip_tags(html or "")).replace("&nbsp;", " ")
     for entity, char in (("&lsquo;", "‘"), ("&rsquo;", "’"), ("&#39;", "'"), ("&ldquo;", "“"), ("&rdquo;", "”")):
         text = text.replace(entity, char)
     return re.sub(r"\s+", " ", text).strip()

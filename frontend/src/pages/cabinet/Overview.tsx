@@ -148,6 +148,10 @@ export default function Overview({ onNavigate }: Props) {
               <BookOpen className="w-5 h-5 text-blue-600" aria-hidden="true" />
               <span className="text-sm font-medium text-gray-800 dark:text-gray-100">Kitob do'koni</span>
             </Link>
+            <Link to="/cabinet/organization" className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+              <FileText className="w-5 h-5 text-blue-600" aria-hidden="true" />
+              <span className="text-sm font-medium text-gray-800 dark:text-gray-100">Korxona pasporti</span>
+            </Link>
             <Link to="/services" className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
               <Tag className="w-5 h-5 text-blue-600" aria-hidden="true" />
               <span className="text-sm font-medium text-gray-800 dark:text-gray-100">Tariflar</span>

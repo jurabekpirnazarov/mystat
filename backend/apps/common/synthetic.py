@@ -102,3 +102,20 @@ def data_source(model, queryset):
         return "real"
     syn = len(pks & ids)
     return "synthetic" if syn == len(pks) else "mixed" if syn else "real"
+
+
+def table_source(model):
+    """Butun jadval manbasi: "real" | "synthetic" | "mixed" (ID'larni yuklamasdan, 10 daqiqa kesh)."""
+    if not settings.DEBUG:
+        return "real"
+    from django.core.cache import cache
+
+    key = f"synthetic:table_source:{model._meta.label}"
+    value = cache.get(key)
+    if value is None:
+        ct = ContentType.objects.get_for_model(model)
+        synthetic = SyntheticRecord.objects.filter(content_type=ct).count()
+        total = model._base_manager.count()
+        value = "real" if not synthetic else "synthetic" if synthetic >= total else "mixed"
+        cache.set(key, value, 600)
+    return value

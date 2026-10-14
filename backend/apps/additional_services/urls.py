@@ -3,6 +3,7 @@ from apps.additional_services.api_endpoints import KtutReportListAPIView, Statis
     PriceIndexYearAndMonthView, KtutDetailAPIView, ReportListAPIView
 from apps.additional_services.api_endpoints.IndustrialProductAPI import IndustrialProductListAPIView, IndustrialProductCategoryAPIView
 from apps.additional_services.api_endpoints.PriceIndexAPI import PriceIndexAPIView
+from apps.additional_services.api_endpoints.PriceIndexAPI.series import CpiSeriesAPIView
 from apps.additional_services.views.service_views import SubmittedReportAPIView
 from apps.additional_services.views.trade_data_views import TradeDataAPIView
 from apps.additional_services.api_endpoints.StaticClassificationAPI.views import StatisticClassificationCategoryAPIView
@@ -22,6 +23,7 @@ urlpatterns = [
     path('demographics/', include('apps.additional_services.api_endpoints.DemographicsAPI.urls')),
     path('submitted-report', SubmittedReportAPIView.as_view()),
     path('price-index', PriceIndexAPIView.as_view()),
+    path('cpi/series/', CpiSeriesAPIView.as_view(), name='cpi-series'),
     path('statistic-classification', StatisticClassificationAPIView.as_view()),
     path('statistic-classification/categories/', StatisticClassificationCategoryAPIView.as_view(), name='statistic-classification-categories'),
     path('reportlist/calendar/', ReportCalendarAPIView.as_view(), name='reportlist-calendar'),

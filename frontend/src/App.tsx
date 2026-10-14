@@ -76,6 +76,18 @@ const TariffCompare = lazy(() => import("./pages/TariffCompare"));
 const MarketReport = lazy(() => import("./pages/MarketReport"));
 const Partners = lazy(() => import("./pages/Partners"));
 const OrganizationPassport = lazy(() => import("./pages/OrganizationPassport"));
+const CitizensHub = lazy(() => import("./pages/citizens/CitizensHub"));
+const Regions = lazy(() => import("./pages/Regions"));
+const RegionProfile = lazy(() => import("./pages/RegionProfile"));
+const MySalary = lazy(() => import("./pages/citizens/MySalary"));
+const Prices = lazy(() => import("./pages/citizens/Prices"));
+const Learn = lazy(() => import("./pages/learn/Learn"));
+const Article = lazy(() => import("./pages/learn/Article"));
+const Glossary = lazy(() => import("./pages/learn/Glossary"));
+const SurveyList = lazy(() => import("./pages/citizens/Surveys").then((m) => ({ default: m.SurveyList })));
+const SurveyPage = lazy(() => import("./pages/citizens/Surveys").then((m) => ({ default: m.SurveyPage })));
+const Names = lazy(() => import("./pages/citizens/Names"));
+const PublicAnswers = lazy(() => import("./pages/citizens/PublicAnswers"));
 
 // Loading component
 const PageLoader = () => (
@@ -121,6 +133,18 @@ function AppRoutes() {
           <Route path="/tariffs" element={<TariffCompare />} />
           <Route path="/market-report" element={<MarketReport />} />
           <Route path="/partners" element={<Partners />} />
+          <Route path="/citizens" element={<CitizensHub />} />
+          <Route path="/regions" element={<Regions />} />
+          <Route path="/regions/:id" element={<RegionProfile />} />
+          <Route path="/my-salary" element={<MySalary />} />
+          <Route path="/prices" element={<Prices />} />
+          <Route path="/learn" element={<Learn />} />
+          <Route path="/learn/:slug" element={<Article />} />
+          <Route path="/glossary" element={<Glossary />} />
+          <Route path="/surveys" element={<SurveyList />} />
+          <Route path="/surveys/:slug" element={<SurveyPage />} />
+          <Route path="/names" element={<Names />} />
+          <Route path="/answers" element={<PublicAnswers />} />
           <Route path="/orginfo" element={<OrgInfoPage />} />
           <Route path="/cpi-calculator" element={<CpiCalculator />} />
           <Route path="/statistical-classifications" element={<StatisticalClassifications />} />

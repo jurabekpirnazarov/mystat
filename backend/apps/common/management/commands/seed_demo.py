@@ -42,6 +42,10 @@ ALLOWED_CASCADE = {
     "contracts.ContractStatusLog",
     "services.CustomDataRequest",
     "additional_services.SavedQuery",
+    "citizens.SurveyResponse",
+    "citizens.SurveyAnswer",
+    "citizens.CitizenQuestion",
+    "citizens.FavoriteIndicator",
 }
 
 

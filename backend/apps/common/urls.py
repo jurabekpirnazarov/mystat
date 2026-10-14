@@ -11,6 +11,7 @@ from .views import (
 from django.urls import path
 
 from .support_views import AssistantAPIView, GlobalSearchAPIView, SupportStartAPIView, SupportThreadAPIView
+from apps.analytics.region_profile import DistrictProfileView, RegionMapView, RegionProfileView
 
 app_name = 'common'
 
@@ -22,6 +23,9 @@ urlpatterns = [
     path('site-stat/', SiteStatAPIView.as_view(), name='site-stat'),
     path('platform-stat/', PlatFormStatAPIView.as_view(), name='platform-stat'),
     path('home-stats/', HomeStatsAPIView.as_view(), name='home-stats'),
+    path('regions/map/', RegionMapView.as_view(), name='regions-map'),
+    path('regions/<int:pk>/profile/', RegionProfileView.as_view(), name='region-profile'),
+    path('districts/<int:pk>/profile/', DistrictProfileView.as_view(), name='district-profile'),
     path('search/', GlobalSearchAPIView.as_view(), name='search'),
     path('assistant/', AssistantAPIView.as_view(), name='assistant'),
     path('support/', SupportStartAPIView.as_view(), name='support-start'),

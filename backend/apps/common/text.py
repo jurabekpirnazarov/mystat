@@ -15,6 +15,39 @@ def fix_lookalikes(text):
     return text
 
 
+_DIGRAPHS = [("o'", "ў"), ("g'", "ғ"), ("sh", "ш"), ("ch", "ч"), ("yo", "ё"), ("yu", "ю"), ("ya", "я"), ("ye", "е")]
+_LETTERS = dict(zip("abdefghijklmnopqrstuvxyz", "абдефгҳижклмнопқрстувхйз"))
+_APOS = str.maketrans({"‘": "'", "’": "'", "ʻ": "'", "ʼ": "'", "`": "'"})
+
+
+def uz_latin_to_cyrillic(text):
+    """O'zbek lotin yozuvini kirillga o'giradi (asosiy qoidalar: digraflar, so'z boshidagi e → э, tutuq → ъ)."""
+    if not text:
+        return text
+    src = text.translate(_APOS)
+    out, i = [], 0
+    while i < len(src):
+        ch = src[i]
+        low = src[i:i + 2].lower()
+        pair = next((cyr for lat, cyr in _DIGRAPHS if low == lat), None)
+        if pair:
+            out.append(pair.upper() if ch.isupper() else pair)
+            i += 2
+            continue
+        lower = ch.lower()
+        if lower == "e":
+            prev = src[i - 1] if i else " "
+            cyr = "э" if not prev.isalpha() else "е"
+        elif lower == "'":
+            prev = src[i - 1] if i else " "
+            cyr = "ъ" if prev.isalpha() and i + 1 < len(src) and src[i + 1].isalpha() else "'"
+        else:
+            cyr = _LETTERS.get(lower, ch)
+        out.append(cyr.upper() if ch.isupper() and cyr != ch else cyr)
+        i += 1
+    return "".join(out)
+
+
 def sector_label(sector, with_code=True):
     if sector is None:
         return None

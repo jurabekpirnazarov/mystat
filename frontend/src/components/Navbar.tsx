@@ -11,6 +11,7 @@ import {
   X,
   HelpCircle,
   FileText,
+  Users,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import NotificationBell from "./notifications/NotificationBell";
@@ -79,7 +80,8 @@ const Navbar = () => {
   const navItems = [
     // { path: "/", label: "Asosiy", icon: Home },
     { path: "/about", label: "Portal haqida", icon: Info },
-    { path: "/statistics", label: "Statistika", icon: BarChart3 },
+    { path: "/statistics", label: "Statistika", icon: BarChart3, wideOnly: true },
+    { path: "/citizens", label: "Fuqarolar uchun", icon: Users },
     { path: "/questions", label: "Savol-javob", icon: HelpCircle },
     { path: "/services", label: "Barcha xizmatlar", icon: Grid3X3 },
     { path: "/reglaments", label: "Reglamentlar", icon: FileText },
@@ -122,7 +124,7 @@ const Navbar = () => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-1.5 whitespace-nowrap leading-none px-2.5 xl:px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                  className={`${"wideOnly" in item ? "hidden xl:flex" : "flex"} items-center gap-1.5 whitespace-nowrap leading-none px-2.5 xl:px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                     isActive(item.path)
                       ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20"
                       : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700"

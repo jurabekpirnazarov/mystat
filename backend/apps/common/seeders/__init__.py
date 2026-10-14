@@ -64,6 +64,7 @@ def aware(dt: datetime):
 def registry():
     from .activity_plans import ActivityPlansSeeder
     from .analytics import EnterpriseIndicatorsSeeder, RegionIndicatorsSeeder
+    from .citizens import CitizensSeeder
     from .classifications import ClassificationsSeeder
     from .custom_requests import CustomRequestsSeeder
     from .demo_users import DemoUsersSeeder
@@ -83,5 +84,6 @@ def registry():
         RegionIndicatorsSeeder,
         ReportGuidesSeeder,
         CustomRequestsSeeder,
+        CitizensSeeder,
     ]
     return {s.name: s for s in seeders}

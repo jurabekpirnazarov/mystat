@@ -14,6 +14,8 @@ import SupportTab from "./cabinet/SupportTab";
 import Benchmark from "./cabinet/Benchmark";
 import MyReports from "./cabinet/MyReports";
 import CustomRequests from "./cabinet/CustomRequests";
+import CitizenHome from "./cabinet/CitizenHome";
+import CitizenQuestions from "./cabinet/CitizenQuestions";
 import {
   User,
   FileText,
@@ -46,6 +48,12 @@ const PersonalCabinet = () => {
   const { pathname } = useLocation();
   const [profileData, setProfileData] = useState<UserProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
+  const [roleData, setRoleData] = useState<string | null>(null);
+  useEffect(() => {
+    getRequest(profile)
+      .then((r) => setRoleData(unwrap(r as MaybeWrapped<UserProfile>)?.role ?? null))
+      .catch(() => setRoleData(null));
+  }, []);
   const [formData, setFormData] = useState<FormData>({
     stir: "",
     companyName: "",
@@ -76,21 +84,27 @@ const PersonalCabinet = () => {
     navigate("/");
   };
 
-  const menuItems = [
-    { id: "overview", label: "Bosh panel", icon: LayoutDashboard },
-    { id: "profile", label: "Foydalanuvchi haqida", icon: User },
-    { id: "services", label: "Mening xizmatlarim", icon: FileText },
-    { id: "contracts", label: "Shartnomalar", icon: FileText },
-    { id: "orders", label: "Buyurtmalarim", icon: FileText },
-    { id: "requests", label: "Xizmat so'rovlari", icon: MessageSquarePlus },
-    { id: "custom", label: "Individual ma'lumot", icon: Database },
-    { id: "plan", label: "Faoliyat rejasi", icon: CalendarRange },
-    { id: "reports", label: "Hisobotlarim", icon: CalendarClock, legalOnly: true },
-    { id: "benchmark", label: "Tarmoq benchmarki", icon: BarChart3, legalOnly: true },
-    { id: "payments", label: "To'lovlar", icon: CreditCard },
-    { id: "notifications", label: "Xabarnomalar", icon: Bell },
-    { id: "support", label: "Qo'llab quvatlash", icon: HelpCircle },
+  // FQ-04: jismoniy shaxsga korxona bo'limlari ko'rinmaydi; xodimlar (employee/manager/admin) navbatlar uchun hammasini ko'radi
+  type Audience = "all" | "legal" | "citizen";
+  const menuItems: { id: string; label: string; icon: typeof User; audience: Audience }[] = [
+    { id: "overview", label: "Bosh panel", icon: LayoutDashboard, audience: "all" },
+    { id: "profile", label: "Foydalanuvchi haqida", icon: User, audience: "all" },
+    { id: "services", label: "Mening xizmatlarim", icon: FileText, audience: "legal" },
+    { id: "contracts", label: "Shartnomalar", icon: FileText, audience: "legal" },
+    { id: "orders", label: "Buyurtmalarim", icon: FileText, audience: "all" },
+    { id: "requests", label: "Xizmat so'rovlari", icon: MessageSquarePlus, audience: "legal" },
+    { id: "custom", label: "Individual ma'lumot", icon: Database, audience: "legal" },
+    { id: "plan", label: "Faoliyat rejasi", icon: CalendarRange, audience: "legal" },
+    { id: "reports", label: "Hisobotlarim", icon: CalendarClock, audience: "legal" },
+    { id: "benchmark", label: "Tarmoq benchmarki", icon: BarChart3, audience: "legal" },
+    { id: "questions", label: "Savollarim", icon: HelpCircle, audience: "citizen" },
+    { id: "payments", label: "To'lovlar", icon: CreditCard, audience: "all" },
+    { id: "notifications", label: "Xabarnomalar", icon: Bell, audience: "all" },
+    { id: "support", label: "Qo'llab quvatlash", icon: HelpCircle, audience: "all" },
   ];
+  const isStaff = ["employee", "manager", "admin"].includes(roleData ?? "");
+  const isCitizen = user?.type === "individual" && !isStaff;
+  const visibleItems = menuItems.filter((i) => isStaff || i.audience === "all" || (i.audience === "citizen") === isCitizen);
 
   const [contracts, setContracts] = useState<Contract[] | null>(null);
   const [bookOrders, setBookOrders] = useState<BookOrder[]>([]);
@@ -227,7 +241,7 @@ const PersonalCabinet = () => {
               </div>
 
               <nav className="p-2">
-                {menuItems.filter((item) => !("legalOnly" in item) || user?.type !== "individual").map((item) => {
+                {visibleItems.map((item) => {
                   const Icon = item.icon;
                   return (
                     <button
@@ -264,7 +278,15 @@ const PersonalCabinet = () => {
 
           <div className="lg:col-span-3">
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md">
-              {activeTab === "overview" && <Overview onNavigate={setActiveTab} />}
+              {activeTab === "overview" && (isCitizen ? <CitizenHome onNavigate={setActiveTab} /> : <Overview onNavigate={setActiveTab} />)}
+
+              {activeTab === "questions" && <CitizenQuestions />}
+
+              {isCitizen && !visibleItems.some((i) => i.id === activeTab) && (
+                <div className="p-6 text-sm text-gray-700 dark:text-gray-200">
+                  Bu bo'lim korxonalar uchun. <a href="/login" className="text-blue-600 underline">Korxona sifatida kirish</a> yoki <button type="button" className="text-blue-600 underline" onClick={() => setActiveTab("overview")}>bosh panelga qaytish</button>.
+                </div>
+              )}
 
               {activeTab === "profile" && <ProfileTab profileData={profileData} profileLoading={profileLoading} user={user} />}
 

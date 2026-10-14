@@ -50,6 +50,7 @@ ALLOWED_CASCADE = {
     "open_api.ApiUsage",
     "notifications.IndicatorSubscription",
     "consultations.ConsultationBooking",
+    "consultations.Consultant_topics",  # M2M bog'lanish jadvali
     "accounts.UserPreference",
     "book_market.BookFavorite",
 }

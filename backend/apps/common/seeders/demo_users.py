@@ -33,6 +33,14 @@ STAFF = [
     ("demo_employee", "Rustam", "Nazarov", "employee"),
 ]
 RESEARCHER = ("demo_tadqiqotchi", "Kamola", "Ismoilova")
+# S-14: konsultant akkauntlari shu yerda yaratiladi (boshqa seeder'lar, masalan xabarnomalar, ularni ham ko'rishi uchun)
+CONSULTANT_USERS = [
+    ("demo_konsultant_1", "Sherzod", "Abdullayev"),
+    ("demo_konsultant_2", "Nodira", "Yo'ldosheva"),
+    ("demo_konsultant_3", "Akmal", "Raximov"),
+    ("demo_konsultant_4", "Feruza", "Qosimova"),
+    ("demo_konsultant_5", "Bekzod", "Toshmatov"),
+]
 # Demo korxonalar OKED bo'limi (LEGAL tartibida) — benchmark guruhi uchun
 LEGAL_SECTIONS = ["A", "C", "F", "H", "J"]
 
@@ -80,6 +88,8 @@ class DemoUsersSeeder(Seeder):
             self._user(username, first, last, user_type="individual",
                        location=districts[i % len(districts)] if districts else None)
         self._user(*RESEARCHER, user_type="individual", location=districts[0] if districts else None)
+        for username, first, last in CONSULTANT_USERS:
+            self._user(username, first, last, role="employee", user_type="individual")
         sections = {s.code: s for s in Sector.objects.filter(parent__isnull=True, code__in=LEGAL_SECTIONS)}
 
         if not districts or not packages:

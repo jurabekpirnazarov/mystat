@@ -9,12 +9,12 @@ from apps.services.models import Service
 from . import Seeder
 from .demo_users import demo_users
 
-CONSULTANTS = [
-    ("demo_konsultant_1", "Sherzod", "Abdullayev", "Tashqi savdo statistikasi bo'yicha mutaxassis"),
-    ("demo_konsultant_2", "Nodira", "Yo'ldosheva", "Korxonalar statistikasi va hisobotlar"),
-    ("demo_konsultant_3", "Akmal", "Raximov", "Demografiya va mehnat statistikasi"),
-    ("demo_konsultant_4", "Feruza", "Qosimova", "Narxlar va inflyatsiya"),
-    ("demo_konsultant_5", "Bekzod", "Toshmatov", "Sanoat va qurilish statistikasi"),
+CONSULTANTS = [  # akkauntlar demo_users seeder'ida (CONSULTANT_USERS)
+    ("demo_konsultant_1", "Tashqi savdo statistikasi bo'yicha mutaxassis"),
+    ("demo_konsultant_2", "Korxonalar statistikasi va hisobotlar"),
+    ("demo_konsultant_3", "Demografiya va mehnat statistikasi"),
+    ("demo_konsultant_4", "Narxlar va inflyatsiya"),
+    ("demo_konsultant_5", "Sanoat va qurilish statistikasi"),
 ]
 TOPICS = ["Hisobot shaklini to'ldirish", "Eksport statistikasi bo'yicha maslahat", "Benchmark natijalarini tushunish",
           "Aholi soni ma'lumotlari", "Narx indekslari metodologiyasi"]
@@ -25,21 +25,22 @@ class ConsultationsSeeder(Seeder):
     depends_on = ("demo_users",)
 
     def seed(self):
-        from .demo_users import DemoUsersSeeder
-        helper = DemoUsersSeeder(stdout=self.stdout)  # parol qoidasi demo foydalanuvchilar bilan bir xil
-        helper.name = "demo_users"
+        users = demo_users()
         services = list(Service.objects.filter(is_active=True).order_by("id")[:8])
         tz = timezone.get_current_timezone()
         today = timezone.localdate()
         consultants = []
-        for i, (username, first, last, title) in enumerate(CONSULTANTS):
-            user = helper._user(username, first, last, role="employee", user_type="individual")
+        for i, (username, title) in enumerate(CONSULTANTS):
+            user = users.get(username)
+            if user is None:
+                continue
             c = self.make(Consultant, f"consultant:{username}", user=user, title=title,
                           bio_uz=f"{title}. Statistika organlarida {6 + i * 2} yillik tajriba (namuna profil).")
             if services and not c.topics.exists():
                 c.topics.set(services[i % len(services): i % len(services) + 2])
             consultants.append(c)
-        self.stats.update(helper.stats)
+        if not consultants:
+            return
 
         slots = []
         for c_i, c in enumerate(consultants):
@@ -55,7 +56,6 @@ class ConsultationsSeeder(Seeder):
                                                                        format="online" if h % 2 else "office")))
         self.bulk(ConsultationSlot, slots)
 
-        users = demo_users()
         clients = [users[n] for n in sorted(users) if n.startswith("demo_yuridik")]
         if not clients:
             return

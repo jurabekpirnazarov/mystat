@@ -162,7 +162,7 @@ class CustomRequestListView(APIView):
 
 class StaffUpdateSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=[c for c, _ in CustomDataRequest.STATUSES], required=False)
-    approved_price_sum = serializers.DecimalField(max_digits=14, decimal_places=2, required=False, min_value=0)
+    approved_price_sum = serializers.DecimalField(max_digits=14, decimal_places=2, required=False, min_value=Decimal("0"))
     staff_comment = serializers.CharField(required=False, allow_blank=True, max_length=2000)
     result_file = serializers.FileField(required=False)
 

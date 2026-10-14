@@ -60,3 +60,9 @@ class IndustrialProduct(BaseModel):
     class Meta:
         verbose_name = _("Sanoat Mahsuloti")
         verbose_name_plural = _("Sanoat Mahsulotlari")
+        # K-04 hamkor qidiruvi: STIR bo'yicha guruhlash, viloyat (manzil boshi) va tuman filtrlari
+        indexes = [
+            models.Index(fields=["inn"], name="indprod_inn_idx"),
+            models.Index(fields=["adress_uz"], name="indprod_address_idx"),
+            models.Index(fields=["soato_uz"], name="indprod_district_idx"),
+        ]

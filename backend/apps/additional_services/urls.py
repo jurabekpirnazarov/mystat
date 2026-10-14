@@ -9,6 +9,10 @@ from apps.additional_services.api_endpoints.StaticClassificationAPI.views import
 from apps.additional_services.api_endpoints.KtutReportAPI.calendar import ReportCalendarAPIView, ReportReminderAPIView
 from apps.additional_services.api_endpoints.KtutReportAPI.my_reports import MyReportsAPIView, ReportGuideAPIView
 from apps.additional_services.api_endpoints.ExternalTradeAPI.market_report import HsSearchAPIView, MarketReportAPIView
+from apps.additional_services.api_endpoints.PartnersAPI import (
+    PartnerExportAPIView, PartnerFiltersAPIView, PartnerMapAPIView, PartnerSearchAPIView, SavedQueryDetailAPIView,
+    SavedQueryListAPIView,
+)
 
 app_name = "additional_services"
 
@@ -24,6 +28,12 @@ urlpatterns = [
     path('my-reports/', MyReportsAPIView.as_view(), name='my-reports'),
     path('market-report/', MarketReportAPIView.as_view(), name='market-report'),
     path('hs-search/', HsSearchAPIView.as_view(), name='hs-search'),
+    path('partners/search/', PartnerSearchAPIView.as_view(), name='partners-search'),
+    path('partners/map/', PartnerMapAPIView.as_view(), name='partners-map'),
+    path('partners/filters/', PartnerFiltersAPIView.as_view(), name='partners-filters'),
+    path('partners/export/', PartnerExportAPIView.as_view(), name='partners-export'),
+    path('saved-queries/', SavedQueryListAPIView.as_view(), name='saved-queries'),
+    path('saved-queries/<int:pk>/', SavedQueryDetailAPIView.as_view(), name='saved-query-detail'),
     path('report-guide/<str:report_id>/', ReportGuideAPIView.as_view(), name='report-guide'),
     path('reportlist/<str:report_id>/remind/', ReportReminderAPIView.as_view(), name='reportlist-remind'),
     path('reportlist/<int:stir_number>', KtutReportListAPIView.as_view()),

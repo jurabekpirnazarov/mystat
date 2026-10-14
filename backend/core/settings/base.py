@@ -422,6 +422,13 @@ CELERY_BEAT_SCHEDULE = {
             minute=config("BEAT_REPORT_NOTIFY_MINUTE", default=0, cast=int),
         ),
     },
+    "report-reminder-notifications": {
+        "task": "apps.additional_services.tasks.report_reminder_notifications_task",
+        "schedule": crontab(
+            hour=config("BEAT_REPORT_NOTIFY_HOUR", default=9, cast=int),
+            minute=config("BEAT_REPORT_NOTIFY_MINUTE", default=0, cast=int),
+        ),
+    },
 }
 
 DIDOX_BASE_URL = config('DIDOX_BASE_URL', default='https://api.didox.com')

@@ -210,9 +210,31 @@ class Contact(BaseModel):
     phone_number = models.CharField(max_length=13)
     email = models.EmailField()
     text = RichTextField()
+    # U-12 operator chat: murojaatchi (login bo'lsa) va javoblarni o'qish uchun maxfiy kalit
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                             related_name="support_contacts", verbose_name=_("Foydalanuvchi"))
+    access_token = models.CharField(max_length=64, null=True, blank=True, db_index=True, editable=False)
+    is_chat = models.BooleanField(default=False, verbose_name=_("Chat orqali"))
 
     def __str__(self):
         return self.name
+
+
+class ContactReply(models.Model):
+    """Murojaatga javob (operator) yoki murojaatchining qo'shimcha xabari."""
+    contact = models.ForeignKey(Contact, on_delete=models.CASCADE, related_name="replies")
+    text = models.TextField(verbose_name=_("Matn"))
+    from_operator = models.BooleanField(default=True, verbose_name=_("Operator javobi"))
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+        verbose_name = _("Murojaat javobi")
+        verbose_name_plural = _("Murojaat javoblari")
+
+    def __str__(self):
+        return self.text[:50]
     
 
 class Sector(BaseModel):

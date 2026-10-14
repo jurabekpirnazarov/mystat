@@ -10,6 +10,8 @@ from .views import (
 
 from django.urls import path
 
+from .support_views import AssistantAPIView, GlobalSearchAPIView, SupportStartAPIView, SupportThreadAPIView
+
 app_name = 'common'
 
 urlpatterns = [
@@ -20,6 +22,10 @@ urlpatterns = [
     path('site-stat/', SiteStatAPIView.as_view(), name='site-stat'),
     path('platform-stat/', PlatFormStatAPIView.as_view(), name='platform-stat'),
     path('home-stats/', HomeStatsAPIView.as_view(), name='home-stats'),
+    path('search/', GlobalSearchAPIView.as_view(), name='search'),
+    path('assistant/', AssistantAPIView.as_view(), name='assistant'),
+    path('support/', SupportStartAPIView.as_view(), name='support-start'),
+    path('support/<int:pk>/', SupportThreadAPIView.as_view(), name='support-thread'),
     path('contact-create/', ContactCreateAPIView.as_view(), name='contact-create'),
     path('information/', InformationListCreateView.as_view(), name='information-list-create'),
     path('information/<int:pk>/', InformationDetailView.as_view(), name='information-detail'),

@@ -53,3 +53,16 @@ class KtutReportList(models.Model):
         verbose_name = _("Korxonaning Hisobot Ro'yxati")
         verbose_name_plural = _("Korxonaning Hisobotlar Ro'yxati")
 
+
+
+class ReportReminder(models.Model):
+    """U-13: foydalanuvchi hisobot muddatidan oldin in-app eslatma olishni yoqqan."""
+    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="report_reminders")
+    report = models.ForeignKey(ReportList, on_delete=models.CASCADE, related_name="reminders")
+    days_before = models.PositiveSmallIntegerField(default=3)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "report")
+        verbose_name = _("Hisobot eslatmasi")
+        verbose_name_plural = _("Hisobot eslatmalari")

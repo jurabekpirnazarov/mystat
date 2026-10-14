@@ -38,6 +38,7 @@ ALLOWED_CASCADE = {
     "book_market.OrderBook",
     "book_market.OrderItem",
     "common.AdminTOTPDevice",
+    "common.ContactReply",
 }
 
 

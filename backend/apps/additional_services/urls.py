@@ -6,6 +6,7 @@ from apps.additional_services.api_endpoints.PriceIndexAPI import PriceIndexAPIVi
 from apps.additional_services.views.service_views import SubmittedReportAPIView
 from apps.additional_services.views.trade_data_views import TradeDataAPIView
 from apps.additional_services.api_endpoints.StaticClassificationAPI.views import StatisticClassificationCategoryAPIView
+from apps.additional_services.api_endpoints.KtutReportAPI.calendar import ReportCalendarAPIView, ReportReminderAPIView
 
 app_name = "additional_services"
 
@@ -17,6 +18,8 @@ urlpatterns = [
     path('price-index', PriceIndexAPIView.as_view()),
     path('statistic-classification', StatisticClassificationAPIView.as_view()),
     path('statistic-classification/categories/', StatisticClassificationCategoryAPIView.as_view(), name='statistic-classification-categories'),
+    path('reportlist/calendar/', ReportCalendarAPIView.as_view(), name='reportlist-calendar'),
+    path('reportlist/<str:report_id>/remind/', ReportReminderAPIView.as_view(), name='reportlist-remind'),
     path('reportlist/<int:stir_number>', KtutReportListAPIView.as_view()),
     path('reportlist/', ReportListAPIView.as_view()),
     path("priceindex-year-month", PriceIndexYearAndMonthView.as_view()),

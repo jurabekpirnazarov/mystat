@@ -111,3 +111,40 @@ class DemographicsDataSourceTests(APITestCase):
         self._touch(self.real)
         with override_settings(DEBUG=True):
             self.assertEqual(self.writer.data_source(), "real")
+
+
+class ReportCalendarTests(APITestCase):
+    def setUp(self):
+        from datetime import date
+        from apps.additional_services.models import ReportList
+        common = dict(type="t", type_ru="", type_cry="", srok="", srok_uz="", srok_ru="", srok_cry="",
+                      formsname="f", formsname_uz="f", formsname_ru="", formsname_cry="")
+        self.monthly = ReportList.objects.create(id="M1", type_uz="Oylik", deadline=date(2025, 1, 31), report_type="monthly", **common)
+        self.quarterly = ReportList.objects.create(id="Q1", type_uz="Choraklik", deadline=date(2025, 1, 25), report_type="quarterly", **common)
+        self.yearly = ReportList.objects.create(id="Y1", type_uz="Yillik", deadline=date(2025, 4, 1), report_type="yearly", **common)
+
+    def ids(self, year, month):
+        data = self.client.get("/api/additional-services/reportlist/calendar/", {"year": year, "month": month}).data
+        return [(i["report_id"], i["date"]) for i in data["items"]]
+
+    def test_recurrence(self):
+        self.assertEqual(self.ids(2026, 2), [("M1", "2026-02-28")])  # oy oxiriga qisqartiriladi
+        self.assertEqual(sorted(self.ids(2026, 4)), [("M1", "2026-04-30"), ("Q1", "2026-04-25"), ("Y1", "2026-04-01")])
+
+    def test_reminder_creates_notification_once(self):
+        from apps.accounts.models import User
+        from apps.additional_services.tasks import report_reminder_notifications_task
+        from apps.notifications.models import Notification
+        user = User.objects.create_user(username="rem_user", password="x")
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {user.tokens['access']}")
+        response = self.client.post("/api/additional-services/reportlist/Y1/remind/")
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(self.ids(2026, 4))
+
+        self.assertEqual(report_reminder_notifications_task("2026-03-20"), 0)  # hali erta
+        self.assertEqual(report_reminder_notifications_task("2026-03-29"), 1)  # 3 kun qoldi
+        self.assertEqual(report_reminder_notifications_task("2026-03-29"), 0)  # takror yo'q
+        self.assertEqual(Notification.objects.filter(recipient=user).count(), 1)
+
+        self.client.delete("/api/additional-services/reportlist/Y1/remind/")
+        self.assertEqual(report_reminder_notifications_task("2027-03-29"), 0)

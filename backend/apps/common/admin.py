@@ -12,7 +12,7 @@ from django.utils.html import format_html
 from import_export.admin import ImportExportModelAdmin
 
 from .models import Branch, ConsultingPlan, Region, District, SiteSettings, QuestionAnswer, Contact, Sector, \
-    InformationModel, Byulleten, AboutPortal, AdminTOTPDevice, SyntheticRecord
+    InformationModel, Byulleten, AboutPortal, AdminTOTPDevice, SyntheticRecord, ContactReply
 from .resources import SectorResource
 from apps.additional_services.models import Year
 from apps.contracts.models import Contract
@@ -116,11 +116,31 @@ class BranchAdmin(admin.ModelAdmin):
     list_filter = ('region',)
 
 
+class ContactReplyInline(admin.TabularInline):
+    model = ContactReply
+    extra = 1
+    fields = ('text', 'from_operator', 'author', 'created_at')
+    readonly_fields = ('author', 'created_at')
+
+
 @admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
-    list_display = ('name', 'surname', 'email')
+    list_display = ('name', 'surname', 'email', 'is_chat', 'replies_count', 'created_at')
     search_fields = ('name', 'surname', 'email', 'phone_number')
-    list_filter = ('email', 'phone_number')
+    list_filter = ('is_chat',)
+    inlines = [ContactReplyInline]
+
+    @admin.display(description="Javoblar")
+    def replies_count(self, obj):
+        return obj.replies.filter(from_operator=True).count()
+
+    def save_formset(self, request, form, formset, change):
+        for reply in formset.save(commit=False):
+            if reply.author_id is None:
+                reply.author = request.user
+            reply.save()
+        for obj in formset.deleted_objects:
+            obj.delete()
 
 
 @admin.register(Sector)

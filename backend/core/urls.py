@@ -37,6 +37,7 @@ urlpatterns += [
     path('api/books/', include('apps.book_market.api.api_urls', namespace='book-orders')),
     path('api/additional-services/', include('apps.additional_services.urls', namespace='additional_services')),
     path('api/notifications/', include('apps.notifications.urls', namespace='notifications')),
+    path('api/analytics/', include('apps.analytics.urls', namespace='analytics')),
 ]
 
 

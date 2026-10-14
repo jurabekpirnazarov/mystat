@@ -64,3 +64,41 @@ class SyntheticFlagField(serializers.Field):
         if model not in cache:
             cache[model] = synthetic_ids(model)
         return str(obj.pk) in cache[model]
+
+
+def bulk_create_synthetic(model, items, batch_size=2000):
+    """Ko'p qatorli seeder'lar uchun: `items` — [(seed_key, fields), ...].
+
+    Reyestrda bor seed_key'lar o'tkazib yuboriladi (idempotent). -> yaratilganlar soni.
+    """
+    keys = [k for k, _ in items]
+    existing = set()
+    for i in range(0, len(keys), 5000):
+        existing.update(SyntheticRecord.objects.filter(seed_key__in=keys[i:i + 5000]).values_list("seed_key", flat=True))
+    todo = [(k, f) for k, f in items if k not in existing]
+    if not todo:
+        return 0
+    ct = ContentType.objects.get_for_model(model)
+    created = 0
+    with transaction.atomic():
+        for i in range(0, len(todo), batch_size):
+            chunk = todo[i:i + batch_size]
+            objs = model._base_manager.bulk_create([model(**f) for _, f in chunk], batch_size=batch_size)
+            SyntheticRecord.objects.bulk_create(
+                [SyntheticRecord(content_type=ct, object_id=str(o.pk), seed_key=k) for o, (k, _) in zip(objs, chunk)],
+                batch_size=batch_size,
+            )
+            created += len(objs)
+    return created
+
+
+def data_source(model, queryset):
+    """S-09: agregat javoblar uchun "real" | "synthetic" | "mixed" (DEBUG=False da doim "real")."""
+    ids = synthetic_ids(model)
+    if not ids:
+        return "real"
+    pks = {str(pk) for pk in queryset.values_list("pk", flat=True)}
+    if not pks:
+        return "real"
+    syn = len(pks & ids)
+    return "synthetic" if syn == len(pks) else "mixed" if syn else "real"

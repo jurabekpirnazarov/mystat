@@ -13,7 +13,7 @@ import {
   type FilterValue,
 } from "../api/demographics";
 import useApi from "../hooks/useApi";
-import { DemoBadge, EmptyState, ErrorState, PageHeader, Skeleton, StatCard } from "../components/ui";
+import { DemoBadge, EmptyState, ErrorState, PageHeader, Skeleton, StatCard, SampleBanner } from "../components/ui";
 
 // Kategorik palitra (seriyalar uchun), ikkala mavzuda o'qiladigan
 const SERIES = ["#2563eb", "#16a34a", "#d97706", "#9333ea", "#dc2626", "#0891b2"];
@@ -217,7 +217,7 @@ function SectionView({ section, synthetic }: { section: DemographicSection; synt
 
             <section className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 sm:p-5">
               <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                {valueLabel} <DemoBadge show={synthetic} label="Sintetik ma'lumot" />
+                {valueLabel} <DemoBadge show={synthetic} label="Namuna ma'lumot" />
               </h3>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
@@ -295,8 +295,9 @@ export default function Demographics() {
           title="Demografik ma'lumotlar"
           description="Aholi soni, tug'ilish, o'lim, nikoh, ajrim va migratsiya — hudud, yil va boshqa kesimlarda."
           breadcrumbs={[{ label: "Bosh sahifa", to: "/" }, { label: "Xizmatlar", to: "/services" }, { label: "Demografiya" }]}
-          badge={<DemoBadge show={!!data?.is_synthetic} label="Sintetik ma'lumot" />}
+          badge={<DemoBadge show={!!data?.is_synthetic} label="Namuna ma'lumot" />}
         />
+        <SampleBanner show={!!data?.is_synthetic} />
         {loading && !data ? (
           <Skeleton variant="chart" />
         ) : error ? (

@@ -6,7 +6,7 @@ from decouple import config
 from django.utils import timezone
 
 from apps.accounts.models import User
-from apps.common.models import District
+from apps.common.models import District, Sector
 from apps.common.synthetic import registered_ids
 from apps.contracts.models import Contract
 from apps.organizations.models import Organization
@@ -32,6 +32,9 @@ STAFF = [
     ("demo_bugalter", "Gulnora", "Hasanova", "bugalter"),
     ("demo_employee", "Rustam", "Nazarov", "employee"),
 ]
+RESEARCHER = ("demo_tadqiqotchi", "Kamola", "Ismoilova")
+# Demo korxonalar OKED bo'limi (LEGAL tartibida) — benchmark guruhi uchun
+LEGAL_SECTIONS = ["A", "C", "F", "H", "J"]
 
 
 def demo_users():
@@ -76,6 +79,8 @@ class DemoUsersSeeder(Seeder):
         for i, (username, first, last) in enumerate(INDIVIDUAL):
             self._user(username, first, last, user_type="individual",
                        location=districts[i % len(districts)] if districts else None)
+        self._user(*RESEARCHER, user_type="individual", location=districts[0] if districts else None)
+        sections = {s.code: s for s in Sector.objects.filter(parent__isnull=True, code__in=LEGAL_SECTIONS)}
 
         if not districts or not packages:
             self.log("  ! District yoki ServicePackage yo'q — korxona, shartnoma va paketlar o'tkazib yuborildi")
@@ -85,12 +90,15 @@ class DemoUsersSeeder(Seeder):
             district = districts[(i * 3) % len(districts)]
             user = self._user(username, first, last, user_type="legal_entity", location=district,
                               phone_number=f"998000000{i + 1:03d}")
-            self.make(
+            org = self.make(
                 Organization, f"org:{username}",
                 user=user, name=f"{DEMO_PREFIX} {org_name}", tin=f"000000{i + 101:03d}",
                 address=f"{district.name}, demo ko'chasi {i + 1}-uy", district=district,
-                organization_type="LLC",
+                organization_type="LLC", sector=sections.get(LEGAL_SECTIONS[i]),
             )
+            if org.sector_id is None and sections.get(LEGAL_SECTIONS[i]):  # oldingi seed'da sektorsiz yaratilgan
+                org.sector = sections[LEGAL_SECTIONS[i]]
+                org.save(update_fields=["sector"])
             if usage is None:
                 continue
 

@@ -31,6 +31,15 @@ class Seeder:
         self.stats[(model._meta.label, "created" if created else "existed")] += 1
         return obj
 
+    def bulk(self, model, items):
+        """[(seed_key, fields), ...] — ko'p qatorli jadvallar uchun (bitta-bitta emas)."""
+        from apps.common.synthetic import bulk_create_synthetic
+        items = [(f"{self.name}:{k}", f) for k, f in items]
+        created = bulk_create_synthetic(model, items)
+        self.stats[(model._meta.label, "created")] += created
+        self.stats[(model._meta.label, "existed")] += len(items) - created
+        return created
+
     def backdate(self, obj, field, value):
         """auto_now_add maydonlarini o'tmish sanaga o'tkazish (faqat sintetik obyekt uchun)."""
         type(obj)._base_manager.filter(pk=obj.pk).update(**{field: value})
@@ -54,6 +63,7 @@ def aware(dt: datetime):
 
 def registry():
     from .activity_plans import ActivityPlansSeeder
+    from .analytics import EnterpriseIndicatorsSeeder, RegionIndicatorsSeeder
     from .classifications import ClassificationsSeeder
     from .demo_users import DemoUsersSeeder
     from .misc import MiscSeeder
@@ -67,5 +77,7 @@ def registry():
         ActivityPlansSeeder,
         NotificationsSeeder,
         MiscSeeder,
+        EnterpriseIndicatorsSeeder,
+        RegionIndicatorsSeeder,
     ]
     return {s.name: s for s in seeders}

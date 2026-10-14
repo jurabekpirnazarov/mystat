@@ -11,6 +11,7 @@ import ServicesTab from "./cabinet/ServicesTab";
 import ContractsTab from "./cabinet/ContractsTab";
 import OrdersTab from "./cabinet/OrdersTab";
 import SupportTab from "./cabinet/SupportTab";
+import Benchmark from "./cabinet/Benchmark";
 import {
   User,
   FileText,
@@ -21,6 +22,7 @@ import {
   LayoutDashboard,
   MessageSquarePlus,
   CalendarRange,
+  BarChart3,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -78,6 +80,7 @@ const PersonalCabinet = () => {
     { id: "orders", label: "Buyurtmalarim", icon: FileText },
     { id: "requests", label: "Xizmat so'rovlari", icon: MessageSquarePlus },
     { id: "plan", label: "Faoliyat rejasi", icon: CalendarRange },
+    { id: "benchmark", label: "Tarmoq benchmarki", icon: BarChart3, legalOnly: true },
     { id: "payments", label: "To'lovlar", icon: CreditCard },
     { id: "notifications", label: "Xabarnomalar", icon: Bell },
     { id: "support", label: "Qo'llab quvatlash", icon: HelpCircle },
@@ -218,7 +221,7 @@ const PersonalCabinet = () => {
               </div>
 
               <nav className="p-2">
-                {menuItems.map((item) => {
+                {menuItems.filter((item) => !("legalOnly" in item) || user?.type !== "individual").map((item) => {
                   const Icon = item.icon;
                   return (
                     <button
@@ -272,6 +275,8 @@ const PersonalCabinet = () => {
               {activeTab === "requests" && <Requests />}
 
               {activeTab === "plan" && <ActivityPlan />}
+
+              {activeTab === "benchmark" && <Benchmark />}
 
               {activeTab === "support" && <SupportTab />}
             </div>

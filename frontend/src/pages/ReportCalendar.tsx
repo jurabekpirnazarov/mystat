@@ -4,11 +4,11 @@ import { Search } from 'lucide-react';
 import BookStep1 from '../components/BookStep1';
 import ReportsCalendarDetail from './ReportsCalendarDetail';
 import { getReportsByStir } from '../api/reports';
-import { reports_calendar } from '../api/apiUrls';
 import { ReportData, ReportCalendarResponse } from '../types/report';
 import { useServiceId } from '../utils/useServiceId';
 import toast, { Toaster } from 'react-hot-toast';
 import RatingModal from '../components/modals/RatingModal';
+import { asApiError } from '../api/errors';
 
 const ReportCalendar: React.FC = () => {
   const { serviceId } = useServiceId(); // get real ID from API
@@ -49,16 +49,11 @@ const ReportCalendar: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        console.log('Sending request for STIR:', stirNumber);
-        console.log('API URL:', `${import.meta.env.VITE_API_URL}${reports_calendar}`);
         
         const response = await getReportsByStir(stirNumber) as unknown as ReportCalendarResponse;
-        console.log('Full API Response:', response);
         
         if (response && response.data && Array.isArray(response.data)) {
-          console.log('Response data array with length:', response.data.length);
           if (response.data.length > 0) {
-            console.log('First item:', response.data[0]);
             setReports(response.data);
             setCompanyName(response.org_name || 'Noma\'lum korxona');
             goToNextStep();
@@ -73,7 +68,8 @@ const ReportCalendar: React.FC = () => {
           console.error('Invalid response format:', response);
           setError('Noto\'g\'ri ma\'lumot formati');
         }
-      } catch (err: any) {
+      } catch (caught) {
+        const err = asApiError(caught);
         console.error('API Error:', err);
         if (err.response?.status === 404) {
           toast.error('Ushbu STIR bo\'yicha ma\'lumot topilmadi', {

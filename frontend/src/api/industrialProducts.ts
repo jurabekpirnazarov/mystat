@@ -100,20 +100,16 @@ export interface IndustryCategoriesResponse {
 }
 
 export const getIndustryCategories = async (): Promise<IndustryCategory[]> => {
-  console.log('🚀 Fetching industry categories from:', industry_service);
   const response = await getRequest(industry_service);
-  console.log('📥 Industry categories response:', response);
   
   // Check if response has results array (paginated response)
   if (response && typeof response === 'object' && 'results' in response) {
     const paginatedResponse = response as IndustryCategoriesResponse;
-    console.log('✅ Found paginated response with', paginatedResponse.results.length, 'categories');
     return paginatedResponse.results;
   }
   
   // Fallback for direct array response
   if (Array.isArray(response)) {
-    console.log('✅ Found direct array response with', response.length, 'categories');
     return response as IndustryCategory[];
   }
   
@@ -128,10 +124,8 @@ export const getIndustrialProductsByCategory = async (categoryId: number, params
   limit?: number;
 }): Promise<DetailedIndustrialProductsResponse> => {
   const apiUrl = `${industrial_products_api}${categoryId}/`;
-  console.log('🏭 Fetching industrial products for category:', categoryId, 'from:', apiUrl);
   
   const response = await getRequest(apiUrl, params as Record<string, string>);
-  console.log('📦 Industrial products response:', response);
   
   return response as DetailedIndustrialProductsResponse;
 };

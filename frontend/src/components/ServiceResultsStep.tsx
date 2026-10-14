@@ -1,6 +1,6 @@
 import { ArrowLeft, Download, Eye, BarChart3, TrendingUp, FileSpreadsheet } from 'lucide-react';
 
-interface TradeDataItem {
+export interface TradeDataItem {
   country?: string;
   july?: number;
   // New API response fields
@@ -28,21 +28,22 @@ interface TradeDataItem {
   quantity?: string | number;
   isGroupSummary?: boolean;
   label?: string;
-  [key: string]: any; // Allow any additional properties
+  [key: string]: string | number | boolean | null | undefined; // qo'shimcha ustunlar (group_by ga qarab)
 }
 
-interface HeaderItem {
+export interface HeaderItem {
   field: string;
   label: string;
 }
 
-interface ApiTradeData {
+export interface ApiTradeData {
+  success?: boolean;
   data: TradeDataItem[];
   total: number;
-  filters: any;
+  filters: Record<string, unknown>;
   headers: HeaderItem[];
   units: string[];
-  missing: any[];
+  missing: unknown[];
 }
 
 interface ServiceResultsStepProps {
@@ -61,7 +62,7 @@ const ServiceResultsStep = ({ onPrevious, tradeData, handleDownloadData }: Servi
     if (item.isGroupSummary && item.label) {
       return item.label;
     }
-    return item.country_name || item.country || item.name || item.label || 'Unknown';
+    return String(item.country_name || item.country || item.name || item.label || 'Unknown');
   };
 
   // Helper function to get value from various possible fields
@@ -96,7 +97,7 @@ const ServiceResultsStep = ({ onPrevious, tradeData, handleDownloadData }: Servi
       }, 0);
     }
     
-    return item.july || item.amount || item.total || 0;
+    return Number(item.july || item.amount || item.total || 0);
   };
 
   // Helper function to get product name
@@ -110,7 +111,7 @@ const ServiceResultsStep = ({ onPrevious, tradeData, handleDownloadData }: Servi
   // Helper function to get trade type
   const getTradeType = (item: TradeDataItem): string => {
     if (tradeData.filters && tradeData.filters.trade_type_name) {
-      return tradeData.filters.trade_type_name;
+      return String(tradeData.filters.trade_type_name);
     }
     return item.trade_type_display || 'Unknown';
   };

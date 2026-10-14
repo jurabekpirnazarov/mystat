@@ -44,15 +44,11 @@ const Industry: React.FC = () => {
     try {
       setIsLoading(true);
       setError(null);
-      console.log('🚀 Fetching industry categories...');
       const categories = await getIndustryCategories();
-      console.log('📥 Industry categories received:', categories.length, 'items');
       
       if (Array.isArray(categories) && categories.length > 0) {
         // Filter only parent categories (those without parent)
         const parentCategories = categories.filter(item => item.parent === null);
-        console.log('📋 Parent categories found:', parentCategories.length);
-        console.log('🎯 Parent categories:', parentCategories.map(p => ({ id: p.id, name: p.name_ru, children: p.children?.length || 0 })));
         setIndustryCategories(parentCategories);
       } else {
         console.warn('⚠️ No categories found or invalid response');
@@ -69,7 +65,6 @@ const Industry: React.FC = () => {
   // Fetch data when component loads on step 2
   useEffect(() => {
     if (currentStep === 2 && industryCategories.length === 0) {
-      console.log('🔄 Component loaded on step 2, fetching categories...');
       fetchIndustryCategories();
     }
   }, [currentStep, industryCategories.length]);
@@ -106,14 +101,11 @@ const Industry: React.FC = () => {
     try {
       setProductsLoading(true);
       setProductsError(null);
-      console.log('🏭 Fetching industrial products for category:', categoryId);
       
       const response = await getIndustrialProductsByCategory(categoryId, { limit: 20 });
-      console.log('📦 Products response:', response);
       
       setIndustrialProducts(response.results);
       setTotalProducts(response.count);
-      console.log('✅ Loaded', response.results.length, 'products out of', response.count, 'total');
     } catch (err) {
       setProductsError('Korxonalar ma\'lumotlarini yuklashda xato yuz berdi');
       console.error('❌ Error fetching industrial products:', err);
@@ -264,8 +256,6 @@ const Industry: React.FC = () => {
                         setExpandedParent(null);
                       } else {
                         setExpandedParent(parentCategory.id);
-                        console.log('🎯 Expanded parent:', parentCategory.name_ru);
-                        console.log('👥 Children available:', parentCategory.children?.length || 0, 'categories');
                       }
                     }}
                     className={`p-4 cursor-pointer transition-all duration-200 hover:bg-gray-50 ${
@@ -307,13 +297,8 @@ const Industry: React.FC = () => {
                           <div
                             key={child.id}
                             onClick={() => {
-                              console.log('🎯 Selected child:', child.name_ru);
                               setSelectedCategory(child.id.toString());
                               setSelectedParent(parentCategory);
-                              // If this child has children, show them
-                              if (child.children && child.children.length > 0) {
-                                console.log('👶 Child has sub-categories:', child.children.length);
-                              }
                             }}
                             className={`p-3 ml-6 bg-white rounded border cursor-pointer transition-all hover:shadow-sm ${
                               selectedCategory === child.id.toString()

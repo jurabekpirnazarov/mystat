@@ -5,13 +5,35 @@ import CabinetNotifications from "./cabinet/Notifications";
 import Payments from "./cabinet/Payments";
 import Requests from "./cabinet/Requests";
 import ActivityPlan from "./cabinet/ActivityPlan";
-// Contract type for contracts list
+interface DidoxParty {
+  name?: string;
+  tin?: string;
+  address?: string;
+  [key: string]: unknown;
+}
+interface DidoxDocumentJson {
+  url?: string;
+  buyer?: DidoxParty;
+  seller?: DidoxParty;
+  document?: { documentno?: string; documentdate?: string; documentname?: string; [key: string]: unknown };
+  contractdoc?: { contractno?: string; contractdate?: string; [key: string]: unknown };
+}
+
+// contracts/ API javobi (ContractSerializer)
 interface Contract {
-  id: string;
-  title: string;
-  date: string;
-  amount: string;
+  id: number;
+  contract_number: string;
   status: string;
+  start_date: string;
+  end_date: string;
+  total_amount: string;
+  notes: string | null;
+  contract_url: string | null;
+  didox_contract_data: {
+    _id?: string;
+    pending_document?: { document_json?: DidoxDocumentJson };
+    [key: string]: unknown;
+  } | null;
 }
 
 // Order type for orders list
@@ -88,6 +110,7 @@ import { FaTelegramPlane } from "react-icons/fa";
 import { useAuth } from "../contexts/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import PaymentModal from "../components/modals/BuyModal";
+import { unwrap, type MaybeWrapped, type UserProfile } from "../types/api";
 import { getRequest } from "../api/request";
 import { contracts_list, order_list, profile, me_package_items_api } from "../api/apiUrls";
 
@@ -107,7 +130,7 @@ const PersonalCabinet = () => {
   const tabName = location.state;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { pathname } = useLocation();
-  const [profileData, setProfileData] = useState<any>(null);
+  const [profileData, setProfileData] = useState<UserProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     stir: "",
@@ -167,8 +190,8 @@ const PersonalCabinet = () => {
     if (activeTab === "profile") {
       setProfileLoading(true);
       getRequest(profile, undefined, headers)
-        .then((response: any) => {
-          setProfileData(response?.data || response);
+        .then((response) => {
+          setProfileData(unwrap(response as MaybeWrapped<UserProfile>));
         })
         .catch((error) => {
           console.error("Profile yuklashda xatolik:", error);
@@ -182,9 +205,8 @@ const PersonalCabinet = () => {
     if (activeTab === "services") {
       setPackageItemsLoading(true);
       getRequest(me_package_items_api, undefined, headers)
-        .then((response: any) => {
-          console.log("Package items data:", response);
-          setUserPackageServices(response?.data || response || []);
+        .then((response) => {
+          setUserPackageServices((unwrap(response as MaybeWrapped<UserPackageService[]>) ?? []).filter((g) => "package_service" in g));
         })
         .catch((error) => {
           console.error("Package items yuklashda xatolik:", error);
@@ -195,24 +217,23 @@ const PersonalCabinet = () => {
     }
 
     // Fetch contracts
-    getRequest(contracts_list, undefined, headers)
-      .then((response: any) => {
+    getRequest<{ results?: Contract[] }>(contracts_list, undefined, headers)
+      .then((response) => {
         // getRequest javob tanasini qaytaradi: { count, results }
         setContracts(response?.results || []);
       })
       .catch((err) => {
-        console.log(err);
+        console.error(err);
       });
 
     // Fetch orders
-    getRequest(order_list, undefined, headers)
-      .then((response: any) => {
-        console.log(response, "orders res");
+    getRequest<{ book_orders?: BookOrder[]; service_orders?: ServiceOrder[] }>(order_list, undefined, headers)
+      .then((response) => {
         setBookOrders(response?.book_orders || []);
         setServiceOrders(response?.service_orders || []);
       })
       .catch((err) => {
-        console.log(err);
+        console.error(err);
       });
   }, [activeTab])
 
@@ -251,7 +272,6 @@ const PersonalCabinet = () => {
 
   const handleSubmit = () => {
     if (isFormValid()) {
-      console.log("Anketa yuborildi:", formData);
       navigate("/cabinet", { state: { name: "contracts", contract: false } });
     }
   };
@@ -750,12 +770,12 @@ const PersonalCabinet = () => {
                     </h2>
 
                     <div className="space-y-4">
-                      {Array.isArray(contracts) && contracts.map((contract: any) => {
+                      {Array.isArray(contracts) && contracts.map((contract: Contract) => {
                         const buyer = contract.didox_contract_data?.pending_document?.document_json?.buyer;
                         const seller = contract.didox_contract_data?.pending_document?.document_json?.seller;
                         const document = contract.didox_contract_data?.pending_document?.document_json?.document;
                         const contractDoc = contract.didox_contract_data?.pending_document?.document_json?.contractdoc;
-                        const contractUrl = contract.contract_url;
+                        const contractUrl = contract.contract_url ?? undefined;
                         return (
                           <div
                             key={contract.id}

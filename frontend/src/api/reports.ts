@@ -5,7 +5,6 @@ import axiosT from './baseUrl';
 export const getReportsByStir = async (stir: string): Promise<Report[]> => {
   try {
     const url = `${reports_calendar}/${stir}`;
-    console.log('Making request to:', url);
     
     const response = await axiosT.get(url, {
       headers: {

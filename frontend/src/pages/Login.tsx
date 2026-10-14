@@ -7,6 +7,7 @@ import { postRequest, getRequest } from "../api/request";
 import { login_api, oneid_login } from "../api/apiUrls";
 import { getCurrentDate } from "../utils/getCurrentDate";
 import toast from "react-hot-toast";
+import type { LoginResponse } from "../types/api";
 
 const Login = () => {
   const [userType, setUserType] = useState<"individual" | "legal">(
@@ -53,21 +54,24 @@ const Login = () => {
     }
 
     // Regular login for legal entities
-    postRequest(login_api, {
+    postRequest<LoginResponse>(login_api, {
       username: formData.username,
       password: formData.password,
     })
-      .then((response: any) => {
+      .then((response: LoginResponse) => {
         // Handle both response structures
         const tokens = response?.data?.tokens || response?.tokens;
         const userData = response?.data?.user || response?.user;
-        const userName = response?.data?.name || response?.name || userData?.name;
+        // login/ javobida faqat {id, username, tokens} keladi — ilgari ism undefined bo'lib,
+        // AuthContext'dagi 'ООО "Технологии"' zaxira nomi ko'rinardi
+        const username = response?.data?.username || response?.username || userData?.username || formData.username;
+        const userName = response?.data?.name || response?.name || userData?.name || username;
 
         if (tokens?.access) {
           setStorage(tokens.access);
           setStorageR(tokens.refresh);
           login(
-            userData,
+            userData?.email || username,
             userName,
             userType,
             getCurrentDate()
@@ -79,7 +83,7 @@ const Login = () => {
         }
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
         setError("Username yoki parol noto'g'ri");
         toast.error("Username yoki parol noto'g'ri kiritildi", {
           duration: 3000,
@@ -93,9 +97,8 @@ const Login = () => {
     // Get current origin for redirect URI
     const redirectUri = `${window.location.origin}/auth/oneid/callback`;
     
-    getRequest(`${oneid_login}?redirect_uri=${encodeURIComponent(redirectUri)}`)
-      .then((response: any) => {
-        console.log(response, "OneID response");
+    getRequest<{ one_id_url?: string }>(`${oneid_login}?redirect_uri=${encodeURIComponent(redirectUri)}`)
+      .then((response: { one_id_url?: string }) => {
         
         // Redirect to OneID URL
         if (response?.one_id_url) {
@@ -105,7 +108,7 @@ const Login = () => {
         }
       })
       .catch((error) => {
-        console.log("OneID login error:", error);
+        console.error("OneID login error:", error);
       });
   };
 

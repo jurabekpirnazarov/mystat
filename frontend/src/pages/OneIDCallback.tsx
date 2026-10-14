@@ -6,6 +6,7 @@ import { postRequest } from "../api/request";
 import { oneid_login } from "../api/apiUrls";
 import { getCurrentDate } from "../utils/getCurrentDate";
 import { Shield, AlertCircle } from "lucide-react";
+import type { LoginResponse } from "../types/api";
 
 const OneIDCallback = () => {
   const [searchParams] = useSearchParams();
@@ -27,15 +28,11 @@ const OneIDCallback = () => {
     const accessToken = searchParams.get("access_token"); // Boshqa token formati
     const authToken = searchParams.get("auth_token"); // Yana bir variant
 
-    console.log("OneIDCallback useEffect triggered");
-    console.log("Current URL:", window.location.href);
-    console.log("Search params:", searchParams.toString());
 
     // Agar URL da token bo'lsa, uni localStorage ga saqlash
     const receivedToken = token || accessToken || authToken;
     if (receivedToken) {
       hasProcessed.current = true; // Ishlaganligi belgisi
-      console.log("Direct token received from URL:", receivedToken);
       setStorage(receivedToken);
       login(
         "Foydalanuvchi", // Haqiqiy ism keyinroq profile API orqali yuklanadi
@@ -49,19 +46,15 @@ const OneIDCallback = () => {
 
     if (code) {
       hasProcessed.current = true; // Ishlaganligi belgisi
-      console.log("Authorization code received:", code);
-      console.log("State parameter:", state);
-      console.log("Making POST request to:", oneid_login);
       
       // Add a delay to ensure the component is fully mounted
       setTimeout(() => {
         // Send the code to your backend to complete the OneID authentication
-        postRequest(oneid_login, {
+        postRequest<LoginResponse>(oneid_login, {
           code: code,
           state: state || "state"
         })
-          .then((response: any) => {
-            console.log("OneID callback response:", response);
+          .then((response: LoginResponse) => {
 
             // Handle both response structures
             const tokens = response?.data?.tokens || response?.tokens;
@@ -83,7 +76,7 @@ const OneIDCallback = () => {
               navigate("/"); // Asosiy sahifaga yo'naltirish
             } else if (response?.data?.access || response?.access) {
               // Alternative token structure
-              const accessToken = response?.data?.access || response?.access;
+              const accessToken = response?.data?.access || response?.access || "";
               const refreshToken = response?.data?.refresh || response?.refresh;
               
               setStorage(accessToken);

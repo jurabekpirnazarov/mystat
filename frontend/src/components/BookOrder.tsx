@@ -45,7 +45,6 @@ const BookOrder: React.FC<BookOrderProps> = ({
     if (storedLocation) {
       try {
         const store = JSON.parse(storedLocation);
-        console.log('Stored location:', store);
         setAddress(store.name); // name maydonini address sifatida ishlatamiz
         setIsMapSelected(true);
         localStorage.removeItem('selectedStore');
@@ -57,12 +56,6 @@ const BookOrder: React.FC<BookOrderProps> = ({
 
   const isFormValid = () => {
     const hasAddress = Boolean(address?.trim());
-    console.log('Form validation:', {
-      hasAddress,
-      selectedPaymentProvider,
-      isMapSelected,
-      address
-    });
     return hasAddress && selectedPaymentProvider && isMapSelected;
   };
 
@@ -73,7 +66,6 @@ const BookOrder: React.FC<BookOrderProps> = ({
     }
 
     try {
-      console.log(`To'lov ${selectedPaymentProvider} orqali amalga oshirilmoqda...`);
 
       const paymentPayload = {
         order_id: orderResponse.id,

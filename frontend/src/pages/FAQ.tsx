@@ -32,7 +32,7 @@ const FAQ = () => {
         setFaqs(sortData)
       })
       .catch((err) => {
-        console.log(err)
+        console.error(err)
       })
   }, [])
 

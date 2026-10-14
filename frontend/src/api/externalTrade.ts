@@ -1,3 +1,4 @@
+import { toList, type ListPayload } from './listResponse';
 import { getRequest, postRequest } from './request';
 import { 
   countries_api, 
@@ -25,7 +26,7 @@ export interface Country {
   name_en: string;
   name_cry: string;
   kod_kont: string;
-  country_group: any;
+  country_group: unknown;
 }
 
 export interface CountryGroup {
@@ -55,7 +56,7 @@ export interface ProductCategory {
   name_ru: string;
   name_cry: string;
   name_cry2: string;
-  parent: any;
+  parent: string | null;
   level: number;
   level_display: string;
 }
@@ -83,7 +84,7 @@ export interface SitcSection {
   name_uz: string;
   name_ru: string;
   name_cry: string;
-  parent: any;
+  parent: string | null;
   level: number;
   level_display: string;
 }
@@ -125,7 +126,7 @@ export interface TradeDataResponse {
   sitc_name: string;
   value: string | number;
   quantity: string | number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // API Functions for External Trade
@@ -133,10 +134,8 @@ export interface TradeDataResponse {
 // Get countries list
 export const getCountries = async (): Promise<Country[]> => {
   try {
-    console.log('getCountries: Fetching countries from API');
-    const response = await getRequest(countries_api) as any;
-    console.log('getCountries: Response:', response);
-    return response?.results || response || [];
+    const response = await getRequest<ListPayload<Country>>(countries_api);
+    return toList(response);
   } catch (error) {
     console.error('Error fetching countries:', error);
     return [];
@@ -146,10 +145,8 @@ export const getCountries = async (): Promise<Country[]> => {
 // Get country groups
 export const getCountryGroups = async (): Promise<CountryGroup[]> => {
   try {
-    console.log('getCountryGroups: Fetching country groups from API');
-    const response = await getRequest(country_groups_api) as any;
-    console.log('getCountryGroups: Response:', response);
-    return response?.results || response || [];
+    const response = await getRequest<ListPayload<CountryGroup>>(country_groups_api);
+    return toList(response);
   } catch (error) {
     console.error('Error fetching country groups:', error);
     return [];
@@ -159,10 +156,8 @@ export const getCountryGroups = async (): Promise<CountryGroup[]> => {
 // Get available years
 export const getYears = async (): Promise<Year[]> => {
   try {
-    console.log('getYears: Fetching years from API');
-    const response = await getRequest(years_api) as any;
-    console.log('getYears: Response:', response);
-    return response?.results || response || [];
+    const response = await getRequest<ListPayload<Year>>(years_api);
+    return toList(response);
   } catch (error) {
     console.error('Error fetching years:', error);
     return [];
@@ -172,10 +167,8 @@ export const getYears = async (): Promise<Year[]> => {
 // Get regions
 export const getRegions = async (): Promise<Region[]> => {
   try {
-    console.log('getRegions: Fetching regions from API');
-    const response = await getRequest(regions_api) as any;
-    console.log('getRegions: Response:', response);
-    return response?.results || response || [];
+    const response = await getRequest<ListPayload<Region>>(regions_api);
+    return toList(response);
   } catch (error) {
     console.error('Error fetching regions:', error);
     return [];
@@ -185,10 +178,8 @@ export const getRegions = async (): Promise<Region[]> => {
 // Get product categories
 export const getProductCategories = async (): Promise<ProductCategory[]> => {
   try {
-    console.log('getProductCategories: Fetching product categories from API');
-    const response = await getRequest(product_categories_api) as any;
-    console.log('getProductCategories: Response:', response);
-    return response?.results || response || [];
+    const response = await getRequest<ListPayload<ProductCategory>>(product_categories_api);
+    return toList(response);
   } catch (error) {
     console.error('Error fetching product categories:', error);
     return [];
@@ -198,10 +189,8 @@ export const getProductCategories = async (): Promise<ProductCategory[]> => {
 // Get product subcategories by category ID
 export const getProductSubcategories = async (categoryId: number): Promise<ProductSubcategory[]> => {
   try {
-    console.log('getProductSubcategories: Fetching subcategories for category:', categoryId);
-    const response = await getRequest(product_subcategories_api, { category: categoryId.toString() }) as any;
-    console.log('getProductSubcategories: Response:', response);
-    return response?.results || response || [];
+    const response = await getRequest<ListPayload<ProductSubcategory>>(product_subcategories_api, { category: categoryId.toString() });
+    return toList(response);
   } catch (error) {
     console.error('Error fetching product subcategories:', error);
     return [];
@@ -211,10 +200,8 @@ export const getProductSubcategories = async (categoryId: number): Promise<Produ
 // Get products by subcategory ID
 export const getProducts = async (subcategoryId: number): Promise<Product[]> => {
   try {
-    console.log('getProducts: Fetching products for subcategory:', subcategoryId);
-    const response = await getRequest(product_products_api, { subcategory: subcategoryId.toString() }) as any;
-    console.log('getProducts: Response:', response);
-    return response?.results || response || [];
+    const response = await getRequest<ListPayload<Product>>(product_products_api, { subcategory: subcategoryId.toString() });
+    return toList(response);
   } catch (error) {
     console.error('Error fetching products:', error);
     return [];
@@ -224,10 +211,8 @@ export const getProducts = async (subcategoryId: number): Promise<Product[]> => 
 // Get SITC sections
 export const getSitcSections = async (): Promise<SitcSection[]> => {
   try {
-    console.log('getSitcSections: Fetching SITC sections from API');
-    const response = await getRequest(sitc1_api) as any;
-    console.log('getSitcSections: Response:', response);
-    return response?.results || response || [];
+    const response = await getRequest<ListPayload<SitcSection>>(sitc1_api);
+    return toList(response);
   } catch (error) {
     console.error('Error fetching SITC sections:', error);
     return [];
@@ -237,10 +222,8 @@ export const getSitcSections = async (): Promise<SitcSection[]> => {
 // Get SITC divisions by section ID
 export const getSitcDivisions = async (sectionId: number): Promise<SitcSection[]> => {
   try {
-    console.log('getSitcDivisions: Fetching SITC divisions for section:', sectionId);
-    const response = await getRequest(sitc2_api, { section: sectionId.toString() }) as any;
-    console.log('getSitcDivisions: Response:', response);
-    return response?.results || response || [];
+    const response = await getRequest<ListPayload<SitcSection>>(sitc2_api, { section: sectionId.toString() });
+    return toList(response);
   } catch (error) {
     console.error('Error fetching SITC divisions:', error);
     return [];
@@ -250,10 +233,8 @@ export const getSitcDivisions = async (sectionId: number): Promise<SitcSection[]
 // Get SITC groups by division ID
 export const getSitcGroups = async (divisionId: number): Promise<SitcSection[]> => {
   try {
-    console.log('getSitcGroups: Fetching SITC groups for division:', divisionId);
-    const response = await getRequest(sitc3_api, { division: divisionId.toString() }) as any;
-    console.log('getSitcGroups: Response:', response);
-    return response?.results || response || [];
+    const response = await getRequest<ListPayload<SitcSection>>(sitc3_api, { division: divisionId.toString() });
+    return toList(response);
   } catch (error) {
     console.error('Error fetching SITC groups:', error);
     return [];
@@ -263,10 +244,8 @@ export const getSitcGroups = async (divisionId: number): Promise<SitcSection[]> 
 // Get SITC subgroups by group ID
 export const getSitcSubgroups = async (groupId: number): Promise<SitcSection[]> => {
   try {
-    console.log('getSitcSubgroups: Fetching SITC subgroups for group:', groupId);
-    const response = await getRequest(sitc4_api, { group: groupId.toString() }) as any;
-    console.log('getSitcSubgroups: Response:', response);
-    return response?.results || response || [];
+    const response = await getRequest<ListPayload<SitcSection>>(sitc4_api, { group: groupId.toString() });
+    return toList(response);
   } catch (error) {
     console.error('Error fetching SITC subgroups:', error);
     return [];
@@ -276,21 +255,9 @@ export const getSitcSubgroups = async (groupId: number): Promise<SitcSection[]> 
 // Get trade data using POST request
 export const getTradeData = async (params: TradeDataRequest): Promise<TradeDataResponse[]> => {
   try {
-    console.log('getTradeData: Sending request with params:', params);
-    const response = await postRequest(post_get_data_api, params) as any;
-    console.log('getTradeData: Response:', response);
+    const response = await postRequest<ListPayload<TradeDataResponse>>(post_get_data_api, params);
     
-    // Handle different response formats
-    if (response?.results && Array.isArray(response.results)) {
-      return response.results;
-    } else if (Array.isArray(response)) {
-      return response;
-    } else if (response?.data && Array.isArray(response.data)) {
-      return response.data;
-    } else {
-      console.warn('getTradeData: Unexpected response format:', response);
-      return [];
-    }
+    return toList(response);
   } catch (error) {
     console.error('Error fetching trade data:', error);
     throw error;
@@ -300,21 +267,9 @@ export const getTradeData = async (params: TradeDataRequest): Promise<TradeDataR
 // Get trade data using GET request (alternative endpoint)
 export const getTradeDataGet = async (params: Record<string, string>): Promise<TradeDataResponse[]> => {
   try {
-    console.log('getTradeDataGet: Sending GET request with params:', params);
-    const response = await getRequest(get_analyze_data_api, params) as any;
-    console.log('getTradeDataGet: Response:', response);
+    const response = await getRequest<ListPayload<TradeDataResponse>>(get_analyze_data_api, params);
     
-    // Handle different response formats
-    if (response?.results && Array.isArray(response.results)) {
-      return response.results;
-    } else if (Array.isArray(response)) {
-      return response;
-    } else if (response?.data && Array.isArray(response.data)) {
-      return response.data;
-    } else {
-      console.warn('getTradeDataGet: Unexpected response format:', response);
-      return [];
-    }
+    return toList(response);
   } catch (error) {
     console.error('Error fetching trade data with GET:', error);
     throw error;

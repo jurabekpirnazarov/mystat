@@ -24,7 +24,6 @@ function OrganizationsKtut() {
   };
 
   const refreshCaptcha = () => {
-    console.log('Refreshing captcha...');
   };
 
   return (

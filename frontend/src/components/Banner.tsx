@@ -27,16 +27,13 @@ const Banner = () => {
       try {
         setIsLoading(true);
         setError(null); // Reset error state before new request
-        console.log("Fetching banner stats from:", banner_stat);
         const response = await getRequest(banner_stat) as BannerStats;
-        console.log("Banner stats raw response:", response);
         
         if (!response) {
           throw new Error('No response data received');
         }
 
         // Log the actual data structure
-        console.log("Response data structure:", response);
 
         // Verify each required field exists and is a number
         const validatedData: BannerStats = {
@@ -106,14 +103,6 @@ const Banner = () => {
     },
   ];
   // Removed unused features array
-
-  if (error) {
-    console.log("Error state:", error);
-  }
-
-  if (isLoading) {
-    console.log("Loading state...");
-  }
 
   return (
     <div className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 dark:from-blue-800 dark:via-blue-900 dark:to-gray-900 overflow-hidden">

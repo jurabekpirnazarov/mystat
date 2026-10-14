@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getServiceInfo } from '../api/serviceInfo';
+import type { ServiceInfoData, ServiceReview } from '../api/serviceInfo';
 
 interface ExpandableItemProps {
   icon: React.ReactNode;
@@ -81,7 +82,7 @@ interface BookStep1Props {
 const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [liked, setLiked] = useState(false);
-  const [serviceData, setServiceData] = useState<any>(null);
+  const [serviceData, setServiceData] = useState<ServiceInfoData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -119,7 +120,7 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
 
   const ratingDistribution = serviceData?.rating_counts ? 
     Object.entries(serviceData.rating_counts)
-      .map(([stars, count]: [string, any]) => ({
+      .map(([stars, count]: [string, number]) => ({
         stars: parseInt(stars),
         count: count,
         percentage: serviceData.ratings_total > 0 ? Math.round((count / serviceData.ratings_total) * 100) : 0
@@ -353,21 +354,21 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
               {/* Individual Reviews */}
               <div className="space-y-6">
                 {serviceData.reviews && serviceData.reviews.length > 0 ? (
-                  serviceData.reviews.map((review: any, index: number) => (
+                  serviceData.reviews.map((review: ServiceReview, index: number) => (
                     <div key={index} className="border-l-4 border-blue-400 pl-4 bg-gradient-to-r from-blue-50 to-transparent p-4 rounded-r-lg transition-all duration-400 hover:shadow-md hover:border-l-8 hover:pl-6 transform hover:translate-x-2">
                       <div className="flex items-center gap-3 mb-2">
                         <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:rotate-12">
                           <User className="text-white" size={16} />
                         </div>
                         <span className="font-semibold text-gray-800 transition-colors duration-300 hover:text-blue-700">
-                          {review.user_name || 'Anonim'}
+                          {review.user?.display_name || review.user?.first_name || review.user?.username || 'Anonim'}
                         </span>
                         <div className="transition-all duration-300 hover:scale-110">
-                          <StarRating rating={review.rating || 5} size={14} />
+                          <StarRating rating={review.value} size={14} />
                         </div>
                       </div>
                       <p className="text-gray-700 transition-colors duration-300 hover:text-gray-900">
-                        {review.comment || review.text}
+                        {review.comment}
                       </p>
                       <span className="text-xs text-gray-500 mt-2 block">
                         {review.created_at || 'Bugun'}

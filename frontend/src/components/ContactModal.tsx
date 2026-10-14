@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { X, Send, User, Mail, Phone, MessageSquare, CheckCircle, AlertCircle } from "lucide-react";
 import { postRequest } from "../api/request";
 import { contact_create_api } from "../api/apiUrls";
+import { asApiError } from '../api/errors';
 
 interface ContactModalProps {
   isOpen: boolean;
@@ -75,8 +76,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
       };
       
       // Make API call with the exact payload format required
-      const response = await postRequest(contact_create_api, payload);
-      console.log("Contact created successfully:", response);
+      await postRequest(contact_create_api, payload);
       
       setSubmitStatus('success');
       
@@ -85,7 +85,8 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
         handleClose();
       }, 2000);
 
-    } catch (error: any) {
+    } catch (caught) {
+      const error = asApiError(caught);
       console.error("Error creating contact:", error);
       setSubmitStatus('error');
       setErrorMessage(error.response?.data?.message || error.message || 'Xatolik yuz berdi. Iltimos, qaytadan urinib ko\'ring.');

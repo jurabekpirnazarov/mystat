@@ -2,6 +2,9 @@ import { ArrowRight, ArrowLeft, ChevronDown, ChevronUp, RefreshCw } from 'lucide
 import Select from 'react-dropdown-select';
 import Checkbox from '@mui/material/Checkbox';
 import { useState, useRef, useEffect } from 'react';
+import type { SelectRenderer } from 'react-dropdown-select';
+
+const pick = (item: OptionType, key?: string) => (key ? (item as unknown as Record<string, unknown>)[key] : undefined);
 
 interface OptionType {
   value: string | number;
@@ -312,7 +315,7 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
   } = props;
 
   // Custom content renderer
-  const customContentRenderer = ({ props, state }: any) => (
+  const customContentRenderer = ({ props, state, methods }: SelectRenderer<OptionType>) => (
     <div className="flex items-center justify-between w-full min-h-[42px] px-3 py-2 bg-white border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all duration-200">
       <span className="flex-1 text-sm text-gray-700">
         {state.values.length === 0 ? (
@@ -332,8 +335,8 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              console.log('Clear all clicked');
-              state.clearAll();
+              // clearAll — methods'da (state'da yo'q edi: tugma TypeError berardi)
+              methods.clearAll();
             }}
             title="Barcha tanlovlarni tozalash"
           >
@@ -350,9 +353,9 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
   );
 
   // Custom dropdown renderer for multi selects
-  const customMultiDropdownRenderer = ({ props, state, methods }: any) => {
+  const customMultiDropdownRenderer = ({ props, state, methods }: SelectRenderer<OptionType>) => {
     const regexp = new RegExp(state.search, 'i');
-    const options = props.options.filter((item: OptionType) => regexp.test((item as any)[props.searchBy] || (item as any)[props.labelField]));
+    const options = props.options.filter((item: OptionType) => regexp.test(String(pick(item, props.searchBy) ?? pick(item, props.labelField) ?? '')));
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
         {props.searchable && (
@@ -373,7 +376,6 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Select All clicked');
                 methods.selectAll();
               }}
             >
@@ -384,7 +386,6 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Clear All clicked');
                 methods.clearAll();
               }}
             >
@@ -408,18 +409,14 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
                     e.preventDefault();
                     e.stopPropagation();
                     
-                    console.log('Multi-select Toggle option:', option.value, 'Current state:', isSelected);
-                    console.log('Current values before action:', state.values);
                     
                     let newValues: OptionType[];
                     if (isSelected) {
                       // Remove the item from selection
                       newValues = state.values.filter((v: OptionType) => v.value !== option.value);
-                      console.log('Removing item, new values:', newValues);
                     } else {
                       // Add the item to selection
                       newValues = [...state.values, option];
-                      console.log('Adding item, new values:', newValues);
                     }
                     
                     // Call onChange directly
@@ -450,9 +447,9 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
   };
 
   // Custom dropdown renderer for single selects
-  const customSingleDropdownRenderer = ({ props, state, methods }: any) => {
+  const customSingleDropdownRenderer = ({ props, state, methods }: SelectRenderer<OptionType>) => {
     const regexp = new RegExp(state.search, 'i');
-    const options = props.options.filter((item: OptionType) => regexp.test((item as any)[props.searchBy] || (item as any)[props.labelField]));
+    const options = props.options.filter((item: OptionType) => regexp.test(String(pick(item, props.searchBy) ?? pick(item, props.labelField) ?? '')));
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
         {props.searchable && (
@@ -482,18 +479,14 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
                     e.preventDefault();
                     e.stopPropagation();
                     
-                    console.log('Single-select Toggle option:', option.value, 'Current state:', isSelected);
-                    console.log('Current values before action:', state.values);
                     
                     let newValues: OptionType[];
                     if (isSelected) {
                       // For single select, clear the selection if clicking on selected item
                       newValues = [];
-                      console.log('Clearing selection, new values:', newValues);
                     } else {
                       // Add the item to selection (replace previous selection)
                       newValues = [option];
-                      console.log('Setting new selection, new values:', newValues);
                     }
                     
                     // Call onChange directly

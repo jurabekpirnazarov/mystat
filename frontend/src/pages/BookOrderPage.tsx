@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import BookOrder from '../components/BookOrder';
 
+type BookOrderProps = React.ComponentProps<typeof BookOrder>;
+
 interface LocationState {
-  cart: any[];
-  books: any[];
+  cart: BookOrderProps["cart"];
+  books: BookOrderProps["books"];
   totalPrice: number;
-  orderResponse: any;
+  orderResponse: BookOrderProps["orderResponse"] | null;
 }
 
 const BookOrderPage: React.FC = () => {
@@ -58,7 +60,7 @@ const BookOrderPage: React.FC = () => {
         onClose={handleClose}
         totalPrice={pageData.totalPrice}
         formatPrice={formatPrice}
-        orderResponse={pageData.orderResponse}
+        orderResponse={pageData.orderResponse ?? undefined}
       />
     </div>
   );

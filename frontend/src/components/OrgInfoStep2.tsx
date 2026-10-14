@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Search } from 'lucide-react';
 import { getOrganizationInfo, OrganizationData } from '../api/organizationInfo';
 import toast, { Toaster } from 'react-hot-toast';
+import { asApiError } from '../api/errors';
 
 interface OrgInfoStep2Props {
   onNext: (orgData: OrganizationData) => void;
@@ -27,9 +28,7 @@ const OrgInfoStep2: React.FC<OrgInfoStep2Props> = ({ onNext, onPrevious }) => {
       setLoading(true);
       setError(null);
       try {
-        console.log('Searching for STIR:', stirNumber);
         const response = await getOrganizationInfo(stirNumber);
-        console.log('Organization info response:', response);
         
         if (response.service_response) {
           setRemainingAttempts(prev => prev - 1);
@@ -37,7 +36,8 @@ const OrgInfoStep2: React.FC<OrgInfoStep2Props> = ({ onNext, onPrevious }) => {
         } else {
           setError('Tashkilot ma\'lumoti topilmadi');
         }
-      } catch (err: any) {
+      } catch (caught) {
+        const err = asApiError(caught);
         console.error('API Error:', err);
         setRemainingAttempts(prev => prev - 1);
         

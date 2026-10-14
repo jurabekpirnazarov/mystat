@@ -20,7 +20,7 @@ const Interactive = () => {
   useEffect(() => {
     getRequest(`${interactive_services}?category__name=interactive&limit=7`)
       .then((res) => setInteractiveData(res as InteractiveServicesResponse))
-      .catch((err) => console.log(err));
+      .catch((err) => console.error(err));
   }, []);
 
   const closeModal = () => setIsOpen(false);
@@ -79,7 +79,6 @@ const Interactive = () => {
                 <div
                   key={service.id}
                   onClick={() => {
-                    console.log("Clicked service:", service);  // Debug log
                     // Handle each service based on its slug or name
                     if (service.slug === "books") {
                       navigate(`/books`);

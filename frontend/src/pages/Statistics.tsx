@@ -3,12 +3,33 @@ import { BarChart3, TrendingUp, Users, Calendar, Download, Loader2, AlertCircle 
 import PieChart from "../components/charts/PieChart";
 import { getRequest } from "../api/request";
 import { platform_stat_api } from "../api/apiUrls";
+import { asApiError } from '../api/errors';
+
+interface PlatformStats {
+  success: boolean;
+  last_updated?: string;
+  service_stats: { label: string; info: { physical: number; legal: number; all: number } }[];
+  user_stats: {
+    daily: { label: string; value: number; desc: string };
+    weekly: { label: string; value: number; desc: string };
+    monthly: { label: string; value: number; desc: string };
+    yearly: { label: string; value: number; desc: string };
+    main: { total: number; active: number; new: number; growth: string };
+    chart_data: { labels: string[]; values: number[] };
+  };
+}
+interface ServiceStatRow {
+  name: string;
+  individual: number;
+  legal: number;
+  total: number;
+}
 
 const Statistics = () => {
   const [timeFilter, setTimeFilter] = useState("monthly");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [statsData, setStatsData] = useState<any>(null);
+  const [statsData, setStatsData] = useState<PlatformStats | null>(null);
 
   // Fetch platform statistics
   useEffect(() => {
@@ -18,10 +39,10 @@ const Statistics = () => {
       
       try {
         const apiUrl = `${platform_stat_api}?stat_type=${timeFilter}`;
-        const response = await getRequest(apiUrl);
-        console.log('Platform stats response:', response);
+        const response = await getRequest<PlatformStats>(apiUrl);
         setStatsData(response);
-      } catch (err: any) {
+      } catch (caught) {
+        const err = asApiError(caught);
         console.error('Error fetching platform stats:', err);
         setError('Ma\'lumotlarni yuklashda xatolik yuz berdi. Iltimos, qaytadan urinib ko\'ring.');
       } finally {
@@ -35,7 +56,7 @@ const Statistics = () => {
   // Helper functions to get data from API
   const getServicesStats = () => {
     if (statsData?.service_stats) {
-      return statsData.service_stats.map((service: any) => ({
+      return statsData.service_stats.map((service) => ({
         name: service.label,
         individual: service.info.physical,
         legal: service.info.legal,
@@ -191,7 +212,7 @@ const Statistics = () => {
                 </p>
               </div>
             ) : (
-              servicesStats.map((service: any, index: number) => (
+              servicesStats.map((service: ServiceStatRow, index: number) => (
                 <div key={index} className="space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="font-medium text-gray-900 dark:text-white">

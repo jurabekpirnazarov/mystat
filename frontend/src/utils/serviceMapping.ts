@@ -1,23 +1,25 @@
 import { getRequest } from '../api/request';
 import { interactive_services } from '../api/apiUrls';
+import { toList, type ListPayload } from '../api/listResponse';
 
 // Cache for services data
-let servicesCache: any[] | null = null;
+interface ServiceSlug {
+  id: number;
+  slug: string | null;
+}
+
+let servicesCache: ServiceSlug[] | null = null;
 
 // Fetch all services from API
-export const fetchAllServices = async (): Promise<any[]> => {
+export const fetchAllServices = async (): Promise<ServiceSlug[]> => {
   if (servicesCache) {
-    console.log('fetchAllServices: Using cached services');
     return servicesCache;
   }
   
   try {
-    console.log('fetchAllServices: Fetching from API:', interactive_services);
-    const response: any = await getRequest(interactive_services);
-    console.log('fetchAllServices: API response:', response);
+    const response = await getRequest<ListPayload<ServiceSlug>>(interactive_services);
     
-    servicesCache = response.results || response || [];
-    console.log('fetchAllServices: Cached services:', servicesCache);
+    servicesCache = toList(response);
     
     return servicesCache || [];
   } catch (error) {
@@ -29,12 +31,9 @@ export const fetchAllServices = async (): Promise<any[]> => {
 // Get service ID by slug from API data
 export const getServiceIdBySlug = async (slug: string): Promise<number | null> => {
   try {
-    console.log('getServiceIdBySlug: Looking for slug:', slug);
     const services = await fetchAllServices();
-    console.log('getServiceIdBySlug: Available services:', services);
     
-    const service = services.find((s: any) => s.slug === slug);
-    console.log('getServiceIdBySlug: Found service:', service);
+    const service = services.find((s) => s.slug === slug);
     
     return service?.id || null;
   } catch (error) {
@@ -45,13 +44,11 @@ export const getServiceIdBySlug = async (slug: string): Promise<number | null> =
 
 // Get service ID by current route
 export const getServiceIdByRoute = async (pathname: string): Promise<number | null> => {
-  console.log('getServiceIdByRoute: pathname =', pathname);
   
   // Remove leading slash and get first part of path
   const pathParts = pathname.replace(/^\//, '').split('/');
   const routeKey = pathParts[0];
   
-  console.log('getServiceIdByRoute: routeKey =', routeKey);
   
   // Map route to service slug
   const routeToSlug: { [key: string]: string } = {
@@ -69,15 +66,12 @@ export const getServiceIdByRoute = async (pathname: string): Promise<number | nu
   };
   
   const slug = routeToSlug[routeKey];
-  console.log('getServiceIdByRoute: slug =', slug);
   
   if (!slug) {
-    console.log('getServiceIdByRoute: No slug found for routeKey:', routeKey);
     return null;
   }
   
   const serviceId = await getServiceIdBySlug(slug);
-  console.log('getServiceIdByRoute: serviceId =', serviceId);
   
   return serviceId;
 };

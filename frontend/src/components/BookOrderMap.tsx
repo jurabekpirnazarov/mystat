@@ -5,7 +5,7 @@ import { X } from 'lucide-react';
 import { postal_locations } from '../api/apiUrls';
 import { getRequest } from '../api/request';
 
-delete (L.Icon.Default.prototype as any)._getIconUrl;
+delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -55,11 +55,9 @@ export default function LocationSelector({ onSelectStore, onClose }: LocationSel
         setIsLoading(true);
         setError(null);
         const response = await getRequest(postal_locations);
-        console.log('Raw API Response:', response);
         
         // Response to'g'ridan-to'g'ri array kelayotgani uchun
         if (Array.isArray(response)) {
-          console.log('Found stores:', response);
           const validStores = response.filter(store => {
             try {
               return store &&
@@ -70,12 +68,11 @@ export default function LocationSelector({ onSelectStore, onClose }: LocationSel
                 typeof store.name === 'string' &&
                 typeof store.index === 'string' &&
                 store.name.trim() !== '';
-            } catch (err) {
+            } catch {
               console.error('Invalid store data:', store);
               return false;
             }
           });
-          console.log('Valid stores:', validStores);
           setAllStores(validStores);
           setFilteredStores(validStores);
         } else {
@@ -172,9 +169,7 @@ export default function LocationSelector({ onSelectStore, onClose }: LocationSel
     markersRef.current = [];
 
     const validStores = filteredStores.filter(store => store && store.lat && store.lng);
-    console.log('Valid stores for mapping:', validStores);
     const newClusters = createClusters(validStores, currentZoom);
-    console.log('Created clusters:', newClusters);
     setClusters(newClusters);
 
     newClusters.forEach(cluster => {

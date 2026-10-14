@@ -168,9 +168,6 @@ const BookStore: React.FC = () => {
     if (!orderResponse) return;
 
     try {
-      console.log(
-        `Tolov ${selectedPaymentProvider} orqali amalga oshirilmoqda...`
-      );
 
       const paymentPayload = {
         order_id: orderResponse.id,
@@ -343,11 +340,9 @@ const BookStore: React.FC = () => {
         queryParams.year = selectedYear;
       }
 
-      console.log("Sending request with params:", queryParams);
 
       typedGetRequest<ApiResponseType<ApiBookResponse>>(`${book_list}`, queryParams)
         .then((data) => {
-          console.log("API response data:", data);
 
           if (data && data.results) {
             const transformedBooks: Book[] = data.results.map((book) => ({
@@ -359,15 +354,13 @@ const BookStore: React.FC = () => {
               category: activeTab,
               price: book.price,
             }));
-            console.log("Transformed books:", transformedBooks);
             setBooks(transformedBooks);
           } else {
-            console.log("No results found in response data");
             setBooks([]);
           }
         })
         .catch((err) => {
-          console.log("Error fetching books:", err);
+          console.error("Error fetching books:", err);
           setBooks([]);
         })
         .finally(() => {
@@ -585,7 +578,6 @@ const BookStore: React.FC = () => {
       }
 
       if (orders.length === 0) {
-        console.log("Hech qanday buyurtma topilmadi");
         return;
       }
 
@@ -593,10 +585,8 @@ const BookStore: React.FC = () => {
         orders: orders,
       };
 
-      console.log("Sending order payload:", payload);
 
       const response = await typedPostRequest<OrderResponse>(book_order_create, payload);
-      console.log("Order response:", response);
 
       if (response && response.id && response.total_price) {
         setOrderResponse(response);

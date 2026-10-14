@@ -12,9 +12,7 @@ export const useServiceId = () => {
     const fetchServiceId = async () => {
       try {
         setLoading(true);
-        console.log('useServiceId: Current pathname =', location.pathname);
         const id = await getServiceIdByRoute(location.pathname);
-        console.log('useServiceId: Fetched service ID =', id);
         setServiceId(id);
       } catch (error) {
         console.error('useServiceId: Error fetching service ID:', error);

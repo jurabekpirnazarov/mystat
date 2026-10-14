@@ -9,18 +9,17 @@ function clearLocalStorageAndRedirect() {
   localStorage.removeItem("user_data");
   localStorage.removeItem("user_profile");
   
-  console.log("LocalStorage cleared, redirecting to login...");
   
   // Redirect to login page
   window.location.href = "/login";
 }
 
-export const postRequest = (
+export const postRequest = <T = unknown>(
   url: string,
-  data: Record<string, any>,
+  data: Record<string, unknown> | FormData | object,
   headers?: Record<string, string>
-) => {
-  return new Promise((resolve, reject) => {
+): Promise<T> => {
+  return new Promise<T>((resolve, reject) => {
     // Get token from localStorage and merge with custom headers
     const token = localStorage.getItem("access_token");
     const mergedHeaders = { ...headers };
@@ -40,7 +39,6 @@ export const postRequest = (
       .catch((error) => {
         // Handle 401 errors specifically
         if (error.response?.status === 401) {
-          console.log("401 Unauthorized - clearing localStorage and redirecting to login");
           clearLocalStorageAndRedirect();
         }
         reject(error);
@@ -48,12 +46,12 @@ export const postRequest = (
   });
 };
 
-export const getRequest = (
+export const getRequest = <T = unknown>(
   url: string,
   params?: Record<string, string>,
   headers?: Record<string, string>
-) => {
-  return new Promise((resolve, reject) => {
+): Promise<T> => {
+  return new Promise<T>((resolve, reject) => {
     // Get token from localStorage and merge with custom headers
     const token = localStorage.getItem("access_token");
     const mergedHeaders = { ...headers };
@@ -71,7 +69,6 @@ export const getRequest = (
       .catch((error) => {
         // Handle 401 errors specifically
         if (error.response?.status === 401) {
-          console.log("401 Unauthorized - clearing localStorage and redirecting to login");
           clearLocalStorageAndRedirect();
         }
         reject(error);

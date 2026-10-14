@@ -65,7 +65,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     localStorage.removeItem("user_data");
     localStorage.removeItem("user_profile");
     
-    console.log("User logged out, localStorage cleared");
   };
 
   return (

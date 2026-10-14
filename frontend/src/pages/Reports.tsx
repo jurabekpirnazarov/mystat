@@ -24,7 +24,6 @@ function Reports() {
   };
 
   const refreshCaptcha = () => {
-    console.log('Refreshing captcha...');
   };
 
   return (

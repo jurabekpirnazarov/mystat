@@ -57,13 +57,11 @@ const CalendarReport: React.FC<ReportsCalendarProps> = () => {
       const month = currentDate.getMonth() + 1;
       const dayApiUrl = `${calendar}?year=${year}&month=${month}&day=${day}`;
       
-      console.log('📅 Fetching day reports from:', dayApiUrl);
       const response = await getRequest(dayApiUrl);
       
       if (response && typeof response === 'object' && 'data' in response) {
         const dayResponse = response as CalendarApiResponse;
         setSelectedDayReports(dayResponse.data);
-        console.log('✅ Day reports loaded:', dayResponse.data.length);
       }
     } catch (err) {
       console.error('❌ Error fetching day reports:', err);
@@ -111,16 +109,12 @@ const CalendarReport: React.FC<ReportsCalendarProps> = () => {
       const month = currentDate.getMonth() + 1; // API expects 1-12
       const apiUrl = `${calendar}?year=${year}&month=${month}`;
       
-      console.log('📅 Fetching calendar data from:', apiUrl);
       const response = await getRequest(apiUrl);
-      console.log('📥 Calendar API response:', response);
       
       if (response && typeof response === 'object' && 'data' in response && 'meta' in response) {
         const calendarResponse = response as CalendarApiResponse;
         setApiReports(calendarResponse.data);
         setHasReportsDays(calendarResponse.meta.has_reports_days);
-        console.log('✅ Loaded', calendarResponse.data.length, 'reports');
-        console.log('📆 Report days:', calendarResponse.meta.has_reports_days);
       } else {
         console.warn('⚠️ Unexpected API response format');
       }
@@ -258,17 +252,11 @@ const CalendarReport: React.FC<ReportsCalendarProps> = () => {
   const getUpcomingReports = () => {
     // Agar biror kun tanlangan bo'lsa, o'sha kunning hisobotlarini ko'rsatish
     if (selectedDay && selectedDayReports.length > 0) {
-      console.log('📅 Showing reports for selected day:', selectedDay);
       return selectedDayReports;
     }
     
     // Default holatda - API'dan kelgan barcha hisobotlarni ko'rsatish (oy bo'yicha filter qilmasdan)
-    const currentMonth = currentDate.getMonth();
-    const currentYear = currentDate.getFullYear();
     
-    console.log('📅 Current month/year:', currentMonth + 1, currentYear);
-    console.log('📋 Total API reports:', apiReports.length);
-    console.log('✅ All API reports will be shown (no month filter)');
     
     // API'dan kelgan barcha hisobotlarni sanaga qarab tartiblab qaytarish
     return apiReports

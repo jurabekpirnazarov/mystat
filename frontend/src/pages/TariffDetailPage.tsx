@@ -105,7 +105,6 @@ const TariffDetailPage = () => {
     }
     navigate("/cabinet", { state: { name: "payments", contract: false } });
   };
-  console.log(isAuthenticated);
 
   const onNext = () => {
     if (!isAuthenticated) {

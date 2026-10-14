@@ -25,14 +25,12 @@ function setupGlobalErrorHandler() {
     localStorage.removeItem("user_data");
     localStorage.removeItem("user_profile");
     
-    console.log("Global error handler: LocalStorage cleared, redirecting to login...");
     window.location.href = "/login";
   };
 
   // Listen for unhandled promise rejections (axios errors)
   window.addEventListener('unhandledrejection', (event) => {
     if (event.reason?.response?.status === 401) {
-      console.log("Global error handler: 401 Unauthorized detected");
       clearLocalStorageAndRedirect();
       event.preventDefault(); // Prevent default error logging
     }
@@ -41,7 +39,6 @@ function setupGlobalErrorHandler() {
   // Listen for general errors
   window.addEventListener('error', (event) => {
     if (event.error?.response?.status === 401) {
-      console.log("Global error handler: 401 Unauthorized detected");
       clearLocalStorageAndRedirect();
     }
   });

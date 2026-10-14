@@ -7,6 +7,14 @@ import { countries_api, country_groups_api, years_api, regions_api, product_cate
 import { useServiceId } from '../utils/useServiceId';
 import RatingModal from '../components/modals/RatingModal';
 import { createRating } from '../api/rating';
+import type { ApiTradeData, HeaderItem, TradeDataItem } from '../components/ServiceResultsStep';
+
+/** trade-data/ POST so'rovi: filtr ro'yxatlari va bir nechta skalyar maydon */
+type TradeQueryPayload = { [key: string]: (string | number)[] | string | number | undefined } & {
+  countries?: (string | number)[];
+  regions?: (string | number)[];
+  country_groups?: (string | number)[];
+};
 
 interface OptionType {
   value: string | number;
@@ -80,14 +88,7 @@ const ExternalTrade = () => {
   const [sitc4, setSitc4] = useState<OptionType[]>([]);
 
   // API response data state
-  const [apiTradeData, setApiTradeData] = useState<{
-    data: any[];
-    total: number;
-    filters: any;
-    headers: any[];
-    units: string[];
-    missing: any[];
-  }>({
+  const [apiTradeData, setApiTradeData] = useState<ApiTradeData>({
     data: [],
     total: 0,
     filters: {},
@@ -303,7 +304,7 @@ const ExternalTrade = () => {
       setHasMoreCountries(!!response.next);
       setCountryOffset(offset + 10);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     } finally {
       setCountryLoading(false);
     }
@@ -334,7 +335,7 @@ const ExternalTrade = () => {
       setCountry(allCountries); // Select all countries including global
       setHasMoreCountries(false);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     } finally {
       setCountryLoading(false);
     }
@@ -379,7 +380,7 @@ const ExternalTrade = () => {
       setHasMoreCountryGroups(!!response.next);
       setCountryGroupOffset(offset + 10);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     } finally {
       setCountryGroupLoading(false);
     }
@@ -410,7 +411,7 @@ const ExternalTrade = () => {
       setCountryGroups(allCountryGroups); // Select all country groups
       setHasMoreCountryGroups(false);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     } finally {
       setCountryGroupLoading(false);
     }
@@ -448,7 +449,7 @@ const ExternalTrade = () => {
       setHasMoreYears(!!response.next);
       setYearOffset(offset + 10);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     } finally {
       setYearLoading(false);
     }
@@ -475,7 +476,7 @@ const ExternalTrade = () => {
       setSelectedYear(sortData); // Select all years
       setHasMoreYears(false);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     } finally {
       setYearLoading(false);
     }
@@ -513,7 +514,7 @@ const ExternalTrade = () => {
       setHasMoreRegions(!!response.next);
       setRegionsOffset(offset + 10);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     } finally {
       setRegionsLoading(false);
     }
@@ -540,7 +541,7 @@ const ExternalTrade = () => {
       setRegions(sortData); // Select all regions
       setHasMoreRegions(false);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     } finally {
       setRegionsLoading(false);
     }
@@ -606,7 +607,7 @@ const ExternalTrade = () => {
       setHs2Options(sortData);
       setHasMoreHs2(false); // No pagination needed
     } catch (err) {
-      console.log(err);
+      console.error(err);
     } finally {
       setHs2Loading(false);
     }
@@ -653,7 +654,7 @@ const ExternalTrade = () => {
       setHs4Options(sortData);
       setHasMoreHs4(false); // No pagination needed
     } catch (err) {
-      console.log(err);
+      console.error(err);
     } finally {
       setHs4Loading(false);
     }
@@ -700,7 +701,7 @@ const ExternalTrade = () => {
       setHs6Options(sortData);
       setHasMoreHs6(false); // No pagination needed
     } catch (err) {
-      console.log(err);
+      console.error(err);
     } finally {
       setHs6Loading(false);
     }
@@ -748,7 +749,7 @@ const ExternalTrade = () => {
       setSitc1Options(sortData);
       setHasMoreSitc1(false); // No pagination needed
     } catch (err) {
-      console.log(err);
+      console.error(err);
     } finally {
       setSitc1Loading(false);
     }
@@ -795,7 +796,7 @@ const ExternalTrade = () => {
       setSitc2Options(sortData);
       setHasMoreSitc2(false); // No pagination needed
     } catch (err) {
-      console.log(err);
+      console.error(err);
     } finally {
       setSitc2Loading(false);
     }
@@ -842,7 +843,7 @@ const ExternalTrade = () => {
       setSitc3Options(sortData);
       setHasMoreSitc3(false); // No pagination needed
     } catch (err) {
-      console.log(err);
+      console.error(err);
     } finally {
       setSitc3Loading(false);
     }
@@ -889,7 +890,7 @@ const ExternalTrade = () => {
       setSitc4Options(sortData);
       setHasMoreSitc4(false); // No pagination needed
     } catch (err) {
-      console.log(err);
+      console.error(err);
     } finally {
       setSitc4Loading(false);
     }
@@ -941,7 +942,7 @@ const ExternalTrade = () => {
     setIsLoading(true);
     try {
       // Build POST payload based on enabled fields
-      const payload: any = {};
+      const payload: TradeQueryPayload = {};
 
       // Set trade_type with default value of 1
       payload.trade_type = tradeFlows.length > 0 ? Number(tradeFlows[0].value) : 1;
@@ -1051,11 +1052,9 @@ const ExternalTrade = () => {
         payload.group_by = groupByOptions;
       }
 
-      console.log('POST Payload:', payload); // For debugging
 
       // Make POST API call
-      const response = await postRequest(post_get_data_api, payload) as any;
-      console.log('API Response:', response); // For debugging
+      const response = await postRequest<ApiTradeData>(post_get_data_api, payload);
 
       // Handle new API response format
       if (response.success && response.data) {
@@ -1069,8 +1068,6 @@ const ExternalTrade = () => {
           missing: response.missing
         });
         
-        console.log(`API returned ${response.total || 0} total records, ${response.data.length} data items`);
-        console.log('Headers:', response.headers);
       } else {
         // Fallback for other formats
         console.warn('Unexpected API response format:', response);
@@ -1106,14 +1103,14 @@ const ExternalTrade = () => {
     if (dataToDownload.length > 0) {
       // Use API headers if available, otherwise extract from first item
       if (apiTradeData.headers && apiTradeData.headers.length > 0) {
-        headers = apiTradeData.headers.map((header: any) => header.label).join(',');
+        headers = apiTradeData.headers.map((header: HeaderItem) => header.label).join(',');
       } else {
         const firstItem = dataToDownload[0];
         headers = Object.keys(firstItem).join(',');
       }
 
       // Create rows
-      const rows = dataToDownload.map((row: any) =>
+      const rows = dataToDownload.map((row: TradeDataItem) =>
         Object.values(row).map(value =>
           typeof value === 'number' ? value.toLocaleString('en-US', { minimumFractionDigits: 1 }) : value
         ).join(',')

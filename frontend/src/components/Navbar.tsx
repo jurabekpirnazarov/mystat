@@ -19,6 +19,7 @@ import { Search } from "lucide-react";
 import { getRequest } from "../api/request";
 import { profile } from "../api/apiUrls";
 import logo from "../img/stat.png";
+import { unwrap, type MaybeWrapped, type UserProfile } from "../types/api";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -35,7 +36,7 @@ const Navbar = () => {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
-  const [profileData, setProfileData] = useState<any>(null);
+  const [profileData, setProfileData] = useState<UserProfile | null>(null);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const location = useLocation();
   const { isAuthenticated, user, logout } = useAuth();
@@ -48,8 +49,8 @@ const Navbar = () => {
       const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
       
       getRequest(profile, undefined, headers)
-        .then((response: any) => {
-          setProfileData(response?.data || response);
+        .then((response) => {
+          setProfileData(unwrap(response as MaybeWrapped<UserProfile>));
         })
         .catch((error) => {
           console.error("Profile yuklashda xatolik:", error);

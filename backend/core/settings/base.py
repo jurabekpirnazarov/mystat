@@ -155,18 +155,6 @@ LANGUAGES = (
     ('uz-Cyrl', 'Uzbek (Cyrillic)'),
 )
 
-PARLER_LANGUAGES = {
-    None: (
-        {'code': 'uz'},
-        {'code': 'ru'},
-        {'code': 'uz-Cyrl'},
-    ),
-    'default': {
-        'fallbacks': ['uz'],
-        'hide_untranslated': False,
-    }
-}
-
 # Internationalization
 LANGUAGE_CODE = 'ru-Ru'
 TIME_ZONE = 'Asia/Tashkent'
@@ -192,19 +180,6 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 # Faqat DEBUG: lokal media/ da yo'q fayllar shu manzildan olinadi (masalan https://my.stat.uz/media)
 MEDIA_FALLBACK_URL = config('MEDIA_FALLBACK_URL', default='')
-
-CKEDITOR_UPLOAD_PATH = 'uploads/'
-CKEDITOR_CONFIGS = {
-    'default': {
-        'toolbar': 'Custom',
-        'toolbar_Custom': [
-            ['Bold', 'Italic', 'Underline'],
-            ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
-            ['Link', 'Unlink'],
-            ['RemoveFormat', 'Source']
-        ]
-    }
-}
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

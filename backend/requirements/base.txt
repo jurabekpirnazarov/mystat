@@ -23,8 +23,6 @@ django-filter==24.2
 django-import-export==4.3.9
 django-jazzmin==3.0.1
 django-js-asset==3.1.2
-django-parler==2.3
-django-parler-rest==2.2
 django-query-counter==0.4.1
 django-redis==5.4.0
 django-solo==2.4.0
@@ -79,7 +77,6 @@ uritemplate==4.2.0
 urllib3==2.5.0
 vine==5.1.0
 wcwidth==0.2.13
-django-import-export==4.3.9
-tqdm==2.2.3
+tqdm==4.66.5
 docxtpl~=0.19.1
 num2word-uz==0.1.1

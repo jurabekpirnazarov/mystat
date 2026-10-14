@@ -22,9 +22,6 @@ const HomePage = () => {
           <HomeHighlights />
           <Interactive />
           <TariffComponent />
-          {/* <ServiceGrid /> */}
-          {/* <UserChart /> */}
-          {/* <UsageCapabilities /> */}
           <CalendarReport/>
         </div>
         <FloatingSupport />

@@ -1,78 +1,41 @@
-import React, { useState } from 'react';
-import { MessageSquare, Phone, X } from 'lucide-react';
-import StatAIChat from './chats/StatAIChat';
-import OperatorChat from './chats/OperatorChat';
+import { useState } from "react";
+import { LifeBuoy, MessageSquare, Phone, X } from "lucide-react";
+import StatAIChat from "./chats/StatAIChat";
+import OperatorChat from "./chats/OperatorChat";
 
-const FloatingSupport: React.FC = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
-  const [isOperatorOpen, setIsOperatorOpen] = useState(false);
+type Panel = "menu" | "ai" | "operator" | null;
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-    if (isMenuOpen) {
-      setIsChatbotOpen(false);
-      setIsOperatorOpen(false);
-    }
-  };
+const FloatingSupport = () => {
+  const [panel, setPanel] = useState<Panel>(null);
 
-  const openChatbot = () => {
-    setIsChatbotOpen(true);
-    setIsOperatorOpen(false);
-    setIsMenuOpen(false);
-  };
-
-  const openOperator = () => {
-    setIsOperatorOpen(true);
-    setIsChatbotOpen(false);
-    setIsMenuOpen(false);
-  };
-
-  const closeChatbot = () => {
-    setIsChatbotOpen(false);
-
-    
-    setIsMenuOpen(true);
-  };
-
-  const closeOperator = () => {
-    setIsOperatorOpen(false);
-    setIsMenuOpen(true);
-  };
+  const fab = "p-4 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300";
 
   return (
     <>
-      {/* Floating Menu */}
-      <div className="fixed bottom-6 right-6 flex items-center gap-3">
-        {isMenuOpen && (
-          <div className="flex items-center gap-3 animate-fadeIn">
-            <button
-              onClick={openChatbot}
-              className="p-4 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors"
-            >
+      <div className="fixed bottom-6 right-6 z-40 flex items-center gap-3">
+        {panel === "menu" && (
+          <div className="flex items-center gap-3">
+            <button type="button" onClick={() => setPanel("ai")} className={fab} aria-label="Stat AI yordamchisi" title="Stat AI">
               <MessageSquare className="w-6 h-6" />
             </button>
-            <button
-              onClick={openOperator}
-              className="p-4 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors"
-            >
+            <button type="button" onClick={() => setPanel("operator")} className={fab} aria-label="Operator bilan chat" title="Operator">
               <Phone className="w-6 h-6" />
             </button>
           </div>
         )}
         <button
-          onClick={toggleMenu}
-          className={`p-4 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-transform duration-300 ${
-            isMenuOpen ? 'rotate-45' : ''
-          }`}
+          type="button"
+          onClick={() => setPanel((p) => (p ? null : "menu"))}
+          className={fab}
+          aria-label={panel ? "Yordamni yopish" : "Yordam"}
+          aria-expanded={!!panel}
         >
-          <X className="w-6 h-6" />
+          {panel ? <X className="w-6 h-6" /> : <LifeBuoy className="w-6 h-6" />}
         </button>
       </div>
 
-      {/* Chat Windows */}
-      {isChatbotOpen && <StatAIChat onClose={closeChatbot} />}
-      {isOperatorOpen && <OperatorChat onClose={closeOperator} />}
+      {panel === "ai" && <StatAIChat onClose={() => setPanel("menu")} onOperator={() => setPanel("operator")} />}
+      {panel === "operator" && <OperatorChat onClose={() => setPanel("menu")} />}
     </>
   );
 };

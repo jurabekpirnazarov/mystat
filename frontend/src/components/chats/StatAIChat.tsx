@@ -1,108 +1,100 @@
-import React, { useState } from 'react';
-import { MessageSquare, X, Send } from 'lucide-react';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { MessageSquare, Phone } from "lucide-react";
+import { askAssistant, type AssistantReply } from "../../api/support";
+import ChatFrame, { Bubble } from "./ChatFrame";
+import { nowTime } from "../../utils/format";
 
-interface ChatMessage {
-  text: string;
-  isUser: boolean;
-  timestamp: string;
+interface Turn {
+  mine: boolean;
+  time: string;
+  text?: string;
+  reply?: AssistantReply;
 }
 
-interface StatAIChatProps {
+const SUGGESTIONS = ["Tarif qanday tanlanadi?", "Shartnoma qanday tuziladi?", "Xizmat narxlari qanday belgilanadi?"];
+
+interface Props {
   onClose: () => void;
+  onOperator: () => void;
 }
 
-const StatAIChat: React.FC<StatAIChatProps> = ({ onClose }) => {
-  const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+/** "Stat AI": FAQ va xizmatlar katalogi bo'yicha javob beradi (tashqi LLM yo'q). Tarix faqat shu sessiyada. U-11. */
+export default function StatAIChat({ onClose, onOperator }: Props) {
+  const [message, setMessage] = useState("");
+  const [turns, setTurns] = useState<Turn[]>([]);
+  const [busy, setBusy] = useState(false);
 
-  const handleSendMessage = () => {
-    if (!message.trim()) return;
-
-    const newMessage: ChatMessage = {
-      text: message,
-      isUser: true,
-      timestamp: new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })
-    };
-
-    setMessages(prev => [...prev, newMessage]);
-    setMessage('');
+  const send = async (text: string) => {
+    const question = text.trim();
+    if (!question) return;
+    setMessage("");
+    setTurns((t) => [...t, { mine: true, text: question, time: nowTime() }]);
+    setBusy(true);
+    try {
+      const reply = await askAssistant(question);
+      setTurns((t) => [...t, { mine: false, reply, time: nowTime() }]);
+    } catch {
+      setTurns((t) => [...t, { mine: false, text: "Kechirasiz, hozir javob bera olmayman. Keyinroq urinib ko'ring.", time: nowTime() }]);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
-    <div className="fixed bottom-24 right-6 w-96 bg-white rounded-2xl shadow-2xl overflow-hidden">
-      {/* Header */}
-      <div className="bg-blue-600 p-4 text-white flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <MessageSquare className="w-6 h-6" />
-          <h3 className="font-medium">
-            Stat AI
-            <span className="ml-2 text-xs bg-blue-500 px-2 py-0.5 rounded-full">BETA</span>
-          </h3>
+    <ChatFrame
+      title="Stat AI"
+      badge="BETA"
+      icon={MessageSquare}
+      onClose={onClose}
+      value={message}
+      onChange={setMessage}
+      onSend={() => send(message)}
+      placeholder="Savolingizni yozing…"
+      disabled={busy}
+      scrollKey={turns.length}
+      footer={<p className="px-4 pb-1 text-[11px] text-gray-500 dark:text-gray-400">Yordamchi ko'p so'raladigan savollar asosida javob beradi.</p>}
+    >
+      <Bubble mine={false}>
+        <p>Salom 👋 Sizga qanday yordam bera olaman?</p>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {SUGGESTIONS.map((s) => (
+            <button key={s} type="button" onClick={() => send(s)} className="text-xs px-2 py-1 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 hover:border-blue-400">
+              {s}
+            </button>
+          ))}
         </div>
-        <button 
-          onClick={onClose}
-          className="p-1 hover:bg-blue-500 rounded-full transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      </div>
+      </Bubble>
 
-      {/* Chat Messages */}
-      <div className="h-96 overflow-y-auto p-4 space-y-4">
-        <div className="flex justify-start">
-          <div className="max-w-[80%] rounded-2xl px-4 py-2 bg-gray-100 text-gray-800 rounded-bl-none">
-            <p>Salom 👋 Sizga qanday yordam bera olaman?</p>
-            <span className="text-xs opacity-70 mt-1 block">
-              {new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
-            </span>
-          </div>
-        </div>
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}
-          >
-            <div
-              className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                msg.isUser
-                  ? 'bg-blue-600 text-white rounded-br-none'
-                  : 'bg-gray-100 text-gray-800 rounded-bl-none'
-              }`}
-            >
-              <p>{msg.text}</p>
-              <span className="text-xs opacity-70 mt-1 block">
-                {msg.timestamp}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Input Area */}
-      <div className="p-4 border-t">
-        <div className="flex items-center gap-2">
-          <input
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Savolingizni yozing..."
-            className="flex-1 px-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:border-blue-500"
-            onKeyPress={(e) => {
-              if (e.key === 'Enter') {
-                handleSendMessage();
-              }
-            }}
-          />
-          <button
-            onClick={handleSendMessage}
-            className="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
-          >
-            <Send className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-    </div>
+      {turns.map((t, i) =>
+        t.mine || t.text ? (
+          <Bubble key={i} mine={t.mine} time={t.time}><p>{t.text}</p></Bubble>
+        ) : t.reply && t.reply.found ? (
+          <Bubble key={i} mine={false} time={t.time}>
+            {t.reply.answers.map((a, j) => (
+              <div key={a.id} className={j ? "mt-3 pt-3 border-t border-gray-200 dark:border-gray-600" : ""}>
+                <p className="font-medium">{a.question}</p>
+                <p className="mt-1 whitespace-pre-line">{a.answer.length > 400 ? `${a.answer.slice(0, 400)}…` : a.answer}</p>
+              </div>
+            ))}
+            {t.reply.links.length > 0 && (
+              <div className="mt-2 flex flex-col gap-1">
+                {t.reply.links.map((l) => (
+                  <Link key={l.url} to={l.url} onClick={onClose} className="text-blue-600 dark:text-blue-300 underline">{l.title}</Link>
+                ))}
+              </div>
+            )}
+          </Bubble>
+        ) : (
+          <Bubble key={i} mine={false} time={t.time}>
+            <p>Bu savol bo'yicha tayyor javob topmadim.</p>
+            <button type="button" onClick={onOperator} className="mt-2 inline-flex items-center gap-1 text-blue-600 dark:text-blue-300 underline">
+              <Phone className="w-3.5 h-3.5" /> Operator bilan bog'lanish
+            </button>
+          </Bubble>
+        )
+      )}
+      {busy && <Bubble mine={false}><p className="animate-pulse">…</p></Bubble>}
+    </ChatFrame>
   );
-};
-
-export default StatAIChat;
+}

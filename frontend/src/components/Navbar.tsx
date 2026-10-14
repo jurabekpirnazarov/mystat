@@ -14,12 +14,27 @@ import {
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import NotificationBell from "./notifications/NotificationBell";
+import CommandPalette from "./search/CommandPalette";
+import { Search } from "lucide-react";
 import { getRequest } from "../api/request";
 import { profile } from "../api/apiUrls";
 import logo from "../img/stat.png";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  // Ctrl+K / Cmd+K — global qidiruv
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearchOpen((v) => !v);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   const [profileData, setProfileData] = useState<any>(null);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const location = useLocation();
@@ -124,6 +139,17 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center space-x-3">
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              aria-label="Qidiruv (Ctrl+K)"
+              className="flex items-center gap-2 p-2 lg:px-3 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 lg:border lg:border-gray-200 dark:lg:border-gray-600"
+            >
+              <Search className="w-5 h-5 lg:w-4 lg:h-4" />
+              <span className="hidden lg:inline text-sm text-gray-500">Qidirish</span>
+              <kbd className="hidden lg:inline text-[10px] font-sans px-1.5 py-0.5 rounded border border-gray-300 dark:border-gray-600 text-gray-500">Ctrl K</kbd>
+            </button>
+            <CommandPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
             {isAuthenticated && <NotificationBell />}
 
             {isAuthenticated ? (

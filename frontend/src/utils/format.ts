@@ -41,3 +41,5 @@ export function stripHtml(html: string | null | undefined): string {
   div.innerHTML = html;
   return (div.textContent || "").trim();
 }
+
+export const nowTime = () => new Date().toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" });

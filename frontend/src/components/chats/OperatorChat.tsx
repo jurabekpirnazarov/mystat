@@ -1,100 +1,117 @@
-import React, { useState } from 'react';
-import { Phone, X, Send } from 'lucide-react';
+import { useCallback, useEffect, useState } from "react";
+import { Phone } from "lucide-react";
+import { useAuth } from "../../contexts/AuthContext";
+import { fetchSupportThread, postSupportMessage, startSupportThread, type SupportThread } from "../../api/support";
+import ChatFrame, { Bubble } from "./ChatFrame";
 
-interface ChatMessage {
-  text: string;
-  isUser: boolean;
-  timestamp: string;
+const STORAGE_KEY = "support_thread";
+const POLL_MS = 15_000;
+
+function loadSaved(): { id: number; token?: string } | null {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+  } catch {
+    return null;
+  }
 }
 
-interface OperatorChatProps {
-  onClose: () => void;
-}
+const time = (iso: string) => new Date(iso).toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" });
 
-const OperatorChat: React.FC<OperatorChatProps> = ({ onClose }) => {
-  const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+/** Operator bilan chat: xabar murojaat sifatida bazaga yoziladi, javob 15 soniyada bir tekshiriladi. U-12. */
+export default function OperatorChat({ onClose }: { onClose: () => void }) {
+  const { isAuthenticated } = useAuth();
+  const [saved, setSaved] = useState(loadSaved);
+  const [thread, setThread] = useState<SupportThread | null>(null);
+  const [message, setMessage] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSendMessage = () => {
-    if (!message.trim()) return;
+  const refresh = useCallback(async () => {
+    if (!saved) return;
+    try {
+      setThread(await fetchSupportThread(saved.id, saved.token));
+    } catch {
+      // eskirgan murojaat — yangisini boshlash mumkin
+      localStorage.removeItem(STORAGE_KEY);
+      setSaved(null);
+      setThread(null);
+    }
+  }, [saved]);
 
-    const newMessage: ChatMessage = {
-      text: message,
-      isUser: true,
-      timestamp: new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })
-    };
+  useEffect(() => {
+    refresh();
+    if (!saved) return;
+    const t = window.setInterval(refresh, POLL_MS);
+    return () => window.clearInterval(t);
+  }, [refresh, saved]);
 
-    setMessages(prev => [...prev, newMessage]);
-    setMessage('');
+  const needContact = !isAuthenticated && !saved;
+
+  const send = async () => {
+    const text = message.trim();
+    if (!text) return;
+    if (needContact && (!name.trim() || phone.replace(/\D/g, "").length < 9)) {
+      setError("Ism va telefon raqamingizni kiriting.");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      if (saved) {
+        setThread(await postSupportMessage(saved.id, text, saved.token));
+      } else {
+        const started = await startSupportThread({ text, name: name.trim() || undefined, phone_number: phone.replace(/\D/g, "").slice(0, 13) || undefined });
+        const ref = { id: started.id, token: started.token };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(ref));
+        setSaved(ref);
+        setThread(started);
+      }
+      setMessage("");
+    } catch {
+      setError("Xabarni yuborib bo'lmadi. Qayta urinib ko'ring.");
+    } finally {
+      setBusy(false);
+    }
   };
 
+  const inputCls = "w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white";
+
   return (
-    <div className="fixed bottom-24 right-6 w-96 bg-white rounded-2xl shadow-2xl overflow-hidden">
-      {/* Header */}
-      <div className="bg-blue-600 p-4 text-white flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Phone className="w-6 h-6" />
-          <h3 className="font-medium">
-            Operator
-            <span className="ml-2 text-xs bg-blue-500 px-2 py-0.5 rounded-full">BETA</span>
-          </h3>
-        </div>
-        <button 
-          onClick={onClose}
-          className="p-1 hover:bg-blue-500 rounded-full transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      </div>
-
-      {/* Chat Messages */}
-      <div className="h-96 overflow-y-auto p-4 space-y-4">
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}
-          >
-            <div
-              className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                msg.isUser
-                  ? 'bg-blue-600 text-white rounded-br-none'
-                  : 'bg-gray-100 text-gray-800 rounded-bl-none'
-              }`}
-            >
-              <p>{msg.text}</p>
-              <span className="text-xs opacity-70 mt-1 block">
-                {msg.timestamp}
-              </span>
+    <ChatFrame
+      title="Operator"
+      icon={Phone}
+      onClose={onClose}
+      value={message}
+      onChange={setMessage}
+      onSend={send}
+      placeholder="Xabar yozing…"
+      disabled={busy}
+      scrollKey={thread?.messages.length}
+      footer={
+        <>
+          {needContact && (
+            <div className="px-3 pt-2 grid grid-cols-2 gap-2">
+              <input aria-label="Ismingiz" placeholder="Ismingiz" value={name} onChange={(e) => setName(e.target.value)} className={inputCls} />
+              <input aria-label="Telefon" placeholder="+998 …" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputCls} />
             </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Input Area */}
-      <div className="p-4 border-t">
-        <div className="flex items-center gap-2">
-          <input
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Xabar yozing..."
-            className="flex-1 px-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:border-blue-500"
-            onKeyPress={(e) => {
-              if (e.key === 'Enter') {
-                handleSendMessage();
-              }
-            }}
-          />
-          <button
-            onClick={handleSendMessage}
-            className="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
-          >
-            <Send className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-    </div>
+          )}
+          {error && <p role="alert" className="px-4 pt-1 text-xs text-red-600">{error}</p>}
+        </>
+      }
+    >
+      <Bubble mine={false}>
+        <p>Assalomu alaykum! Savolingizni yozing — operatorlarimiz ish vaqtida javob beradi.</p>
+      </Bubble>
+      {thread?.messages.map((m, i) => (
+        <Bubble key={i} mine={!m.from_operator} time={time(m.created_at)}>
+          <p className="whitespace-pre-line">{m.text}</p>
+        </Bubble>
+      ))}
+      {thread && thread.messages.every((m) => !m.from_operator) && (
+        <p className="text-center text-xs text-gray-500 dark:text-gray-400">Xabaringiz qabul qilindi. Javob shu oynada paydo bo'ladi.</p>
+      )}
+    </ChatFrame>
   );
-};
-
-export default OperatorChat;
+}

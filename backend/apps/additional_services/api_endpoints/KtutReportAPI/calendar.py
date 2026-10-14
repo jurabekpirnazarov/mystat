@@ -88,6 +88,13 @@ class ReportReminderAPIView(APIView):
         if report is None:
             return Response({"detail": "Hisobot topilmadi"}, status=status.HTTP_404_NOT_FOUND)
         reminder, _ = ReportReminder.objects.get_or_create(user=request.user, report=report)
+        days_before = request.data.get("days_before") if hasattr(request, "data") else None
+        if days_before is not None:  # K-05: muddatdan necha kun oldin eslatish (1..30)
+            try:
+                reminder.days_before = max(1, min(30, int(days_before)))
+            except (TypeError, ValueError):
+                return Response({"detail": "days_before 1..30 oralig'ida bo'lishi kerak"}, status=status.HTTP_400_BAD_REQUEST)
+            reminder.save(update_fields=["days_before"])
         nxt = next_occurrence(report, date.today())
         return Response({"report_id": report.id, "reminded": True, "next_deadline": nxt.isoformat() if nxt else None,
                          "days_before": reminder.days_before}, status=status.HTTP_201_CREATED)

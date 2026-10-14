@@ -12,6 +12,7 @@ import ContractsTab from "./cabinet/ContractsTab";
 import OrdersTab from "./cabinet/OrdersTab";
 import SupportTab from "./cabinet/SupportTab";
 import Benchmark from "./cabinet/Benchmark";
+import MyReports from "./cabinet/MyReports";
 import {
   User,
   FileText,
@@ -23,6 +24,7 @@ import {
   MessageSquarePlus,
   CalendarRange,
   BarChart3,
+  CalendarClock,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -80,6 +82,7 @@ const PersonalCabinet = () => {
     { id: "orders", label: "Buyurtmalarim", icon: FileText },
     { id: "requests", label: "Xizmat so'rovlari", icon: MessageSquarePlus },
     { id: "plan", label: "Faoliyat rejasi", icon: CalendarRange },
+    { id: "reports", label: "Hisobotlarim", icon: CalendarClock, legalOnly: true },
     { id: "benchmark", label: "Tarmoq benchmarki", icon: BarChart3, legalOnly: true },
     { id: "payments", label: "To'lovlar", icon: CreditCard },
     { id: "notifications", label: "Xabarnomalar", icon: Bell },
@@ -277,6 +280,8 @@ const PersonalCabinet = () => {
               {activeTab === "plan" && <ActivityPlan />}
 
               {activeTab === "benchmark" && <Benchmark />}
+
+              {activeTab === "reports" && <MyReports />}
 
               {activeTab === "support" && <SupportTab />}
             </div>

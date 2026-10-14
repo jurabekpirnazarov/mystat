@@ -5,6 +5,7 @@ import { fetchCabinetSummary, type CabinetSummary } from "../../api/cabinet";
 import useApi from "../../hooks/useApi";
 import { EmptyState, ErrorState, Skeleton, StatCard } from "../../components/ui";
 import { formatDateTime, monthLabel, timeAgo } from "../../utils/format";
+import { fetchMyReports } from "../../api/myReports";
 
 interface Props {
   onNavigate: (tab: string) => void;
@@ -75,6 +76,29 @@ function PackageCard({ summary }: { summary: CabinetSummary }) {
   );
 }
 
+/** K-05: bosh paneldagi "Yaqin muddatlar" (STIR KTUT'da bo'lmasa ko'rinmaydi). */
+function UpcomingReports({ onNavigate }: Props) {
+  const { data } = useApi(() => fetchMyReports(), []);
+  const next = (data?.items ?? []).filter((i) => i.days_left !== null).slice(0, 3);
+  if (next.length === 0) return null;
+  return (
+    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Yaqin hisobot muddatlari</h3>
+      <ul className="space-y-1.5">
+        {next.map((i) => (
+          <li key={i.report_id} className="flex justify-between gap-2 text-sm">
+            <span className="truncate text-gray-700 dark:text-gray-200">{i.type_uz}</span>
+            <span className={`shrink-0 tabular-nums ${i.days_left !== null && i.days_left <= 3 ? "text-red-600" : "text-gray-500"}`}>
+              {formatDateTime(i.next_deadline, false)} · {i.days_left} kun
+            </span>
+          </li>
+        ))}
+      </ul>
+      <button type="button" onClick={() => onNavigate("reports")} className="mt-2 text-sm text-blue-600 hover:underline">Barcha hisobotlarim →</button>
+    </div>
+  );
+}
+
 export default function Overview({ onNavigate }: Props) {
   const { data, loading, error, reload } = useApi(fetchCabinetSummary, []);
 
@@ -129,6 +153,7 @@ export default function Overview({ onNavigate }: Props) {
               <span className="text-sm font-medium text-gray-800 dark:text-gray-100">Tariflar</span>
             </Link>
           </div>
+          <UpcomingReports onNavigate={onNavigate} />
         </section>
       </div>
 

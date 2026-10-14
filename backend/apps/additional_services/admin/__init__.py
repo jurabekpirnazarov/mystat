@@ -9,3 +9,4 @@ from .staticclassification_admin import *
 from .ktut_admin import *
 from .industrial_products_admin import *
 from .demographic_admin import *
+from .guides_admin import *

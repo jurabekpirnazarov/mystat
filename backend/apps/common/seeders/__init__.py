@@ -68,6 +68,7 @@ def registry():
     from .demo_users import DemoUsersSeeder
     from .misc import MiscSeeder
     from .notifications import NotificationsSeeder
+    from .report_guides import ReportGuidesSeeder
     from .service_requests import ServiceRequestsSeeder
 
     seeders = [
@@ -79,5 +80,6 @@ def registry():
         MiscSeeder,
         EnterpriseIndicatorsSeeder,
         RegionIndicatorsSeeder,
+        ReportGuidesSeeder,
     ]
     return {s.name: s for s in seeders}

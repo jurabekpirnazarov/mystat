@@ -153,8 +153,11 @@ function App() {
         <NotificationsProvider>
         <Router>
           <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
+            <a href="#main-content" className="skip-link">Asosiy kontentga o'tish</a>
             <Navbar />
-            <AppRoutes />
+            <div id="main-content" tabIndex={-1}>
+              <AppRoutes />
+            </div>
             <Footer />
           </div>
         </Router>

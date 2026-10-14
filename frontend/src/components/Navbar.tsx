@@ -104,7 +104,7 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <div className="w-10 h-10  rounded-full flex items-center justify-center">
-                <img src={logo} />
+                <img src={logo} alt="my.stat.uz" />
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-xs text-gray-600 dark:text-gray-300 ">
@@ -217,6 +217,8 @@ const Navbar = () => {
 
             <button
               onClick={() => setIsOpen(!isOpen)}
+              aria-label={isOpen ? "Menyuni yopish" : "Menyuni ochish"}
+              aria-expanded={isOpen}
               className="md:hidden p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               {isOpen ? (

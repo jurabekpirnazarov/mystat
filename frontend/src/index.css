@@ -2,6 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Kirish qulayligi (U-14): klaviatura fokusini aniq ko'rsatish, harakatni kamaytirish */
+:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -3rem;
+  z-index: 100;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  background: #2563eb;
+  color: #fff;
+}
+.skip-link:focus {
+  top: 1rem;
+}
+
 /* Hide react-dropdown-select default icons and borders */
 .react-dropdown-select-dropdown-handle {
   display: none !important;

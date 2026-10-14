@@ -9,6 +9,9 @@ from apps.services.api.MyServiceView.views import (
 from apps.services.api.views import RegisterOrganizationDetailAPIView, ClassifyItemListAPIView
 from apps.services.api.ActivityPlanView.views import ActivityPlanListAPIView
 from apps.services.api.TariffView.views import TariffCompareView, TariffRecommendView
+from apps.services.api.CustomRequestView import (
+    CustomRequestDetailView, CustomRequestListView, CustomRequestOptionsView, CustomRequestQuoteView,
+)
 
 app_name = "services"
 
@@ -21,6 +24,10 @@ urlpatterns = [
     path('package/', ServicePackageAPIView.as_view(), name='service-package'),
     path('tariff-compare/', TariffCompareView.as_view(), name='tariff-compare'),
     path('tariff-recommend/', TariffRecommendView.as_view(), name='tariff-recommend'),
+    path('custom-requests/', CustomRequestListView.as_view(), name='custom-requests'),
+    path('custom-requests/options/', CustomRequestOptionsView.as_view(), name='custom-requests-options'),
+    path('custom-requests/quote/', CustomRequestQuoteView.as_view(), name='custom-requests-quote'),
+    path('custom-requests/<int:pk>/', CustomRequestDetailView.as_view(), name='custom-request-detail'),
     path('register-organization-detail/<int:stir_number>/', RegisterOrganizationDetailAPIView.as_view(), name='register-organization'),
     path('classify-item/', ClassifyItemListAPIView.as_view(), name='classify-item'),
     path("rating-create", ServiceRatingCreateView.as_view(), name='service-rating-create'),

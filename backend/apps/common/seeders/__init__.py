@@ -65,6 +65,7 @@ def registry():
     from .activity_plans import ActivityPlansSeeder
     from .analytics import EnterpriseIndicatorsSeeder, RegionIndicatorsSeeder
     from .classifications import ClassificationsSeeder
+    from .custom_requests import CustomRequestsSeeder
     from .demo_users import DemoUsersSeeder
     from .misc import MiscSeeder
     from .notifications import NotificationsSeeder
@@ -81,5 +82,6 @@ def registry():
         EnterpriseIndicatorsSeeder,
         RegionIndicatorsSeeder,
         ReportGuidesSeeder,
+        CustomRequestsSeeder,
     ]
     return {s.name: s for s in seeders}

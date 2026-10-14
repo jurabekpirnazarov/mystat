@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from apps.accounts.models import User
@@ -301,3 +302,69 @@ class ServiceRequestResponse(BaseModel):
 
 
 
+
+
+class CustomRequestTariff(models.Model):
+    """S-13/K-06: individual statistik ma'lumot buyurtmasi narxi (BHM'da)."""
+    DATA_TYPES = (
+        ("trade", _("Tashqi savdo")),
+        ("enterprise", _("Korxonalar")),
+        ("industry", _("Sanoat")),
+        ("demography", _("Demografiya")),
+        ("prices", _("Narxlar")),
+        ("other", _("Boshqa")),
+    )
+    data_type = models.CharField(max_length=16, choices=DATA_TYPES, unique=True, verbose_name=_("Ma'lumot turi"))
+    base_bhm = models.DecimalField(max_digits=8, decimal_places=2, verbose_name=_("Asosiy narx (BHM)"))
+    per_indicator_bhm = models.DecimalField(max_digits=8, decimal_places=2, default=0, verbose_name=_("Har ko'rsatkich"))
+    per_year_bhm = models.DecimalField(max_digits=8, decimal_places=2, default=0, verbose_name=_("Har yil"))
+    per_region_bhm = models.DecimalField(max_digits=8, decimal_places=2, default=0, verbose_name=_("Har hudud"))
+    urgency_multiplier = models.DecimalField(max_digits=4, decimal_places=2, default=Decimal("1.5"), verbose_name=_("Shoshilinch koeffitsienti"))
+
+    class Meta:
+        verbose_name = _("Individual buyurtma tarifi")
+        verbose_name_plural = _("Individual buyurtma tariflari")
+
+    def __str__(self):
+        return self.get_data_type_display()
+
+
+class CustomDataRequest(models.Model):
+    """K-06: katalogda yo'q individual ma'lumot buyurtmasi. Onlayn to'lov yo'q — narx tasdiqlangach mavjud oqim."""
+    STATUSES = (
+        ("created", _("Yuborildi")),
+        ("priced", _("Narx tasdiqlandi")),
+        ("in_progress", _("Bajarilmoqda")),
+        ("completed", _("Tayyor")),
+        ("cancelled", _("Bekor qilindi")),
+    )
+    FORMATS = (("xlsx", "XLSX"), ("pdf", "PDF"))
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="custom_data_requests")
+    data_type = models.CharField(max_length=16, choices=CustomRequestTariff.DATA_TYPES, verbose_name=_("Ma'lumot turi"))
+    indicators = models.JSONField(default=list, verbose_name=_("Ko'rsatkichlar"))
+    year_from = models.PositiveSmallIntegerField(verbose_name=_("Yildan"))
+    year_to = models.PositiveSmallIntegerField(verbose_name=_("Yilgacha"))
+    regions = models.JSONField(default=list, blank=True, verbose_name=_("Hududlar (bo'sh — respublika)"))
+    output_format = models.CharField(max_length=4, choices=FORMATS, default="xlsx", verbose_name=_("Format"))
+    urgent = models.BooleanField(default=False, verbose_name=_("Shoshilinch"))
+    comment = models.TextField(blank=True, verbose_name=_("Izoh"))
+    price_bhm = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_("Hisoblangan narx (BHM)"))
+    price_sum = models.DecimalField(max_digits=14, decimal_places=2, verbose_name=_("Hisoblangan narx (so'm)"))
+    approved_price_sum = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True,
+                                             verbose_name=_("Tasdiqlangan narx (so'm)"))
+    status = models.CharField(max_length=12, choices=STATUSES, default="created", db_index=True)
+    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,
+                                    related_name="assigned_custom_requests", verbose_name=_("Mas'ul xodim"))
+    staff_comment = models.TextField(blank=True, verbose_name=_("Xodim izohi"))
+    result_file = models.FileField(upload_to="custom_requests/", null=True, blank=True, verbose_name=_("Natija fayli"))
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+        verbose_name = _("Individual ma'lumot buyurtmasi")
+        verbose_name_plural = _("Individual ma'lumot buyurtmalari")
+
+    def __str__(self):
+        return f"#{self.pk} {self.get_data_type_display()} — {self.user}"

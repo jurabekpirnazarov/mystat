@@ -124,3 +124,19 @@ class UserServicePackageItemUseAdmin(admin.ModelAdmin):
 @admin.register(ServiceRequestResponse)
 class ServiceRequestResponseAdmin(admin.ModelAdmin):
     list_display = ('contract', 'package_item', 'client_input_text', 'created_at')
+
+from .models import CustomDataRequest, CustomRequestTariff  # noqa: E402  (K-06)
+
+
+@admin.register(CustomRequestTariff)
+class CustomRequestTariffAdmin(admin.ModelAdmin):
+    list_display = ("data_type", "base_bhm", "per_indicator_bhm", "per_year_bhm", "per_region_bhm", "urgency_multiplier")
+
+
+@admin.register(CustomDataRequest)
+class CustomDataRequestAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "data_type", "year_from", "year_to", "price_sum", "approved_price_sum", "status",
+                    "assigned_to", "created_at")
+    list_filter = ("status", "data_type", "urgent")
+    raw_id_fields = ("user", "assigned_to")
+    search_fields = ("user__username", "comment")

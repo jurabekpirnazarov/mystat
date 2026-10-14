@@ -40,6 +40,8 @@ ALLOWED_CASCADE = {
     "common.AdminTOTPDevice",
     "common.ContactReply",
     "contracts.ContractStatusLog",
+    "services.CustomDataRequest",
+    "additional_services.SavedQuery",
 }
 
 

@@ -80,13 +80,9 @@ const Navbar = () => {
     // { path: "/", label: "Asosiy", icon: Home },
     { path: "/about", label: "Portal haqida", icon: Info },
     { path: "/statistics", label: "Statistika", icon: BarChart3 },
-    {
-      path: "/questions",
-      label: "Savol va javoblar",
-      icon: HelpCircle,
-    },
+    { path: "/questions", label: "Savol-javob", icon: HelpCircle },
     { path: "/services", label: "Barcha xizmatlar", icon: Grid3X3 },
-    { path: "/reglaments", label: "Xizmatlar reglamenti", icon: FileText },
+    { path: "/reglaments", label: "Reglamentlar", icon: FileText },
     { path: "/contact", label: "Aloqa", icon: Phone },
   ];
 
@@ -107,7 +103,7 @@ const Navbar = () => {
               <div className="w-10 h-10  rounded-full flex items-center justify-center">
                 <img src={logo} alt="my.stat.uz" />
               </div>
-              <div className="hidden sm:block">
+              <div className="hidden sm:block lg:hidden 2xl:block">
                 <h1 className="text-xs text-gray-600 dark:text-gray-300 ">
                   MILLIY STATISTIKA QO‘MITASI
                 </h1>
@@ -119,36 +115,35 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden lg:flex items-center gap-1 xl:gap-2">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                  className={`flex items-center gap-1.5 whitespace-nowrap leading-none px-2.5 xl:px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                     isActive(item.path)
                       ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20"
                       : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700"
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="hidden 2xl:block w-4 h-4 shrink-0" />
                   <span>{item.label}</span>
                 </Link>
               );
             })}
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-2 xl:gap-3 shrink-0">
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
               aria-label="Qidiruv (Ctrl+K)"
-              className="flex items-center gap-2 p-2 lg:px-3 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 lg:border lg:border-gray-200 dark:lg:border-gray-600"
+              title="Qidiruv (Ctrl+K)"
+              className="flex items-center p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
-              <Search className="w-5 h-5 lg:w-4 lg:h-4" />
-              <span className="hidden lg:inline text-sm text-gray-500">Qidirish</span>
-              <kbd className="hidden lg:inline text-[10px] font-sans px-1.5 py-0.5 rounded border border-gray-300 dark:border-gray-600 text-gray-500">Ctrl K</kbd>
+              <Search className="w-5 h-5" />
             </button>
             <CommandPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
             {isAuthenticated && <NotificationBell />}
@@ -157,10 +152,10 @@ const Navbar = () => {
               <div className="flex items-center space-x-3 relative">
                 <button
                   onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200"
+                  className="flex items-center gap-2 whitespace-nowrap px-3 xl:px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200"
                 >
                   <User className="w-4 h-4" />
-                  <span className="hidden sm:inline">
+                  <span className="hidden sm:inline lg:hidden xl:inline max-w-[11rem] truncate">
                     {profileData ? 
                       `${profileData.first_name || ""} ${profileData.last_name || ""}`.trim() || profileData.username
                       : user?.name || "Foydalanuvchi"}
@@ -207,7 +202,7 @@ const Navbar = () => {
             ) : (
               <Link
                 to="/login"
-                className="flex items-center space-x-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200"
+                className="flex items-center gap-1.5 whitespace-nowrap px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200"
               >
                 <LogIn className="w-4 h-4" />
                 <span>Login</span>
@@ -220,7 +215,7 @@ const Navbar = () => {
               onClick={() => setIsOpen(!isOpen)}
               aria-label={isOpen ? "Menyuni yopish" : "Menyuni ochish"}
               aria-expanded={isOpen}
-              className="md:hidden p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="lg:hidden p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               {isOpen ? (
                 <X className="w-6 h-6" />
@@ -233,7 +228,7 @@ const Navbar = () => {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden">
+          <div className="lg:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-gray-800 border-t dark:border-gray-700">
               {navItems.map((item) => {
                 const Icon = item.icon;

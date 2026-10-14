@@ -3,8 +3,6 @@ import { ArrowLeft, Phone, Mail, MapPin, User, AlertCircle, Download } from 'luc
 import { OrganizationData } from '../api/organizationInfo';
 import { getClassificatorItem } from '../api/organizationInfo';
 import toast from 'react-hot-toast';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 
 interface OrgDetailProps {
   onBack: () => void;
@@ -29,6 +27,8 @@ function OrgDetail({ onBack, organizationData }: OrgDetailProps) {
 
       toast.loading('PDF fayl tayyorlanmoqda...');
 
+      // Q-02: og'ir kutubxonalar faqat PDF so'ralganda yuklanadi (OrgInfoPage chunk'i 635 KB edi)
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([import('html2canvas'), import('jspdf')]);
       const canvas = await html2canvas(contentElement, {
         scale: 2,
         useCORS: true,

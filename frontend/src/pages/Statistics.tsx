@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { BarChart3, TrendingUp, Users, Calendar, Download, Loader2, AlertCircle } from "lucide-react";
-import PieChart from "../components/charts/PieChart";
+import TrendAreaChart from "../components/charts/TrendAreaChart";
 import { getRequest } from "../api/request";
 import { platform_stat_api } from "../api/apiUrls";
 import { asApiError } from '../api/errors';
@@ -267,7 +267,7 @@ const Statistics = () => {
                     </p>
                   </div>
                 ) : (
-                  <PieChart labels={labels} dataPoints={values} label="" />
+                  <TrendAreaChart labels={labels} dataPoints={values} label="yangi foydalanuvchilar" />
                 )}
               </div>
             </div>

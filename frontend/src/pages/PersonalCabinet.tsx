@@ -16,6 +16,8 @@ import MyReports from "./cabinet/MyReports";
 import CustomRequests from "./cabinet/CustomRequests";
 import CitizenHome from "./cabinet/CitizenHome";
 import CitizenQuestions from "./cabinet/CitizenQuestions";
+import ApiKeys from "./cabinet/ApiKeys";
+import Subscriptions from "./cabinet/Subscriptions";
 import {
   User,
   FileText,
@@ -29,6 +31,8 @@ import {
   BarChart3,
   CalendarClock,
   Database,
+  BellRing,
+  KeyRound,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -98,6 +102,8 @@ const PersonalCabinet = () => {
     { id: "reports", label: "Hisobotlarim", icon: CalendarClock, audience: "legal" },
     { id: "benchmark", label: "Tarmoq benchmarki", icon: BarChart3, audience: "legal" },
     { id: "questions", label: "Savollarim", icon: HelpCircle, audience: "citizen" },
+    { id: "subscriptions", label: "Obunalarim", icon: BellRing, audience: "all" },
+    { id: "api-keys", label: "API kalitlarim", icon: KeyRound, audience: "all" },
     { id: "payments", label: "To'lovlar", icon: CreditCard, audience: "all" },
     { id: "notifications", label: "Xabarnomalar", icon: Bell, audience: "all" },
     { id: "support", label: "Qo'llab quvatlash", icon: HelpCircle, audience: "all" },
@@ -281,6 +287,10 @@ const PersonalCabinet = () => {
               {activeTab === "overview" && (isCitizen ? <CitizenHome onNavigate={setActiveTab} /> : <Overview onNavigate={setActiveTab} />)}
 
               {activeTab === "questions" && <CitizenQuestions />}
+
+              {activeTab === "subscriptions" && <Subscriptions />}
+
+              {activeTab === "api-keys" && <ApiKeys />}
 
               {isCitizen && !visibleItems.some((i) => i.id === activeTab) && (
                 <div className="p-6 text-sm text-gray-700 dark:text-gray-200">

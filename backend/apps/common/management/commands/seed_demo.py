@@ -46,6 +46,9 @@ ALLOWED_CASCADE = {
     "citizens.SurveyAnswer",
     "citizens.CitizenQuestion",
     "citizens.FavoriteIndicator",
+    "open_api.ApiKey",
+    "open_api.ApiUsage",
+    "notifications.IndicatorSubscription",
 }
 
 

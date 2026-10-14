@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import SubscribeButton from "../components/SubscribeButton";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowDownRight, ArrowUpRight, Globe2, Hash, Layers, TrendingUp, X } from "lucide-react";
 import {
@@ -56,9 +57,12 @@ export default function TradeFlows() {
           description="Davlatlar kesimida eksport va import: hajm, ulush va o'tgan yilning shu davriga nisbatan o'zgarish."
           breadcrumbs={[{ label: "Bosh sahifa", to: "/" }, { label: "Tashqi savdo", to: "/ex-trade" }, { label: "Savdo oqimlari" }]}
           actions={
+            <>
+            <SubscribeButton indicator="trade" title="Tashqi savdo" />
             <Link to={hs.length >= 2 ? `/market-report?hs=${hs}` : "/market-report"} className="inline-flex items-center px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm hover:bg-white dark:hover:bg-gray-800">
               Mahsulot bo'yicha bozor tahlili →
             </Link>
+            </>
           }
         />
 

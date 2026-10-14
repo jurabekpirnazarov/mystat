@@ -7,6 +7,7 @@ import useApi from "../hooks/useApi";
 import { ErrorState, PageHeader, Skeleton } from "../components/ui";
 import Term from "../components/Term";
 import FavoriteButton from "../components/FavoriteButton";
+import SubscribeButton from "../components/SubscribeButton";
 import { adjustAmount, compareGrowth, depositReal, purchasingPower } from "../utils/inflation";
 
 type Scenario = "salary" | "rent" | "deposit";
@@ -76,7 +77,7 @@ export default function CpiCalculator() {
           title="Inflyatsiya kalkulyatori"
           description="Iste'mol narxlari indeksi (rasmiy oylik ma'lumot) asosida: maosh, ijara va omonat foizini inflyatsiya bilan solishtiring."
           breadcrumbs={[{ label: "Bosh sahifa", to: "/" }, { label: "Fuqarolar uchun", to: "/citizens" }, { label: "Inflyatsiya kalkulyatori" }]}
-          actions={<FavoriteButton kind="cpi" title="Inflyatsiya kalkulyatori" />}
+          actions={<><SubscribeButton indicator="cpi" title="Inflyatsiya (ISN)" /><FavoriteButton kind="cpi" title="Inflyatsiya kalkulyatori" /></>}
         />
         {loading && !data ? (
           <Skeleton variant="chart" />

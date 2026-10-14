@@ -73,3 +73,45 @@ class Notification(models.Model):
     @staticmethod
     def mark_all_as_read(user):
         Notification.objects.filter(recipient=user).update(is_read=True)
+
+class IndicatorSubscription(models.Model):
+    """A-02: foydalanuvchi ko'rsatkich yangilanishiga obuna (in-app, email yoki Telegram)."""
+    CHANNELS = (("in_app", _("Saytda")), ("email", _("Email")), ("telegram", _("Telegram")))
+    # Ko'rsatkich kaliti: "cpi", "trade", "demography", "region:<id>", "report:<id>"
+    BASE_INDICATORS = (("cpi", _("Inflyatsiya (ISN)")), ("trade", _("Tashqi savdo")), ("demography", _("Demografiya")),
+                       ("region", _("Hudud ko'rsatkichlari")), ("report", _("Hisobot muddati")))
+
+    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="indicator_subscriptions")
+    indicator = models.CharField(max_length=40, db_index=True, verbose_name=_("Ko'rsatkich"))
+    title = models.CharField(max_length=160, blank=True, verbose_name=_("Nomi"))
+    channel = models.CharField(max_length=10, choices=CHANNELS, default="in_app", verbose_name=_("Kanal"))
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "indicator", "channel")
+        ordering = ("-created_at",)
+        verbose_name = _("Ko'rsatkichga obuna")
+        verbose_name_plural = _("Ko'rsatkichlarga obunalar")
+
+    def __str__(self):
+        return f"{self.user} → {self.indicator} ({self.channel})"
+
+
+class IndicatorUpdateEvent(models.Model):
+    """A-02: "ko'rsatkich yangilandi" hodisasi; Celery task obunachilarga yuboradi (`dispatched_at`)."""
+    indicator = models.CharField(max_length=40, db_index=True)
+    title = models.CharField(max_length=200)
+    link = models.CharField(max_length=300, blank=True)
+    date = models.DateField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    dispatched_at = models.DateTimeField(null=True, blank=True)
+    recipients = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ("-date", "-id")
+        verbose_name = _("Ko'rsatkich yangilanishi")
+        verbose_name_plural = _("Ko'rsatkich yangilanishlari")
+
+    def __str__(self):
+        return f"{self.indicator}: {self.title}"

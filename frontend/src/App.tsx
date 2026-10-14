@@ -88,6 +88,7 @@ const SurveyList = lazy(() => import("./pages/citizens/Surveys").then((m) => ({ 
 const SurveyPage = lazy(() => import("./pages/citizens/Surveys").then((m) => ({ default: m.SurveyPage })));
 const Names = lazy(() => import("./pages/citizens/Names"));
 const PublicAnswers = lazy(() => import("./pages/citizens/PublicAnswers"));
+const Developers = lazy(() => import("./pages/Developers"));
 
 // Loading component
 const PageLoader = () => (
@@ -145,6 +146,7 @@ function AppRoutes() {
           <Route path="/surveys/:slug" element={<SurveyPage />} />
           <Route path="/names" element={<Names />} />
           <Route path="/answers" element={<PublicAnswers />} />
+          <Route path="/developers" element={<Developers />} />
           <Route path="/orginfo" element={<OrgInfoPage />} />
           <Route path="/cpi-calculator" element={<CpiCalculator />} />
           <Route path="/statistical-classifications" element={<StatisticalClassifications />} />

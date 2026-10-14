@@ -39,6 +39,7 @@ urlpatterns += [
     path('api/notifications/', include('apps.notifications.urls', namespace='notifications')),
     path('api/analytics/', include('apps.analytics.urls', namespace='analytics')),
     path('api/citizens/', include('apps.citizens.urls', namespace='citizens')),
+    path('api/open/', include('apps.open_api.urls', namespace='open_api')),
 ]
 
 

@@ -13,6 +13,7 @@ import {
   type FilterValue,
 } from "../api/demographics";
 import useApi from "../hooks/useApi";
+import SubscribeButton from "../components/SubscribeButton";
 import { DemoBadge, EmptyState, ErrorState, PageHeader, Skeleton, StatCard, SampleBanner } from "../components/ui";
 
 // Kategorik palitra (seriyalar uchun), ikkala mavzuda o'qiladigan
@@ -296,6 +297,7 @@ export default function Demographics() {
           description="Aholi soni, tug'ilish, o'lim, nikoh, ajrim va migratsiya — hudud, yil va boshqa kesimlarda."
           breadcrumbs={[{ label: "Bosh sahifa", to: "/" }, { label: "Xizmatlar", to: "/services" }, { label: "Demografiya" }]}
           badge={<DemoBadge show={!!data?.is_synthetic} label="Namuna ma'lumot" />}
+          actions={<SubscribeButton indicator="demography" title="Demografiya" />}
         />
         <SampleBanner show={!!data?.is_synthetic} />
         {loading && !data ? (

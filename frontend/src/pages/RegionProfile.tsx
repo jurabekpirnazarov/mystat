@@ -7,6 +7,7 @@ import useApi from "../hooks/useApi";
 import { DemoBadge, ErrorState, PageHeader, SampleBanner, Skeleton } from "../components/ui";
 import Term from "../components/Term";
 import FavoriteButton from "../components/FavoriteButton";
+import SubscribeButton from "../components/SubscribeButton";
 import { exportElementToPng } from "../utils/exportPdf";
 
 const nf = (v: number | null | undefined, d = 1) => (v === null || v === undefined ? "—" : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: d }).format(v));
@@ -80,6 +81,7 @@ export default function RegionProfile() {
               breadcrumbs={[{ label: "Fuqarolar uchun", to: "/citizens" }, { label: "Hududlar", to: "/regions" }, { label: data.region.name_uz }]}
               actions={
                 <>
+                  <SubscribeButton indicator={`region:${data.region.id}`} title={`Hudud: ${data.region.name_uz}`} />
                   <FavoriteButton kind="region" title={`Hudud: ${data.region.name_uz}`} params={{ region: data.region.id }} />
                   <button type="button" onClick={() => info.current && exportElementToPng(info.current, `hudud-${data.region.code}.png`, data.data_source === "synthetic")}
                     className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-sm"><Download className="w-4 h-4" /> Infografika</button>

@@ -63,6 +63,7 @@ LOCAL_APPS = [
     'apps.additional_services',
     'apps.analytics',
     'apps.citizens',
+    'apps.open_api',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -405,6 +406,15 @@ CELERY_BEAT_SCHEDULE = {
             hour=config("BEAT_REPORT_NOTIFY_HOUR", default=9, cast=int),
             minute=config("BEAT_REPORT_NOTIFY_MINUTE", default=0, cast=int),
         ),
+    },
+    # A-02: ko'rsatkich yangilanishlari (har soat) va oylik dayjest (har oyning 1-kuni 10:00)
+    "indicator-updates": {
+        "task": "apps.notifications.tasks.dispatch_indicator_updates",
+        "schedule": crontab(minute=5),
+    },
+    "monthly-digest": {
+        "task": "apps.notifications.tasks.monthly_digest",
+        "schedule": crontab(day_of_month=1, hour=10, minute=0),
     },
 }
 

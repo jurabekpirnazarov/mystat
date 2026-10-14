@@ -49,6 +49,7 @@ ALLOWED_CASCADE = {
     "open_api.ApiKey",
     "open_api.ApiUsage",
     "notifications.IndicatorSubscription",
+    "consultations.ConsultationBooking",
 }
 
 

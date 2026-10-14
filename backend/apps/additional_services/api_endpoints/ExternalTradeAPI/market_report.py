@@ -17,7 +17,7 @@ from rest_framework.views import APIView
 
 from apps.additional_services.models.ex_trade import Product, TradeData
 from apps.common.search import ci_contains
-from apps.services.limits import consume
+from apps.services.limits import consume, public_usage
 
 from .flows import FLOWS, OTHER_COUNTRIES_CODE, _month_num, latest_periods, period_label
 
@@ -173,7 +173,7 @@ class MarketReportAPIView(APIView):
             result.pop("shrinking_markets")
             result["concentration"] = None
         result["full"] = full
-        result["usage"] = usage
+        result["usage"] = public_usage(usage)
         return Response(result)
 
 

@@ -18,6 +18,7 @@ import CitizenHome from "./cabinet/CitizenHome";
 import CitizenQuestions from "./cabinet/CitizenQuestions";
 import ApiKeys from "./cabinet/ApiKeys";
 import Subscriptions from "./cabinet/Subscriptions";
+import Consultations from "./cabinet/Consultations";
 import {
   User,
   FileText,
@@ -33,6 +34,7 @@ import {
   Database,
   BellRing,
   KeyRound,
+  CalendarCheck,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -101,6 +103,7 @@ const PersonalCabinet = () => {
     { id: "plan", label: "Faoliyat rejasi", icon: CalendarRange, audience: "legal" },
     { id: "reports", label: "Hisobotlarim", icon: CalendarClock, audience: "legal" },
     { id: "benchmark", label: "Tarmoq benchmarki", icon: BarChart3, audience: "legal" },
+    { id: "consultations", label: "Konsultatsiyalarim", icon: CalendarCheck, audience: "legal" },
     { id: "questions", label: "Savollarim", icon: HelpCircle, audience: "citizen" },
     { id: "subscriptions", label: "Obunalarim", icon: BellRing, audience: "all" },
     { id: "api-keys", label: "API kalitlarim", icon: KeyRound, audience: "all" },
@@ -291,6 +294,8 @@ const PersonalCabinet = () => {
               {activeTab === "subscriptions" && <Subscriptions />}
 
               {activeTab === "api-keys" && <ApiKeys />}
+
+              {activeTab === "consultations" && <Consultations />}
 
               {isCitizen && !visibleItems.some((i) => i.id === activeTab) && (
                 <div className="p-6 text-sm text-gray-700 dark:text-gray-200">

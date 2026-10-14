@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.common.synthetic import synthetic_ids
-from apps.services.limits import consume, limit_status
+from apps.services.limits import consume, limit_status, public_usage
 
 from .geo import region_name_uz
 from .models import EnterpriseIndicator
@@ -135,7 +135,7 @@ class BenchmarkView(APIView):
             "dynamics": dynamics,
             "summary": _summary(metrics),
             "data_source": _source(group.filter(year=year)),
-            "usage": usage,
+            "usage": public_usage(usage),
         })
 
 

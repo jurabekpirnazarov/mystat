@@ -42,6 +42,7 @@ urlpatterns += [
     path('api/analytics/', include('apps.analytics.urls', namespace='analytics')),
     path('api/citizens/', include('apps.citizens.urls', namespace='citizens')),
     path('api/open/', include('apps.open_api.urls', namespace='open_api')),
+    path('api/consultations/', include('apps.consultations.urls', namespace='consultations')),
 ]
 
 

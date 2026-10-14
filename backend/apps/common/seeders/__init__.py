@@ -67,6 +67,7 @@ def registry():
     from .api_subscriptions import ApiSubscriptionsSeeder
     from .citizens import CitizensSeeder
     from .classifications import ClassificationsSeeder
+    from .consultations import ConsultationsSeeder
     from .custom_requests import CustomRequestsSeeder
     from .demo_users import DemoUsersSeeder
     from .misc import MiscSeeder
@@ -87,5 +88,6 @@ def registry():
         CustomRequestsSeeder,
         CitizensSeeder,
         ApiSubscriptionsSeeder,
+        ConsultationsSeeder,
     ]
     return {s.name: s for s in seeders}

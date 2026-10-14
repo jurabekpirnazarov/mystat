@@ -41,6 +41,11 @@ def limit_status(user, slug):
     return {"configured": True, "limit": psi.limit if psi else 0, "used": used}
 
 
+def public_usage(usage):
+    """API javobi uchun (ichki `use_id` siz)."""
+    return {k: v for k, v in usage.items() if k != "use_id"} if usage else usage
+
+
 def consume(user, slug, request_data=None, once_per_day=False):
     """Bitta foydalanishni yozadi yoki `LimitExceeded` (403) ko'taradi. -> limit_status.
 
@@ -61,6 +66,6 @@ def consume(user, slug, request_data=None, once_per_day=False):
             return {"configured": True, "limit": psi.limit, "used": used}
         if psi is None or psi.limit <= 0 or used >= psi.limit:
             raise LimitExceeded("Sizning limitingiz tugagan!", limit=psi.limit if psi else 0, used_count=used)
-        UserServicePackageItemUse.objects.create(usp=usp, psi=psi, is_success=True,
-                                                 request_data=request_data or {}, response_data=None)
-    return {"configured": True, "limit": psi.limit, "used": used + 1}
+        use = UserServicePackageItemUse.objects.create(usp=usp, psi=psi, is_success=True,
+                                                       request_data=request_data or {}, response_data=None)
+    return {"configured": True, "limit": psi.limit, "used": used + 1, "use_id": use.id}

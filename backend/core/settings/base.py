@@ -64,6 +64,7 @@ LOCAL_APPS = [
     'apps.analytics',
     'apps.citizens',
     'apps.open_api',
+    'apps.consultations',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -411,6 +412,10 @@ CELERY_BEAT_SCHEDULE = {
     "indicator-updates": {
         "task": "apps.notifications.tasks.dispatch_indicator_updates",
         "schedule": crontab(minute=5),
+    },
+    "consultation-reminders": {
+        "task": "apps.consultations.tasks.consultation_reminders",
+        "schedule": 15 * 60,
     },
     "monthly-digest": {
         "task": "apps.notifications.tasks.monthly_digest",

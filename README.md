@@ -130,7 +130,8 @@ cd frontend && npm test                     # vitest (sof funksiyalar: autofill,
 ## PWA
 
 `frontend/public/sw.js` faqat production build'da ro'yxatdan o'tadi. Nginx'da `sw.js` uchun keshni o'chiring,
-aks holda yangi versiya foydalanuvchilarga kech yetadi:
+aks holda yangi versiya foydalanuvchilarga kech yetadi. Docker'dagi `nginx/default.conf.template` da bu bor;
+serverdagi (systemd) nginx'ga qo'lda qo'shing:
 
 ```nginx
 location = /sw.js { add_header Cache-Control "no-cache"; }
@@ -155,5 +156,12 @@ Serverda bir martalik o'tish:
    `/var/www/mystat/backend/{staticfiles,media}` → `sudo nginx -t && sudo systemctl reload nginx`
 6. `venv` virtualenv ko'chirilganda buziladi — `python3 -m venv venv` bilan qayta yarating
    va `pip install -r requirements/prod.txt` qiling.
+
+7. Bir martalik: `python manage.py setup_service_limits` — benchmark, bozor tahlili, hamkor eksporti
+   va konsultatsiya uchun tariflarga default limit (keyin admin'da o'zgartiriladi; qayta ishga tushirish
+   admin limitlarini buzmaydi).
+8. `python manage.py check --deploy` — `common.W001`/`W002` email yoki Telegram sozlanmaganini bildiradi.
+9. Shartnoma matni `backend/datas/contractContentTemplate.json` dan olinadi (repoda yo'q, serverda qoladi);
+   fayl bo'lmasa `backend/contractTemplate.docx` bo'limlari ishlatiladi.
 
 Repo nomi yoki yo'li boshqacha bo'lsa, `.gitlab-ci.yml` dagi `PROJECT_PATH` / `REPO_URL` ni o'zgartiring.

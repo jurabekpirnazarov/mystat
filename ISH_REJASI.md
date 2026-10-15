@@ -106,7 +106,7 @@ Admin'da `PackageService` shu slug'lar bilan qo'shilsa va paketlarga limit beril
 | OS-19 | Korxona o'lchami (xodimlar soni) uchun real manba bormi? | K-04 da o'lcham filtri yo'q |
 | OS-20 | Jahon savdosi ma'lumoti (K-03 "imkoniyatlar") olinadimi? | O'zbekiston eksporti dinamikasi bilan |
 | OS-21 | Production'da `TELEGRAM_BOT_TOKEN`, `EMAIL_HOST` sozlanganmi? | Sozlanmagan kanal jim o'tkaziladi |
-| OS-22 | Nginx'da `sw.js` uchun `Cache-Control: no-cache` | Qo'shilishi kerak (aks holda PWA yangilanishi kechikadi) |
+| OS-22 | Nginx'da `sw.js` uchun `Cache-Control: no-cache` | ✅ Qo'shildi (`sw.js` va `manifest.webmanifest`) |
 
 ### Qo'lda tekshirish kerak (brauzerda)
 

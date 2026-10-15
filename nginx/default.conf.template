@@ -40,6 +40,17 @@ server {
         try_files $uri $uri/ /index.html;
     }
 
+    # PWA: service worker va manifest keshlanmasin, aks holda yangi versiya kech yetadi
+    location = /sw.js {
+        root /usr/share/nginx/html;
+        add_header Cache-Control "no-cache";
+    }
+
+    location = /manifest.webmanifest {
+        root /usr/share/nginx/html;
+        add_header Cache-Control "no-cache";
+    }
+
     location ~* ^/assets/ {
         root /usr/share/nginx/html;
         expires 1y;

@@ -95,7 +95,8 @@ function NumbersStrip() {
 function MonthlyUsers() {
   const { data, loading, error, reload } = useApi(async () => (await axiosT.get<MonthUserStat>("/accounts/month-user-stat")).data, []);
   if (loading && !data) return <Skeleton variant="chart" />;
-  if (error || !data) return <ErrorState onRetry={reload} className="py-4" />;
+  // Kutilmagan javobda (masalan proxy'siz index.html) butun bosh sahifa ErrorBoundary'ga tushmasin
+  if (error || !data?.months) return <ErrorState onRetry={reload} className="py-4" />;
   const now = new Date();
   const rows = Object.entries(data.months)
     .slice(0, data.year === now.getFullYear() ? now.getMonth() + 1 : 12)

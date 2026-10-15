@@ -1,4 +1,5 @@
-export const host = import.meta.env.VITE_API_URL;
+// Bo'sh qolsa (masalan .env siz lokal `vite build`) "undefinedapi/..." emas, shu domendagi /api/ ishlatiladi
+export const host: string = import.meta.env.VITE_API_URL || "/";
 // Backend yo'li slash'siz: apps/accounts/urls.py -> "TokenRefresh"
 export const refresh_token = "/accounts/TokenRefresh";
 export const login_api = "/accounts/login/";

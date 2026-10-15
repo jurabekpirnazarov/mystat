@@ -2,6 +2,13 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 
+// VITE_API_URL=/ bo'lganda /api va /media Django'ga yo'naltiriladi
+// changeOrigin: false — Django absolyut URL'larni (rasm, pagination) shu serverning hostida yasaydi
+const devProxy = {
+  '/api': { target: process.env.VITE_PROXY_TARGET || 'http://localhost:8000', changeOrigin: false },
+  '/media': { target: process.env.VITE_PROXY_TARGET || 'http://localhost:8000', changeOrigin: false },
+};
+
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -28,13 +35,10 @@ export default defineConfig({
       },
     },
   },
+  // `vite preview` (production build'ni lokal tekshirish, PWA/Lighthouse) ham Django'ga yo'naltiradi
+  preview: { proxy: devProxy },
   server: {
-    // VITE_API_URL=/ bo'lganda dev-serverda /api va /media Django'ga yo'naltiriladi
-    // changeOrigin: false — Django absolyut URL'larni (rasm, pagination) shu dev-server hostida yasaydi
-    proxy: {
-      '/api': { target: process.env.VITE_PROXY_TARGET || 'http://localhost:8000', changeOrigin: false },
-      '/media': { target: process.env.VITE_PROXY_TARGET || 'http://localhost:8000', changeOrigin: false },
-    },
+    proxy: devProxy,
     fs: {
       allow: ['..']
     },

@@ -25,7 +25,7 @@ const PAGES: SearchItem[] = [
   { id: "p-partners", title: "Hamkor va raqobatchilarni qidirish", subtitle: "Korxonalar", url: "/partners" },
   { id: "p-consult", title: "Konsultatsiya", subtitle: "Mutaxassis bilan uchrashuv", url: "/consultation" },
   { id: "p-citizens", title: "Fuqarolar uchun", subtitle: "Bepul xizmatlar", url: "/citizens" },
-  { id: "p-regions", title: "Mening hududim", subtitle: "Viloyat va tuman profili", url: "/regions" },
+  { id: "p-regions", title: "Hududlar xaritasi", subtitle: "Viloyat va tumanlar SIAT ko'rsatkichlari, mening hududim", url: "/regions" },
   { id: "p-salary", title: "Mening maoshim", subtitle: "Ish haqi taqqoslash", url: "/my-salary" },
   { id: "p-prices", title: "Narxlar monitoringi va savat", subtitle: "Sahifa", url: "/prices" },
   { id: "p-learn", title: "Statistika oddiy tilda", subtitle: "Maqolalar", url: "/learn" },

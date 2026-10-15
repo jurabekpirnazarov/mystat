@@ -1,0 +1,10 @@
+{% extends "admin/change_list.html" %}
+{% block object-tools-items %}
+  <li><a href="{% url 'admin:siat_upload' %}">JSON faylni qo'lda yuklash</a></li>
+  <li>
+    <form method="post" action="{% url 'admin:siat_sync_all' %}" style="display:inline">{% csrf_token %}
+      <button type="submit" class="btn btn-sm btn-primary">Hammasini hozir sinxronlash</button>
+    </form>
+  </li>
+  {{ block.super }}
+{% endblock %}

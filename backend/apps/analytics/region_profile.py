@@ -82,7 +82,7 @@ def build_region_profile(region):
     data["industry"] = _industry(region.code)
     data["trade"] = _trade(region.code)
     if year is None:
-        return data
+        return _with_siat(data, region)
 
     own = RegionIndicator.objects.filter(region=region, district__isnull=True, period="Y")
     latest = {r.indicator: r for r in own.filter(year=year)}
@@ -114,7 +114,14 @@ def build_region_profile(region):
         table.setdefault(r.district_id, {"id": r.district_id, "name": r.district.name})[r.indicator] = float(r.value)
     data["districts"] = sorted(table.values(), key=lambda d: -d.get("population", 0))
     data["data_source"] = _source(own.filter(year=year))
-    return data
+    return _with_siat(data, region)
+
+
+def _with_siat(data, region):
+    """SIAT'da real ma'lumot bor ko'rsatkichlar namuna o'rniga SIAT'dan (SIAT_KARTA_TAHLIL.md, 6-bo'lim)."""
+    from apps.siat.profile import apply_siat
+
+    return apply_siat(data, region.code, CARD_ORDER)
 
 
 class RegionProfileView(APIView):
@@ -123,7 +130,9 @@ class RegionProfileView(APIView):
 
     def get(self, request, pk):
         region = get_object_or_404(Region, pk=pk)
-        key = f"region_profile:v1:{pk}"
+        from apps.siat.sync import cache_version
+
+        key = f"region_profile:v2:{cache_version()}:{pk}"
         data = cache.get(key)
         if data is None:
             data = build_region_profile(region)

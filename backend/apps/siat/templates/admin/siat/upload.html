@@ -1,0 +1,9 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<p>Server <code>api.siat.stat.uz</code> ga ulana olmasa: SIAT sahifasida (masalan <code>https://siat.stat.uz/data/246/</code>)
+"JSON" ni yuklab oling va shu yerga yuklang. Fayl avtomatik sinxronlashdagi kabi tozalanadi.</p>
+<form method="post" enctype="multipart/form-data">{% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="btn btn-primary">Yuklash</button>
+</form>
+{% endblock %}

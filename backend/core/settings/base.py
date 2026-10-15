@@ -65,6 +65,7 @@ LOCAL_APPS = [
     'apps.citizens',
     'apps.open_api',
     'apps.consultations',
+    'apps.siat',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -421,6 +422,14 @@ CELERY_BEAT_SCHEDULE = {
     "monthly-digest": {
         "task": "apps.notifications.tasks.monthly_digest",
         "schedule": crontab(day_of_month=1, hour=10, minute=0),
+    },
+    # SIAT_KARTA_TAHLIL KR-01: SIAT ko'rsatkichlari har kuni kechasi (faqat o'zgarganlari yuklanadi)
+    "siat-sync": {
+        "task": "apps.siat.tasks.sync_siat_task",
+        "schedule": crontab(
+            hour=config("BEAT_SIAT_SYNC_HOUR", default=3, cast=int),
+            minute=config("BEAT_SIAT_SYNC_MINUTE", default=30, cast=int),
+        ),
     },
 }
 

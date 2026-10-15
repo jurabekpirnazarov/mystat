@@ -34,6 +34,7 @@ urlpatterns += [
     path('api/organizations/', include('apps.organizations.api.api_urls', namespace='organizations')),
     path('api/services/', include('apps.services.api.api_urls', namespace='services')),
     path('api/contracts/', include('apps.contracts.api.api_urls', namespace='contracts')),
+    path('api/common/map/', include('apps.siat.urls', namespace='siat')),  # SIAT_KARTA_TAHLIL KR-05
     path('api/common/', include('apps.common.urls', namespace='common')),
     path("api/orders/", include('apps.payment.urls', namespace='orders')),
     path('api/books/', include('apps.book_market.api.api_urls', namespace='book-orders')),

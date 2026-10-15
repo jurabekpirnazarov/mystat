@@ -25,3 +25,11 @@ class TokenRefreshTests(APITestCase):
     def test_trailing_slash_is_not_routed(self):
         response = self.client.post(REFRESH_URL + "/", {"refresh": self.tokens["refresh"]}, format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_new_access_token_passes_custom_is_authenticated(self):
+        """Yangilangan token bilan `permissions.IsAuthenticated` endpoint'lari 403 bermasligi kerak."""
+        for _ in range(2):
+            response = self.client.post(REFRESH_URL, {"refresh": self.tokens["refresh"]}, format="json")
+            self.tokens = response.data
+            self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.tokens['access']}")
+            self.assertEqual(self.client.get("/api/contracts/").status_code, status.HTTP_200_OK)

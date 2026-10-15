@@ -249,6 +249,7 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
+    'TOKEN_REFRESH_SERIALIZER': 'apps.accounts.serializers.OutstandingTokenRefreshSerializer',
 }
 
 # Spectacular (Swagger) Settings

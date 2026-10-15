@@ -1,4 +1,8 @@
+from rest_framework_simplejwt.settings import api_settings
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+from rest_framework_simplejwt.utils import datetime_from_epoch
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework import serializers
 from collections import OrderedDict
@@ -160,6 +164,27 @@ class LogoutSerializer(serializers.Serializer):
             
         except TokenError:
             pass
+
+
+class OutstandingTokenRefreshSerializer(TokenRefreshSerializer):
+    """Aylantirilgan (ROTATE_REFRESH_TOKENS) yangi refresh tokenni ham `OutstandingToken` ga yozadi.
+
+    simplejwt 5.3 buni qilmaydi, `permissions.IsAuthenticated` esa foydalanuvchining oxirgi outstanding
+    tokeni qora ro'yxatda bo'lsa rad etadi — natijada birinchi yangilashdan keyin barcha himoyalangan
+    endpoint'lar 403 qaytarardi.
+    """
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        if "refresh" in data:
+            token = RefreshToken(data["refresh"])
+            user = User.objects.filter(**{api_settings.USER_ID_FIELD: token[api_settings.USER_ID_CLAIM]}).first()
+            OutstandingToken.objects.get_or_create(
+                jti=token[api_settings.JTI_CLAIM],
+                defaults={"user": user, "token": data["refresh"], "created_at": token.current_time,
+                          "expires_at": datetime_from_epoch(token["exp"])},
+            )
+        return data
 
 
 class UserSerializer(serializers.ModelSerializer):

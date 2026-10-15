@@ -17,13 +17,13 @@
 
 ## Bajarilish holati
 
-> Oxirgi yangilanish: 2026-10-14 (2-versiya). Har bir vazifa yoki vazifalar guruhi alohida git commit'da (`git log --oneline`). Masofaviy repo yo'q, shuning uchun branch/MR o'rniga `main` da ketma-ket commit'lar. 1-versiya vazifalari (F, B, S-01..S-09, U-01..U-14, Q) bajarilgan holati git tarixidagi oldingi `ISH_REJASI.md` da; quyida qisqacha.
+> Oxirgi yangilanish: 2026-10-15 (2-versiya + ochiq savollar va brauzerda tekshiruv). Har bir vazifa yoki vazifalar guruhi alohida git commit'da (`git log --oneline`). Masofaviy repo yo'q, shuning uchun branch/MR o'rniga `main` da ketma-ket commit'lar. 1-versiya vazifalari (F, B, S-01..S-09, U-01..U-14, Q) bajarilgan holati git tarixidagi oldingi `ISH_REJASI.md` da; quyida qisqacha.
 
 ### Yakuniy tekshiruv
 
 | Tekshiruv | Natija |
 |---|---|
-| `manage.py test` | **160 test, hammasi o'tdi** (1-versiya oxirida 76) |
+| `manage.py test` | **163 test, hammasi o'tdi** (1-versiya oxirida 76) |
 | `manage.py check` | Faqat CKEditor 4 ogohlantirishi (xavfsizlik, keyinga qoldirilgan) |
 | `makemigrations --check` | O'zgarish yo'q |
 | `npx tsc --noEmit` | 0 xato |
@@ -89,7 +89,7 @@
 
 ### Yangi pullik xizmatlar uchun paket limiti (OS-14)
 
-Admin'da `PackageService` shu slug'lar bilan qo'shilsa va paketlarga limit berilsa, limit ishlaydi; qo'shilmaguncha xizmatlar limitsiz:
+`python manage.py setup_service_limits` shu slug'larni yaratadi va tariflarga default limit beradi (tarif nomidagi raqam bo'yicha: 1/3/10/30, konsultatsiya 1/2/5/10). Qayta ishga tushirilsa admin'da o'zgartirilgan limitlarga tegmaydi. Lokal bazada bajarilgan; production'da bir marta ishga tushirish kerak:
 
 | Slug | Xizmat |
 |---|---|
@@ -102,20 +102,44 @@ Admin'da `PackageService` shu slug'lar bilan qo'shilsa va paketlarga limit beril
 
 | ID | Savol | Hozirgi default |
 |---|---|---|
-| OS-18 | Shartnoma shabloni `datas/contractContentTemplate.json` repoda yo'q — serverdagi faylni repoga qo'shamizmi? | Oldindan ko'rishda qisqa shartlar |
-| OS-19 | Korxona o'lchami (xodimlar soni) uchun real manba bormi? | K-04 da o'lcham filtri yo'q |
-| OS-20 | Jahon savdosi ma'lumoti (K-03 "imkoniyatlar") olinadimi? | O'zbekiston eksporti dinamikasi bilan |
-| OS-21 | Production'da `TELEGRAM_BOT_TOKEN`, `EMAIL_HOST` sozlanganmi? | Sozlanmagan kanal jim o'tkaziladi |
+| OS-18 | Shartnoma shabloni `datas/contractContentTemplate.json` repoda yo'q | ✅ Repoga qo'shilmadi (`.gitignore`, server faylini bosib ketmasligi uchun). JSON bo'lmasa bo'limlar repodagi `contractTemplate.docx` dan olinadi (`contracts/template_parts.py`). Shablondagi qattiq yozilgan "Sirdaryo viloyati" (1-bo'lim) va "2025-yil" (sana, 10.1) yuristlar bilan ko'rib chiqilishi kerak |
+| OS-19 | Korxona o'lchami (xodimlar soni) uchun real manba bormi? | ⏸ Ochiq: bazada yagona `employees` ustuni S-10 sintetik namunasi. Manba berilsa K-04 ga filtr qo'shiladi |
+| OS-20 | Jahon savdosi ma'lumoti (K-03 "imkoniyatlar") olinadimi? | ⏸ Ochiq: bazada jahon savdosi jadvali yo'q; hozircha O'zbekiston eksporti dinamikasi |
+| OS-21 | Production'da `TELEGRAM_BOT_TOKEN`, `EMAIL_HOST` sozlanganmi? | ✅ `manage.py check --deploy` endi `common.W001`/`W002` ogohlantiradi; serverda tekshirish kerak (README, Production 8-qadam) |
 | OS-22 | Nginx'da `sw.js` uchun `Cache-Control: no-cache` | ✅ Qo'shildi (`sw.js` va `manifest.webmanifest`) |
 
-### Qo'lda tekshirish kerak (brauzerda)
+### Brauzerda tekshiruv (2026-10-15)
 
-1. Kabinet (korxona: `demo_yuridik_2`): bosh panel, tanishtiruv (`demo_yuridik_4/5` da chiqadi), Hisobotlarim, Benchmark (PDF), Individual ma'lumot, Konsultatsiyalarim, Obunalarim, API kalitlarim, korxona pasporti.
-2. Shartnoma oqimi: tarif → "Shartnoma orqali" → rekvizitlar va matn → tasdiqlash (DIDOX lokal muhitda ishlamaydi).
-3. Fuqaro (`demo_jismoniy_1`): bosh panel, Savollarim; ochiq sahifalar `/citizens`, `/regions`, `/cpi-calculator`, `/my-salary`, `/prices`, `/learn`, `/surveys`, `/names`, `/answers`.
-4. Xodim (`demo_employee`): Individual ma'lumot va Savollarim — "Xodim navbati"; konsultant (`demo_konsultant_1`): "Mening jadvalim".
-5. Admin: `/<admin>/analytics/`, Excel eksport.
-6. PWA (production build), mobil ko'rinish, Lighthouse.
+Lokal: Postgres + `runserver` + Vite (dev) va `vite build` + `vite preview` (production). Demo akkauntlarga parolsiz, `user.tokens` orqali kirildi.
+
+| Qism | Natija |
+|---|---|
+| Ochiq sahifalar (27 ta: fuqaro, savdo, xizmatlar, tariflar, ...) | Konsol xatosi va 4xx/5xx yo'q |
+| Korxona kabineti (`demo_yuridik_2`), 16 bo'lim | Ishlaydi (topilgan buglar pastda tuzatildi) |
+| Fuqaro (`demo_jismoniy_1`), 8 bo'lim | Ishlaydi; korxona bo'limlari yashirin |
+| Xodim (`demo_employee`) | Individual ma'lumot va Savollarim'da "Xodim navbati" bor |
+| Konsultant (`demo_konsultant_1`) | "Mening jadvalim" — slotlar va band qilishlar |
+| Admin `/<admin>/analytics/` | 200, davr filtri, `?demo=1`, XLSX eksport (lokal superuser'da `is_staff=False` — tekshiruv tranzaksiyada) |
+| Shartnoma oldindan ko'rish | Bo'limlar `.docx` shablondan, o'zgaruvchilar to'ldirilgan; DIDOX lokal ishlamaydi (tekshirilmadi) |
+| Mobil (375 px) | Gorizontal scroll yo'q, hamburger menyu |
+| Lighthouse (mobil, `vite preview`) | Accessibility/Best practices/SEO **100** (/, /citizens, /trade-flows, /services). Performance 59–76: LCP 5–8 s — ishlatilmagan JS (~2 s), rasmlar (~1.4 s); `/services` da CLS 0.30 (xizmatlar ro'yxati yuklanganda). Keyingi optimizatsiya vazifasi |
+| PWA | `sw.js` production'da ro'yxatdan o'tadi, `mystat-static-v1` keshi; API keshlanmaydi |
+
+### Brauzerda topilgan va tuzatilgan buglar
+
+| Bug | Ta'siri |
+|---|---|
+| simplejwt 5.3 aylantirilgan refresh tokenni `OutstandingToken` ga yozmaydi, maxsus `IsAuthenticated` esa oxirgi tokeni qora ro'yxatda bo'lsa rad etadi | Birinchi token yangilanishidan (5 soat) keyin shartnomalar va boshqa himoyalangan endpoint'lar 403 |
+| `AuthContext` foydalanuvchini `useEffect` da tiklardi | `/cabinet` ni yangilash yoki to'g'ridan-to'g'ri ochish bosh sahifaga otardi |
+| `DemoBadge` — `<button>` ichida `<button>` | Yaroqsiz HTML; yorliq bosilganda qator ham ochilardi |
+| `VITE_API_URL` bo'lmasa so'rovlar `undefinedapi/...` | `.env` siz build'da bosh sahifa va `/trade-flows` qulardi |
+
+### Qolgan kuzatuvlar
+
+- `statistical-classifications` xizmati (id 38) bazada `is_active=False` — `/statistical-classifications` "Xizmat ma'lumotlari topilmadi" ko'rsatadi. Admin qarori.
+- Konsultatsiyalarim har bir korxona uchun `/consultations/schedule/` ni chaqirib 403 oladi (konsultantmi-yo'qmi aniqlash) — xato ushlanadi, faqat tarmoq shovqini.
+- Konsultant akkauntiga korxona tanishtiruvi ("korxonangiz kabineti") chiqadi.
+- CKEditor 4 ogohlantirishi — 2.1-bo'lim bo'yicha keyinga qoldirilgan.
 
 ---
 

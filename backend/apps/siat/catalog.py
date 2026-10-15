@@ -30,7 +30,7 @@ EXTRA_SOURCES = [3844, 3845, 3847, 3848]  # Norasmiy/yashirin iqtisodiyot — ad
 # Hisoblangan ko'rsatkichlar (KR-10): kalit -> (nomi uz/ru/en, birlik uz, manba, mavzu, tartib, yuqori yaxshimi)
 DERIVED = {
     "d-density": (("Aholi zichligi", "Плотность населения", "Population density"), "kishi/km²",
-                  "SIAT 246 va chegaralar fayli (maydon)", "population", 13, None),
+                  "SIAT 246 va chegaralar fayli (maydon); shaharlar uchun hisoblanmaydi", "population", 13, None),
     "d-rural-share": (("Qishloq aholisi ulushi", "Доля сельского населения", "Rural population share"), "%",
                       "SIAT 247 / 246", "population", 14, None),
     "d-pop-growth": (("Aholi o'sishi", "Прирост населения", "Population growth"), "%",

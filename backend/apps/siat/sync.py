@@ -15,7 +15,7 @@ from . import client
 from .catalog import DEFAULT_GROUPS, DEFAULT_INDICATORS, DERIVED, guess_theme
 from .classify import classify, parse_metadata, periodicity_of, region_in_title, strip_region
 from .models import SiatBreakdown, SiatIndicator, SiatSyncLog, SiatValue, Territory
-from .normalize import (REPUBLIC, extract_rows, is_rate_unit, is_soato, period_year, preliminary_years,
+from .normalize import (REPUBLIC, clean_name, extract_rows, is_rate_unit, is_soato, period_year, preliminary_years,
                         territory_kind, territory_level)
 
 logger = logging.getLogger(__name__)
@@ -110,9 +110,9 @@ def load_payload(indicator, payload, source_updated_at=None, catalog=False):
 
     indicator.code = meta.get("code", {}).get("uz", "")[:20]
     for lang in ("uz", "ru", "en", "uzc"):
-        setattr(indicator, f"name_{lang}", (name.get(lang) or "").strip()[:300])
+        setattr(indicator, f"name_{lang}", clean_name(name.get(lang))[:300])
     for lang in ("uz", "ru", "en"):
-        setattr(indicator, f"unit_{lang}", (unit.get(lang) or "").strip()[:120])
+        setattr(indicator, f"unit_{lang}", clean_name(unit.get(lang))[:120])
         setattr(indicator, f"notes_{lang}", notes.get(lang, ""))
     indicator.methodology_uz = meta.get("methodology", {}).get("uz", "")
     indicator.periodicity = periodicity_of(meta, periods)
@@ -286,7 +286,9 @@ def rebuild_derived():
     if not total:
         return []
     computed = {}
-    areas = dict(Territory.objects.filter(area_km2__isnull=False).values_list("soato", "area_km2"))
+    # Shaharlar uchun hisoblanmaydi: ochiq chegaralar faylida shahar faqat zich qurilgan qismi bilan chizilgan
+    # (masalan Nukus ~18 km², rasmiy ~220 km²) — zichlik bir necha barobar oshib ketadi
+    areas = dict(Territory.objects.filter(area_km2__isnull=False).exclude(kind="city").values_list("soato", "area_km2"))
     if areas:
         computed["d-density"] = {k: v * 1000 / areas[k[0]] for k, v in total.items() if areas.get(k[0])}
     rural = _series(247)

@@ -10,7 +10,11 @@ export interface RegionCard {
   republic: number | null;
   vs_average_pct: number | null;
   assessment: "good" | "bad" | null;
-  source: "real" | "synthetic";
+  source: "real" | "synthetic" | "siat";
+  /** SIAT kartochkalarida — o'z yili, dastlabki belgisi va manba havolasi */
+  year?: number;
+  preliminary?: boolean;
+  source_url?: string;
 }
 
 export interface RegionProfile {
@@ -23,6 +27,8 @@ export interface RegionProfile {
   industry: { companies: number; top_categories: { name: string; companies: number }[] } | null;
   trade: { year: number; period: string; export: number; import: number; unit: string } | null;
   data_source: DataSource;
+  siat_year?: number;
+  districts_source?: "siat";
 }
 
 export interface RegionMap {

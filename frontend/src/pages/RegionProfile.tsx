@@ -17,14 +17,19 @@ function Card({ c }: { c: RegionCard }) {
   const term = TERM[c.key];
   return (
     <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
-      <p className="text-xs text-gray-500 flex items-center gap-1">{term ? <Term id={term}>{c.label}</Term> : c.label} <DemoBadge show={c.source === "synthetic"} /></p>
+      <p className="text-xs text-gray-500 flex items-center gap-1">
+        {term ? <Term id={term}>{c.label}</Term> : c.label}{c.year ? `, ${c.year}` : ""}{c.preliminary ? "*" : ""} <DemoBadge show={c.source === "synthetic"} />
+        {c.source === "siat" && c.source_url && (
+          <a href={c.source_url} target="_blank" rel="noopener noreferrer" title="Rasmiy statistika (SIAT)" className="ml-auto text-[10px] font-semibold text-blue-700 hover:underline">SIAT</a>
+        )}
+      </p>
       <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{nf(c.value)} <span className="text-xs font-normal text-gray-500">{c.unit}</span></p>
       <p className="mt-1 text-xs text-gray-500">
         {c.change_pct !== null && <span className="mr-2">{c.change_pct >= 0 ? "+" : ""}{nf(c.change_pct)}% yil davomida</span>}
         {c.vs_average_pct !== null && (
           <span className={`inline-flex items-center ${c.assessment === "good" ? "text-emerald-700" : c.assessment === "bad" ? "text-red-600" : ""}`}>
             {c.vs_average_pct >= 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
-            {nf(Math.abs(c.vs_average_pct))}% {c.vs_average_pct >= 0 ? "yuqori" : "past"} (respublika o'rtachasidan)
+            {nf(Math.abs(c.vs_average_pct))}% {c.vs_average_pct >= 0 ? "yuqori" : "past"} ({c.key === "population" && c.source === "siat" ? "viloyatlar o'rtachasidan" : "respublika o'rtachasidan"})
           </span>
         )}
       </p>
@@ -78,7 +83,7 @@ export default function RegionProfile() {
             <PageHeader
               title={data.region.name_uz}
               description={`${data.year ?? ""}-yil holati · ${data.districts_count} ta tuman/shahar`}
-              breadcrumbs={[{ label: "Fuqarolar uchun", to: "/citizens" }, { label: "Hududlar", to: "/regions" }, { label: data.region.name_uz }]}
+              breadcrumbs={[{ label: "Fuqarolar uchun", to: "/citizens" }, { label: "Hududlar", to: `/regions?t=${data.region.code}` }, { label: data.region.name_uz }]}
               actions={
                 <>
                   <SubscribeButton indicator={`region:${data.region.id}`} title={`Hudud: ${data.region.name_uz}`} />
@@ -90,7 +95,9 @@ export default function RegionProfile() {
                 </>
               }
             />
-            <SampleBanner show={data.data_source !== "real"} text="Aholi, ish haqi, ishsizlik, YaHM va boshqa hududiy ko'rsatkichlar namuna. Sanoat korxonalari va tashqi savdo — real ma'lumot." />
+            <SampleBanner show={data.data_source !== "real"} text={data.cards.some((c) => c.source === "siat")
+              ? "Aholi, ish haqi, ishsizlik va aholi jon boshiga YaHM — rasmiy statistika (SIAT). «Namuna» belgili ko'rsatkichlar hali namuna."
+              : "Aholi, ish haqi, ishsizlik, YaHM va boshqa hududiy ko'rsatkichlar namuna. Sanoat korxonalari va tashqi savdo — real ma'lumot."} />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               {data.cards.map((c) => <Card key={c.key} c={c} />)}
@@ -158,9 +165,9 @@ export default function RegionProfile() {
 
             {data.districts.length > 0 && (
               <section className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-x-auto">
-                <h2 className="font-semibold px-4 pt-4">Tumanlar reytingi <DemoBadge show={data.data_source !== "real"} /></h2>
+                <h2 className="font-semibold px-4 pt-4">Tumanlar reytingi <DemoBadge show={data.districts_source !== "siat" && data.data_source !== "real"} />{data.districts_source === "siat" && <span className="ml-2 text-xs font-normal text-gray-500">manba: SIAT</span>}</h2>
                 <table className="min-w-full text-sm">
-                  <thead><tr className="text-left text-xs text-gray-500"><th className="px-4 py-2">Tuman/shahar</th><th className="px-2 text-right">Aholi, ming</th><th className="px-2 text-right">O'rtacha ish haqi</th><th className="px-2 text-right">Ishsizlik, %</th><th className="px-2 text-right">Tug'ilganlar</th></tr></thead>
+                  <thead><tr className="text-left text-xs text-gray-500"><th className="px-4 py-2">Tuman/shahar</th><th className="px-2 text-right">Aholi, ming</th><th className="px-2 text-right">O'rtacha ish haqi</th><th className="px-2 text-right">Ishsizlik, %</th>{data.districts_source !== "siat" && <th className="px-2 text-right">Tug'ilganlar</th>}</tr></thead>
                   <tbody>
                     {data.districts.map((d) => (
                       <tr key={d.id} className="border-t border-gray-100 dark:border-gray-700">
@@ -168,7 +175,7 @@ export default function RegionProfile() {
                         <td className="px-2 text-right tabular-nums">{nf(d.population as number)}</td>
                         <td className="px-2 text-right tabular-nums">{nf(d.avg_salary as number, 0)}</td>
                         <td className="px-2 text-right tabular-nums">{nf(d.unemployment_rate as number)}</td>
-                        <td className="px-2 text-right tabular-nums">{nf(d.births as number, 0)}</td>
+                        {data.districts_source !== "siat" && <td className="px-2 text-right tabular-nums">{nf(d.births as number, 0)}</td>}
                       </tr>
                     ))}
                   </tbody>

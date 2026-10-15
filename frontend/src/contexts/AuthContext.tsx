@@ -27,15 +27,17 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<User | null>(null);
-  // Rehydrate user from localStorage on mount
-  React.useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    const userData = localStorage.getItem("user");
-    if (token && userData) {
-      setUser(JSON.parse(userData));
+  // localStorage'dan birinchi renderdayoq tiklanadi: useEffect'da tiklansa ProtectedRoute birinchi
+  // renderda user=null ko'rib /cabinet ni yangilaganda yoki to'g'ridan-to'g'ri ochganda chiqarib yuborardi
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const token = localStorage.getItem("access_token");
+      const userData = localStorage.getItem("user");
+      return token && userData ? (JSON.parse(userData) as User) : null;
+    } catch {
+      return null;
     }
-  }, []);
+  });
   const [nav, setNav] = useState("");
 
   const login = (

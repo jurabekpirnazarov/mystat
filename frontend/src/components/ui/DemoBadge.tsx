@@ -18,16 +18,28 @@ export default function DemoBadge({ show = true, label = "Namuna", className = "
   if (!show) return null;
   return (
     <span className={`relative inline-flex ${className}`}>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
+      {/* <button> emas: yorliq ko'pincha bosiladigan qator (<button>) ichida turadi — ichma-ich tugma yaroqsiz HTML */}
+      <span
+        role="button"
+        tabIndex={0}
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((v) => !v);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            e.stopPropagation();
+            setOpen((v) => !v);
+          }
+        }}
         onBlur={() => setOpen(false)}
         aria-expanded={open}
         title={EXPLANATION}
-        className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
+        className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide cursor-pointer bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
       >
         {label}
-      </button>
+      </span>
       {open && (
         <span
           role="tooltip"

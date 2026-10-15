@@ -13,6 +13,7 @@ from apps.services.models import Service, ServicePackage
 from apps.services.pricing import package_price
 from ...utils import  create_didox_client, DidoxAPIError
 from ..utils import generate_financial_report, num_to_words_uz
+from ...template_parts import load_template_parts
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -217,15 +218,8 @@ class ContractCreateSerializer(serializers.Serializer):
         }
 
     def _load_contract_template_parts(self):
-        """Load contract template parts from JSON file"""
-        try:
-            template_path = os.path.join(settings.BASE_DIR, "datas", "contractContentTemplate.json")
-            with open(template_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            return data.get('parts', [])
-        except Exception as e:
-            logger.error(f"Failed to load contract template: {str(e)}")
-            return []
+        """Shartnoma bo'limlari: datas/contractContentTemplate.json, bo'lmasa contractTemplate.docx (OS-18)"""
+        return load_template_parts()
 
     def _render_template_parts(self, parts, context):
         """Replace template variables in parts with actual values"""

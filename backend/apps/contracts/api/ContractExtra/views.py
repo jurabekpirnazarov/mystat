@@ -77,7 +77,7 @@ class ContractPreviewView(APIView):
         parts = helper._render_template_parts(helper._load_contract_template_parts(), context)
         template_found = bool(parts)
         if not parts:
-            # Shablon fayli (datas/contractContentTemplate.json) bu muhitda yo'q — asosiy shartlar qisqacha
+            # Na JSON shablon, na contractTemplate.docx o'qilmadi — asosiy shartlar qisqacha
             parts = [
                 {"title": "Tomonlar", "body": f"Ijrochi: {context['region']} statistika boshqarmasi. "
                                               f"Buyurtmachi: {context['orgName']}, rahbar {context['directorName']}."},

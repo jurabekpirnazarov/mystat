@@ -70,6 +70,17 @@ class PreviewAndTimelineTests(Base):
         self.assertTrue(response.data["parts"])
         self.assertEqual(Decimal(response.data["pricing"]["price"]), Decimal("8240000"))
 
+    def test_preview_parts_come_from_docx_without_json(self):
+        """OS-18: JSON shablon yo'q muhitda bo'limlar contractTemplate.docx dan, o'zgaruvchilar to'ldirilgan."""
+        response = self.client.post("/api/contracts/preview/", {"service_package_id": self.package.id}, format="json")
+        self.assertTrue(response.data["template_found"])
+        titles = [p["title"] for p in response.data["parts"]]
+        self.assertIn("2. SHARTNOMA PREDMETI", titles)
+        self.assertIn("10. BOSHQA SHARTLAR", titles)
+        text = " ".join(p["body"] for p in response.data["parts"])
+        self.assertNotIn("{{", text)
+        self.assertIn("8,240,000.00", text)
+
     def test_create_requires_requisites_confirmation(self):
         self.client.force_authenticate(None)
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.user.tokens['access']}")

@@ -16,7 +16,7 @@ export default function Learn() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <PageHeader
           title="Statistika oddiy tilda"
-          description="Asosiy statistik tushunchalar — qisqa va tushunarli. Murakkab atamalar uchun lug'atga qarang."
+          description="Narxlar, maosh, aholi haqida — oddiy so'zlar bilan, 2 daqiqada o'qiladi. Notanish so'z uchrasa, lug'atga qarang."
           breadcrumbs={[{ label: "Fuqarolar uchun", to: "/citizens" }, { label: "Maqolalar" }]}
           actions={<Link to="/glossary" className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm">Lug'at →</Link>}
         />

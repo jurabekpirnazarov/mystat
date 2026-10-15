@@ -154,13 +154,20 @@ class CitizensSeeder(Seeder):
         articles = {}
         start = date.today() - timedelta(days=len(ARTICLES) * 9)
         for i, a in enumerate(ARTICLES):
-            existing = Article.objects.filter(slug=a["slug"]).first()
-            articles[a["slug"]] = existing or self.make(
-                Article, f"article:{a['slug']}", slug=a["slug"], topic=a["topic"], reading_minutes=a["minutes"],
+            text = dict(
+                reading_minutes=a["minutes"],
                 title_uz=a["title_uz"], title_ru=a["title_ru"], title_cry=uz_latin_to_cyrillic(a["title_uz"]),
                 summary_uz=a["summary_uz"], summary_ru=a["summary_ru"], summary_cry=uz_latin_to_cyrillic(a["summary_uz"]),
                 body_uz=a["body_uz"], body_ru="", body_cry=uz_latin_to_cyrillic(a["body_uz"]),
-                related=a["related"], published_at=start + timedelta(days=i * 9))
+                related=a["related"])
+            existing = Article.objects.filter(slug=a["slug"]).first()
+            if existing and self._is_ours(Article, a["slug"], "article"):
+                # Seed maqolasi — content.py dagi yangi matn bilan yangilanadi (admin yaratganiga tegilmaydi)
+                Article.objects.filter(pk=existing.pk).update(**text)
+                existing.refresh_from_db()
+            articles[a["slug"]] = existing or self.make(
+                Article, f"article:{a['slug']}", slug=a["slug"], topic=a["topic"],
+                published_at=start + timedelta(days=i * 9), **text)
         for slug, term_uz, term_ru, def_uz, def_ru, example, article in GLOSSARY:
             if GlossaryTerm.objects.filter(slug=slug).exists() and not self._is_ours(GlossaryTerm, slug):
                 continue
@@ -169,9 +176,9 @@ class CitizensSeeder(Seeder):
                       definition_cry=uz_latin_to_cyrillic(def_uz), example_uz=example,
                       article=articles.get(article) if article else None)
 
-    def _is_ours(self, model, slug):
+    def _is_ours(self, model, slug, kind="term"):
         from apps.common.models import SyntheticRecord
-        return SyntheticRecord.objects.filter(seed_key=f"{self.name}:term:{slug}").exists()
+        return SyntheticRecord.objects.filter(seed_key=f"{self.name}:{kind}:{slug}").exists()
 
     def _surveys(self, regions):
         ages = [a for a, _ in SurveyResponse.AGE_GROUPS]

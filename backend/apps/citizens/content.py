@@ -8,287 +8,316 @@ ARTICLES = [
     {
         "slug": "inflyatsiya-nima",
         "topic": "prices",
-        "minutes": 4,
-        "title_uz": "Inflyatsiya nima va u hamyonimizga qanday ta'sir qiladi?",
+        "minutes": 2,
+        "title_uz": "Inflyatsiya nima?",
         "title_ru": "Что такое инфляция и как она влияет на наш кошелёк?",
-        "summary_uz": "Narxlarning umumiy o'sishi, pulning xarid qobiliyati va nima uchun maosh oshsa ham ba'zan kamroq narsa sotib olamiz.",
+        "summary_uz": "Narxlar oshsa, pulimizga kamroq narsa olamiz. Inflyatsiya shu haqida.",
         "summary_ru": "Общий рост цен, покупательная способность денег и почему при росте зарплаты мы иногда можем купить меньше.",
         "related": [{"label": "Inflyatsiya kalkulyatori", "to": "/cpi-calculator"}, {"label": "Narxlar monitoringi", "to": "/prices"}],
-        "body_uz": """**Inflyatsiya** — bu tovar va xizmatlar narxlarining umumiy darajasi vaqt o'tishi bilan oshishi. Bitta mahsulot qimmatlashishi hali inflyatsiya emas: inflyatsiya haqida ko'pchilik narxlar birga o'sganda gapiriladi.
+        "body_uz": """**Inflyatsiya** — narxlarning oshishi. Bitta mahsulot qimmatlashsa, bu hali inflyatsiya emas. Ko'p narsalar birga qimmatlashsa — bu inflyatsiya.
 
-## Pulning xarid qobiliyati
+## Pulimizga nima bo'ladi?
 
-Inflyatsiya bo'lganda bir xil pulga avvalgidan kamroq narsa sotib olinadi. Masalan, yil boshida 100 ming so'mga 10 ta mahsulot olingan bo'lsa va yil davomida narxlar o'rtacha 10% oshsa, yil oxirida o'sha pulga taxminan 9 ta mahsulot olinadi (bu shartli misol).
+Narxlar oshsa, o'sha pulga kamroq narsa olamiz.
 
-## Inflyatsiya qanday o'lchanadi?
+Masalan: yil boshida 100 ming so'mga 10 ta non oldingiz. Narxlar 10% oshdi. Endi shu pulga taxminan 9 ta non olasiz. (Bu shunchaki misol.)
 
-Statistika organlari har oy yuzlab tovar va xizmatlar narxini kuzatadi va ularni **iste'mol narxlari indeksi (ISN)** ga birlashtiradi. Har bir mahsulotning indeksdagi og'irligi oilalar xarajatlarida uning ulushiga qarab belgilanadi: non va go'shtning og'irligi, masalan, zargarlik buyumlarinikidan katta.
+## Qanday o'lchanadi?
 
-## Nima uchun maosh oshsa ham "yetmaydi"?
+Statistika xodimlari har oy do'kon va bozorlarda narxlarni yozib boradi. Ulardan bitta raqam chiqariladi. Bu raqam **iste'mol narxlari indeksi** deyiladi.
 
-Maosh 15% oshgan, narxlar esa 12% oshgan bo'lsa, **real** maosh atigi taxminan 3% ga oshgan bo'ladi. Shuning uchun nominal (yozilgan) summa emas, inflyatsiyadan tozalangan real o'zgarish muhim.
+## Maosh oshdi, lekin yetmayapti — nega?
 
-## Amaliy maslahat
+Maoshingiz 15% oshdi. Narxlar esa 12% oshdi. Demak, aslida maoshingiz atigi 3% ga oshgan. Buni **real** o'sish deyiladi.
 
-- Omonat yoki kredit foizini inflyatsiya bilan solishtiring: foiz inflyatsiyadan past bo'lsa, omonat real qiymatini yo'qotadi.
-- Uzoq muddatli rejalarni (ijara, ta'lim to'lovi) inflyatsiyani hisobga olib tuzing.
-- Saytdagi inflyatsiya kalkulyatori bilan o'tgan yillardagi summani bugungi narxlarga o'tkazib ko'ring.""",
+## Foydali maslahatlar
+
+- Omonat foizi inflyatsiyadan past bo'lsa, pulingiz qadrsizlanadi.
+- Katta xarajatlarni rejalashtirganda narxlar oshishini hisobga oling.
+- Saytdagi inflyatsiya kalkulyatorida eski summani bugungi narxga o'tkazib ko'ring.""",
     },
     {
         "slug": "iste-mol-narxlari-indeksi",
         "topic": "prices",
-        "minutes": 5,
-        "title_uz": "Iste'mol narxlari indeksi qanday hisoblanadi?",
+        "minutes": 2,
+        "title_uz": "Narxlar indeksi qanday hisoblanadi?",
         "title_ru": "Как рассчитывается индекс потребительских цен?",
-        "summary_uz": "\"Iste'mol savati\", mahsulot og'irliklari va nima uchun sizning shaxsiy inflyatsiyangiz rasmiy raqamdan farq qilishi mumkin.",
+        "summary_uz": "\"Iste'mol savati\" nima va nega sizning inflyatsiyangiz rasmiy raqamdan farq qilishi mumkin.",
         "summary_ru": "«Потребительская корзина», веса товаров и почему ваша личная инфляция может отличаться от официальной.",
         "related": [{"label": "Inflyatsiya kalkulyatori", "to": "/cpi-calculator"}],
-        "body_uz": """**Iste'mol narxlari indeksi (ISN, inglizcha CPI)** — oilalar sotib oladigan tovar va xizmatlar to'plami narxining tanlangan bazaviy davrga nisbatan o'zgarishi.
+        "body_uz": """**Iste'mol narxlari indeksi (ISN)** — oilalar sotib oladigan narsalar qanchaga qimmatlashganini ko'rsatadi.
 
-## Uch bosqich
+## Uch qadam
 
-1. **Savat tanlanadi.** Uy xo'jaliklari byudjeti so'rovlari asosida oilalar eng ko'p pul sarflaydigan tovar va xizmatlar ro'yxati tuziladi: oziq-ovqat, kiyim, kommunal xizmatlar, transport, ta'lim va hokazo.
-2. **Narxlar yig'iladi.** Har oy turli hududlardagi do'kon va bozorlardan bir xil mahsulotlarning narxi qayd etiladi.
-3. **Og'irliklar qo'llanadi.** Har bir mahsulot narxining o'zgarishi oilalar xarajatlaridagi ulushiga ko'paytiriladi va yig'iladi.
+1. **Savat tuziladi.** Oilalar nimaga ko'p pul sarflashi aniqlanadi: oziq-ovqat, kiyim, kommunal, transport, o'qish.
+2. **Narxlar yoziladi.** Har oy turli shaharlardagi do'kon va bozorlarda bir xil mahsulotlar narxi yoziladi.
+3. **Hisoblanadi.** Ko'p pul ketadigan narsalar natijaga ko'proq ta'sir qiladi. Masalan, non zargarlik buyumidan muhimroq.
 
-## Indeksni o'qish
+## Raqamni qanday o'qish kerak?
 
-Indeks 100 dan yuqori bo'lsa narxlar bazaviy davrga nisbatan oshgan. Masalan, 108,5 — narxlar 8,5% oshgan degani (shartli misol).
+100 — narxlar o'zgarmagan.
+108 — narxlar 8% oshgan.
+95 — narxlar 5% arzonlagan.
 
-## Nega sizning inflyatsiyangiz boshqacha?
+## Nega sizda boshqacha?
 
-Rasmiy indeks "o'rtacha oila" savati bo'yicha. Agar oilangiz daromadining katta qismini, masalan, ijaraga sarflasa va ijara narxi tez o'sayotgan bo'lsa, sizning shaxsiy inflyatsiyangiz rasmiy ko'rsatkichdan yuqori bo'ladi. Saytdagi "savat" kalkulyatorida o'z savatingizni tuzib ko'rishingiz mumkin.""",
+Rasmiy raqam "o'rtacha oila" uchun. Agar siz pulingizning ko'p qismini ijaraga bersangiz va ijara tez qimmatlashsa, sizning inflyatsiyangiz kattaroq bo'ladi.""",
     },
     {
         "slug": "yaim-qanday-hisoblanadi",
         "topic": "economy",
-        "minutes": 5,
-        "title_uz": "Yalpi ichki mahsulot (YaIM) qanday hisoblanadi?",
+        "minutes": 2,
+        "title_uz": "YaIM nima?",
         "title_ru": "Как рассчитывается валовой внутренний продукт (ВВП)?",
-        "summary_uz": "Iqtisodiyot hajmini o'lchashning uch usuli, nominal va real YaIM, nima uchun aholi jon boshiga hisoblash muhim.",
+        "summary_uz": "Mamlakat bir yilda qancha narsa ishlab chiqardi? YaIM shuni ko'rsatadi.",
         "summary_ru": "Три способа измерить размер экономики, номинальный и реальный ВВП, почему важен расчёт на душу населения.",
-        "related": [{"label": "Hududlar profili", "to": "/regions"}],
-        "body_uz": """**YaIM** — mamlakat hududida ma'lum davr (chorak yoki yil) davomida ishlab chiqarilgan barcha yakuniy tovar va xizmatlarning bozor qiymati.
+        "related": [{"label": "Hududlar xaritasi", "to": "/regions"}],
+        "body_uz": """**YaIM (yalpi ichki mahsulot)** — mamlakatda bir yilda yoki bir chorakda yaratilgan barcha mahsulot va xizmatlarning qiymati.
 
-## Uch usul — bitta natija
+Oddiy qilib aytganda: YaIM — iqtisodiyotning kattaligi.
 
-- **Ishlab chiqarish usuli:** har bir tarmoq yaratgan qo'shilgan qiymat (sotuv minus xom ashyo va xizmatlar xarajati) yig'iladi.
-- **Daromadlar usuli:** ish haqi, korxonalar foydasi va soliqlar yig'iladi.
-- **Xarajatlar usuli:** uy xo'jaliklari iste'moli, investitsiyalar, davlat xarajatlari va sof eksport yig'iladi.
+## Nima kiradi?
 
-Nazariy jihatdan uch usul bir xil natija beradi; amalda farqlar statistik tuzatishlar bilan muvofiqlashtiriladi.
+Zavodda ishlab chiqarilgan mahsulot, dalada yetishtirilgan hosil, sartaroshning xizmati, taksining xizmati — hammasi.
 
 ## Nominal va real
 
-Nominal YaIM joriy narxlarda hisoblanadi, shuning uchun narxlar oshsa, ishlab chiqarish o'zgarmasa ham u o'sadi. **Real YaIM** narxlar o'zgarishidan tozalanadi va iqtisodiyot haqiqatan qancha ko'p mahsulot ishlab chiqarganini ko'rsatadi. Iqtisodiy o'sish haqida gap ketganda odatda real o'sish nazarda tutiladi.
+- **Nominal YaIM** — bugungi narxlarda. Narxlar oshsa, u ham oshadi.
+- **Real YaIM** — narxlar oshishi olib tashlangan. U iqtisodiyot haqiqatan o'sganmi, shuni ko'rsatadi.
+
+"Iqtisodiyot 6% o'sdi" deyilsa, odatda real o'sish nazarda tutiladi.
 
 ## Aholi jon boshiga
 
-Katta mamlakatda YaIM katta bo'lishi tabiiy. Turmush darajasini solishtirish uchun YaIM aholi soniga bo'linadi. Hududlar uchun xuddi shu ko'rsatkich **YaHM** (yalpi hududiy mahsulot) deyiladi.""",
+Katta mamlakatda YaIM ham katta bo'ladi. Shuning uchun YaIMni aholi soniga bo'lib solishtiriladi. Viloyatlar uchun bu **YaHM** deyiladi.""",
     },
     {
         "slug": "yahm-va-hududlar",
         "topic": "economy",
-        "minutes": 3,
-        "title_uz": "Yalpi hududiy mahsulot: hududlar iqtisodiyotini qanday solishtirish mumkin?",
+        "minutes": 2,
+        "title_uz": "Viloyatlar iqtisodiyotini qanday solishtirish mumkin?",
         "title_ru": "Валовой региональный продукт: как сравнивать экономику регионов?",
-        "summary_uz": "YaHM nima, nega poytaxt ko'rsatkichi yuqori va hududlarni solishtirishda nimalarga e'tibor berish kerak.",
+        "summary_uz": "YaHM nima va viloyatlarni solishtirishda nimaga e'tibor berish kerak.",
         "summary_ru": "Что такое ВРП, почему у столицы он выше и на что обращать внимание при сравнении регионов.",
-        "related": [{"label": "Hududlar profili", "to": "/regions"}],
-        "body_uz": """**Yalpi hududiy mahsulot (YaHM)** — viloyat yoki shahar hududida yaratilgan qo'shilgan qiymat. Barcha hududlar YaHM ining yig'indisi mamlakat YaIM iga yaqin bo'ladi.
+        "related": [{"label": "Hududlar xaritasi", "to": "/regions"}],
+        "body_uz": """**YaHM (yalpi hududiy mahsulot)** — bitta viloyatda yaratilgan mahsulot va xizmatlar qiymati. Bu viloyatning YaIMi.
 
-## Solishtirishda e'tibor bering
+## Solishtirishda 3 ta qoida
 
-- **Aholi jon boshiga** hisoblang: aholisi ko'p hududning umumiy YaHM i katta bo'lishi tabiiy.
-- **Tarmoq tuzilmasi:** sanoat yoki tog'-kon korxonalari joylashgan hududda YaHM yuqori bo'lishi mumkin, lekin bu aholining daromadi ham shunchalik yuqori degani emas.
-- **Bosh ofislar effekti:** yirik kompaniyalar bosh ofisi joylashgan shaharda (odatda poytaxtda) qo'shilgan qiymat ko'proq qayd etiladi.
+- **Aholi soniga bo'ling.** Aholisi ko'p viloyatda YaHM katta bo'lishi tabiiy.
+- **Zavod va konlarga qarang.** Katta zavod bor viloyatda YaHM yuqori bo'ladi. Lekin odamlar daromadi ham yuqori degani emas.
+- **Poytaxt alohida.** Katta kompaniyalar ofisi Toshkentda, shuning uchun poytaxt raqami yuqori chiqadi.
 
-Hududiy profil sahifasida YaHM ni ish haqi, ishsizlik va boshqa ko'rsatkichlar bilan birga ko'ring — bitta ko'rsatkich to'liq manzara bermaydi.""",
+Bitta raqamga qarab xulosa qilmang. Hududlar xaritasida ish haqi, ishsizlik va aholini ham ko'ring.""",
     },
     {
         "slug": "ishsizlik-darajasi",
         "topic": "labour",
-        "minutes": 4,
-        "title_uz": "Ishsizlik darajasi: kim ishsiz hisoblanadi?",
+        "minutes": 2,
+        "title_uz": "Kim ishsiz hisoblanadi?",
         "title_ru": "Уровень безработицы: кто считается безработным?",
-        "summary_uz": "Iqtisodiy faol aholi, ishsizlik ta'rifi va nima uchun ishlamayotgan har bir kishi ham ishsiz emas.",
+        "summary_uz": "Ishlamayotgan har bir odam ishsiz emas. Farqi nimada?",
         "summary_ru": "Экономически активное население, определение безработицы и почему не каждый неработающий — безработный.",
-        "related": [{"label": "Hududlar profili", "to": "/regions"}],
-        "body_uz": """Xalqaro mehnat tashkiloti ta'rifiga ko'ra **ishsiz** — bu:
+        "related": [{"label": "Hududlar xaritasi", "to": "/regions"}],
+        "body_uz": """Odam **ishsiz** hisoblanishi uchun uch shart bor:
 
-1. so'nggi haftada ishi bo'lmagan,
-2. faol ish qidirgan,
-3. yaqin ikki hafta ichida ishga chiqishga tayyor bo'lgan kishi.
+1. Hozir ishi yo'q.
+2. Ish qidiryapti.
+3. Ish topilsa, yaqin ikki haftada chiqishga tayyor.
 
-## Ishsizlik darajasi
+## Kim ishsiz emas?
 
-Ishsizlik darajasi = ishsizlar soni ÷ **iqtisodiy faol aholi** × 100. Iqtisodiy faol aholi — band (ishlayotgan) va ishsizlar yig'indisi.
+Talaba, nafaqaxo'r, uy bekasi, ish qidirmayotgan odam — ular ishsiz emas. Ular hisobga umuman kirmaydi.
 
-## Kimlar hisobga kirmaydi?
+## Ishsizlik darajasi qanday hisoblanadi?
 
-Talabalar, nafaqaxo'rlar, uy bekalari va ish qidirmayotganlar iqtisodiy **nofaol** hisoblanadi. Shuning uchun ishlamayotgan har bir kishi ishsiz emas.
+Ishlayotganlar va ish qidirayotganlar birga olinadi. Shulardan necha foizi ish qidirayotgan bo'lsa — bu ishsizlik darajasi.
 
-## Qanday aniqlanadi?
+Masalan: 100 kishidan 94 tasi ishlaydi, 6 tasi ish qidiryapti. Ishsizlik — 6%.
 
-Ishsizlik asosan **uy xo'jaliklari tanlanma so'rovi** (ishchi kuchi so'rovi) orqali baholanadi: tasodifiy tanlangan oilalar bilan suhbat o'tkaziladi va natija butun aholiga tarqatiladi. Bandlik organlarida ro'yxatdan o'tganlar soni odatda haqiqiy ishsizlardan kam bo'ladi, chunki hamma ham ro'yxatdan o'tmaydi.""",
+## Ma'lumot qayerdan olinadi?
+
+Tasodifiy tanlangan oilalardan so'raladi. Bandlik markazida ro'yxatdagilar soni odatda kamroq chiqadi, chunki hamma ham u yerga bormaydi.""",
     },
     {
         "slug": "o-rtacha-va-median-ish-haqi",
         "topic": "labour",
-        "minutes": 4,
-        "title_uz": "O'rtacha va median ish haqi: qaysi biri haqiqatga yaqin?",
+        "minutes": 2,
+        "title_uz": "O'rtacha maosh va median: farqi nima?",
         "title_ru": "Средняя и медианная зарплата: какая ближе к реальности?",
-        "summary_uz": "Nima uchun ko'pchilik \"o'rtacha maosh\"dan kam oladi va median nimani ko'rsatadi.",
+        "summary_uz": "Nega ko'pchilik \"o'rtacha maosh\"dan kam oladi?",
         "summary_ru": "Почему большинство получает меньше «средней зарплаты» и что показывает медиана.",
         "related": [{"label": "Mening maoshim", "to": "/my-salary"}],
-        "body_uz": """**O'rtacha ish haqi** — barcha xodimlar maoshi yig'indisi xodimlar soniga bo'linadi. **Median** — xodimlarni maoshi bo'yicha tartiblaganda o'rtada turgan kishining maoshi: yarmi undan kam, yarmi ko'p oladi.
+        "body_uz": """**O'rtacha maosh** — hamma maoshlar qo'shiladi va odamlar soniga bo'linadi.
 
-## Nega ular farq qiladi?
+**Median** — hammani maoshi bo'yicha qatorga tizsak, o'rtada turgan odamning maoshi. Yarmi undan kam, yarmi ko'p oladi.
 
-Oz sonli juda yuqori maoshlar o'rtachani yuqoriga tortadi. Masalan, 9 kishi 3 mln, 1 kishi 30 mln so'm olsa, o'rtacha 5,7 mln, median esa 3 mln bo'ladi (shartli misol). Ko'pchilik uchun median "odatiy" maoshni yaxshiroq ko'rsatadi.
+## Misol
 
-## Kvartillar va persentillar
+10 kishi bor. 9 tasi 3 mln so'm oladi, bittasi 30 mln.
 
-- **25-persentil (p25):** xodimlarning chorak qismi bundan kam oladi.
-- **75-persentil (p75):** xodimlarning to'rtdan uch qismi bundan kam oladi.
-- **90-persentil (p90):** eng yuqori maoshli 10% ning chegarasi.
+- O'rtacha maosh — 5,7 mln.
+- Median — 3 mln.
 
-"Mening maoshim" sahifasida maoshingizni hudud va tarmoq taqsimoti bilan solishtiring — kiritgan summangiz serverga yuborilmaydi.""",
+Ko'rdingizmi? Bitta katta maosh o'rtachani yuqoriga tortdi. Lekin 10 kishidan 9 tasi 3 mln oladi. Shuning uchun median hayotga yaqinroq.
+
+(Raqamlar shunchaki misol.)
+
+## O'zingizni solishtiring
+
+"Mening maoshim" sahifasida maoshingizni boshqalar bilan solishtiring. Siz yozgan summa serverga yuborilmaydi.""",
     },
     {
         "slug": "aholi-soni-qanday-aniqlanadi",
         "topic": "population",
-        "minutes": 4,
+        "minutes": 2,
         "title_uz": "Aholi soni qanday aniqlanadi?",
         "title_ru": "Как определяется численность населения?",
-        "summary_uz": "Ro'yxatga olish, joriy hisob va demografik balans: tug'ilish, o'lim va migratsiya.",
+        "summary_uz": "Uyma-uy ro'yxat va har yilgi hisob: tug'ilganlar, vafot etganlar, kelganlar va ketganlar.",
         "summary_ru": "Перепись, текущий учёт и демографический баланс: рождаемость, смертность и миграция.",
         "related": [{"label": "Demografiya", "to": "/demographics"}],
         "body_uz": """Aholi soni ikki yo'l bilan aniqlanadi.
 
 ## 1. Aholini ro'yxatga olish
 
-Har bir xonadonga borib, barcha yashovchilar haqida ma'lumot yig'iladi. Bu eng aniq, lekin juda qimmat usul, shuning uchun odatda o'n yilda bir marta o'tkaziladi.
+Har bir uyga borib, unda kim yashashi yoziladi. Bu eng aniq yo'l. Lekin qimmat, shuning uchun taxminan 10 yilda bir marta o'tkaziladi.
 
-## 2. Joriy hisob (demografik balans)
+## 2. Har yilgi hisob
 
-Ro'yxatga olishlar oralig'ida aholi soni har yili hisoblab boriladi:
+Qolgan yillarda aholi soni oddiy hisob bilan topiladi:
 
-**Yil oxiridagi aholi = yil boshidagi aholi + tug'ilganlar − vafot etganlar + kelganlar − ketganlar**
+**Yil boshidagi aholi + tug'ilganlar − vafot etganlar + ko'chib kelganlar − ko'chib ketganlar**
 
-Tug'ilish va o'lim FHDYo organlari qaydlaridan, migratsiya esa doimiy yashash joyi bo'yicha ro'yxatga olish ma'lumotlaridan olinadi.
-
-## Doimiy va mavjud aholi
-
-Statistikada **doimiy aholi** (shu yerda doimiy yashaydiganlar) va **mavjud aholi** (hisob paytida shu yerda bo'lganlar) farqlanadi. Vaqtincha chet elda ishlayotganlar qaysi toifaga kirishi metodologiyada aniq belgilanadi.""",
+Tug'ilish va o'lim FHDYo (ZAGS) yozuvlaridan olinadi. Ko'chib kelish va ketish — propiska ma'lumotlaridan.""",
     },
     {
         "slug": "tug-ilish-koeffitsienti",
         "topic": "population",
-        "minutes": 3,
+        "minutes": 2,
         "title_uz": "Tug'ilish koeffitsienti nima?",
         "title_ru": "Что такое коэффициент рождаемости?",
-        "summary_uz": "Umumiy tug'ilish koeffitsienti va jami tug'ilish koeffitsienti o'rtasidagi farq.",
+        "summary_uz": "Tug'ilishni o'lchashning ikki usuli va ularning farqi.",
         "summary_ru": "Разница между общим коэффициентом рождаемости и суммарным коэффициентом рождаемости.",
         "related": [{"label": "Demografiya", "to": "/demographics"}],
-        "body_uz": """**Umumiy tug'ilish koeffitsienti** — yil davomida tug'ilganlar sonining har 1000 aholiga nisbati. U oddiy, lekin aholining yosh tarkibiga bog'liq: yoshlar ko'p hududda koeffitsient yuqori bo'ladi.
+        "body_uz": """Tug'ilishni ikki xil o'lchash mumkin.
 
-**Jami tug'ilish koeffitsienti** — bir ayol butun reproduktiv yoshi davomida (shu yildagi yoshga xos tug'ilish darajalari saqlansa) o'rtacha nechta farzand ko'rishini ko'rsatadi. Aholining o'z o'rnini to'ldirishi uchun bu ko'rsatkich taxminan 2,1 bo'lishi kerak deb hisoblanadi.
+## 1. Har 1000 kishiga nechta bola
 
-Hududlarni solishtirishda yosh tarkibiga bog'liq bo'lmagan jami koeffitsientdan foydalangan ma'qul.""",
+Bir yilda tug'ilgan bolalar soni har 1000 aholiga hisoblanadi. Bu **umumiy tug'ilish koeffitsienti**.
+
+Kamchiligi: yoshlar ko'p joyda bu raqam o'z-o'zidan yuqori chiqadi.
+
+## 2. Bir ayolga nechta bola
+
+Bir ayol hayoti davomida o'rtacha nechta farzand ko'rishi hisoblanadi. Bu **jami tug'ilish koeffitsienti**.
+
+Agar bu raqam taxminan 2,1 bo'lsa, aholi soni o'zgarmay turadi. Undan ko'p bo'lsa — aholi ko'payadi.
+
+Viloyatlarni solishtirish uchun ikkinchi usul yaxshiroq.""",
     },
     {
         "slug": "tashqi-savdo-saldosi",
         "topic": "economy",
-        "minutes": 3,
-        "title_uz": "Tashqi savdo saldosi: kamomad yomonmi?",
+        "minutes": 2,
+        "title_uz": "Eksport, import va savdo saldosi",
         "title_ru": "Сальдо внешней торговли: плох ли дефицит?",
-        "summary_uz": "Eksport, import, saldo va savdo kamomadini qanday talqin qilish kerak.",
+        "summary_uz": "Chetga sotganimizdan ko'p sotib olsak — bu yomonmi?",
         "summary_ru": "Экспорт, импорт, сальдо и как интерпретировать торговый дефицит.",
         "related": [{"label": "Savdo oqimlari", "to": "/trade-flows"}, {"label": "Bozor tahlili", "to": "/market-report"}],
-        "body_uz": """**Tashqi savdo saldosi** = eksport − import. Musbat saldo — profitsit, manfiy — kamomad (defitsit).
+        "body_uz": """- **Eksport** — chet elga sotganimiz.
+- **Import** — chet eldan sotib olganimiz.
+- **Saldo** — eksportdan importni ayiramiz.
 
-## Kamomad har doim yomon emasmi?
+Saldo musbat bo'lsa — ko'proq sotganmiz. Manfiy bo'lsa — ko'proq sotib olganmiz. Buni **kamomad** deyiladi.
 
-Yo'q. Rivojlanayotgan iqtisodiyot ko'pincha uskunalar va texnologiyalarni import qiladi — bu kelajakda ishlab chiqarishni oshiradi. Muhimi, import nimadan iborat: iste'mol tovarlari yoki investitsion tovarlar.
+## Kamomad yomonmi?
 
-## Qanday hisoblanadi?
+Har doim emas. Agar chetdan zavod uskunalari olib kelinsa, keyinchalik ular ko'proq mahsulot ishlab chiqaradi. Muhimi — nima sotib olinyapti.
 
-Bojxona deklaratsiyalari asosida tovarlar HS (TN VED) kodlari bo'yicha qayd etiladi; qiymat odatda AQSh dollarida beriladi. Xizmatlar savdosi (turizm, transport) alohida hisobga olinadi.
+## Ma'lumot qayerdan?
 
-Saytdagi "Bozor tahlili" sahifasida istalgan mahsulot bo'yicha eksport, import va asosiy hamkor davlatlarni ko'rishingiz mumkin.""",
+Chegaradan o'tgan har bir yuk bojxonada yoziladi. Har bir mahsulotning o'z kodi bor (masalan, paxta tolasi — 5201).
+
+Saytdagi "Bozor tahlili" sahifasida istalgan mahsulotni kim sotib olishini va kim sotishini ko'ring.""",
     },
     {
         "slug": "tanlanma-kuzatuv",
         "topic": "methods",
-        "minutes": 4,
-        "title_uz": "Tanlanma kuzatuv: nega hammadan so'ramasa ham bo'ladi?",
+        "minutes": 2,
+        "title_uz": "Nega hammadan so'ramasa ham bo'ladi?",
         "title_ru": "Выборочное наблюдение: почему не нужно опрашивать всех?",
-        "summary_uz": "Tasodifiy tanlov, xatolik chegarasi va so'rovnoma natijalariga qanchalik ishonish mumkin.",
+        "summary_uz": "Bir necha ming kishidan so'rab, butun mamlakat haqida bilish mumkin. Qanday qilib?",
         "summary_ru": "Случайный отбор, предел погрешности и насколько можно доверять результатам опросов.",
         "related": [{"label": "So'rovnomalar", "to": "/surveys"}],
-        "body_uz": """Butun aholini so'rash qimmat va uzoq. **Tanlanma kuzatuvda** aholining kichik, lekin to'g'ri tanlangan qismi so'raladi va natija butun aholiga tarqatiladi.
+        "body_uz": """Qozondagi oshning tuzini bilish uchun hammasini yeyish shart emas. Bir qoshiq yetadi — agar yaxshilab aralashtirilgan bo'lsa.
 
-## Tanlov tasodifiy bo'lishi kerak
+Statistika ham shunday. Hammadan emas, bir qismidan so'raladi. Bu **tanlanma kuzatuv** deyiladi.
 
-Agar faqat internetdan foydalanadiganlar yoki faqat shahar aholisi so'ralsa, natija qiyshiq bo'ladi. Shuning uchun hudud, shahar/qishloq, yosh va jins bo'yicha muvozanatlangan tasodifiy tanlov qo'llanadi.
+## Asosiy shart — tasodifiy tanlash
 
-## Xatolik chegarasi
+Faqat shaharliklardan yoki faqat yoshlardan so'ralsa, natija noto'g'ri chiqadi. Shuning uchun turli viloyat, shahar va qishloq, yosh va keksa odamlar tasodifiy tanlanadi.
 
-Tanlanma natijasi taxmin: masalan, "45% ± 3%" degani haqiqiy qiymat katta ehtimol bilan 42–48% oralig'ida (shartli misol). Tanlanma kattalashgan sari xatolik kamayadi.
+## "± 3%" nima degani?
 
-## Saytdagi so'rovnomalar haqida
+Natija aniq emas, taxmin. "45% ± 3%" — haqiqiy raqam 42% bilan 48% orasida degani. Ko'proq odamdan so'ralsa, xato kichrayadi.
 
-Saytdagi so'rovnomalarda qatnashuvchilar o'zlari qatnashadi, ya'ni tanlov tasodifiy emas — natijalar fikrlarni ko'rsatadi, lekin rasmiy statistika o'rnini bosmaydi.""",
+## Saytdagi so'rovnomalar
+
+Saytdagi so'rovnomalarda istagan odam qatnashadi. Shuning uchun ular fikrlarni ko'rsatadi, lekin rasmiy statistika emas.""",
     },
     {
         "slug": "mavsumiy-tuzatish",
         "topic": "methods",
-        "minutes": 3,
-        "title_uz": "Mavsumiy tuzatish: nega oyma-oy solishtirish chalg'itishi mumkin?",
+        "minutes": 2,
+        "title_uz": "Nega dekabrni noyabr bilan solishtirib bo'lmaydi?",
         "title_ru": "Сезонная корректировка: почему помесячные сравнения могут вводить в заблуждение?",
-        "summary_uz": "Mavsumiylik, o'tgan yilning shu davri bilan solishtirish va kumulyativ ko'rsatkichlar.",
+        "summary_uz": "Fasllar raqamlarga ta'sir qiladi. To'g'ri solishtirish yo'li.",
         "summary_ru": "Сезонность, сравнение с аналогичным периодом прошлого года и накопительные показатели.",
         "related": [{"label": "Savdo oqimlari", "to": "/trade-flows"}],
-        "body_uz": """Ko'p ko'rsatkichlar yil fasliga bog'liq: qishloq xo'jaligi mahsulotlari kuzda ko'payadi, qurilish yozda faol, chakana savdo bayram oylarida o'sadi. Shuning uchun dekabrni noyabr bilan solishtirish noto'g'ri xulosaga olib kelishi mumkin.
+        "body_uz": """Ko'p narsa faslga bog'liq:
 
-## Ikki to'g'ri yo'l
+- kuzda hosil ko'p,
+- yozda qurilish ko'p,
+- bayram oldidan savdo ko'p.
 
-1. **O'tgan yilning shu davri bilan solishtirish** (masalan, 2025-yil yanvar–sentabr va 2024-yil yanvar–sentabr). Saytdagi tashqi savdo sahifalari shu usulni ishlatadi.
-2. **Mavsumiy tuzatilgan qatorlar** — maxsus usullar bilan mavsumiy tebranish olib tashlanadi.
+Shuning uchun "dekabrda savdo noyabrdan oshdi" degani hali yaxshi yangilik emas. Har yili shunday bo'ladi.
 
-## Kumulyativ ma'lumot
+## To'g'ri solishtirish
 
-Ba'zi ko'rsatkichlar yil boshidan boshlab yig'ilib boradi ("yanvar–mart"). Bunday ma'lumotda mart oyining o'zini topish uchun yanvar–mart dan yanvar–fevral ayiriladi.""",
+**O'tgan yilning shu oyi bilan solishtiring.** Masalan, bu yilgi dekabrni o'tgan yilgi dekabr bilan.
+
+## "Yanvar–mart" nima degani?
+
+Ba'zi raqamlar yil boshidan yig'ilib boradi. "Yanvar–mart" — uch oyning jami. Faqat martni bilish uchun "yanvar–mart"dan "yanvar–fevral"ni ayiring.""",
     },
     {
         "slug": "grafikni-to-g-ri-o-qish",
         "topic": "methods",
-        "minutes": 4,
-        "title_uz": "Statistik grafikni qanday to'g'ri o'qish kerak?",
+        "minutes": 2,
+        "title_uz": "Grafikni qanday to'g'ri o'qish kerak?",
         "title_ru": "Как правильно читать статистический график?",
-        "summary_uz": "O'qlar, birliklar, foiz va foiz punkti, korrelyatsiya va sabab — oddiy qoidalar.",
+        "summary_uz": "Grafik sizni aldamasligi uchun 5 ta oddiy qoida.",
         "summary_ru": "Оси, единицы измерения, процент и процентный пункт, корреляция и причинность — простые правила.",
         "related": [{"label": "Lug'at", "to": "/glossary"}],
-        "body_uz": """## 1. O'qlarga qarang
+        "body_uz": """## 1. Chap tomondagi raqamlarga qarang
 
-Vertikal o'q noldan boshlanmasa, kichik farq katta bo'lib ko'rinadi. Avval o'q qayerdan boshlanishini tekshiring.
+Ular noldan boshlanmasa, kichik farq ham katta bo'lib ko'rinadi.
 
-## 2. Birliklarni tekshiring
+## 2. O'lchov birligini o'qing
 
-"Ming so'm", "mln AQSh $", "ming tonna" — birlik noto'g'ri o'qilsa, raqam ming marta adashadi.
+"Ming so'm" yoki "mln so'm"? Bitta so'zni o'tkazib yuborsangiz, ming marta adashasiz.
 
 ## 3. Foiz va foiz punkti
 
-Ishsizlik 8% dan 6% ga tushsa, bu **2 foiz punkti**, lekin **25%** ga kamayish (shartli misol). Ikkalasini aralashtirmang.
+Ishsizlik 8% dan 6% ga tushdi. Bu **2 foiz punkti** kamaygani. Lekin **25%** ga kamaygani ham to'g'ri. Ikkalasini chalkashtirmang.
 
-## 4. Korrelyatsiya — sabab emas
+## 4. Birga o'sish — sabab emas
 
-Ikki ko'rsatkich birga o'sishi biri ikkinchisini keltirib chiqaradi degani emas. Ko'pincha ularning ikkalasiga ta'sir qiladigan uchinchi omil bo'ladi.
+Yozda muzqaymoq ham, suvga cho'kish ham ko'payadi. Lekin muzqaymoq bunga sabab emas — sabab issiq havo.
 
-## 5. Manba va davrni tekshiring
+## 5. Manba va sanani tekshiring
 
-Raqam qaysi davr uchun (yil, chorak, kumulyativ), qaysi hudud bo'yicha va kim tomonidan e'lon qilinganiga qarang. Saytda namuna ma'lumotlar alohida "Namuna" belgisi bilan ko'rsatiladi.""",
+Raqam qaysi yil uchun? Qaysi hudud uchun? Kim e'lon qilgan? Saytda sinov raqamlari "Namuna" belgisi bilan ko'rsatiladi.""",
     },
 ]
 

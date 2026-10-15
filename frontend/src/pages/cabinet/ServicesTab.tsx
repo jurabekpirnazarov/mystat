@@ -108,12 +108,12 @@ export default function ServicesTab({ userPackageServices, packageItemsLoading, 
                                 Limit: {item.limit}
                               </span>
                             ) : (
-                              <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded text-sm font-medium">
+                              <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded text-sm font-medium">
                                 Cheksiz
                               </span>
                             )}
                             <div className="mt-2">
-                              <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
+                              <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
                                 Faol
                               </span>
                             </div>

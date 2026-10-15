@@ -84,7 +84,7 @@ export default function CitizenQuestions() {
             <li key={q.id} className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
               <div className="flex flex-wrap justify-between gap-2 text-xs text-gray-500">
                 <span>{q.category_label}{q.region_name ? ` · ${q.region_name}` : ""} · {formatDateTime(q.created_at, false)}</span>
-                <span className={q.status === "answered" ? "text-emerald-600" : q.status === "rejected" ? "text-red-600" : ""}>{q.status_label}</span>
+                <span className={q.status === "answered" ? "text-emerald-700" : q.status === "rejected" ? "text-red-600" : ""}>{q.status_label}</span>
               </div>
               <p className="mt-1 text-gray-900 dark:text-white">{q.question}</p>
               {q.answer && <p className="mt-2 rounded-lg bg-gray-50 dark:bg-gray-900/40 p-3 text-sm text-gray-700 dark:text-gray-200">{q.answer}</p>}

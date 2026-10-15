@@ -22,7 +22,7 @@ function Card({ c }: { c: RegionCard }) {
       <p className="mt-1 text-xs text-gray-500">
         {c.change_pct !== null && <span className="mr-2">{c.change_pct >= 0 ? "+" : ""}{nf(c.change_pct)}% yil davomida</span>}
         {c.vs_average_pct !== null && (
-          <span className={`inline-flex items-center ${c.assessment === "good" ? "text-emerald-600" : c.assessment === "bad" ? "text-red-600" : ""}`}>
+          <span className={`inline-flex items-center ${c.assessment === "good" ? "text-emerald-700" : c.assessment === "bad" ? "text-red-600" : ""}`}>
             {c.vs_average_pct >= 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
             {nf(Math.abs(c.vs_average_pct))}% {c.vs_average_pct >= 0 ? "yuqori" : "past"} (respublika o'rtachasidan)
           </span>

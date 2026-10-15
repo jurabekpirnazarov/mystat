@@ -129,7 +129,7 @@ const Interactive = () => {
                       <span
                         className={`font-bold ${
                           service.is_free
-                            ? "text-green-600"
+                            ? "text-green-700"
                             : "text-blue-600"
                         }`}
                       >

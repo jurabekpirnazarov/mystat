@@ -216,7 +216,7 @@ export default function TradeFlows() {
                           onClick={() => onSelect(c.country_id === countryId ? null : c.country_id)}
                           className={`cursor-pointer border-b border-gray-100 dark:border-gray-700/60 hover:bg-gray-50 dark:hover:bg-gray-700/40 ${c.country_id === countryId ? "bg-amber-50 dark:bg-amber-900/20" : ""}`}
                         >
-                          <td className="py-2 pr-2 text-gray-400 tabular-nums">{i + 1}</td>
+                          <td className="py-2 pr-2 text-gray-500 tabular-nums">{i + 1}</td>
                           <td className="py-2 pr-2 text-gray-900 dark:text-white">{c.country_name}</td>
                           <td className="py-2 pr-2 text-right tabular-nums text-gray-900 dark:text-white whitespace-nowrap">{fmt(c.value)}</td>
                           <td className="py-2 pr-2">
@@ -231,7 +231,7 @@ export default function TradeFlows() {
                             {c.change_pct === null ? (
                               <span className="text-gray-400">—</span>
                             ) : (
-                              <span className={`inline-flex items-center gap-0.5 ${c.change_pct >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                              <span className={`inline-flex items-center gap-0.5 ${c.change_pct >= 0 ? "text-emerald-700" : "text-red-600"}`}>
                                 {c.change_pct >= 0 ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
                                 {fmt(Math.abs(c.change_pct))}%
                               </span>

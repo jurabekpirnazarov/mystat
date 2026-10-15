@@ -921,14 +921,14 @@ const BookStore: React.FC = () => {
                               className="w-8 h-8 rounded-full bg-green-100 hover:bg-green-200 flex items-center justify-center transition-colors duration-200"
                               title="Miqdorni oshirish"
                             >
-                              <Plus className="w-4 h-4 text-green-600" />
+                              <Plus className="w-4 h-4 text-green-700" />
                             </button>
                           ) : (
                             <div
                               className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center"
                               title="Elektron kitob savatda"
                             >
-                              <CheckCircle className="w-4 h-4 text-green-600" />
+                              <CheckCircle className="w-4 h-4 text-green-700" />
                             </div>
                           )}
                         </div>
@@ -1188,7 +1188,7 @@ const BookStore: React.FC = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Jami summa:</span>
-                    <span className="font-semibold text-green-600">
+                    <span className="font-semibold text-green-700">
                       {formatPrice(parseInt(orderResponse.total_price))} so'm
                     </span>
                   </div>

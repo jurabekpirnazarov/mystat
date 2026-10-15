@@ -34,7 +34,7 @@ export default function OrdersTab({ bookOrders, serviceOrders }: Props) {
                     <div className="flex gap-2 mt-2">
                                                         {/* Payment Status */}
                       <span className={`px-3 py-1 rounded-full text-sm font-medium ${order.status === "paid"
-                          ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+                          ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
                           : order.status === "pending"
                             ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
                             : order.status === "cancelled"
@@ -52,7 +52,7 @@ export default function OrdersTab({ bookOrders, serviceOrders }: Props) {
                           : order.postal_status === "sent"
                             ? "bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"
                             : order.postal_status === "delivered"
-                              ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+                              ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
                               : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
                       }`}>
                         {order.postal_status === "processing" ? "Tayyorlanmoqda" :

@@ -83,7 +83,7 @@ const ServiceModal: React.FC<ModalProps> = ({
           )}
           {result && (
             <div className="bg-white rounded-xl shadow-xl px-8 py-6 text-center">
-              <span className={`block text-lg font-semibold mb-2 ${result.success ? "text-green-600" : "text-red-600"}`}>
+              <span className={`block text-lg font-semibold mb-2 ${result.success ? "text-green-700" : "text-red-600"}`}>
                 {result.message}
               </span>
               <button

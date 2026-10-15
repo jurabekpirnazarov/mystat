@@ -15,7 +15,7 @@ interface StatCardProps {
 
 export default function StatCard({ label, value, icon: Icon, change, hint, trend, className = "" }: StatCardProps) {
   const changeColor =
-    change === undefined ? "" : change >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400";
+    change === undefined ? "" : change >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-red-600 dark:text-red-400";
 
   return (
     <div className={`rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 ${className}`}>

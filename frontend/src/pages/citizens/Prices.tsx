@@ -72,7 +72,7 @@ export default function Prices() {
                       </div>
                       <p className="text-lg font-bold">{nf(p.price)} <span className="text-xs font-normal text-gray-500">so'm</span></p>
                       <p className="text-xs">
-                        <span className={(p.change_month_pct ?? 0) > 0 ? "text-red-600" : "text-emerald-600"}>{p.change_month_pct !== null ? `${p.change_month_pct > 0 ? "+" : ""}${p.change_month_pct}% oy` : ""}</span>
+                        <span className={(p.change_month_pct ?? 0) > 0 ? "text-red-600" : "text-emerald-700"}>{p.change_month_pct !== null ? `${p.change_month_pct > 0 ? "+" : ""}${p.change_month_pct}% oy` : ""}</span>
                         <span className="text-gray-500"> · {p.change_year_pct !== null ? `${p.change_year_pct > 0 ? "+" : ""}${p.change_year_pct}% yil` : ""}</span>
                       </p>
                     </button>

@@ -241,7 +241,7 @@ const BookOrder: React.FC<BookOrderProps> = ({
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Yetkazib berish</span>
-                  <span className="text-green-600">Bepul</span>
+                  <span className="text-green-700">Bepul</span>
                 </div>
                 <div className="border-t border-gray-200 pt-3 flex justify-between text-lg font-semibold">
                   <span>Jami</span>

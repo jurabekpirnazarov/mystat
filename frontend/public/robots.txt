@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /cabinet
+Disallow: /api/
+Allow: /

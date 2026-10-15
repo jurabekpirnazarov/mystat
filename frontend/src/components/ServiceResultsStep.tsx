@@ -222,12 +222,12 @@ const ServiceResultsStep = ({ onPrevious, tradeData, handleDownloadData }: Servi
             <div className="bg-green-50 p-4 rounded-lg border border-green-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-green-600 font-medium">Jami Qiymat</p>
+                  <p className="text-sm text-green-700 font-medium">Jami Qiymat</p>
                   <p className="text-2xl font-bold text-green-900">{formatNumber(totalSum)}</p>
-                  <p className="text-xs text-green-600">AQSh dollari</p>
+                  <p className="text-xs text-green-700">AQSh dollari</p>
                 </div>
                 <div className="bg-green-100 p-3 rounded-lg">
-                  <TrendingUp className="w-6 h-6 text-green-600" />
+                  <TrendingUp className="w-6 h-6 text-green-700" />
                 </div>
               </div>
             </div>

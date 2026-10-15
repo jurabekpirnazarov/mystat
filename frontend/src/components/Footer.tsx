@@ -106,6 +106,7 @@ const Footer = () => {
                 <a
                   href="https://www.facebook.com/uzstataxborot"
                   target="_blank"
+                  aria-label="Facebook"
                   rel="noopener noreferrer"
                   className="w-8 h-8 bg-blue-800/50 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors duration-200"
                 >
@@ -114,6 +115,7 @@ const Footer = () => {
                 <a
                   href="https://twitter.com/uzstataxborot"
                   target="_blank"
+                  aria-label="Twitter (X)"
                   rel="noopener noreferrer"
                   className="w-8 h-8 bg-blue-800/50 rounded-full flex items-center justify-center hover:bg-blue-400 transition-colors duration-200"
                 >
@@ -122,6 +124,7 @@ const Footer = () => {
                 <a
                   href="https://t.me/uzstataxborot"
                   target="_blank"
+                  aria-label="Telegram"
                   rel="noopener noreferrer"
                   className="w-8 h-8 bg-blue-800/50 rounded-full flex items-center justify-center hover:bg-cyan-500 transition-colors duration-200"
                 >
@@ -130,6 +133,7 @@ const Footer = () => {
                 <a
                   href="https://www.instagram.com/uzstataxborot?igsh=MWZ5OG10empwMGVqNg=="
                   target="_blank"
+                  aria-label="Instagram"
                   rel="noopener noreferrer"
                   className="w-8 h-8 bg-blue-800/50 rounded-full flex items-center justify-center hover:bg-pink-600 transition-colors duration-200"
                 >
@@ -138,6 +142,7 @@ const Footer = () => {
                 <a
                   href="https://stat.uz/uz/"
                   target="_blank"
+                  aria-label="stat.uz rasmiy sayti"
                   rel="noopener noreferrer"
                   className="w-8 h-8 bg-blue-800/50 rounded-full flex items-center justify-center hover:bg-green-600 transition-colors duration-200"
                 >
@@ -146,6 +151,7 @@ const Footer = () => {
                 <a
                   href="https://www.youtube.com/channel/UCiMwrLl7Cq_NrUv1L5ubNkw"
                   target="_blank"
+                  aria-label="YouTube"
                   rel="noopener noreferrer"
                   className="w-8 h-8 bg-blue-800/50 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
                 >
@@ -157,7 +163,7 @@ const Footer = () => {
             <div className="space-y-2">
               <div className="flex items-center space-x-4 text-sm text-gray-300">
                 <span>Sertifikatlar:</span>
-                <span className="bg-blue-600 px-2 py-1 rounded text-xs">
+                <span className="bg-blue-600 text-white px-2 py-1 rounded text-xs">
                   SSL Secured
                 </span>
               </div>

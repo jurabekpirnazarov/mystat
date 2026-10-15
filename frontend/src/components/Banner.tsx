@@ -168,9 +168,9 @@ const Banner = () => {
                     </div>
                   </div>
 
-                  <h3 className="text-2xl font-bold text-white dark:text-white mb-1">
+                  <p className="text-2xl font-bold text-white dark:text-white mb-1">
                     {stat.value}
-                  </h3>
+                  </p>
                   <p className="text-gray-300 dark:text-gray-400 text-sm">
                     {stat.title}
                   </p>

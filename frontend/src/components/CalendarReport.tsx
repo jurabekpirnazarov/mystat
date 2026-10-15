@@ -284,6 +284,7 @@ const CalendarReport: React.FC<ReportsCalendarProps> = () => {
               <div className="flex items-center justify-between">
                 <button
                   onClick={() => navigateMonth('prev')}
+                  aria-label="Oldingi oy"
                   className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                 >
                   <ChevronLeft className="w-5 h-5" />
@@ -293,6 +294,7 @@ const CalendarReport: React.FC<ReportsCalendarProps> = () => {
                 </h2>
                 <button
                   onClick={() => navigateMonth('next')}
+                  aria-label="Keyingi oy"
                   className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                 >
                   <ChevronRight className="w-5 h-5" />

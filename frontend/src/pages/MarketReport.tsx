@@ -28,7 +28,7 @@ function CountryTable({ title, rows, unit }: { title: string; rows: MarketCountr
                 <td className="py-1.5">{r.country}</td>
                 <td className="text-right tabular-nums">{nf(r.value, 1)}</td>
                 <td className="text-right tabular-nums">{nf(r.share, 1)}%</td>
-                <td className={`text-right tabular-nums ${r.change_pct !== null && r.change_pct < 0 ? "text-red-600" : "text-emerald-600"}`}>{pct(r.change_pct)}</td>
+                <td className={`text-right tabular-nums ${r.change_pct !== null && r.change_pct < 0 ? "text-red-600" : "text-emerald-700"}`}>{pct(r.change_pct)}</td>
               </tr>
             ))}
           </tbody>
@@ -215,8 +215,8 @@ export default function MarketReport() {
                     <p className="mt-2 text-xs text-gray-500">Herfindahl indeksi: hamkorlar ulushlari kvadratlari yig'indisi (0–10 000). 1500 dan past — eksport ko'p davlatga taqsimlangan, 2500 dan yuqori — bir-ikki davlatga bog'liq.</p>
                   </section>
                   <section className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
-                    <h3 className="font-semibold mb-2 flex items-center gap-1"><TrendingUp className="w-4 h-4 text-emerald-600" /> O'sayotgan bozorlar</h3>
-                    {(report.growing_markets ?? []).filter((g) => g.change_pct > 0).map((g) => <p key={g.country} className="text-sm flex justify-between"><span>{g.country}</span><span className="text-emerald-600">{pct(g.change_pct)}</span></p>)}
+                    <h3 className="font-semibold mb-2 flex items-center gap-1"><TrendingUp className="w-4 h-4 text-emerald-700" /> O'sayotgan bozorlar</h3>
+                    {(report.growing_markets ?? []).filter((g) => g.change_pct > 0).map((g) => <p key={g.country} className="text-sm flex justify-between"><span>{g.country}</span><span className="text-emerald-700">{pct(g.change_pct)}</span></p>)}
                   </section>
                   <section className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
                     <h3 className="font-semibold mb-2 flex items-center gap-1"><TrendingDown className="w-4 h-4 text-red-600" /> Qisqarayotgan bozorlar</h3>

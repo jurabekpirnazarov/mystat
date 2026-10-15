@@ -111,7 +111,7 @@ export default function MySalary() {
                 <h2 className="font-semibold mb-2">Yillar bo'yicha o'sish (median)</h2>
                 <ul className="space-y-1 text-sm">
                   {data.trend.map((t, i) => (
-                    <li key={t.year} className="flex justify-between"><span>{t.year}</span><span className="tabular-nums">{nf(t.median)} {i > 0 && <span className="text-xs text-emerald-600">+{(((t.median / data.trend[i - 1].median) - 1) * 100).toFixed(1)}%</span>}</span></li>
+                    <li key={t.year} className="flex justify-between"><span>{t.year}</span><span className="tabular-nums">{nf(t.median)} {i > 0 && <span className="text-xs text-emerald-700">+{(((t.median / data.trend[i - 1].median) - 1) * 100).toFixed(1)}%</span>}</span></li>
                   ))}
                 </ul>
               </section>

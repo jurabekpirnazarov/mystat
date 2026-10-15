@@ -187,6 +187,7 @@ const AllServices = () => {
               <div className="relative">
                 <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <select
+                  aria-label="Xizmat turi bo'yicha filtr"
                   value={priceFilter}
                   onChange={(e) => setPriceFilter(e.target.value)}
                   className="w-full pl-10 pr-8 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none cursor-pointer"
@@ -231,7 +232,7 @@ const AllServices = () => {
                   </span>
                   <button
                     onClick={() => setPriceFilter("all")}
-                    className="text-green-600 dark:text-green-300 hover:text-green-800 dark:hover:text-green-100"
+                    className="text-green-700 dark:text-green-300 hover:text-green-800 dark:hover:text-green-100"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -335,9 +336,9 @@ const AllServices = () => {
                         <span
                           className={`font-bold ${
                             service.in_package
-                              ? "text-emerald-600 dark:text-emerald-400"
+                              ? "text-emerald-700 dark:text-emerald-400"
                               : service.is_free
-                              ? "text-green-600"
+                              ? "text-green-700"
                               : "text-blue-600"
                             }`}
                         >
@@ -455,7 +456,7 @@ const AllServices = () => {
                           <CreditCard className="w-4 h-4 text-gray-400" />
                           <span
                             className={`font-bold ${service.price === "Tekin"
-                                ? "text-green-600"
+                                ? "text-green-700"
                                 : "text-blue-600"
                               }`}
                           >

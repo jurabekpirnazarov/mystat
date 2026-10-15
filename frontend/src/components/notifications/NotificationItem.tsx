@@ -5,7 +5,7 @@ import DemoBadge from "../ui/DemoBadge";
 
 export const GROUP_META: Record<NotificationGroup, { label: string; icon: typeof Info; color: string }> = {
   contract: { label: "Shartnoma", icon: FileSignature, color: "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-300" },
-  payment: { label: "To'lov", icon: CreditCard, color: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-300" },
+  payment: { label: "To'lov", icon: CreditCard, color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" },
   system: { label: "Tizim", icon: Info, color: "bg-sky-100 text-sky-600 dark:bg-sky-900/40 dark:text-sky-300" },
 };
 

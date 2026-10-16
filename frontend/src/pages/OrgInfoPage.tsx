@@ -6,6 +6,9 @@ import { OrganizationData } from '../api/organizationInfo';
 import { useServiceId } from '../utils/useServiceId';
 import RatingModal from '../components/modals/RatingModal';
 
+// KORXONA_SCORING.md KR-36: korxona bali kartochkasi — lazy (Q-02 chunk'ini kattalashtirmaslik uchun)
+const CompanyScoreCard = React.lazy(() => import('../components/company-score/CompanyScoreCard'));
+
 const OrgInfoPage: React.FC = () => {
   const { serviceId } = useServiceId(); // get real ID from API
 
@@ -105,6 +108,13 @@ const OrgInfoPage: React.FC = () => {
       {currentStep === 3 && (
         <>
           <OrgDetail organizationData={organizationData} onBack={goToPreviousStep} />
+          {organizationData?.tin && (
+            <div className="max-w-4xl mx-auto mt-4 px-4">
+              <React.Suspense fallback={<div className="h-48 animate-pulse rounded-xl bg-gray-100" />}>
+                <CompanyScoreCard stir={organizationData.tin} />
+              </React.Suspense>
+            </div>
+          )}
           <div className="flex justify-center mt-4 mb-5">
             <button
               onClick={() => setShowRatingModal(true)}

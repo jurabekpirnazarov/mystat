@@ -95,7 +95,34 @@ def build_dashboard(date_from, date_to, include_demo=False):
         },
         "ratings": list(ratings.values("service__name_uz").annotate(avg=Avg("value"), n=Count("id")).order_by("-n")[:10]),
         "funnel": [{"step": s, "count": n, "pct": round(n / funnel[0][1] * 100, 1) if funnel[0][1] else 0} for s, n in funnel],
+        "company_scores": company_scores(include_demo),
         "generated_at": today,
+    }
+
+
+def company_scores(include_demo):
+    """KORXONA_SCORING.md KR-37, 13-band: sinflar taqsimoti; demo o'chirilgan bo'lsa faqat real manbali ballar."""
+    from .company_scoring import api, config
+    from .models import EnterpriseScore
+
+    cfg = config.get()
+    year = api.latest_year(cfg)
+    if year is None:
+        return None
+    qs = EnterpriseScore.objects.filter(model_version=cfg["version"], year=year, preset=cfg["default_preset"])
+    if not include_demo:
+        qs = qs.filter(data_source="real")
+    total = qs.count()
+    counts = dict(qs.values_list("klass").annotate(n=Count("id")))
+    sources = dict(EnterpriseScore.objects.filter(model_version=cfg["version"], year=year, preset=cfg["default_preset"])
+                   .values_list("data_source").annotate(n=Count("id")))
+    return {
+        "year": year, "total": total, "mean": round(qs.exclude(klass="").aggregate(a=Avg("overall"))["a"] or 0, 1),
+        "classes": [{"klass": c["key"], "name": config.tr(c["name"], "uz"), "count": counts.get(c["key"], 0),
+                     "pct": round(counts.get(c["key"], 0) / total * 100, 1) if total else 0} for c in cfg["classes"]]
+        + [{"klass": "—", "name": "Ma'lumot yetarli emas", "count": counts.get("", 0),
+            "pct": round(counts.get("", 0) / total * 100, 1) if total else 0}],
+        "sources": sources,
     }
 
 

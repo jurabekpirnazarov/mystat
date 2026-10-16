@@ -8,8 +8,10 @@ import useApi from "../hooks/useApi";
 import { EmptyState, ErrorState, PageHeader, Skeleton } from "../components/ui";
 import RegionBubbleMap from "../components/maps/RegionBubbleMap";
 import SavedQueries from "../components/SavedQueries";
+import CompanyScoreBadge from "../components/company-score/CompanyScoreBadge";
+import { PRESETS } from "../api/companyScores";
 
-type FilterKey = "q" | "region" | "district" | "category" | "legal_form" | "page";
+type FilterKey = "q" | "region" | "district" | "category" | "legal_form" | "page" | "klass" | "ordering" | "csp";
 
 /** K-04: korxonalarni hudud, tuman, faoliyat turi va tashkiliy shakl bo'yicha topish; Excel eksport. */
 export default function Partners() {
@@ -22,6 +24,9 @@ export default function Partners() {
     category: params.get("category") ? Number(params.get("category")) : undefined,
     legal_form: params.get("legal_form") ?? undefined,
     page: Number(params.get("page") ?? 1),
+    klass: params.get("klass") ?? undefined,
+    ordering: (params.get("ordering") as PartnerFilters["ordering"]) ?? undefined,
+    csp: params.get("csp") ?? undefined,
   }), [params]);
   const [q, setQ] = useState(filters.q ?? "");
   const [exportMsg, setExportMsg] = useState<string | null>(null);
@@ -114,6 +119,28 @@ export default function Partners() {
                   {options.data?.legal_forms.map((f) => <option key={f.code} value={f.code}>{f.name}</option>)}
                 </select>
               </label>
+              {/* KORXONA_SCORING.md KR-35: ball bo'yicha filtr va saralash */}
+              <fieldset className="space-y-2 border-t border-gray-100 dark:border-gray-700 pt-3">
+                <legend className="text-sm font-medium">Korxona bali</legend>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={filters.klass === "A,B"} onChange={(e) => update({ klass: e.target.checked ? "A,B" : undefined })} />
+                  Faqat A–B sinf
+                </label>
+                <label className="block text-sm">
+                  Saralash
+                  <select className={`${select} mt-1`} value={filters.ordering ?? ""} onChange={(e) => update({ ordering: e.target.value })}>
+                    <option value="">Mahsulotlar soni bo'yicha</option>
+                    <option value="-score">Ball: yuqoridan pastga</option>
+                    <option value="score">Ball: pastdan yuqoriga</option>
+                  </select>
+                </label>
+                <label className="block text-sm">
+                  Vaznlar
+                  <select className={`${select} mt-1`} value={filters.csp ?? ""} onChange={(e) => update({ csp: e.target.value })}>
+                    {PRESETS.map((p) => <option key={p.key} value={p.key === "muvozanatli" ? "" : p.key}>{p.name}</option>)}
+                  </select>
+                </label>
+              </fieldset>
               <div className="flex gap-2">
                 <button type="submit" className="flex-1 px-3 py-2 rounded-lg bg-blue-600 text-white text-sm">Qidirish</button>
                 <button type="button" onClick={() => { setQ(""); setParams(new URLSearchParams()); }} className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm">Tozalash</button>
@@ -144,13 +171,14 @@ export default function Partners() {
                 <table className="min-w-full text-sm">
                   <thead>
                     <tr className="text-left text-xs text-gray-500 border-b border-gray-100 dark:border-gray-700">
-                      <th className="px-4 py-2">Nomi</th><th className="px-2">STIR</th><th className="px-2">Shakl</th><th className="px-2">Hudud</th><th className="px-2 text-right">Mahsulotlar</th>
+                      <th className="px-4 py-2">Nomi</th><th className="px-2">Ball</th><th className="px-2">STIR</th><th className="px-2">Shakl</th><th className="px-2">Hudud</th><th className="px-2 text-right">Mahsulotlar</th>
                     </tr>
                   </thead>
                   <tbody>
                     {results.data.results.map((r) => (
                       <tr key={r.stir} className="border-b border-gray-50 dark:border-gray-700/50">
                         <td className="px-4 py-2 text-gray-900 dark:text-white">{r.name}</td>
+                        <td className="px-2"><CompanyScoreBadge score={r.score} /></td>
                         <td className="px-2 tabular-nums">{r.stir}</td>
                         <td className="px-2 text-xs">{r.legal_form.name}</td>
                         <td className="px-2 text-xs">{r.region}{r.district ? `, ${r.district}` : ""}</td>
@@ -170,6 +198,7 @@ export default function Partners() {
             ) : null}
             <p className="text-xs text-gray-500">
               Manba: sanoat mahsulotlari reyestri (ishlab chiqaruvchi korxonalar). Telefon va rahbar ma'lumotlari ko'rsatilmaydi. Xaritada korxonalar viloyat markazi bo'yicha guruhlangan.
+              {" "}Korxona bali — taxminiy baho, rasmiy emas; "N" belgisi — namuna ko'rsatkichlardan. <Link to="/methodology/company-score" className="underline">Qanday hisoblanadi</Link>
             </p>
           </div>
         </div>

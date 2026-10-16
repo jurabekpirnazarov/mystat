@@ -4,6 +4,8 @@ GET /api/common/map/indicators/                     — katalog: mavzu, nom, bir
 GET /api/common/map/values/?indicator=246&period=2026&level=district&parent=1735[&breakdown=B]
 GET /api/common/map/territory/<soato>/              — hudud kartochkasi: barcha ko'rsatkichlar, o'rni, dinamika
 GET /api/common/map/territories/                    — qidiruv uchun hududlar ro'yxati (4 tilda)
+Salohiyat indeksi (`indicator=score`, `score-A..E`) va prognoz yillari (`period=2027`, `view=growth`) ham shu
+`values/` orqali — karta UI'si bir xil shakldagi javob oladi (views_score.py, SCORING_MODEL.md).
 Har so'rovda `lang=uz|ru|en|uzc`. Ma'lumot yo'q (`missing`) qiymat `null` bo'lib keladi, hech qachon 0 emas.
 """
 from collections import defaultdict
@@ -81,6 +83,8 @@ class IndicatorsView(APIView):
                 .values_list("indicator_id", "period").distinct())
         for indicator_id, period in rows:
             periods[indicator_id].add(period)
+        from .views_score import forecast_periods_for, score_catalog, theme_label
+
         items = []
         for ind in indicators:
             ps = sorted(periods.get(ind.pk, ()))
@@ -98,8 +102,15 @@ class IndicatorsView(APIView):
                 "methodology": ind.methodology_uz[:1500],
                 "breakdowns": [{"code": b.code, "name": getattr(b, f"name_{lang}", "") or b.name_uz}
                                for b in ind.breakdowns.all()],
+                "forecast_periods": forecast_periods_for(ind.key) if ind.periodicity == "Y" else [],
             })
+        items.extend(score_catalog(lang))   # SCORING_MODEL.md 7-bo'lim: "Salohiyat" guruhi
+        from .views_company import catalog as company_catalog
+
+        items.extend(company_catalog(lang))  # KORXONA_SCORING.md KR-37: korxonalar sifati qatlami
         themes = [{"key": k, "label": str(v)} for k, v in SiatIndicator.THEMES if any(i["theme"] == k for i in items)]
+        if any(i["theme"] == "potential" for i in items):
+            themes.append(theme_label())
         return {"themes": themes, "indicators": items, "source": SOURCE}
 
 
@@ -107,8 +118,27 @@ class ValuesView(APIView):
     permission_classes = (AllowAny,)
 
     def get(self, request):
+        from .views_score import forecast_periods_for, forecast_values_payload, is_score_key
+
         params = request.query_params
         key = params.get("indicator", "")
+        if is_score_key(key):
+            return self.score(request, key)
+        from .views_company import is_company_key, values_payload as company_values
+
+        if is_company_key(key):
+            level = params.get("level") or "region"
+            if level not in ("region", "district"):
+                return Response({"detail": "level: region yoki district"}, status=400)
+            parent = params.get("parent") or ""
+            lang = _lang(request)
+            data = _cached(f"values:{key}:{level}:{parent}:{params.get('period', '')}:{lang}",
+                           lambda: company_values(key, level, parent, params.get("period"), lang))
+            if data is None:
+                raise Http404("Korxona ballari hisoblanmagan")
+            if params.get("export") in ("csv", "xlsx"):
+                return export_values(data, params["export"])
+            return Response(data)
         indicator = _map_indicators().filter(key=key).first()
         if indicator is None:
             raise Http404("Ko'rsatkich topilmadi yoki kartada ko'rsatilmaydi")
@@ -126,6 +156,28 @@ class ValuesView(APIView):
             breakdown = _default_breakdown(indicator)
         lang = _lang(request)
         period = params.get("period") or ""
+        view = params.get("view") or ""
+        if view not in ("", "growth"):
+            return Response({"detail": "view: growth"}, status=400)
+        from .views_score import SCENARIOS
+
+        scenario = SCENARIOS.get(params.get("scenario") or params.get("sc") or "base")
+        if scenario is None:
+            return Response({"detail": "scenario: base|opt|pes"}, status=400)
+        if period and period in forecast_periods_for(key) and not breakdown:
+            # 10.8: prognoz yili — shkala, legenda va eksport odatdagi qiymatlar bilan bir xil shaklda
+            def build_forecast():
+                last = self.build(indicator, level, parent, breakdown, "", lang)
+                if last is None:
+                    return None
+                base = {**last, "periods": last["periods"] + forecast_periods_for(key)}
+                return forecast_values_payload(indicator, level, parent, period, lang, view, base, scenario)
+            data = _cached(f"values:fc:{key}:{level}:{parent}:{period}:{view}:{scenario}:{lang}", build_forecast)
+            if data is None:
+                raise Http404("Prognoz yo'q")
+            if params.get("export") in ("csv", "xlsx"):
+                return export_values(data, params["export"])
+            return Response(data)
         cache_key = f"values:{key}:{level}:{parent}:{breakdown}:{period}:{lang}"
         data = _cached(cache_key, lambda: self.build(indicator, level, parent, breakdown, period, lang))
         if data is None:
@@ -133,6 +185,28 @@ class ValuesView(APIView):
         export = params.get("export")
         if export in ("csv", "xlsx"):
             return export_values(data, export)
+        return Response(data)
+
+    def score(self, request, key):
+        """SCORING_MODEL.md 7-bo'lim: `ind=score` / `score-A..E` — salohiyat indeksi kartada."""
+        from .views_score import BadRequest, score_values_payload
+
+        params = request.query_params
+        level = params.get("level") or "region"
+        if level not in ("region", "district"):
+            return Response({"detail": "level: region yoki district"}, status=400)
+        parent = params.get("parent") or ""
+        if parent and not (parent.isdigit() and len(parent) == 4):
+            return Response({"detail": "parent: 4 xonali SOATO kodi"}, status=400)
+        lang = _lang(request)
+        weights_key = params.get("weights") or params.get("sw") or params.get("preset") or params.get("sp") or ""
+        cache_key = f"values:{key}:{level}:{parent}:{params.get('period', '')}:{weights_key}:{lang}"
+        try:
+            data = _cached(cache_key, lambda: score_values_payload(key, level, parent, params.get("period"), params, lang))
+        except BadRequest as exc:
+            return Response({"detail": str(exc)}, status=400)
+        if params.get("export") in ("csv", "xlsx"):
+            return export_values(data, params["export"])
         return Response(data)
 
     @staticmethod
@@ -175,7 +249,8 @@ class ValuesView(APIView):
             if parent else None,
             "breakdown": {"code": breakdown, "name": getattr(breakdown_obj, f"name_{lang}", "") or breakdown_obj.name_uz}
             if breakdown_obj else None,
-            "period": period, "periods": periods, "preliminary": int(period[:4]) in prelim_years,
+            "period": period, "periods": periods, "forecast_periods": [], "forecast": False,
+            "preliminary": int(period[:4]) in prelim_years,
             "republic": republic, "items": items,
             "scale": {"min": min(all_values) if all_values else None, "max": max(all_values) if all_values else None,
                       "quantiles": _quantiles(all_values), "current_quantiles": _quantiles(current),
@@ -195,7 +270,23 @@ def export_values(data, kind):
     note = f"Manba: {data['source']['name']}, {data['source']['license']}. {data['siat_url']}".strip()
     header = ["SOATO", "Hudud", f"Qiymat ({data['unit']})", "Dastlabki"]
     rows = [[i["code"], i["name"], i["value"], "ha" if i["preliminary"] else ""] for i in data["items"]]
-    rows.append(["1700", "O'zbekiston Respublikasi", data["republic"], ""])
+    if data.get("republic") is not None:
+        rows.append(["1700", "O'zbekiston Respublikasi", data["republic"], ""])
+    header.append("is_forecast")
+    rows = [r + [int(bool(data.get("forecast")))] for r in rows]
+    if data.get("forecast"):
+        from .forecast.service import current_version
+
+        # Prognoz qatorlari (10.8.7): 80% oraliq va prognoz versiyasi (usul nomi foydalanuvchiga chiqmaydi)
+        version = current_version() or ""
+        header[2] = f"Prognoz ({data['unit']})"
+        header += ["80% oraliq (past)", "80% oraliq (yuqori)", "Prognoz versiyasi"]
+        by_code = {i["code"]: i for i in data["items"]}
+        rows = [r + ([by_code[r[0]].get("lo80"), by_code[r[0]].get("hi80")] if r[0] in by_code else ["", ""]) + [version]
+                for r in rows]
+        note += " " + (data.get("note") or "")
+        if data.get("scenario") and data["scenario"] != "base":
+            note += {"optimistic": " Ssenariy: ijobiy.", "pessimistic": " Ssenariy: salbiy."}[data["scenario"]]
     filename = f"siat-{data['indicator']}-{data['period']}.{kind}"
     if kind == "csv":
         buf = io.StringIO()
@@ -239,6 +330,8 @@ class TerritoryView(APIView):
 
     @staticmethod
     def build(territory, lang):
+        from .forecast.service import territory_forecast
+
         siblings = Territory.objects.filter(level=territory.level)
         if territory.level == "district":
             siblings = siblings.filter(parent_id=territory.parent_id)
@@ -272,6 +365,8 @@ class TerritoryView(APIView):
                 "vs_average_pct": round((last["value"] / mean - 1) * 100, 1) if mean else None,
                 "republic": republic, "siat_url": ind.siat_url, "derived_from": ind.derived_from,
                 "series": [{"period": r["period"], "value": r["value"]} for r in own],
+                "forecast": territory_forecast(ind.key, territory.soato, last["period"], last["value"], lang)
+                if ind.periodicity == "Y" and len(last["period"]) == 4 else None,
             })
         parent = territory.parent if territory.parent_id and territory.parent_id != REPUBLIC else None
         return {

@@ -78,6 +78,8 @@ const Partners = lazy(() => import("./pages/Partners"));
 const OrganizationPassport = lazy(() => import("./pages/OrganizationPassport"));
 const CitizensHub = lazy(() => import("./pages/citizens/CitizensHub"));
 const Regions = lazy(() => import("./pages/Regions"));
+const CompanyScoreMethodology = lazy(() => import("./pages/CompanyScoreMethodology"));
+const CompanyScoreShowcase = lazy(() => import("./pages/CompanyScoreShowcase"));
 const RegionProfile = lazy(() => import("./pages/RegionProfile"));
 const MySalary = lazy(() => import("./pages/citizens/MySalary"));
 const Prices = lazy(() => import("./pages/citizens/Prices"));
@@ -137,6 +139,8 @@ function AppRoutes() {
           <Route path="/partners" element={<Partners />} />
           <Route path="/citizens" element={<CitizensHub />} />
           <Route path="/regions" element={<Regions />} />
+          <Route path="/methodology/company-score" element={<CompanyScoreMethodology />} />
+          <Route path="/company-score/components" element={<CompanyScoreShowcase />} />
           <Route path="/regions/:id" element={<RegionProfile />} />
           <Route path="/my-salary" element={<MySalary />} />
           <Route path="/prices" element={<Prices />} />

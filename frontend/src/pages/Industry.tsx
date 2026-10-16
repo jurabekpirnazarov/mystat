@@ -3,6 +3,8 @@ import { Building2, Factory, Zap, Droplets } from 'lucide-react';
 import IndustryStep1 from '../components/IndustryStep1';
 import { getIndustryCategories, IndustryCategory, getIndustrialProductsByCategory, DetailedIndustrialProduct } from '../api/industrialProducts';
 import { useServiceId } from '../utils/useServiceId';
+import CompanyScoreBadge from '../components/company-score/CompanyScoreBadge';
+import { useCompanyScores } from '../api/companyScores';
 
 const Industry: React.FC = () => {
   const { serviceId } = useServiceId(); // get real ID from API
@@ -35,6 +37,8 @@ const Industry: React.FC = () => {
   
   // Step 3 state
   const [industrialProducts, setIndustrialProducts] = useState<DetailedIndustrialProduct[]>([]);
+  // Sahifadagi barcha ishlab chiqaruvchilar uchun bitta batch so'rov (KR-34)
+  const scores = useCompanyScores(industrialProducts.map((p) => p.inn).filter(Boolean) as string[]);
   const [productsLoading, setProductsLoading] = useState(false);
   const [productsError, setProductsError] = useState<string | null>(null);
   const [totalProducts, setTotalProducts] = useState(0);
@@ -470,7 +474,11 @@ const Industry: React.FC = () => {
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {/* Company Info */}
                             <div className="lg:col-span-2">
-                              <h3 className="font-semibold text-lg text-gray-900 mb-2">{product.name}</h3>
+                              <h3 className="font-semibold text-lg text-gray-900 mb-2 flex flex-wrap items-center gap-2">
+                                {product.name}
+                                {/* KORXONA_SCORING.md KR-35: ishlab chiqaruvchi korxona bali */}
+                                <CompanyScoreBadge score={scores[product.inn]} />
+                              </h3>
                               <div className="space-y-2 text-sm">
                                 <div className="flex items-start gap-2">
                                   <span className="text-gray-500 font-medium min-w-[80px]">Manzil:</span>

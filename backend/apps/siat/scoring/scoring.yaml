@@ -1,0 +1,260 @@
+# Hududlar salohiyati: scoring modeli konfiguratsiyasi (SCORING_MODEL.md, KR-15).
+# Yangi ko'rsatkich qo'shish uchun kod o'zgartirish shart emas: `indicators` ga ta'rif va ustunga kalit qo'shiladi.
+# Ishga tushishda sxema bo'yicha tekshiriladi (config.py): noma'lum manba, yo'nalish yoki transformatsiya xato beradi.
+version: "1.0"
+
+params:
+  coverage_min: 0.6          # bundan kam to'liqlikda indeks ko'rsatilmaydi
+  coverage_full: 0.85        # bundan kam bo'lsa "qisman ma'lumot"
+  z_clip: 2.5                # chetdagi qiymatlar (Toshkent shahri) cheklanadi
+  score_scale: 20            # s = 50 + 20·z
+  max_lag: 1                 # tanlangan yildan ko'pi bilan 1 yil oldingi qiymat olinadi
+  strong_pct: 75             # kuchli tomon (percentil)
+  weak_pct: 25               # zaif tomon
+  max_strengths: 3
+  rank_iterations: 500       # reyting oralig'i: vaznlar ×U(1−j, 1+j)
+  rank_jitter: 0.2
+  rank_seed: 20261015
+  rank_unstable: 4           # oraliq kengligi shundan katta bo'lsa "vaznlarga sezgir"
+  lq_high: 1.25
+  lq_low: 0.8
+  sector_growth_margin: 5    # "o'sayotgan tarmoq": respublikadan kamida 5 p.p. tez
+  sector_min_share: 1        # 1% dan kichik tarmoqlar e'tiborga olinmaydi
+  sector_years: 3
+  max_recommendations: 3
+  peers: 3
+  peers_min_common: 5
+  peer_ahead_points: 10
+  structural_break_pct: 15   # aholi yiliga ±15% dan ko'p o'zgarsa — ma'muriy o'zgarish, o'sish hisoblanmaydi
+
+pillars:
+  A:
+    name: {uz: "Iqtisodiy quvvat", ru: "Экономический потенциал", en: "Economic strength"}
+    indicators: [gdp-pc, gdp-growth-3y]
+  B:
+    name: {uz: "Mehnat bozori", ru: "Рынок труда", en: "Labour market"}
+    indicators: [wage, real-wage-growth-3y, unemployment]
+  C:
+    name: {uz: "Demografik salohiyat", ru: "Демографический потенциал", en: "Demographic potential"}
+    indicators: [population, pop-growth-3y, density]
+  D:
+    name: {uz: "Sanoat va investitsiya", ru: "Промышленность и инвестиции", en: "Industry and investment"}
+    indicators: [industry-pc, investment-pc, investment-growth-3y]
+  E:
+    name: {uz: "Ijtimoiy infratuzilma", ru: "Социальная инфраструктура", en: "Social infrastructure"}
+    indicators: [preschool-per10k]
+
+presets:
+  balanced:
+    name: {uz: "Muvozanatli", ru: "Сбалансированный", en: "Balanced"}
+    region: [25, 25, 15, 25, 10]
+    district: [0, 55, 45, 0, 0]
+  investor:
+    name: {uz: "Investor nigohi", ru: "Взгляд инвестора", en: "Investor view"}
+    region: [30, 20, 15, 30, 5]
+    district: [0, 60, 40, 0, 0]
+  social:
+    name: {uz: "Ijtimoiy nigoh", ru: "Социальный взгляд", en: "Social view"}
+    region: [15, 30, 20, 10, 25]
+    district: [0, 55, 45, 0, 0]
+
+# role: score — bahoga kiradi; context — faqat kartochkada; rule — faqat tavsiya qoidalarida
+# source: key — SiatIndicator kaliti (SIAT ID yoki hosila); breakdown "*" — barcha bo'limlar yig'indisi;
+#         offset — qiymatga qo'shiladi (o'sish indeksi 107 → 7%); growth — yildan yilga o'sish %;
+#         per_capita — aholiga (246, ming kishi) bo'linadi va `scale` ga ko'paytiriladi; avg_years — N yil o'rtachasi
+indicators:
+  gdp-pc:
+    name: {uz: "Aholi jon boshiga YaHM", ru: "ВРП на душу населения", en: "GRP per capita"}
+    unit: {uz: "ming so'm", ru: "тыс. сум", en: "thousand UZS"}
+    source: {key: "660"}
+    level: region
+    direction: "+"
+    transform: log
+    role: score
+  gdp-growth-3y:
+    name: {uz: "YaHM o'sishi (3 yil o'rtachasi)", ru: "Рост ВРП (среднее за 3 года)", en: "GRP growth (3-year average)"}
+    unit: {uz: "%", ru: "%", en: "%"}
+    source: {key: "658", offset: -100, avg_years: 3}
+    level: region
+    direction: "+"
+    transform: none
+    role: score
+  informal-share:
+    name: {uz: "Norasmiy iqtisodiyot ulushi", ru: "Доля неформальной экономики", en: "Informal economy share"}
+    unit: {uz: "%", ru: "%", en: "%"}
+    source: {key: "3846"}
+    level: region
+    role: context
+  wage:
+    name: {uz: "O'rtacha oylik ish haqi", ru: "Средняя заработная плата", en: "Average monthly wage"}
+    unit: {uz: "so'm", ru: "сум", en: "UZS"}
+    source: {key: "500"}
+    level: district
+    direction: "+"
+    transform: log
+    role: score
+  real-wage-growth-3y:
+    name: {uz: "Real ish haqi o'sishi (3 yil o'rtachasi)", ru: "Рост реальной зарплаты (среднее за 3 года)", en: "Real wage growth (3-year average)"}
+    unit: {uz: "%", ru: "%", en: "%"}
+    source: {key: "d-real-wage", avg_years: 3}
+    level: district
+    direction: "+"
+    transform: none
+    role: score
+  real-wage-growth:
+    name: {uz: "Real ish haqi o'sishi", ru: "Рост реальной зарплаты", en: "Real wage growth"}
+    unit: {uz: "%", ru: "%", en: "%"}
+    source: {key: "d-real-wage"}
+    level: district
+    role: rule
+  unemployment:
+    name: {uz: "Ishsizlik darajasi", ru: "Уровень безработицы", en: "Unemployment rate"}
+    unit: {uz: "%", ru: "%", en: "%"}
+    source: {key: "1875"}
+    level: district
+    direction: "-"
+    transform: none
+    role: score
+  population:
+    name: {uz: "Doimiy aholi", ru: "Постоянное население", en: "Resident population"}
+    unit: {uz: "ming kishi", ru: "тыс. человек", en: "thousand people"}
+    source: {key: "246"}
+    level: district
+    direction: "+"
+    transform: log
+    role: score
+    compare_national: false   # hajm ko'rsatkichi: respublika jami bilan solishtirilmaydi
+  pop-growth-3y:
+    name: {uz: "Aholi o'sishi (3 yil o'rtachasi)", ru: "Прирост населения (среднее за 3 года)", en: "Population growth (3-year average)"}
+    unit: {uz: "%", ru: "%", en: "%"}
+    source: {key: "d-pop-growth", avg_years: 3}
+    level: district
+    direction: "+"
+    transform: none
+    role: score
+  density:
+    name: {uz: "Aholi zichligi", ru: "Плотность населения", en: "Population density"}
+    unit: {uz: "kishi/km²", ru: "чел./км²", en: "people/km²"}
+    source: {key: "d-density"}
+    level: district
+    direction: "+"
+    transform: log
+    role: score
+    compare_national: false
+  rural-share:
+    name: {uz: "Qishloq aholisi ulushi", ru: "Доля сельского населения", en: "Rural population share"}
+    unit: {uz: "%", ru: "%", en: "%"}
+    source: {key: "d-rural-share"}
+    level: district
+    role: context
+  gender-ratio:
+    name: {uz: "Gender nisbati (100 ayolga erkak)", ru: "Мужчин на 100 женщин", en: "Men per 100 women"}
+    unit: {uz: "erkak", ru: "муж.", en: "men"}
+    source: {key: "d-gender-ratio"}
+    level: district
+    role: context
+  industry-pc:
+    name: {uz: "Aholi jon boshiga sanoat mahsuloti", ru: "Промышленная продукция на душу населения", en: "Industrial output per capita"}
+    unit: {uz: "mln so'm", ru: "млн сум", en: "million UZS"}
+    source: {key: "industry-by-activity", breakdown: "B, C, D, E", per_capita: true, scale: 1}
+    level: region
+    direction: "+"
+    transform: log
+    role: score
+  investment-pc:
+    name: {uz: "Aholi jon boshiga investitsiya", ru: "Инвестиции на душу населения", en: "Investment per capita"}
+    unit: {uz: "mln so'm", ru: "млн сум", en: "million UZS"}
+    source: {key: "investment-by-activity", breakdown: "*", per_capita: true, scale: 1}
+    level: region
+    direction: "+"
+    transform: log
+    role: score
+  investment-growth-3y:
+    name: {uz: "Investitsiya o'sishi (3 yil o'rtachasi, nominal)", ru: "Рост инвестиций (среднее за 3 года, номинал)", en: "Investment growth (3-year average, nominal)"}
+    unit: {uz: "%", ru: "%", en: "%"}
+    source: {key: "investment-by-activity", breakdown: "*", growth: true, avg_years: 3}
+    level: region
+    direction: "+"
+    transform: none
+    role: score
+  preschool-per10k:
+    name: {uz: "10 000 aholiga maktabgacha ta'lim tashkilotlari", ru: "Дошкольные организации на 10 000 жителей", en: "Preschools per 10,000 people"}
+    unit: {uz: "birlik", ru: "ед.", en: "units"}
+    source: {key: "1409", per_capita: true, scale: 10}
+    level: region
+    direction: "+"
+    transform: none
+    role: score
+  dehqon-growth:
+    name: {uz: "Dehqon xo'jaliklari mahsuloti o'sishi", ru: "Рост продукции дехканских хозяйств", en: "Household farm output growth"}
+    unit: {uz: "%", ru: "%", en: "%"}
+    source: {key: "1460", offset: -100}
+    level: region
+    role: rule
+
+# Tavsiya qoidalari (5.3). Shartlar tengdoshlar orasidagi percentil (yo'nalishsiz, xom qiymat bo'yicha) bilan.
+# `parent: true` — tuman uchun viloyat qiymati olinadi ("viloyat ma'lumoti").
+rules:
+  R1:
+    levels: [region, district]
+    when:
+      - {indicator: rural-share, op: ">=", pct: 65}
+      - {indicator: density, op: "<=", pct: 50}
+      - {indicator: dehqon-growth, op: ">=", pct: 50, parent: true}
+    title: {uz: "Agrosanoat: qayta ishlash, sovutish omborlari, issiqxonalar", ru: "Агропромышленность: переработка, холодильные склады, теплицы", en: "Agro-industry: processing, cold storage, greenhouses"}
+    why: {uz: "Aholining katta qismi qishloqda yashaydi, yer resursi bor va dehqon xo'jaliklari mahsuloti o'smoqda. Qishloq xo'jaligi mahsulotini joyida qayta ishlash qo'shimcha qiymat va ish o'rni beradi.", ru: "Большая часть населения живёт в сельской местности, есть земельные ресурсы, продукция дехканских хозяйств растёт. Переработка на месте даёт добавленную стоимость и рабочие места.", en: "Most people live in rural areas, land is available and household farm output is growing. Local processing adds value and creates jobs."}
+  R2:
+    levels: [region, district]
+    when:
+      - {indicator: unemployment, op: ">=", pct: 65}
+      - {indicator: pop-growth-3y, op: ">=", pct: 50}
+      - {indicator: wage, op: "<=", pct: 40}
+    title: {uz: "Mehnat sig'imli sanoat (to'qimachilik, yig'uv) va kasb-hunar markazlari", ru: "Трудоёмкая промышленность (текстиль, сборка) и центры профобучения", en: "Labour-intensive manufacturing (textiles, assembly) and vocational centres"}
+    why: {uz: "Ishsizlik yuqori, aholi o'smoqda va ish haqi o'rtachadan past: mehnat sig'imli ishlab chiqarish uchun ishchi kuchi zaxirasi bor.", ru: "Высокая безработица, растущее население и зарплата ниже средней: есть резерв рабочей силы для трудоёмкого производства.", en: "High unemployment, a growing population and below-average wages: there is a labour reserve for labour-intensive production."}
+  R3:
+    levels: [region, district]
+    when:
+      - {indicator: density, op: ">=", pct: 70}
+      - {indicator: population, op: ">=", pct: 60}
+      - {indicator: wage, op: ">=", pct: 50}
+    title: {uz: "Xizmatlar, savdo, IT va logistika markazi", ru: "Услуги, торговля, IT и логистический центр", en: "Services, trade, IT and logistics hub"}
+    why: {uz: "Aholi zich va ko'p, ish haqi o'rtachadan yuqori: xizmatlar va savdo uchun katta va to'lovga qodir bozor.", ru: "Плотное и многочисленное население, зарплата выше средней: большой платёжеспособный рынок для услуг и торговли.", en: "Dense, large population with above-average wages: a large market with purchasing power for services and trade."}
+  R4:
+    levels: [region]
+    when:
+      - {indicator: gdp-pc, op: ">=", pct: 65}
+      - {indicator: industry-pc, op: ">=", pct: 65}
+    title: {uz: "Yuqori qo'shilgan qiymatli sanoat, klaster va eksport", ru: "Промышленность с высокой добавленной стоимостью, кластеры и экспорт", en: "High value-added industry, clusters and exports"}
+    why: {uz: "Aholi jon boshiga YaHM va sanoat mahsuloti yuqori: mavjud sanoat bazasini chuqurroq qayta ishlash va eksportga yo'naltirish mumkin.", ru: "Высокие ВРП и промышленный выпуск на душу населения: существующую базу можно углублять и ориентировать на экспорт.", en: "High GRP and industrial output per capita: the existing base can move to deeper processing and exports."}
+  R5:
+    levels: [region]
+    when:
+      - {indicator: investment-pc, op: "<=", pct: 35}
+      - {indicator: unemployment, op: ">=", pct: 50}
+    title: {uz: "Investitsiya jalb qilish: sanoat zonalari va imtiyozlar", ru: "Привлечение инвестиций: промзоны и льготы", en: "Attracting investment: industrial zones and incentives"}
+    why: {uz: "Aholi jon boshiga investitsiya past, ishsizlik esa o'rtachadan yuqori: yangi ish o'rinlari uchun investitsiya yetishmaydi.", ru: "Инвестиции на душу населения низкие, а безработица выше средней: не хватает инвестиций для новых рабочих мест.", en: "Investment per capita is low while unemployment is above average: investment for new jobs is lacking."}
+  R6:
+    levels: [region]
+    when:
+      - {indicator: preschool-per10k, op: "<=", pct: 30}
+      - {indicator: pop-growth-3y, op: ">=", pct: 60}
+    title: {uz: "Ijtimoiy infratuzilma: maktabgacha ta'lim va maktab quvvati", ru: "Социальная инфраструктура: дошкольное образование и школы", en: "Social infrastructure: preschools and school capacity"}
+    why: {uz: "Aholi tez o'smoqda, lekin aholiga nisbatan maktabgacha ta'lim tashkilotlari kam.", ru: "Население быстро растёт, но дошкольных организаций на душу населения мало.", en: "The population is growing fast but there are few preschools per capita."}
+  R7:
+    levels: [region, district]
+    when:
+      - {indicator: real-wage-growth, op: "negative_streak", years: 2}
+    title: {uz: "Real daromadni himoya qilish: narx monitoringi va ish haqi siyosati", ru: "Защита реальных доходов: мониторинг цен и политика оплаты труда", en: "Protecting real incomes: price monitoring and wage policy"}
+    why: {uz: "Real ish haqi ketma-ket ikki yil pasaygan: narxlar ish haqidan tez o'smoqda.", ru: "Реальная зарплата снижается второй год подряд: цены растут быстрее зарплат.", en: "Real wages have fallen two years in a row: prices are rising faster than wages."}
+  R8:
+    levels: [region, district]
+    when:
+      - {indicator: pop-growth-3y, op: "<=", pct: 20}
+      - {indicator: rural-share, op: ">=", pct: 50}
+    title: {uz: "Aholi kamayishiga qarshi: yangi ish o'rinlari va migratsiyani ushlab qolish", ru: "Против оттока населения: новые рабочие места и удержание жителей", en: "Countering population decline: new jobs and retaining residents"}
+    why: {uz: "Aholi o'sishi eng past hududlar qatorida va aholining katta qismi qishloqda: odamlar ish izlab ketayotgan bo'lishi mumkin.", ru: "Прирост населения среди самых низких, большая часть жителей — сельские: люди могут уезжать в поисках работы.", en: "Population growth is among the lowest and most people are rural: people may be leaving to find work."}
+  R9:
+    levels: [region]
+    sector: true
+    title: {uz: "Yetakchi tarmoqni rivojlantirish: {sector}", ru: "Развитие ведущей отрасли: {sector}", en: "Developing the leading sector: {sector}"}
+    why: {uz: "{sector_text}", ru: "{sector_text}", en: "{sector_text}"}

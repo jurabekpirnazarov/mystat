@@ -5,6 +5,8 @@ import { fetchMyReports, fetchReportGuide, setReportReminder, type MyReportItem 
 import useApi from "../../hooks/useApi";
 import { ApiErrorState, DemoBadge, SampleBanner, Skeleton } from "../../components/ui";
 import { formatDateTime } from "../../utils/format";
+import CompanyScoreBadge from "../../components/company-score/CompanyScoreBadge";
+import { useCompanyScores } from "../../api/companyScores";
 
 const TYPE_LABEL = { monthly: "Oylik", quarterly: "Choraklik", yearly: "Yillik" } as const;
 const MONTHS = ["Yan", "Fev", "Mar", "Apr", "May", "Iyn", "Iyl", "Avg", "Sen", "Okt", "Noy", "Dek"];
@@ -94,6 +96,7 @@ function ReportCard({ item, onClose, onReminder }: { item: MyReportItem; onClose
 export default function MyReports() {
   const [tab, setTab] = useState<"upcoming" | "past" | "year">("upcoming");
   const { data, loading, error, reload } = useApi(() => fetchMyReports(), []);
+  const scores = useCompanyScores(data?.organization?.tin ? [data.organization.tin] : []);
   const [open, setOpen] = useState<MyReportItem | null>(null);
   const [overrides, setOverrides] = useState<Record<string, number | null>>({});
 
@@ -127,7 +130,7 @@ export default function MyReports() {
         <>
           <SampleBanner show={data.is_synthetic} text="Bu demo korxona hisobot shakllariga namuna sifatida biriktirilgan. Muddatlar real hisobot ro'yxatidan." />
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
-            {data.organization.name} (STIR {data.organization.tin}) — {items.length} ta hisobot shakli. Shu oy: {thisMonth.length} ta muddat.
+            {data.organization.name} (STIR {data.organization.tin}) <CompanyScoreBadge score={scores[data.organization.tin]} /> — {items.length} ta hisobot shakli. Shu oy: {thisMonth.length} ta muddat.
           </p>
           <div className="flex gap-2 mb-4" role="tablist">
             <button type="button" role="tab" aria-selected={tab === "upcoming"} className={tabCls(tab === "upcoming")} onClick={() => setTab("upcoming")}>Yaqin muddatlar</button>

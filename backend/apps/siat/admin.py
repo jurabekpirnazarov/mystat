@@ -8,7 +8,8 @@ from django.urls import path, reverse
 from django.utils.html import format_html, format_html_join
 
 from . import client
-from .models import SiatIndicator, SiatSyncLog, Territory
+from .models import (ForecastModelRun, ForecastVersion, ScoringReport, SiatIndicator, SiatSyncLog, Territory,
+                     TerritoryScore)
 from .sync import _indicator_for, bump_cache, load_payload, rebuild_derived, rebuild_groups, run_sync
 
 
@@ -122,3 +123,77 @@ class SiatSyncLogAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False
+
+
+class ReadOnlyAdmin(admin.ModelAdmin):
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+def _pre(data):
+    return format_html("<pre style='white-space:pre-wrap;max-width:1100px'>{}</pre>",
+                       json.dumps(data, ensure_ascii=False, indent=2))
+
+
+@admin.register(TerritoryScore)
+class TerritoryScoreAdmin(ReadOnlyAdmin):
+    """SCORING_MODEL.md KR-16: oldindan hisoblangan indeks (faqat o'qish; `compute_scores` yangilaydi)."""
+    list_display = ("soato", "level", "period", "preset", "is_forecast", "score", "rank", "rank_low", "rank_high",
+                    "coverage", "status", "methodology_version")
+    list_filter = ("level", "preset", "is_forecast", "status", "methodology_version", "period")
+    search_fields = ("soato",)
+
+
+@admin.register(ScoringReport)
+class ScoringReportAdmin(ReadOnlyAdmin):
+    """KR-18 (qoidalar, faqat o'qish) va KR-22 (tekshiruv hisoboti)."""
+    list_display = ("created_at", "methodology_version", "warnings")
+    readonly_fields = ("created_at", "methodology_version", "report_view", "rules_view")
+    exclude = ("report",)
+
+    @admin.display(description="Ogohlantirishlar")
+    def warnings(self, obj):
+        return sum(len(v.get("warnings", [])) for v in (obj.report.get("levels") or {}).values())
+
+    @admin.display(description="Hisobot")
+    def report_view(self, obj):
+        return _pre(obj.report)
+
+    @admin.display(description="Tavsiya qoidalari (scoring.yaml)")
+    def rules_view(self, obj):
+        from .scoring.config import load
+
+        return _pre(load().get("rules"))
+
+
+@admin.register(ForecastVersion)
+class ForecastVersionAdmin(ReadOnlyAdmin):
+    """KR-26, KR-28: prognoz versiyalari, orqaga sinov hisoboti va prognoz/haqiqat monitoringi (faqat staff)."""
+    list_display = ("version", "created_at", "is_current", "has_error")
+    readonly_fields = ("version", "created_at", "is_current", "data_until_view", "report_view", "monitoring_view", "error")
+    exclude = ("data_until", "report", "monitoring", "what_if")
+
+    @admin.display(description="Xato", boolean=True)
+    def has_error(self, obj):
+        return bool(obj.error)
+
+    @admin.display(description="Ma'lumot oxiri")
+    def data_until_view(self, obj):
+        return _pre(obj.data_until)
+
+    @admin.display(description="Orqaga sinov")
+    def report_view(self, obj):
+        return _pre(obj.report)
+
+    @admin.display(description="Monitoring")
+    def monitoring_view(self, obj):
+        return _pre(obj.monitoring)
+
+
+@admin.register(ForecastModelRun)
+class ForecastModelRunAdmin(ReadOnlyAdmin):
+    list_display = ("indicator", "level", "horizon", "model_kind", "data_until", "version", "trained_at")
+    list_filter = ("indicator", "level", "horizon", "model_kind", "version")

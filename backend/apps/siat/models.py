@@ -167,3 +167,125 @@ class SiatSyncLog(models.Model):
 
     def __str__(self):
         return f"{self.started_at:%Y-%m-%d %H:%M} · {self.updated}/{self.unchanged}/{self.failed}"
+
+
+class TerritoryScore(models.Model):
+    """SCORING_MODEL.md KR-16: oldindan hisoblangan salohiyat indeksi (standart presetlar × yillar × darajalar)."""
+
+    soato = models.CharField(max_length=7, db_index=True, verbose_name=_("SOATO"))
+    level = models.CharField(max_length=10, verbose_name=_("Daraja"))
+    period = models.CharField(max_length=7, verbose_name=_("Davr"))
+    preset = models.CharField(max_length=20, verbose_name=_("Preset"))
+    is_forecast = models.BooleanField(default=False, verbose_name=_("Prognoz yili"))
+    score = models.FloatField(null=True, blank=True, verbose_name=_("Indeks"))
+    rank = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name=_("O'rin"))
+    rank_low = models.PositiveSmallIntegerField(null=True, blank=True)
+    rank_high = models.PositiveSmallIntegerField(null=True, blank=True)
+    rank_in_parent = models.PositiveSmallIntegerField(null=True, blank=True)
+    pillars = models.JSONField(default=dict, blank=True, verbose_name=_("Ustunlar"))
+    details = models.JSONField(default=dict, blank=True, verbose_name=_("Tafsilotlar"))
+    coverage = models.FloatField(default=0, verbose_name=_("To'liqlik"))
+    status = models.CharField(max_length=15, default="ok", verbose_name=_("Holat"))
+    methodology_version = models.CharField(max_length=20, verbose_name=_("Metodologiya versiyasi"))
+    computed_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("soato", "period", "preset", "methodology_version")
+        indexes = [models.Index(fields=["level", "period", "preset", "methodology_version"])]
+        ordering = ["level", "period", "rank"]
+        verbose_name = _("Salohiyat indeksi")
+        verbose_name_plural = _("Salohiyat indeksi")
+
+    def __str__(self):
+        return f"{self.soato} · {self.period} · {self.preset} · {self.score}"
+
+
+class ScoringReport(models.Model):
+    """KR-22: `compute_scores` tekshiruv hisoboti (korrelyatsiya, reyting barqarorligi, orqaga sinov)."""
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    methodology_version = models.CharField(max_length=20)
+    report = models.JSONField(default=dict)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = _("Scoring hisoboti")
+        verbose_name_plural = _("Scoring hisobotlari")
+
+    def __str__(self):
+        return f"{self.created_at:%Y-%m-%d %H:%M} · v{self.methodology_version}"
+
+
+class ForecastModelRun(models.Model):
+    """SCORING_MODEL.md 10.7: ko'rsatkich × daraja × horizont uchun tanlangan prognoz usuli va orqaga sinov natijasi.
+
+    Usul nomi va aniqlik o'lchovlari faqat ichki (admin, hisobot) — foydalanuvchi interfeysida ko'rsatilmaydi.
+    """
+
+    indicator = models.CharField(max_length=40, verbose_name=_("Ko'rsatkich"))
+    level = models.CharField(max_length=10, verbose_name=_("Daraja"))
+    horizon = models.PositiveSmallIntegerField(verbose_name=_("Horizont (yil)"))
+    model_kind = models.CharField(max_length=10, verbose_name=_("Usul"))
+    params = models.JSONField(default=dict, blank=True)
+    backtest = models.JSONField(default=dict, blank=True, verbose_name=_("Orqaga sinov"))
+    interval = models.JSONField(default=dict, blank=True, verbose_name=_("80% oraliq (qoldiqlar)"))
+    trained_at = models.DateTimeField(auto_now_add=True)
+    data_until = models.CharField(max_length=7, verbose_name=_("Ma'lumot oxiri"))
+    version = models.CharField(max_length=40, db_index=True, verbose_name=_("Versiya"))
+    artifact_path = models.CharField(max_length=300, blank=True)
+    is_active = models.BooleanField(default=True, db_index=True)
+
+    class Meta:
+        ordering = ["-trained_at", "indicator", "level", "horizon"]
+        verbose_name = _("Prognoz modeli")
+        verbose_name_plural = _("Prognoz modellari")
+
+    def __str__(self):
+        return f"{self.indicator} · {self.level} · h{self.horizon} · {self.version}"
+
+
+class ForecastValue(models.Model):
+    SCENARIOS = (("base", _("Bazaviy")), ("optimistic", _("Ijobiy")), ("pessimistic", _("Salbiy")))
+
+    indicator = models.CharField(max_length=40, verbose_name=_("Ko'rsatkich"))
+    soato = models.CharField(max_length=7, verbose_name=_("SOATO"))
+    period = models.CharField(max_length=7, verbose_name=_("Davr"))
+    horizon = models.PositiveSmallIntegerField()
+    scenario = models.CharField(max_length=12, choices=SCENARIOS, default="base")
+    value = models.FloatField()
+    lo80 = models.FloatField(null=True, blank=True)
+    hi80 = models.FloatField(null=True, blank=True)
+    model_run = models.ForeignKey(ForecastModelRun, on_delete=models.CASCADE, null=True, blank=True,
+                                  related_name="values")
+    version = models.CharField(max_length=40, db_index=True)
+    drivers = models.JSONField(default=list, blank=True, verbose_name=_("Asosiy omillar"))
+
+    class Meta:
+        unique_together = ("indicator", "soato", "period", "scenario", "version")
+        indexes = [models.Index(fields=["indicator", "period", "scenario", "version"])]
+        verbose_name = _("Prognoz qiymati")
+        verbose_name_plural = _("Prognoz qiymatlari")
+
+    def __str__(self):
+        return f"{self.indicator} · {self.soato} · {self.period} · {self.scenario}"
+
+
+class ForecastVersion(models.Model):
+    """Har `train_forecasts` ishga tushishi — bitta versiya; faqat oxirgi muvaffaqiyatli versiya ishlatiladi."""
+
+    version = models.CharField(max_length=40, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_current = models.BooleanField(default=False, db_index=True)
+    data_until = models.JSONField(default=dict, blank=True, verbose_name=_("Ko'rsatkichlar ma'lumot oxiri"))
+    report = models.JSONField(default=dict, blank=True, verbose_name=_("Hisobot"))
+    monitoring = models.JSONField(default=dict, blank=True, verbose_name=_("Prognoz va haqiqat"))
+    what_if = models.JSONField(default=dict, blank=True, verbose_name=_("Maqsadli ssenariy"))
+    error = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = _("Prognoz versiyasi")
+        verbose_name_plural = _("Prognoz versiyalari")
+
+    def __str__(self):
+        return f"{self.version}{' · joriy' if self.is_current else ''}"

@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+import { configDefaults } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import path from "path";
 
@@ -11,6 +12,8 @@ const devProxy = {
 
 export default defineConfig({
   plugins: [react()],
+  // Playwright e2e testlari (e2e/*.spec.ts) vitest'ga kirmaydi — `npm run e2e`
+  test: { exclude: [...configDefaults.exclude, "e2e/**"] },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

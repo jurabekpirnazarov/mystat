@@ -8,6 +8,7 @@ import { formatDateTime, monthLabel, timeAgo } from "../../utils/format";
 import { fetchMyReports } from "../../api/myReports";
 import { fetchPrefill } from "../../hooks/usePrefill";
 import { profileCompleteness } from "../../utils/profile";
+import { MyScoreMini } from "../../components/company-score/ScoreWidgets";
 
 interface Props {
   onNavigate: (tab: string) => void;
@@ -140,6 +141,7 @@ export default function Overview({ onNavigate }: Props) {
   return (
     <div className="p-4 sm:p-6 space-y-6">
       <ProfileProgress onNavigate={onNavigate} />
+      <MyScoreMini />
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <StatCard label="Faol paket" value={data.package?.name_uz ?? "—"} icon={Package} hint={data.package ? "joriy tarif" : "paket tanlanmagan"} />
         <StatCard label="Shartnomalar" value={data.contracts.total} icon={FileText} hint={`${activeContracts} ta jarayonda`} />

@@ -7,6 +7,7 @@ import useApi from "../hooks/useApi";
 import { ApiErrorState, PageHeader, Skeleton, SourceBadge, type DataSource } from "../components/ui";
 import { exportElementToPdf } from "../utils/exportPdf";
 import { formatDateTime, formatMoney } from "../utils/format";
+import CompanyScoreCard from "../components/company-score/CompanyScoreCard";
 
 interface Passport {
   basic: Record<"name" | "tin" | "address" | "phone" | "email" | "organization_type" | "region" | "district" | "sector" | "ktut_name", string | null>;
@@ -77,6 +78,9 @@ export default function OrganizationPassport() {
                 </dl>
               </div>
             </Block>
+
+            {/* KORXONA_SCORING.md KR-36: o'z korxonasi bali — tavsiyalar, o'z qiymatlari, yillar dinamikasi */}
+            <CompanyScoreCard mode="own" className="break-inside-avoid" />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {data.indicators && (

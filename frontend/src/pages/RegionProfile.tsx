@@ -9,6 +9,8 @@ import Term from "../components/Term";
 import FavoriteButton from "../components/FavoriteButton";
 import SubscribeButton from "../components/SubscribeButton";
 import { exportElementToPng } from "../utils/exportPdf";
+import { formatAxis, niceAxis, useChartTheme } from "../utils/chartTheme";
+import CompanyQualityBlock from "../components/company-score/CompanyQualityBlock";
 
 const nf = (v: number | null | undefined, d = 1) => (v === null || v === undefined ? "—" : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: d }).format(v));
 const TERM: Record<string, string> = { unemployment_rate: "unemployment-rate", grp_per_capita: "grp", avg_salary: "average-wage", births: "crude-birth-rate" };
@@ -65,14 +67,20 @@ export default function RegionProfile() {
   const info = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
 
+  const chart = useChartTheme();
+  const [metric, setMetric] = useState("avg_salary");
+  const metrics = Object.keys(data?.dynamics ?? {}).filter((k) => (data?.dynamics[k]?.length ?? 0) > 1);
+  const activeMetric = metrics.includes(metric) ? metric : metrics[0];
+  const metricCard = data?.cards.find((c) => c.key === activeMetric);
   const merged = (key: string) => {
     const a = data?.dynamics[key] ?? [];
     const b = other.data?.dynamics[key] ?? [];
-    return a.map((p) => ({ year: p.year, a: p.value, b: b.find((x) => x.year === p.year)?.value }));
+    return a.map((p) => ({ year: p.year, a: p.value, b: b.find((x) => x.year === p.year)?.value ?? null }));
   };
+  const series = activeMetric ? merged(activeMetric) : [];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {loading && !data ? (
           <Skeleton variant="chart" />
@@ -103,29 +111,51 @@ export default function RegionProfile() {
               {data.cards.map((c) => <Card key={c.key} c={c} />)}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 lg:items-start">
               <section className="lg:col-span-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
-                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                  <h2 className="font-semibold">O'rtacha ish haqi dinamikasi</h2>
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                  <h2 className="font-semibold">Dinamika{metricCard ? `: ${metricCard.label.toLowerCase()}` : ""}{metricCard?.unit ? `, ${metricCard.unit}` : ""}</h2>
                   <select aria-label="Solishtirish uchun hudud" value={compareId ?? ""} onChange={(e) => setParams(e.target.value ? { compare: e.target.value } : {})}
                     className="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm">
                     <option value="">Boshqa hudud bilan solishtirish…</option>
                     {regions.data?.items.filter((r) => r.region_id !== data.region.id).map((r) => <option key={r.region_id} value={r.region_id}>{r.name}</option>)}
                   </select>
                 </div>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={merged("avg_salary")}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      <XAxis dataKey="year" fontSize={12} />
-                      <YAxis fontSize={12} width={60} />
-                      <Tooltip formatter={(v) => nf(Number(v))} />
-                      <Legend />
-                      <Line type="monotone" dataKey="a" name={data.region.name_uz} stroke="#2563eb" strokeWidth={2} />
-                      {other.data && <Line type="monotone" dataKey="b" name={other.data.region.name_uz} stroke="#f97316" strokeWidth={2} />}
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
+                {metrics.length > 1 && (
+                  <div role="tablist" aria-label="Ko'rsatkich" className="flex flex-wrap gap-1.5 mb-3">
+                    {metrics.map((k) => {
+                      const c = data.cards.find((x) => x.key === k);
+                      return (
+                        <button key={k} type="button" role="tab" aria-selected={k === activeMetric} onClick={() => setMetric(k)}
+                          className={`px-2.5 py-1 rounded-full text-xs border ${k === activeMetric ? "bg-blue-600 border-blue-600 text-white" : "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"}`}>
+                          {c?.label ?? k}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                {series.length > 1 ? (
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={series} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                        <CartesianGrid stroke={chart.grid} vertical={false} />
+                        <XAxis dataKey="year" tick={{ fontSize: 12, fill: chart.axis }} tickLine={false} axisLine={{ stroke: chart.grid }} interval="preserveStartEnd" minTickGap={16} />
+                        <YAxis tick={{ fontSize: 12, fill: chart.axis }} tickLine={false} axisLine={false} width={64}
+                          {...niceAxis(series.flatMap((p) => [p.a, p.b]))} tickFormatter={(v) => formatAxis(Number(v))} />
+                        <Tooltip {...chart.tooltip} formatter={(v, name) => [`${nf(v === null ? null : Number(v))} ${metricCard?.unit ?? ""}`, name]} />
+                        <Legend iconType="plainline" wrapperStyle={{ fontSize: 12 }} />
+                        <Line type="monotone" dataKey="a" name={data.region.name_uz} stroke="#2563eb" strokeWidth={2} animationDuration={400}
+                          dot={{ r: 3, fill: chart.dotFill, strokeWidth: 1.5 }} activeDot={{ r: 5 }} />
+                        {other.data && (
+                          <Line type="monotone" dataKey="b" name={other.data.region.name_uz} stroke="#f97316" strokeWidth={2} animationDuration={400}
+                            dot={{ r: 3, fill: chart.dotFill, strokeWidth: 1.5 }} activeDot={{ r: 5 }} />
+                        )}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <p className="py-12 text-center text-sm text-gray-500">Bu hudud uchun dinamika ma'lumoti yo'q.</p>
+                )}
                 {other.data && (
                   <table className="mt-4 w-full text-sm">
                     <thead><tr className="text-left text-xs text-gray-500"><th>Ko'rsatkich</th><th className="text-right">{data.region.name_uz}</th><th className="text-right">{other.data.region.name_uz}</th></tr></thead>
@@ -159,6 +189,8 @@ export default function RegionProfile() {
                     <p className="text-sm">Import: <b>{nf(data.trade.import, 0)}</b> {data.trade.unit}</p>
                   </div>
                 )}
+                {/* KORXONA_SCORING.md KR-37: hudud korxonalari sifati (agregat) */}
+                <CompanyQualityBlock soato={data.region.code} />
                 <div ref={info} className="pt-2"><Infographic p={data} /></div>
               </section>
             </div>

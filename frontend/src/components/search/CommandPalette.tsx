@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BookOpen, CornerDownLeft, FileText, HelpCircle, Layers, LayoutGrid, Library, Search, X } from "lucide-react";
 import { globalSearch, type SearchGroup, type SearchItem } from "../../api/support";
+import CompanyScoreBadge from "../company-score/CompanyScoreBadge";
 
 // Statik sahifalar — serverga so'rovsiz, darhol qidiriladi
 const PAGES: SearchItem[] = [
@@ -157,6 +158,7 @@ export default function CommandPalette({ open, onClose }: Props) {
                         <span className="block text-sm text-gray-900 dark:text-white truncate">{item.title}</span>
                         {item.subtitle && <span className="block text-xs text-gray-500 dark:text-gray-400 truncate">{item.subtitle}</span>}
                       </span>
+                      {item.stir && item.score !== undefined && <CompanyScoreBadge score={item.score} interactive={false} />}
                       {i === active && <CornerDownLeft className="w-4 h-4 text-gray-400" aria-hidden="true" />}
                     </button>
                   );

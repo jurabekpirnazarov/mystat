@@ -80,3 +80,5 @@ wcwidth==0.2.13
 tqdm==4.66.5
 docxtpl~=0.19.1
 num2word-uz==0.1.1
+scipy==1.18.1
+xgboost-cpu==2.1.4

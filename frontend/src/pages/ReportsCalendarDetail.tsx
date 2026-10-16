@@ -3,6 +3,8 @@ import { Building2, Hash, LayoutGrid, Table, Search, Filter } from 'lucide-react
 import { ReportData } from '../types/report';
 import ReportsTable from '../components/reports/ReportsTable';
 import ReportCard from '../components/reports/ReportCard';
+import CompanyScoreBadge from '../components/company-score/CompanyScoreBadge';
+import { useCompanyScores } from '../api/companyScores';
 
 interface ReportsCalendarDetailProps {
   reports: ReportData[];
@@ -13,6 +15,8 @@ interface ReportsCalendarDetailProps {
 }
 
 const ReportsCalendarDetail: React.FC<ReportsCalendarDetailProps> = ({ reports, companyInfo }) => {
+  // KORXONA_SCORING.md KR-35 ("Qamrov qoidasi"): topilgan korxona bali
+  const scores = useCompanyScores(companyInfo?.stir ? [companyInfo.stir] : []);
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('all');
@@ -61,7 +65,7 @@ const ReportsCalendarDetail: React.FC<ReportsCalendarDetailProps> = ({ reports, 
                   <Hash className="h-5 w-5 text-blue-600" />
                   <div className="text-left">
                     <p className="text-sm font-medium text-gray-600">STIR:</p>
-                    <p className="text-lg font-bold text-gray-900">{companyInfo.stir}</p>
+                    <p className="text-lg font-bold text-gray-900 flex items-center gap-2">{companyInfo.stir} <CompanyScoreBadge score={scores[companyInfo.stir]} /></p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">

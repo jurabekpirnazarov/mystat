@@ -80,4 +80,16 @@
     {% for r in data.ratings %}<div class="an-row"><span class="l">{{ r.service__name_uz }}</span><span>{{ r.avg|floatformat:1 }} ★ ({{ r.n }})</span></div>{% empty %}<p class="an-note">Yo'q</p>{% endfor %}
   </div>
 </div>
+
+{% if data.company_scores %}
+<div class="an-sec">
+  <h3>Korxona ballari: sinflar taqsimoti ({{ data.company_scores.year }})</h3>
+  <p class="an-note">
+    {% if data.include_demo %}Real va namuna (sintetik) ballar birga.{% else %}Faqat real manbali ballar — namunani ko'rish uchun "Demo ma'lumotni ko'rsatish" ni yoqing.{% endif %}
+    Manba bo'yicha: {% for k, v in data.company_scores.sources.items %}{{ k }} — {{ v }}{% if not forloop.last %}, {% endif %}{% empty %}yo'q{% endfor %}.
+  </p>
+  <p>Korxonalar: {{ data.company_scores.total }} · o'rtacha ball: {{ data.company_scores.mean }}</p>
+  {% for c in data.company_scores.classes %}<div class="an-row"><span class="l">{{ c.klass }} · {{ c.name }}</span><span>{{ c.count }} ({{ c.pct }}%)</span></div>{% endfor %}
+</div>
+{% endif %}
 {% endblock %}

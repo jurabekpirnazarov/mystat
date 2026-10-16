@@ -70,6 +70,7 @@ def registry():
     from .consultations import ConsultationsSeeder
     from .custom_requests import CustomRequestsSeeder
     from .demo_users import DemoUsersSeeder
+    from .enterprise_scoring import EnterpriseScoringSeeder
     from .misc import MiscSeeder
     from .notifications import NotificationsSeeder
     from .report_guides import ReportGuidesSeeder
@@ -83,6 +84,7 @@ def registry():
         NotificationsSeeder,
         MiscSeeder,
         EnterpriseIndicatorsSeeder,
+        EnterpriseScoringSeeder,
         RegionIndicatorsSeeder,
         ReportGuidesSeeder,
         CustomRequestsSeeder,

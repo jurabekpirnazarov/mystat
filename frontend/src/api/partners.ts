@@ -1,4 +1,5 @@
 import axiosT from "./baseUrl";
+import type { CompanyScoreShort } from "./companyScores";
 
 export interface PartnerFilters {
   q?: string;
@@ -7,6 +8,10 @@ export interface PartnerFilters {
   category?: number;
   legal_form?: string;
   page?: number;
+  /** KORXONA_SCORING.md KR-35: sinf filtri ("A,B"), ball bo'yicha saralash, vazn preseti */
+  klass?: string;
+  ordering?: "" | "score" | "-score";
+  csp?: string;
 }
 
 export interface PartnerRow {
@@ -18,6 +23,8 @@ export interface PartnerRow {
   district: string | null;
   products: number;
   categories: number;
+  /** Korxona bali (OS-18 bo'yicha yopiq bo'lsa null) */
+  score: CompanyScoreShort | null;
 }
 
 export interface PartnerFilterOptions {

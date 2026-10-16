@@ -5,6 +5,7 @@ import { fetchBenchmark, type BenchmarkMetric } from "../../api/analytics";
 import useApi from "../../hooks/useApi";
 import { ApiErrorState, Skeleton, SourceBadge } from "../../components/ui";
 import { exportElementToPdf } from "../../utils/exportPdf";
+import { ScoreBenchmark } from "../../components/company-score/ScoreWidgets";
 
 const fmt = (v: number | null | undefined, digits = 0) =>
   v === null || v === undefined ? "—" : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: digits }).format(v);
@@ -171,6 +172,8 @@ export default function Benchmark() {
               </ResponsiveContainer>
             </div>
           </div>
+          {/* KORXONA_SCORING.md KR-36: guruhdagi ball taqsimoti va ustunlar p25–p75 */}
+          <ScoreBenchmark />
           {data.usage.configured && data.usage.limit !== null && (
             <p className="text-xs text-gray-500">Paket limiti: {data.usage.used} / {data.usage.limit} (bir kunda bir xil hisobot qayta sanalmaydi)</p>
           )}

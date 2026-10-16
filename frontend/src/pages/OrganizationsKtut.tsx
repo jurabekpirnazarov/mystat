@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { Search, RefreshCw } from 'lucide-react';
+import CompanyScoreCard from '../components/company-score/CompanyScoreCard';
 
 function OrganizationsKtut() {
   const [stir, setStir] = useState('');
   const [captcha, setCaptcha] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [captchaCode] = useState('cf ЯК ec');
+  // KORXONA_SCORING.md KR-35: qidirilgan STIR bo'yicha korxona bali kartochkasi
+  const [found, setFound] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -13,7 +16,8 @@ function OrganizationsKtut() {
     
     setTimeout(() => {
       setIsLoading(false);
-    }, 2000);
+      setFound(stir.length === 9 ? stir : null);
+    }, 300);
   };
 
   const handleStirChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -159,6 +163,11 @@ function OrganizationsKtut() {
                 )}
               </button>
             </form>
+            {found && (
+              <div className="mt-6">
+                <CompanyScoreCard stir={found} />
+              </div>
+            )}
 
             {/* Security Note */}
             {/* <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">

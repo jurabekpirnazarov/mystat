@@ -5,6 +5,9 @@ export interface SearchItem {
   title: string;
   subtitle: string;
   url: string;
+  /** "Korxonalar" guruhi: STIR va korxona bali (KORXONA_SCORING.md KR-35) */
+  stir?: string;
+  score?: import("./companyScores").CompanyScoreShort | null;
 }
 export interface SearchGroup {
   type: string;

@@ -125,7 +125,14 @@ class Command(BaseCommand):
         return result
 
     def _flush(self, only, dry_run):
-        records = SyntheticRecord.objects.all()
+        # Partiya bilan yozadigan seeder'lar (KORXONA_SCORING.md KR-30): reyestrda bitta yozuv, qatorlar jadvaldagi
+        # `is_synthetic` ustuni bo'yicha o'chiriladi
+        for name, seeder in registry().items():
+            if hasattr(seeder, "flush_batch") and (not only or name in only):
+                counts = seeder.flush_batch(dry_run=dry_run)
+                for label, n in sorted(counts.items()):
+                    self.stdout.write(f"  {label:45} o'chiriladi (partiya): {n}")
+        records = SyntheticRecord.objects.exclude(object_id="batch")
         if only:
             from django.db.models import Q
             q = Q()

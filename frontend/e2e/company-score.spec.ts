@@ -1,0 +1,111 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { expect, test, type Page } from "@playwright/test";
+
+/**
+ * KORXONA_SCORING.md KR-34..KR-38 qabul shartlari. Bazada `seed_demo --only enterprise_scoring` natijasi bo'lishi kerak
+ * (demo muhit, DEBUG=True). Kabinet uchun demo korxona `demo_yuridik_1` (parol — backend/.env DEMO_USER_PASSWORD).
+ */
+
+const API = "http://localhost:8000/api";
+
+function demoPassword() {
+  const env = readFileSync(resolve(process.cwd(), "../backend/.env"), "utf-8");
+  return /^DEMO_USER_PASSWORD=(.*)$/m.exec(env)?.[1].trim() ?? "";
+}
+
+async function loginDemo(page: Page) {
+  const res = await page.request.post(`${API}/accounts/login/`, { data: { username: "demo_yuridik_1", password: demoPassword() } });
+  expect(res.ok()).toBeTruthy();
+  const tokens = (await res.json()).data.tokens;
+  await page.addInitScript((t) => {
+    localStorage.setItem("access_token", t.access);
+    localStorage.setItem("refresh_token", t.refresh);
+    localStorage.setItem("user", JSON.stringify({ name: "Demo", email: "demo@example.com", type: "legal", date: "2026-10-16" }));
+  }, tokens);
+}
+
+test("KR-34: badge va kartochka holatlari, 375px da kartochka buzilmaydi", async ({ page }) => {
+  await page.goto("/company-score/components");
+  const states = page.getByRole("region", { name: "Badge holatlari" });
+  for (const label of ["A ·", "B ·", "C ·", "D ·", "E ·", "Ma'lumot yetarli emas"]) {
+    await expect(states.getByRole("img", { name: new RegExp(label) }).first()).toBeAttached();
+  }
+  await expect(states.getByRole("img", { name: /namuna/ })).toBeAttached();
+  const card = page.getByRole("region", { name: "Korxona bali" }).first();
+  await expect(card).toContainText("Tengdoshlar guruhi");
+  await page.setViewportSize({ width: 375, height: 800 });
+  await expect(card).toBeVisible();
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
+});
+
+test("KR-35: hamkorlar — badge ustuni, A–B filtri, ball bo'yicha saralash", async ({ page }) => {
+  await page.goto("/partners?ordering=-score");
+  const table = page.locator("table").first();
+  await expect(table.locator("th", { hasText: "Ball" })).toBeVisible();
+  await expect(table.getByRole("img", { name: /Korxona bali/ }).first()).toBeVisible();
+  const scores = await table.getByRole("img", { name: /Korxona bali/ }).evaluateAll((els) =>
+    els.map((e) => Number(/ball (\d+(?:\.\d+)?)/.exec(e.getAttribute("aria-label") ?? "")?.[1] ?? NaN)).filter((n) => !Number.isNaN(n)));
+  expect(scores.length).toBeGreaterThan(3);
+  expect(scores).toEqual([...scores].sort((a, b) => b - a));
+  // Checkbox holati URL'dan (klass=A,B) — bosib, URL va holat yangilanishini kutamiz
+  const filtered = page.waitForResponse((r) => r.url().includes("/partners/search/") && r.url().includes("klass="));
+  await page.getByLabel("Faqat A–B sinf").click();
+  await expect(page).toHaveURL(/klass=A%2CB|klass=A,B/);
+  await expect(page.getByLabel("Faqat A–B sinf")).toBeChecked();
+  await filtered;
+  const labels = await table.getByRole("img", { name: /Korxona bali/ }).evaluateAll((els) => els.map((e) => e.getAttribute("aria-label") ?? ""));
+  expect(labels.length).toBeGreaterThan(0);
+  expect(labels.every((l) => /bali: [AB] ·/.test(l))).toBeTruthy();
+});
+
+test("KR-35: hamkorlarda ball qidiruv javobining o'zida — alohida so'rovlar yo'q (N+1 yo'q)", async ({ page }) => {
+  const batches: string[] = [];
+  page.on("request", (r) => { if (/\/analytics\/company-scores\/\?/.test(r.url())) batches.push(r.url()); });
+  await page.goto("/partners");
+  await expect(page.locator("table").first().getByRole("img", { name: /Korxona bali/ }).first()).toBeVisible();
+  // Hamkorlar ballni qidiruv javobining o'zidan oladi — alohida batch so'rov ham shart emas
+  expect(batches.length).toBeLessThanOrEqual(1);
+});
+
+test("KR-36: demo kabinet — pasportda ball, tavsiyalar va dinamika (Namuna)", async ({ page }) => {
+  await loginDemo(page);
+  await page.goto("/cabinet/organization");
+  const card = page.getByRole("region", { name: "Korxona bali" });
+  await expect(card).toBeVisible();
+  await expect(card.getByText("Namuna", { exact: true }).first()).toBeVisible();
+  await expect(card.getByRole("figure", { name: "Yillar bo'yicha ball" })).toBeVisible();
+  await card.getByText("Ustunlar va ko'rsatkichlar").click();
+  await expect(card.getByText(/Qiymat ustiga olib boring/)).toBeVisible();
+});
+
+test("KR-36: begona korxona — tavsiya va xom qiymatlar yo'q", async ({ page }) => {
+  const list = await (await page.request.get(`${API}/additional-services/partners/search/?ordering=-score`)).json();
+  const stir = list.results.find((r: { score: unknown }) => r.score).stir as string;
+  await page.goto("/organizations-ktut");
+  await page.locator("#stir").fill(stir);
+  await page.locator("#captcha").fill("x");
+  await page.getByRole("button", { name: /Qidirish|Izlash|Tekshirish|Yuborish/ }).first().click();
+  const card = page.getByRole("region", { name: "Korxona bali" });
+  await expect(card).toBeVisible();
+  await expect(card.getByRole("region", { name: "Tavsiyalar" })).toHaveCount(0);
+  const detail = await (await page.request.get(`${API}/analytics/company-scores/${stir}/`)).text();
+  for (const raw of ['"value"', '"median"', "revenue", "net_profit", "avg_wage", "tax_debt_amount"]) expect(detail).not.toContain(raw);
+});
+
+test("KR-37: xarita qatlami va hudud kartochkasida 'Korxonalar sifati'", async ({ page }) => {
+  await page.goto("/regions?ind=company-score&t=1708");
+  await expect(page.locator("path.leaflet-interactive").first()).toBeAttached();
+  await page.goto("/regions?ind=score&p=2025&t=1708");
+  const block = page.getByRole("region", { name: "Korxonalar sifati" });
+  await expect(block).toBeVisible();
+  await expect(block).toContainText(/O'rtacha ball|Ma'lumot yetarli emas/);
+});
+
+test("KR-38: metodologiya sahifasi", async ({ page }) => {
+  await page.goto("/methodology/company-score");
+  await expect(page.getByRole("heading", { name: "Korxona bali: qanday hisoblanadi" })).toBeVisible();
+  await expect(page.getByText("rasmiy baho emas").first()).toBeVisible();
+  await expect(page.locator("table").first()).toContainText("Tushum o'sishi");
+});

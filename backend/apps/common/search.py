@@ -55,6 +55,25 @@ def _contains(fields, q):
 
 
 
+def _companies(q):
+    """KTUT korxonalari (STIR bo'yicha boshlanishi yoki nom); har biriga `stir` va `score` (badge uchun, bitta so'rov)."""
+    from apps.additional_services.models import Ktut
+    from apps.analytics.company_scoring import api as score_api, config as score_config
+
+    qs = Ktut.objects.filter(inn__startswith=q) if q.isdigit() else Ktut.objects.filter(_contains(["name"], q))
+    rows = list(qs.order_by("name").values("id", "inn", "name")[:PER_GROUP])
+    scores = {}
+    if rows and score_api.is_public():
+        cfg = score_config.get()
+        year = score_api.latest_year(cfg)
+        if year:
+            by = score_api._rows(cfg, [r["inn"] for r in rows], cfg["default_preset"], year)
+            scores = {s: score_api.short(v[cfg["default_preset"]], v[cfg["default_preset"]], cfg, "uz")
+                      for s, v in by.items() if cfg["default_preset"] in v}
+    return [{"id": f"ktut-{r['id']}", "title": r["name"], "subtitle": f"STIR {r['inn']}", "stir": r["inn"],
+             "score": scores.get(r["inn"]), "url": f"/partners?q={r['inn']}"} for r in rows]
+
+
 def global_search(query, user):
     from apps.additional_services.models import ReportList
     from apps.additional_services.models.staticclassification_model import StatisticClassification
@@ -101,6 +120,8 @@ def global_search(query, user):
             {"id": c.id, "title": c.name_uz, "subtitle": c.analog_uz, "url": "/statistical-classifications"}
             for c in classifications
         ]))
+
+    groups.append(("companies", "Korxonalar", _companies(q)))
 
     from apps.citizens.models import Article, GlossaryTerm
     articles = Article.objects.filter(_contains(["title_uz", "summary_uz", "title_ru"], q), is_published=True)[:PER_GROUP]

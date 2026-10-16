@@ -252,7 +252,7 @@ export default function TradeFlows() {
 
               <section className="xl:col-span-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 sm:p-5">
                 <h2 className="font-semibold text-gray-900 dark:text-white mb-3">
-                  {selected ? `${selected.country_name}: ` : ""}{flowLabel.toLowerCase()} dinamikasi
+                  {selected ? `${selected.country_name}: ` : ""}{selected ? flowLabel.toLowerCase() : flowLabel} dinamikasi
                 </h2>
                 <select
                   aria-label="Taqqoslash uchun davlat"

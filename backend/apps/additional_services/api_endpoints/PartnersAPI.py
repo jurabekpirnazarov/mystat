@@ -8,12 +8,16 @@ Rejadagi "o'lcham (xodimlar soni)" filtri qo'shilmadi: korxona bo'yicha real xod
 korxonaga o'ylab topilgan raqam biriktirish esa noto'g'ri ma'lumot tarqatadi (S-10 namunasi faqat anonim guruhlar uchun).
 
 Telefon, PINFL va rahbar ma'lumotlari javobga ham, eksportga ham kirmaydi.
+
+KORXONA_SCORING.md KR-35: har qatorda `score` (ball, sinf, ustunlar — xom qiymatsiz), `klass=A,B` filtri,
+`ordering=-score|score` saralash, `csp=` preset; XLSX eksportda `ball`, `sinf`, `namuna` ustunlari. OS-18: ball
+ochiq bo'lmasa (`DEBUG=False` va `company_score_public=False`) `score` null va filtr/saralash e'tiborga olinmaydi.
 """
 import io
 import re
 
 from django.core.cache import cache
-from django.db.models import Count, Max, Q
+from django.db.models import Count, F, Max, OuterRef, Q, Subquery
 from django.http import HttpResponse
 from rest_framework import serializers, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -82,6 +86,22 @@ class SearchParams(serializers.Serializer):
     category = serializers.IntegerField(required=False)
     legal_form = serializers.ChoiceField(required=False, choices=[c for c, _n, _r in LEGAL_FORMS] + ["OTHER"])
     page = serializers.IntegerField(required=False, min_value=1, default=1)
+    klass = serializers.CharField(required=False, allow_blank=True, max_length=12)
+    ordering = serializers.ChoiceField(required=False, choices=["", "score", "-score"])
+    csp = serializers.CharField(required=False, allow_blank=True, max_length=20)
+
+    def validate_klass(self, value):
+        parts = [k.strip().upper() for k in value.split(",") if k.strip()]
+        if any(k not in "ABCDE" or len(k) != 1 for k in parts):
+            raise serializers.ValidationError("klass: A, B, C, D, E (vergul bilan)")
+        return parts
+
+    def validate_csp(self, value):
+        from apps.analytics.company_scoring import config as score_config
+
+        if value and value not in score_config.get()["presets"]:
+            raise serializers.ValidationError("preset noma'lum")
+        return value
 
 
 def filtered_products(params):
@@ -111,12 +131,57 @@ def filtered_products(params):
     return qs
 
 
+def _score_subquery(params, field):
+    """EnterpriseScore'dan (oxirgi yil, tanlangan preset) bitta maydon — inn bo'yicha korrelyatsiyalangan subquery."""
+    from apps.analytics.company_scoring import api as score_api, config as score_config
+    from apps.analytics.models import EnterpriseScore
+
+    cfg = score_config.get()
+    preset = params.get("csp") or cfg["default_preset"]
+    return Subquery(EnterpriseScore.objects.filter(stir=OuterRef("inn"), preset=preset, model_version=cfg["version"],
+                                                   year=score_api.latest_year(cfg)).values(field)[:1])
+
+
+def scores_on():
+    from apps.analytics.company_scoring.api import is_public
+
+    return is_public()
+
+
 def companies(params):
-    """inn bo'yicha guruhlangan korxonalar (eng ko'p mahsulotlilar birinchi)."""
+    """inn bo'yicha guruhlangan korxonalar (eng ko'p mahsulotlilar birinchi; `ordering=-score` — ball bo'yicha)."""
     rows = (filtered_products(params).values("inn")
             .annotate(name=Max("name"), address=Max("adress_uz"), district=Max("soato_uz"),
-                      products=Count("id"), categories=Count("category", distinct=True))
-            .order_by("-products", "name"))
+                      products=Count("id"), categories=Count("category", distinct=True)))
+    order = ("-products", "name")
+    if scores_on() and (params.get("klass") or params.get("ordering")):
+        rows = rows.annotate(score=_score_subquery(params, "overall"), klass=_score_subquery(params, "klass"))
+        if params.get("klass"):
+            rows = rows.filter(klass__in=params["klass"])
+        if params.get("ordering") == "-score":
+            order = (F("score").desc(nulls_last=True), "name")
+        elif params.get("ordering") == "score":
+            order = (F("score").asc(nulls_last=True), "name")
+    return rows.order_by(*order)
+
+
+def attach_scores(rows, params):
+    """Sahifadagi qatorlarga `score` (bitta batch so'rov, N+1 yo'q)."""
+    if not rows:
+        return rows
+    if not scores_on():
+        for r in rows:
+            r["score"] = None
+        return rows
+    from apps.analytics.company_scoring import api as score_api, config as score_config
+
+    cfg = score_config.get()
+    preset = params.get("csp") or cfg["default_preset"]
+    year = score_api.latest_year(cfg)
+    by = score_api._rows(cfg, [r["stir"] for r in rows], preset, year) if year else {}
+    for r in rows:
+        got = by.get(r["stir"], {})
+        r["score"] = score_api.short(got[preset], got.get(cfg["default_preset"]), cfg, "uz") if preset in got else None
     return rows
 
 
@@ -128,7 +193,10 @@ def _row(r):
 
 
 def _cache_key(prefix, params):
-    return prefix + ":" + ":".join(f"{k}={params.get(k) or ''}" for k in ("q", "region", "district", "category", "legal_form", "page"))
+    from apps.analytics.company_scoring.service import cache_version
+
+    keys = ("q", "region", "district", "category", "legal_form", "page", "klass", "ordering", "csp")
+    return f"{prefix}:{cache_version()}:" + ":".join(f"{k}={params.get(k) or ''}" for k in keys)
 
 
 class PartnerSearchAPIView(APIView):
@@ -146,7 +214,7 @@ class PartnerSearchAPIView(APIView):
             total = rows.count()
             start = (p["page"] - 1) * PAGE_SIZE
             data = {"count": total, "page": p["page"], "page_size": PAGE_SIZE,
-                    "results": [_row(r) for r in rows[start:start + PAGE_SIZE]]}
+                    "results": attach_scores([_row(r) for r in rows[start:start + PAGE_SIZE]], p)}
             cache.set(key, data, CACHE_SECONDS)
         return Response(data)
 
@@ -207,13 +275,17 @@ class PartnerExportAPIView(APIView):
         wb = Workbook()
         ws = wb.active
         ws.title = "Korxonalar"
-        ws.append(["STIR", "Nomi", "Tashkiliy-huquqiy shakl", "Viloyat", "Tuman", "Mahsulotlar soni", "Mahsulot guruhlari"])
-        for r in companies(p)[:EXPORT_LIMIT]:
-            row = _row(r)
+        ws.append(["STIR", "Nomi", "Tashkiliy-huquqiy shakl", "Viloyat", "Tuman", "Mahsulotlar soni", "Mahsulot guruhlari",
+                   "ball", "sinf", "namuna"])
+        rows = attach_scores([_row(r) for r in companies(p)[:EXPORT_LIMIT]], p)
+        for row in rows:
+            sc = row.get("score") or {}
             ws.append([row["stir"], row["name"], row["legal_form"]["name"], row["region"], row["district"],
-                       row["products"], row["categories"]])
+                       row["products"], row["categories"], sc.get("overall"), sc.get("klass") or "",
+                       "ha" if sc.get("is_synthetic") else ""])
         ws.append([])
         ws.append([f"Manba: my.stat.uz, sanoat mahsulotlari reyestri. Ko'pi bilan {EXPORT_LIMIT} qator."])
+        ws.append(["Ball va sinf — taxminiy baho, rasmiy baho emas; \"namuna\" — sintetik ko'rsatkichlardan."])
         buf = io.BytesIO()
         wb.save(buf)
         response = HttpResponse(buf.getvalue(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")

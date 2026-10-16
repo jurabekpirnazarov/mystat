@@ -1,0 +1,150 @@
+# KORXONA_SCORING.md KR-29: korxonalar scoringi konfiguratsiyasi.
+# Yangi ko'rsatkich qo'shish uchun `indicators` ga yozish yetarli (kod o'zgarmaydi), agar uning qiymati
+# `EnterpriseIndicator` maydonlaridan `value` ifodasi bilan hisoblanadigan bo'lsa (engine.VALUE_FUNCS yoki `field`).
+version: "1.0"
+
+params:
+  min_peer: 30            # tengdoshlar guruhi kamida shuncha korxona (4.1)
+  shrink_k: 10            # kichik korxonada ulushlarni bo'lim o'rtachasiga tortish (4.3)
+  no_export_score: 30     # savdoga yaroqli, lekin eksport qilmaydigan korxona T bahosi (4.4)
+  exporter_base: 40       # eksportchi: 40 + 60 × percentil
+  exporter_span: 60
+  new_exporter_growth: 0.5
+  cap_tax_debt: 57        # soliq qarzi bo'lsa umumiy ball shundan oshmaydi (4.5)
+  coverage_min: 0.6       # bundan kam — ball yo'q (4.7)
+  coverage_full: 0.85     # bundan kam — "qisman ma'lumot"
+  reports_low: 0.5        # o'z vaqtida topshirilgan < 50% — bayroq
+  usd_rate: 12500         # eksport (ming AQSh $) -> ming so'm, eksport ulushi uchun
+  rec_peer_below: 25      # tavsiya: tengdosh ko'rsatkich percentili shundan past
+  rec_abs_below: 60       # tavsiya: mutlaq ko'rsatkich bahosi shundan past
+  rec_max: 3
+  min_group_region: 30    # KR-37: hududda shundan kam baholangan korxona bo'lsa — "Ma'lumot yetarli emas"
+  first_year: 2023        # shu yildan boshlab baholanadi (oldingi S-10 qatorlarida scoring maydonlari yo'q)
+
+size_classes:             # faqat solishtirish uchun, qonundagi toifa emas (4.1)
+  - {key: micro, max: 10, name: {uz: "mikro", ru: "микро", cry: "микро"}}
+  - {key: small, max: 50, name: {uz: "kichik", ru: "малые", cry: "кичик"}}
+  - {key: medium, max: 250, name: {uz: "o'rta", ru: "средние", cry: "ўрта"}}
+  - {key: large, max: null, name: {uz: "yirik", ru: "крупные", cry: "йирик"}}
+
+tradable:                 # tashqi savdo ustuni baholanadigan tarmoqlar (4.4)
+  sections: [A, B, C]
+  divisions: ["46"]
+
+pillars:
+  M: {name: {uz: "Moliyaviy holat", ru: "Финансовое состояние", cry: "Молиявий ҳолат"}}
+  O: {name: {uz: "O'sish va investitsiya", ru: "Рост и инвестиции", cry: "Ўсиш ва инвестиция"}}
+  T: {name: {uz: "Tashqi savdo", ru: "Внешняя торговля", cry: "Ташқи савдо"}}
+  X: {name: {uz: "Mehnat resurslari", ru: "Трудовые ресурсы", cry: "Меҳнат ресурслари"}}
+  I: {name: {uz: "Inklyuzivlik", ru: "Инклюзивность", cry: "Инклюзивлик"}}
+  S: {name: {uz: "Intizom va ishonchlilik", ru: "Дисциплина и надёжность", cry: "Интизом ва ишончлилик"}}
+
+# kind: peer — tengdoshlar ichida percentil; absolute — o'z formulasi 0..100; trade — eksportchilar ichida percentil.
+# value: engine.VALUE_FUNCS dagi hisob nomi yoki EnterpriseIndicator maydoni (field).
+# applies: qo'llanish sharti (engine.CONDITIONS); qo'llanmasa to'liqlik maxrajiga kirmaydi.
+indicators:
+  m_rev_growth: {pillar: M, kind: peer, direction: "+", value: rev_growth, applies: has_history,
+                 name: {uz: "Tushum o'sishi", ru: "Рост выручки", cry: "Тушум ўсиши"}, unit: "%/yil", fmt: pct}
+  m_rpe: {pillar: M, kind: peer, direction: "+", value: rpe,
+          name: {uz: "Xodim boshiga tushum", ru: "Выручка на работника", cry: "Ходим бошига тушум"}, unit: "mln so'm", fmt: mln}
+  m_margin: {pillar: M, kind: peer, direction: "+", value: margin,
+             name: {uz: "Sof foyda marjasi", ru: "Маржа чистой прибыли", cry: "Соф фойда маржаси"}, unit: "%", fmt: pct}
+  o_emp_growth: {pillar: O, kind: peer, direction: "+", value: emp_growth, applies: has_history,
+                 name: {uz: "Xodimlar soni o'sishi", ru: "Рост численности", cry: "Ходимлар сони ўсиши"}, unit: "%/yil", fmt: pct}
+  o_invest_pe: {pillar: O, kind: peer, direction: "+", value: invest_pe,
+                name: {uz: "Xodim boshiga investitsiya", ru: "Инвестиции на работника", cry: "Ходим бошига инвестиция"}, unit: "mln so'm", fmt: mln}
+  o_products: {pillar: O, kind: peer, direction: "+", field: products_count, applies: producing,
+               name: {uz: "Mahsulot turlari", ru: "Виды продукции", cry: "Маҳсулот турлари"}, unit: "ta", fmt: int}
+  t_export_share: {pillar: T, kind: trade, direction: "+", value: export_share,
+                   name: {uz: "Eksport ulushi", ru: "Доля экспорта", cry: "Экспорт улуши"}, unit: "%", fmt: pct}
+  t_countries: {pillar: T, kind: trade, direction: "+", field: export_countries,
+                name: {uz: "Eksport davlatlari", ru: "Страны экспорта", cry: "Экспорт давлатлари"}, unit: "ta", fmt: int}
+  t_hs: {pillar: T, kind: trade, direction: "+", field: export_hs_count,
+         name: {uz: "Eksport tovar turlari", ru: "Товары экспорта", cry: "Экспорт товар турлари"}, unit: "ta", fmt: int}
+  t_export_growth: {pillar: T, kind: trade, direction: "+", value: export_growth,
+                    name: {uz: "Eksport o'sishi", ru: "Рост экспорта", cry: "Экспорт ўсиши"}, unit: "%/yil", fmt: pct}
+  t_balance: {pillar: T, kind: trade, direction: "+", value: trade_balance,
+              name: {uz: "Savdo balansi", ru: "Торговый баланс", cry: "Савдо баланси"}, unit: "", fmt: ratio}
+  x_staj: {pillar: X, kind: peer, direction: "+", field: avg_tenure_years,
+           name: {uz: "O'rtacha ish staji", ru: "Средний стаж", cry: "Ўртача иш стажи"}, unit: "yil", fmt: num}
+  x_turnover: {pillar: X, kind: peer, direction: "-", field: turnover_rate,
+               name: {uz: "Kadrlar qo'nimsizligi", ru: "Текучесть кадров", cry: "Кадрлар қўнимсизлиги"}, unit: "%", fmt: pct}
+  x_wage_rel: {pillar: X, kind: peer, direction: "+", value: wage_rel,
+               name: {uz: "Nisbiy ish haqi", ru: "Относительная зарплата", cry: "Нисбий иш ҳақи"}, unit: "", fmt: ratio}
+  x_edu: {pillar: X, kind: peer, direction: "+", field: higher_edu_share,
+          name: {uz: "Oliy ma'lumotlilar ulushi", ru: "Доля с высшим образованием", cry: "Олий маълумотлилар улуши"}, unit: "%", fmt: pct}
+  i_women: {pillar: I, kind: peer, direction: "+", value: women_share, shrink: employees,
+            name: {uz: "Ayollar ulushi", ru: "Доля женщин", cry: "Аёллар улуши"}, unit: "%", fmt: pct}
+  i_mgmt: {pillar: I, kind: peer, direction: "+", value: women_mgmt, shrink: mgmt_count,
+           name: {uz: "Rahbariyatda ayollar", ru: "Женщины в руководстве", cry: "Раҳбариятда аёллар"}, unit: "%", fmt: pct}
+  i_pay_gap: {pillar: I, kind: absolute, direction: "+", value: pay_gap_score, applies: employees_6,
+              name: {uz: "Ayollar va erkaklar ish haqi nisbati", ru: "Соотношение зарплат женщин и мужчин", cry: "Аёллар ва эркаклар иш ҳақи нисбати"}, unit: "", fmt: score}
+  i_youth: {pillar: I, kind: peer, direction: "+", field: youth_share,
+            name: {uz: "Yoshlar ulushi (18–30)", ru: "Доля молодёжи (18–30)", cry: "Ёшлар улуши (18–30)"}, unit: "%", fmt: pct}
+  i_disab: {pillar: I, kind: absolute, direction: "+", value: disab_score, applies: employees_20,
+            name: {uz: "Nogironlik kvotasi", ru: "Квота для лиц с инвалидностью", cry: "Ногиронлик квотаси"}, unit: "", fmt: score}
+  s_reports: {pillar: S, kind: absolute, direction: "+", value: reports_score, applies: reports_due,
+              name: {uz: "Hisobotlarni o'z vaqtida topshirish", ru: "Своевременная сдача отчётов", cry: "Ҳисоботларни ўз вақтида топшириш"}, unit: "", fmt: score}
+  s_tax: {pillar: S, kind: absolute, direction: "+", value: tax_score,
+          name: {uz: "Soliq qarzi yo'qligi", ru: "Отсутствие налогового долга", cry: "Солиқ қарзи йўқлиги"}, unit: "", fmt: score}
+  s_age: {pillar: S, kind: absolute, direction: "+", value: age_score, recommend: false,
+          name: {uz: "Faoliyat davomiyligi", ru: "Срок деятельности", cry: "Фаолият давомийлиги"}, unit: "", fmt: score}
+
+presets:
+  muvozanatli: {name: {uz: "Muvozanatli", ru: "Сбалансированный", cry: "Мувозанатли"}, weights: {M: 20, O: 15, T: 15, X: 20, I: 15, S: 15}}
+  hamkor: {name: {uz: "Hamkor / investor", ru: "Партнёр / инвестор", cry: "Ҳамкор / инвестор"}, weights: {M: 30, O: 20, T: 20, X: 10, I: 5, S: 15}}
+  bank: {name: {uz: "Bank / kredit", ru: "Банк / кредит", cry: "Банк / кредит"}, weights: {M: 35, O: 15, T: 5, X: 10, I: 5, S: 30}}
+  eksport: {name: {uz: "Eksport", ru: "Экспорт", cry: "Экспорт"}, weights: {M: 20, O: 15, T: 40, X: 10, I: 5, S: 10}}
+  ijtimoiy: {name: {uz: "Ijtimoiy ta'sir", ru: "Социальное влияние", cry: "Ижтимоий таъсир"}, weights: {M: 5, O: 15, T: 5, X: 30, I: 30, S: 15}}
+default_preset: muvozanatli
+
+classes:                  # pastki chegara bo'yicha, yuqoridan pastga (4.6)
+  - {key: A, min: 70, name: {uz: "Yuqori", ru: "Высокий", cry: "Юқори"}}
+  - {key: B, min: 58, name: {uz: "Yaxshi", ru: "Хороший", cry: "Яхши"}}
+  - {key: C, min: 45, name: {uz: "O'rta", ru: "Средний", cry: "Ўрта"}}
+  - {key: D, min: 35, name: {uz: "Past", ru: "Низкий", cry: "Паст"}}
+  - {key: E, min: 0, name: {uz: "Xavf zonasi", ru: "Зона риска", cry: "Хавф зонаси"}}
+
+flags:
+  soliq_qarzi: {uz: "Soliq qarzi bor", ru: "Есть налоговый долг", cry: "Солиқ қарзи бор"}
+  hisobot_intizomi_past: {uz: "Hisobot intizomi past", ru: "Низкая отчётная дисциплина", cry: "Ҳисобот интизоми паст"}
+  zarar_bilan_ishlagan: {uz: "Zarar bilan ishlagan", ru: "Работал с убытком", cry: "Зарар билан ишлаган"}
+
+# Tavsiya shablonlari (4.9): {value}, {median} — o'z qiymati va guruh medianasi (fmt bo'yicha formatlangan),
+# {due}, {late} — hisobotlar. `link` — frontend yo'li (K-03, K-05).
+recommendations:
+  default:
+    uz: "{name}: {value}, guruhingizda mediana {median}."
+    ru: "{name}: {value}, медиана по группе {median}."
+    cry: "{name}: {value}, гуруҳингизда медиана {median}."
+  x_turnover:
+    uz: "Kadrlar qo'nimsizligi {value}, guruhingizda mediana {median}. Ish haqi va ish sharoitini ko'rib chiqing."
+    ru: "Текучесть кадров {value}, медиана по группе {median}. Пересмотрите зарплату и условия труда."
+    cry: "Кадрлар қўнимсизлиги {value}, гуруҳингизда медиана {median}. Иш ҳақи ва иш шароитини кўриб чиқинг."
+  s_reports:
+    uz: "Statistik hisobotlarning {due} tasidan {late} tasi kechikkan. Hisobot kalendarida eslatmani yoqing."
+    ru: "Из {due} статистических отчётов {late} сданы с опозданием. Включите напоминания в календаре отчётов."
+    cry: "Статистик ҳисоботларнинг {due} тасидан {late} таси кечиккан. Ҳисобот календарида эслатмани ёқинг."
+    link: "/report-calendar"
+  t_export_share:
+    uz: "Eksport yo'q yoki ulushi kichik ({value}). Mahsulotingiz bo'yicha bozor tahlili hisobotini ko'ring."
+    ru: "Экспорта нет или его доля мала ({value}). Посмотрите отчёт по анализу рынка для вашей продукции."
+    cry: "Экспорт йўқ ёки улуши кичик ({value}). Маҳсулотингиз бўйича бозор таҳлили ҳисоботини кўринг."
+    link: "/market-report"
+  no_export:
+    uz: "Eksport yo'q. Mahsulotingiz bo'yicha bozor tahlili hisobotini ko'ring."
+    ru: "Экспорта нет. Посмотрите отчёт по анализу рынка для вашей продукции."
+    cry: "Экспорт йўқ. Маҳсулотингиз бўйича бозор таҳлили ҳисоботини кўринг."
+    link: "/market-report"
+  s_tax:
+    uz: "Soliq qarzi bor: umumiy ball {cap} dan oshmaydi. Qarzni yopish balni darhol oshiradi."
+    ru: "Есть налоговый долг: общий балл не выше {cap}. Погашение долга сразу повысит балл."
+    cry: "Солиқ қарзи бор: умумий балл {cap} дан ошмайди. Қарзни ёпиш баллни дарҳол оширади."
+  i_disab:
+    uz: "Nogironligi bo'lgan xodimlar ulushi {value}, kvota 3%."
+    ru: "Доля работников с инвалидностью {value}, квота 3%."
+    cry: "Ногиронлиги бўлган ходимлар улуши {value}, квота 3%."
+  i_pay_gap:
+    uz: "Ayollar ish haqi erkaklarnikining {value} qismini tashkil etadi. Teng mehnatga teng haq tamoyilini tekshiring."
+    ru: "Зарплата женщин составляет {value} от зарплаты мужчин. Проверьте принцип равной оплаты за равный труд."
+    cry: "Аёллар иш ҳақи эркакларникининг {value} қисмини ташкил этади. Тенг меҳнатга тенг ҳақ тамойилини текширинг."

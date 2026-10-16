@@ -103,6 +103,8 @@ class SiteSettings(SingletonModel):
         verbose_name=_("BHM qiymati")
     )
     last_didox_update = models.DateTimeField(blank=True, null=True)
+    # KORXONA_SCORING.md 7-bo'lim, OS-18: productionda begona korxona bali ochiq ko'rinsinmi (standart — yo'q)
+    company_score_public = models.BooleanField(default=False, verbose_name=_("Korxona bali ochiq ko'rinsin"))
 
     def __str__(self):
         return "Sayt sozlamalari"

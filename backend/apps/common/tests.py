@@ -62,3 +62,19 @@ class PlatformStatTests(TestCase):
         self.assertEqual(len(data["user_stats"]["chart_data"]["values"]), 6)
         # Ikki marta chaqirilganda bir xil (avval random edi)
         self.assertEqual(self.client.get("/api/common/platform-stat/?stat_type=monthly").json(), data)
+
+
+class StaffOnlyEndpointsTests(TestCase):
+    """XIZMATLAR_TAHLILI 6-bo'lim (1, 8): ma'lumot yuklash va GoodSign sinov endpoint'lari ommaga yopiq."""
+    urls = ("/api/additional-services/trade-data/upload", "/api/common/didox/password/",
+            "/api/common/didox/company-login/")
+
+    def test_guest_and_regular_user_are_rejected(self):
+        from rest_framework.test import APIClient
+        from apps.accounts.models import User
+        client = APIClient()
+        for url in self.urls:
+            self.assertEqual(client.post(url, {}).status_code, 401, url)
+        client.force_authenticate(User.objects.create_user(username="so_user", password="x"))
+        for url in self.urls:
+            self.assertEqual(client.post(url, {}).status_code, 403, url)

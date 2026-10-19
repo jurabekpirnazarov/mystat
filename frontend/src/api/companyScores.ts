@@ -17,8 +17,9 @@ export interface CompanyScoreShort {
   partial: boolean;
   data_source: "real" | "synthetic" | "mixed";
   is_synthetic: boolean;
-  pillars: Record<string, number | null>;
-  flags: string[];
+  /** KR-39: ro'yxatlarda kelmaydi — faqat ochilgan kartochka yoki o'z korxonasi */
+  pillars?: Record<string, number | null>;
+  flags?: string[];
 }
 
 export interface CompanyScoreIndicator {
@@ -35,7 +36,29 @@ export interface CompanyScoreIndicator {
   fmt?: string;
 }
 
+export interface UnlockOption {
+  level: "basis" | "deep";
+  credits: number | null;
+  available: boolean;
+  /** null — ochish mumkin; login | plan_required | insufficient | insufficient_data | unavailable */
+  reason: string | null;
+  min_plan: string;
+}
+
+/** KR-39: ochilmagan korxona kartochkasi — faqat umumiy ball va ochish narxi. */
+export interface CompanyScoreLocked extends CompanyScoreShort {
+  locked: true;
+  level: "general";
+  klass_info: { key: Klass; name: string };
+  unlock_options: UnlockOption[];
+  profile_url: string;
+  disclaimer: string;
+  sample_note: string | null;
+}
+
 export interface CompanyScoreDetail extends CompanyScoreShort {
+  locked?: false;
+  level?: "basis" | "deep";
   klass_info: { key: Klass; name: string };
   pillars_detail: { key: string; name: string; score: number | null; applicable: boolean }[];
   peer_group: string;
@@ -91,7 +114,7 @@ export const fetchCompanyScores = async (stirs: string[], preset?: string, lang?
     "/analytics/company-scores/", { params: params({ stir: stirs.join(","), preset, lang }) })).data;
 
 export const fetchCompanyScore = async (stir: string, q: { preset?: string; year?: number; lang?: ScoreLang } = {}) =>
-  (await axiosT.get<CompanyScoreDetail>(`/analytics/company-scores/${stir}/`, { params: params(q) })).data;
+  (await axiosT.get<CompanyScoreDetail | CompanyScoreLocked>(`/analytics/company-scores/${stir}/`, { params: params(q) })).data;
 
 export const fetchMyCompanyScore = async (q: { preset?: string; year?: number; lang?: ScoreLang } = {}) =>
   (await axiosT.get<CompanyScoreDetail>("/analytics/company-scores/me/", { params: params(q) })).data;

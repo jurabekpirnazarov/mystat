@@ -56,7 +56,7 @@ const TariffDetailPage = () => {
           items: service.service_items.map(item => ({
             name: stripHtmlTags(item.name_uz || item.name_ru || item.name_cry),
             included: true,
-            value: item.limit > 0 ? `Limit: ${item.limit}` : undefined
+            value: item.limit > 0 ? `Limit: ${item.limit}` : item.limit < 0 ? "Cheksiz" : undefined
           }))
         }))
       };

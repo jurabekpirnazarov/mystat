@@ -7,6 +7,7 @@ import { oneid_login } from "../api/apiUrls";
 import { getCurrentDate } from "../utils/getCurrentDate";
 import { Shield, AlertCircle } from "lucide-react";
 import type { LoginResponse } from "../types/api";
+import { takeReturnTo } from "../utils/loginRedirect";
 
 const OneIDCallback = () => {
   const [searchParams] = useSearchParams();
@@ -40,7 +41,7 @@ const OneIDCallback = () => {
         "individual",
         getCurrentDate()
       );
-      navigate("/"); // Asosiy sahifaga yo'naltirish
+      navigate(takeReturnTo() || "/"); // login talab qilgan sahifaga yoki bosh sahifaga
       return;
     }
 
@@ -73,7 +74,7 @@ const OneIDCallback = () => {
                 "individual",
                 getCurrentDate()
               );
-              navigate("/"); // Asosiy sahifaga yo'naltirish
+              navigate(takeReturnTo() || "/"); // login talab qilgan sahifaga yoki bosh sahifaga
             } else if (response?.data?.access || response?.access) {
               // Alternative token structure
               const accessToken = response?.data?.access || response?.access || "";
@@ -89,7 +90,7 @@ const OneIDCallback = () => {
                 "individual",
                 getCurrentDate()
               );
-              navigate("/"); // Asosiy sahifaga yo'naltirish
+              navigate(takeReturnTo() || "/"); // login talab qilgan sahifaga yoki bosh sahifaga
             } else {
               console.error("No access token in response:", response);
               setError("OneID autentifikatsiyasida xatolik yuz berdi");

@@ -35,6 +35,8 @@ class Service(BaseModel):
     description_ru = RichTextField(blank=True, verbose_name=_("Tasnif (Russian)"))
     description_cry = RichTextField(blank=True, verbose_name=_("Tasnif (Cyrillic)"))
     is_free = models.BooleanField(default=False, verbose_name=_("Tekin"))
+    requires_login = models.BooleanField(default=False, verbose_name=_("Kirish talab qilinadi"),
+                                         help_text=_("Sahifa ochiq, lekin ma'lumot/amal uchun tizimga kirish kerak"))
     icon = models.CharField(max_length=255, blank=True, null=True, verbose_name="Icon")
     duration = models.CharField(max_length=100, verbose_name=_("Vaqti"), choices=DURATION_CHOICES, default="now")
     slug = models.CharField(max_length=255, verbose_name="Link (Slug)", null=True, blank=True)
@@ -140,7 +142,10 @@ class PackageServiceItem(models.Model):
     name_uz = models.CharField(max_length=255, verbose_name=_("Element nomi (Uzbek)"))
     name_ru = models.CharField(max_length=255, verbose_name=_("Element nomi (Russian)"))
     name_cry = models.CharField(max_length=255, verbose_name=_("Element nomi (Cyrillic)"))
-    limit = models.IntegerField(default=0, verbose_name=_("Limit"))
+    UNLIMITED = -1
+
+    limit = models.IntegerField(default=0, verbose_name=_("Limit"),
+                                help_text=_("0 — ruxsat yo'q, -1 — cheksiz (masalan, \"Barcha to'plamlar\")"))
 
     class Meta:
         verbose_name = _("Paket servis elementi")
@@ -148,7 +153,15 @@ class PackageServiceItem(models.Model):
 
     def __str__(self):
         return f"{self.name_uz}"
-    
+
+    @property
+    def is_unlimited(self):
+        return self.limit < 0
+
+    def is_exhausted(self, used):
+        """Limit tugaganmi: cheksiz (-1) hech qachon, 0 — har doim (ruxsat yo'q)."""
+        return not self.is_unlimited and used >= self.limit
+
 
 class ServiceRequests(BaseModel):
     STATUS_CHOICES = (

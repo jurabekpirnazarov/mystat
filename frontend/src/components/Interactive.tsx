@@ -1,4 +1,4 @@
-import { ChevronsRight, TrendingUp } from "lucide-react";
+import { ChevronsRight, LogIn, TrendingUp } from "lucide-react";
 import { services } from "../data";
 import { useNavigate } from "react-router-dom";
 import ServiceModal from "./modals/ServiceModal";
@@ -128,12 +128,22 @@ const Interactive = () => {
                     <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                       <span
                         className={`font-bold ${
-                          service.is_free
+                          service.in_package
+                            ? "text-emerald-700 dark:text-emerald-400"
+                            : service.is_free
                             ? "text-green-700"
                             : "text-blue-600"
                         }`}
                       >
-                        {service.is_free ? "Tekin" : "Pullik"}
+                        {service.in_package ? "Tarif bo'yicha" : service.is_free ? "Tekin" : "Pullik"}
+                        {service.requires_login && (
+                          <span
+                            title="Sahifa ochiq, ma'lumotni ko'rish uchun tizimga kirish kerak"
+                            className="ml-2 inline-flex items-center gap-1 align-middle px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-xs font-medium text-gray-600 dark:text-gray-300"
+                          >
+                            <LogIn className="w-3 h-3" aria-hidden /> Kirish kerak
+                          </span>
+                        )}
                       </span>
                       <button
                         className="flex items-center space-x-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium text-sm transition-colors duration-200"

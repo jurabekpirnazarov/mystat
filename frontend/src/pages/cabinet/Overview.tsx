@@ -17,14 +17,16 @@ interface Props {
 const ACTIVITY_ICON = { usage: Activity, book_order: ShoppingCart, request: MessageSquarePlus, contract: FileText };
 
 function LimitBar({ name, used, limit }: { name: string; used: number; limit: number }) {
-  const pct = Math.min(100, Math.round((used / limit) * 100));
+  // limit < 0 — cheksiz (masalan, "Barcha to'plamlar")
+  const unlimited = limit < 0;
+  const pct = unlimited ? 0 : Math.min(100, Math.round((used / limit) * 100));
   const color = pct >= 100 ? "bg-red-500" : pct >= 80 ? "bg-amber-500" : "bg-blue-600";
   return (
     <div>
       <div className="flex justify-between gap-3 text-sm">
         <span className="text-gray-700 dark:text-gray-200 truncate">{name}</span>
         <span className="shrink-0 tabular-nums text-gray-500 dark:text-gray-400">
-          {used} / {limit}
+          {unlimited ? `${used} / cheksiz` : `${used} / ${limit}`}
         </span>
       </div>
       <div

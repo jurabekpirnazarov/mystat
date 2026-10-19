@@ -58,7 +58,7 @@ class RegisterOrganizationDetailAPIView(GenericAPIView):
                     psi=psi
                 ).count()
 
-                if psi.limit <= 0 or uses_count >= psi.limit:
+                if psi.is_exhausted(uses_count):
                     return Response({
                         "detail": "Sizning limitingiz tugagan!",
                         "limit": psi.limit,

@@ -45,7 +45,7 @@ mystat/
 ├── .gitlab-ci.yml             production deploy
 ├── .env.example               barcha sozlamalar ro'yxati (qiymatsiz)
 ├── README.md                  tez ishga tushirish
-└── LOYIHA.md                  shu hujjat
+└── docs/                  loyiha hujjatlari va vazifalar holati (docs/README.md)
 ```
 
 `_archive/` papkasida eski CI fayllar va ishlatilmaydigan skriptlar turadi. U git'ga kirmaydi.
@@ -279,17 +279,4 @@ Serverni eski ikki repodan monorepo'ga o'tkazish qadamlari `README.md` ning "Pro
 
 ## 11. Ma'lum muammolar va qilinadigan ishlar
 
-**Xavfsizlik (ustuvor):**
-- [ ] `common/information/` endpoint'larida ruxsat tekshiruvi yo'q. Mehmon ham yozuv qo'shishi, o'zgartirishi va o'chirishi mumkin. Kim yozishi mumkinligini belgilash kerak.
-- [ ] `ALLOWED_HOSTS = ['*']` va `CORS_ALLOW_ALL_ORIGINS = True`. Production'da cheklash kerak.
-- [ ] `__debug__/` (debug toolbar) URL'i production'da ham ulangan.
-- [ ] CKEditor 4 eskirgan va xavfsizlik tuzatishlarisiz qolgan.
-
-**Funksional:**
-- [ ] Celery Beat jadvali (DIDOX tekshiruvi va boshqalar) sozlanmagan.
-- [ ] Statistik klassifikatsiyalar jadvali bo'sh.
-- [ ] `core/asgi.py` noto'g'ri settings modulini ko'rsatadi.
-- [ ] URL namespace takrorlanadi (`accounts`).
-- [ ] Testlar deyarli yo'q.
-- [ ] Begona jadvallarni (5-bo'lim) tozalash kerak.
-- [ ] Frontend bundle katta (500 kB dan ortiq). Code-splitting kerak.
+Joriy holat — bajarilgan vazifalar va qolgan ishlar — [README.md](README.md) da (shu `docs/` papkasida).

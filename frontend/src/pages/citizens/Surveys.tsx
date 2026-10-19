@@ -6,6 +6,7 @@ import { asApiError } from "../../api/errors";
 import { useAuth } from "../../contexts/AuthContext";
 import useApi from "../../hooks/useApi";
 import { ApiErrorState, ErrorState, PageHeader, SampleBanner, Skeleton } from "../../components/ui";
+import { loginUrl } from "../../utils/loginRedirect";
 
 /** FQ-08: so'rovnomalar ro'yxati. */
 export function SurveyList() {
@@ -171,7 +172,7 @@ export function SurveyPage() {
           breadcrumbs={[{ label: "Fuqarolar uchun", to: "/citizens" }, { label: "So'rovnomalar", to: "/surveys" }, { label: data?.title ?? "" }]}
           actions={<button type="button" onClick={() => setParams(view === "results" ? {} : { view: "results" })} className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm">{view === "results" ? "Qatnashish" : "Natijalar"}</button>} />
         {view === "results" ? <Results slug={slug} /> : !isAuthenticated ? (
-          <p className="text-sm">Qatnashish uchun <Link to="/login" className="text-blue-600 underline">tizimga kiring</Link> (bitta foydalanuvchi — bitta javob). Natijalarni kirmasdan ko'rishingiz mumkin.</p>
+          <p className="text-sm">Qatnashish uchun <Link to={loginUrl()} className="text-blue-600 underline">tizimga kiring</Link> (bitta foydalanuvchi — bitta javob). Natijalarni kirmasdan ko'rishingiz mumkin.</p>
         ) : <Form slug={slug} onDone={() => setParams({ view: "results" })} />}
       </div>
     </div>

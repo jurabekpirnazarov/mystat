@@ -150,7 +150,7 @@ class DemoUsersSeeder(Seeder):
     def _uses(self, usp, package, ratio, username):
         for psi in PackageServiceItem.objects.filter(package=package).order_by("id"):
             # 1000+ limitlar amalda "cheksiz" — qatorlar sonini cheklaymiz
-            count = min(int(round(psi.limit * ratio)), MAX_USES_PER_ITEM) if psi.limit else 0
+            count = min(int(round(psi.limit * ratio)), MAX_USES_PER_ITEM) if psi.limit > 0 else 0
             for n in range(count):
                 use = self.make(
                     UserServicePackageItemUse, f"use:{username}:{psi.id}:{n}",

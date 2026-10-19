@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Clock, CreditCard, CheckCircle, ChevronsRight, Search, Filter, X } from "lucide-react";
+import { Clock, CreditCard, CheckCircle, ChevronsRight, Search, Filter, X, LogIn } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import OfferTermsModal from "../components/modals/OfferTermsModal";
 import NewServices from "../components/NewServices";
@@ -348,6 +348,14 @@ const AllServices = () => {
                             ? "Tekin" 
                             : "Pullik"
                           }
+                          {service.requires_login && (
+                            <span
+                              title="Sahifa ochiq, ma'lumotni ko'rish uchun tizimga kirish kerak"
+                              className="ml-2 inline-flex items-center gap-1 align-middle px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-xs font-medium text-gray-600 dark:text-gray-300"
+                            >
+                              <LogIn className="w-3 h-3" aria-hidden /> Kirish kerak
+                            </span>
+                          )}
                         </span>
                         <button className="flex items-center space-x-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium text-sm transition-colors duration-200">
                           <span>O'tish</span>

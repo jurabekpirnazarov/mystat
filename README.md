@@ -3,7 +3,7 @@
 Backend (Django), frontend (React) va ma'lumotlar bazasi (PostgreSQL dump) bitta repoda,
 `docker compose` bilan bitta buyruqda ko'tariladi.
 
-To'liq loyiha hujjati: [LOYIHA.md](LOYIHA.md).
+To'liq loyiha hujjati: [docs/LOYIHA.md](docs/LOYIHA.md). Vazifalar holati (bajarilgan va qolgan ishlar): [docs/README.md](docs/README.md).
 
 ```
 mystat/

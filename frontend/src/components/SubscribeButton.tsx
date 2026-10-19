@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { BellPlus, Check } from "lucide-react";
 import { subscribe, type Subscription } from "../api/openApi";
 import { useAuth } from "../contexts/AuthContext";
+import { loginUrl } from "../utils/loginRedirect";
 
 const CHANNELS: { id: Subscription["channel"]; label: string }[] = [
   { id: "in_app", label: "Saytda" },
@@ -17,7 +18,7 @@ export default function SubscribeButton({ indicator, title }: { indicator: strin
   const [done, setDone] = useState<string | null>(null);
 
   if (!isAuthenticated) {
-    return <Link to="/login" className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-sm"><BellPlus className="w-4 h-4" /> Obuna</Link>;
+    return <Link to={loginUrl()} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-sm"><BellPlus className="w-4 h-4" /> Obuna</Link>;
   }
   const pick = async (channel: Subscription["channel"]) => {
     await subscribe(indicator, channel, title);

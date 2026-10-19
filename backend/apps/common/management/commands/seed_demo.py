@@ -53,6 +53,8 @@ ALLOWED_CASCADE = {
     "consultations.Consultant_topics",  # M2M bog'lanish jadvali
     "accounts.UserPreference",
     "book_market.BookFavorite",
+    "credits.CreditLedger",   # KR-40: hamyon o'chirilganda ledger va ochilgan korxonalar ham ketadi
+    "credits.CreditUnlock",
 }
 
 

@@ -8,7 +8,7 @@
 >
 > **Yangilanish (2026-10-14):** bu hujjat 2026-10-13 dagi holatni tasvirlaydi. Keyin ko'p narsa tuzatildi va ba'zi xulosalar aniqlashtirildi — joriy holat [ISH_REJASI.md](ISH_REJASI.md) ning "Bajarilish holati" bo'limida. Aniqlashtirishlar: `/statistical-data` demografiya sahifasi **emas**, zaglushka edi (frontend'da demografiya UI'si umuman yo'q edi); `trade-flows` frontend'da chaqirilmagan (konsolda 404 bo'lmagan); `/statistics` sahifasidagi raqamlar soxta (`random`) edi; kabinetdagi shartnomalar ro'yxati mijozlar uchun doim bo'sh edi.
 >
-> Boshqa hujjatlar: [README.md](README.md) (tez ishga tushirish), [LOYIHA.md](LOYIHA.md) (arxitektura va sozlamalar), [backend/README.md](backend/README.md) (endpoint'lar ro'yxati).
+> Boshqa hujjatlar: [README.md](../README.md) (tez ishga tushirish), [LOYIHA.md](LOYIHA.md) (arxitektura va sozlamalar), [backend/README.md](../backend/README.md) (endpoint'lar ro'yxati).
 
 ---
 

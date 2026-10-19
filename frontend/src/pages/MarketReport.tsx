@@ -6,6 +6,7 @@ import { fetchMarketReport, searchHs, type HsOption, type MarketCountry, type Ma
 import { useAuth } from "../contexts/AuthContext";
 import { ApiErrorState, EmptyState, PageHeader, Skeleton, StatCard } from "../components/ui";
 import { exportElementToPdf } from "../utils/exportPdf";
+import { loginUrl } from "../utils/loginRedirect";
 
 const nf = (v: number | null | undefined, d = 0) =>
   v === null || v === undefined ? "—" : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: d }).format(v);
@@ -146,7 +147,7 @@ export default function MarketReport() {
                   <Download className="w-4 h-4" /> {report.full ? "PDF yuklab olish" : "To'liq hisobot (PDF)"}
                 </button>
               ) : (
-                <Link to="/login" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm">
+                <Link to={loginUrl()} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm">
                   <Lock className="w-4 h-4" /> To'liq hisobot uchun kiring
                 </Link>
               )}

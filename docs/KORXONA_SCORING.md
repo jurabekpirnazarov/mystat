@@ -2,7 +2,7 @@
 
 > **Sana:** 2026-10-16
 > **Maqsad:** KTUT'dagi har bir korxonaga (STIR bo'yicha) 0–100 ball va 6 ta ustun bo'yicha baho berish: moliya, o'sish, tashqi savdo, kadrlar, inklyuzivlik (ayollar, yoshlar, nogironligi bo'lgan shaxslar), intizom. Ball ilovada korxona ko'rinadigan **hamma joyda** chiqadi.
-> **Asos:** `ISH_REJASI.md` (S-01, S-02, S-09, S-10, K-02, K-04, K-07 qoidalari), `SCORING_MODEL.md` (hududlar scoringi, KR-15..KR-28). Bu fayl uning davomi: vazifalar **KR-29..KR-38**.
+> **Asos:** `ISH_REJASI.md` (S-01, S-02, S-09, S-10, K-02, K-04, K-07 qoidalari), `SCORING_MODEL.md` (hududlar scoringi, KR-15..KR-28). Bu fayl uning davomi: vazifalar **KR-29..KR-38** (scoring) va **KR-39..KR-44** (tariflar va kreditlar, 11–12-bo'limlar), **KR-45..KR-46** (korxona profili, 13–14-bo'limlar).
 > **Qanday ishlatiladi:** Claude Code'ga "KORXONA_SCORING.md dagi `KR-30` ni bajar" deyish yetarli. Tartib 9-bo'limda.
 > **Namunaviy kod va ma'lumot:** `korxona_scoring/` papkasida: `generate_companies.py` (generator), `score_companies.py` (hisoblash), `namuna_korxonalar.csv` (3000 ta soxta korxona), `namuna_scoring.csv` (ularning bali). Ilovadagi kod shu ikki skript mantiqini takrorlaydi va natijasi ular bilan solishtiriladi (KR-31 qabul mezoni).
 > **Muhim:** ball **rasmiy baho emas**. Sintetik ma'lumotdagi ball faqat `DEBUG=True` muhitda bor va doim "Namuna" belgisi bilan chiqadi (S-09).
@@ -42,6 +42,25 @@ Lokal bazada: 65 545 KTUT korxonasi, 174 288 ko'rsatkich qatori (2023–2025), 4
 - **Tashqi savdo / bozor tahlili (K-03).** Savdo ma'lumotida STIR yo'q, shuning uchun 11-band bo'yicha blok chiqmaydi.
 - **PNG/PDF "NAMUNA" suv belgisi.** Kartochkaning o'z eksporti yo'q. Pasport PDF'i (unda kartochka ham bor) mavjud suv belgisi mexanizmidan foydalanadi.
 - **Shablonlar `_uz`, `_ru`, `_cry` maydonlari bilan emas**, bitta YAML kalitida `{uz, ru, cry}` ko'rinishida. API `?lang=uz|ru|cry` qabul qiladi, frontend esa o'zbekcha (loyihada umumiy i18n yo'q).
+
+### KR-39, KR-40, KR-45, KR-46 (2026-10-19)
+
+Bajarildi (foydalanuvchi bilan kelishilgan qamrov: profil va uning zarur asosi). Tekshiruv: backend 197 test (yangi `apps/credits/tests.py`, `apps/analytics/tests_company_profile.py`), `npm run e2e` 19 test (yangi KR-45/46 testlari), `tsc`, `eslint`, `vite build` — xatosiz. Migratsiyalar: `credits.0001_initial`, `credits.0002_default_prices`.
+
+| Vazifa | Holat | Qayerda / izoh |
+|---|---|---|
+| KR-39 | ✅ | `credits.service.can_view(user, stir, level)` — bitta joyda. Ro'yxat endpoint'lari (`company-scores/?stir=`, hamkorlar, global qidiruv) faqat 0-daraja: `pillars`/`flags` olib tashlandi. `company-scores/<stir>/` — ochilmagan bo'lsa `locked: true` + `unlock_options`; 1-darajada ustunlar va bayroqlar, ko'rsatkichlar baholari faqat 2-darajada. Hamkorlar XLSX'ida ustunlar faqat Tarif 60+ va ochilgan korxonalar uchun |
+| KR-40 | ✅ | `apps/credits`: `CreditWallet` (korxona yoki shaxsiy, `plan`), `CreditLedger` (faqat qo'shiladi; spend/expire qaysi grant'dan — FIFO muddat bo'yicha), `CreditUnlock`, `CreditPrice` (`profile_basis`=1, `profile_deep`=3, `profile_pdf`=0). `select_for_update`, kunlik limit (200), `expire_due` Celery Beat (har kecha 02:10). `GET /api/credits/me/`, `POST /api/credits/unlock/`. Demo: `seed_demo --only credits` — demo_yuridik_1 (Scoring 50, 3 kredit), _2 (Scoring 90, 85), _3 (korporativ, 500), _4 (Scoring 60, 37) |
+| KR-45 | ✅ | `GET /api/analytics/company-profile/<stir>/` (`company_scoring/profile.py`): general/basis/deep/watch, ochilmagan bo'lim ma'lumoti yuborilmaydi. Ball tarkibi va sezgirlik — `company_scoring/explain.py`, standart preset uchun `EnterpriseScore.indicators._contrib/_sens` ga yoziladi. O'xshash 5 korxona (Evklid), hududiy kontekst (`TerritoryScore`), OKED×hudud taqsimoti. Frontend: `pages/company/CompanyProfile.tsx` (yorliqlar, mobilda ketma-ket), `ScoreWaterfall`, `LockedSection` (tasdiqlash oynasi, "Bu seansda so'ramasin"), PDF (mavjud `exportPdf`, "NAMUNA" suv belgisi), `og:` teglari |
+| KR-46 | ✅ | `/partners`: nom va badge `/company/:stir` ga, tooltip "Ball nimaga asoslangan: profilda, 1 kredit", bali yo'q qatorda "—" ("Hali hisoblanmagan"). Global qidiruv, sanoat, hisobot kalendari, "Hisobotlarim" badge'lari profilga; `/orginfo` va KTUT qidiruvida kartochka o'rniga umumiy ball + "Profilni ochish" |
+| KR-42 | qisman | Qilingan: qulflangan bo'lim, tasdiqlash oynasi, sarlavhadagi balans chipi, `/cabinet/credits` (balans, muddatlar, ochilgan korxonalar, ledger). Qilinmagan: `/tariffs` dagi scoring bloki va korporativ forma, bosh paneldagi 20% ogohlantirish |
+| KR-41, KR-43, KR-44 | ⏳ | Qamrovga kirmadi. Hozircha tarif (`CreditWallet.plan`) va grant admin'da qo'lda (ledger admin: faqat `grant`/`adjust`, sabab majburiy). "Kuzatish" bo'limi profilda tavsif bilan, xizmat KR-43 bilan |
+
+**Farazlar va farqlar:**
+- **Tarif darajasi `CreditWallet.plan` da.** KR-41 (paketdan kredit berish) hali yo'q, shuning uchun 2-daraja uchun "Tarif 60+" hamyondagi `plan` maydonidan tekshiriladi; KR-41 uni paketdan to'ldiradi.
+- **Hudud kartochkasidagi korxonalar ro'yxati yo'q** (u yerda faqat agregat "Korxonalar sifati" bloki) — profil havolasi qo'yiladigan joy bo'lmadi.
+- **"Guruhdagi o'rni" p25/median/p75** percentil shkalasida beriladi (25/50/75 belgilar), xom qiymat va guruh medianasi (xom) yuborilmaydi (OS-22 default).
+- **Waterfall** Recharts emas, oddiy bloklar bilan chizilgan: hissalar ±10 ball atrofida, 0 dan boshlanadigan shkalada ko'rinmay qoladi.
 
 ---
 
@@ -263,7 +282,7 @@ EnterpriseScore
 | Endpoint | Kim | Javob |
 |---|---|---|
 | `GET /api/analytics/company-scores/?stir=a,b,c&preset=` | ochiq | Ro'yxatlar uchun: har STIR'ga `overall`, `klass`, `coverage`, `data_source`, `is_synthetic`. Ko'pi bilan 100 STIR, N+1 yo'q |
-| `GET /api/analytics/company-scores/<stir>/?preset=&year=` | ochiq | Kartochka: ustunlar, bayroqlar, tengdoshlar guruhi va hajmi, ustun bo'yicha percentil. **Xom qiymat yo'q** |
+| `GET /api/analytics/company-scores/<stir>/?preset=&year=` | ochiq: faqat umumiy ball; ochilgan (11.3): to'liq | Kartochka: ustunlar, bayroqlar, tengdoshlar guruhi va hajmi, ustun bo'yicha percentil. **Xom qiymat yo'q**. Ochilmagan bo'lsa `locked: true` va ochish narxi |
 | `GET /api/analytics/company-scores/me/` | login, o'z korxonasi | Yuqoridagi + ko'rsatkichlarning o'z qiymati, guruh medianasi, tavsiyalar |
 | `GET /api/analytics/company-scores/distribution/?oked=&region=&district=` | ochiq | Agregat: sinflar taqsimoti, o'rtacha ball, ustunlar medianasi (hududiy blok va benchmark uchun) |
 | `GET /api/analytics/company-scores/methodology/` | ochiq | Ko'rsatkichlar ro'yxati, vaznlar, chegaralar (`company_scoring.yaml` dan) |
@@ -273,6 +292,8 @@ Mavjud ro'yxat endpoint'lari (KTUT, `ktut/search`) serializer'iga `score` obyekt
 ---
 
 ## 6. UI: ball qayerda chiqadi
+
+> **Kirish darajalari 11-bo'limda.** Hamma joyda bepul faqat **umumiy ball va sinf** chiqadi. Ustunlar, radar, bayroqlar, tengdoshlar va hisobot kredit bilan ochiladi. Quyidagi jadvaldagi "nima chiqadi" ustuni to'liq ochilgan holatni tasvirlaydi.
 
 Ikki komponent, `frontend/src/components/company-score/`:
 - **`CompanyScoreBadge`**: sinf harfi rangli doirachada + ball ("B · 63"). Ustiga olib borilganda 6 ustun mini-chizig'i va "Namuna" izohi. To'liqlik < 0.6 bo'lsa kulrang "—" va "Ma'lumot yetarli emas".
@@ -433,3 +454,248 @@ Qabul mezonlarini tekshirib, natijasini PR tavsifida yoz.
 2. Percentil bahosi nisbiy: guruhdagi hamma korxona yomon bo'lsa ham eng yaxshisi yuqori ball oladi. Mutlaq ko'rsatkichlar (intizom, soliq, kvota) buni qisman muvozanatlaydi.
 3. 2 yillik o'sish bir martalik sakrashlarga sezgir; real ma'lumotda 3 yilga o'tkaziladi.
 4. Tashqi savdo faqat tovarlar bo'yicha (bojxona ma'lumoti); IT va xizmatlar eksporti hisobga olinmaydi. J bo'limi shuning uchun savdoga yaroqli ro'yxatga kiritilmagan.
+
+---
+
+## 11. Tariflar va kreditlar: bepul umumiy ball, kengaytirilgani kredit bilan
+
+> Egasining talabi (2026-10-16): hamma joyda bitta umumiy ball tursin; qolgan ma'lumot kengaytirilgan ko'rinishda, limit asosida ochilsin; limit umumiy kredit orqali; tarifga qarab 50, 60, 90 va korporativ yo'nalishlar; o'tish alohida to'lov bilan.
+
+### 11.1. Kirish darajalari
+
+| Daraja | Kim ko'radi | Nima ochiladi | Narx (standart, admin'da o'zgaradi) |
+|---|---|---|---|
+| **0. Umumiy** | Hamma (OS-18 bilan productionda cheklanishi mumkin) | Umumiy ball, sinf (A–E), "qisman ma'lumot" belgisi | Bepul |
+| **1. Kengaytirilgan** | Har qanday scoring tarifi | 6 ustun va radar, bayroqlar, tengdoshlar guruhi va hajmi, ustunlar percentili, preset almashtirish | 1 kredit, shu korxona 30 kun ochiq turadi |
+| **2. To'liq hisobot** | Tarif 60 va yuqori | 1-daraja + ko'rsatkichlar darajasidagi percentillar, 3 yillik ball dinamikasi, 3 ta o'xshash korxona (faqat ball), PDF | 3 kredit |
+| **3. Monitoring** | Tarif 90, korporativ | Kuzatuv ro'yxati: sinf o'zgarsa yoki yangi bayroq paydo bo'lsa xabarnoma | 1 kredit har korxona uchun oyiga |
+| **Ommaviy tekshiruv** | Korporativ | STIR ro'yxati (XLSX) → ball, sinf, ustunlar, bayroqlar | 0,5 kredit har qator |
+| **API** | Korporativ (S-16 kalitlari) | `company-scores/<stir>/` 1-daraja javobi | 1 kredit har yangi korxona (30 kun ichida qayta so'rov bepul) |
+| **O'z korxonasi** | Korxona egasi (`Organization` STIR'i) | Hammasi + o'z qiymatlari va tavsiyalar (4.9) | Har doim bepul |
+
+Qoidalar:
+- "Ma'lumot yetarli emas" (to'liqlik < 0.6) korxonani ochib bo'lmaydi va kredit yechilmaydi.
+- Ochilmagan ma'lumot frontend'ga **umuman yuborilmaydi** (backend darvozasi). Qulflangan kartochkadagi xira radar haqiqiy qiymat emas, statik shakl.
+- Xom qiymatlar (tushum, foyda, ish haqi) pullik darajada ham ochilmaydi: 6-bo'limdagi qoida kredit bilan ham o'zgarmaydi.
+
+### 11.2. Tariflar
+
+Tariflar mavjud `ServicePackage` sifatida admin'da yaratiladi, yangi to'lov mexanizmi yo'q (11.5). Har paketda yangi "Scoring krediti" xizmat elementi bor; uning limiti = oylik kredit.
+
+| Tarif | Kredit / oy | Foydalanuvchilar | Imkoniyatlar |
+|---|---|---|---|
+| **Scoring 50** | 50 | 1 | 1-daraja |
+| **Scoring 60** | 60 | 2 | 1–2-daraja, ro'yxatlarni XLSX eksportida ustunlar bilan |
+| **Scoring 90** | 90 | 3 | 1–3-daraja, 50 tagacha korxona monitoringi, o'z vazn preseti |
+| **Korporativ** (yo'nalish bo'yicha, 11.4) | Kelishuv bo'yicha (masalan 500+) | Shartnomadagi o'rinlar soni | Hammasi + ommaviy tekshiruv, API, 500 tagacha monitoring, umumiy hovuz va a'zolar limiti |
+| **Qo'shimcha kredit** (top-up) | 20 / 50 / 100, bir martalik | — | Har qanday tarifga qo'shiladi, 12 oy amal qiladi |
+
+"50, 60, 90" oylik kredit soni deb olindi (OS-19). Kredit soni, narx, muddat va imkoniyatlar ro'yxati faqat admin'dagi qiymatlar, kodda qattiq yozilmaydi; shuning uchun boshqa talqin tanlansa ham kod o'zgarmaydi.
+
+### 11.3. Kredit hamyoni ("umumiy kredit")
+
+- **Bitta hamyon** har `Organization` uchun (korporativda barcha a'zolar bitta hovuzdan). Korxonasiz foydalanuvchida shaxsiy hamyon.
+- **Umumiy**: narxlar `CreditPrice(action_code, credits)` jadvalida. Hozir scoring amallari (`score_extended`, `score_report`, `score_monitor`, `score_bulk_row`, `score_api`). Keyin benchmark (K-02), bozor tahlili PDF (K-03), hamkor eksporti (K-04) ham shu hamyonga o'tkazilishi mumkin (OS-14 bilan), alohida limitlar o'rniga.
+- **Ledger** (o'chirilmaydi, faqat qo'shiladi): `grant` (tarif yoki top-up), `spend`, `expire`, `refund`, `adjust` (admin, sabab majburiy). Balans = yozuvlar yig'indisi. Yechish `select_for_update` bilan, balans hech qachon manfiy emas.
+- **Tartib**: avval muddati eng yaqin tugaydigan grant'dan yechiladi.
+- **Muddat**: tarif krediti paket `expires_at` da (B-07) yoki oy oxirida (OS-19 sozlamasi `carry_over=false`) yonadi; top-up 12 oy.
+- **Qayta ochish bepul**: `CreditUnlock(org, stir, level, expires_at)` bo'lsa, 30 kun ichida shu korxona va darajani qayta ko'rish, presetni almashtirish kredit yechmaydi.
+- **Suiiste'molga qarshi**: kreditdan qat'i nazar kuniga bir foydalanuvchiga ko'pi bilan 200 ta ochish (sozlanadi); ommaviy tekshiruv faqat korporativda.
+- **Korporativ a'zolar**: tashkilot admini har a'zoga oylik limit qo'yadi; foydalanish hisoboti a'zo bo'yicha.
+
+### 11.4. Korporativ yo'nalishlar
+
+Yo'nalish = korporativ tarifning profili: standart preset, hisobot shabloni va bosh sahifa bloklari. Har biri admin'da alohida paket ("Korporativ · Bank" va h.k.).
+
+| Yo'nalish | Kim uchun | Standart preset | Qo'shimcha |
+|---|---|---|---|
+| Bank va kredit | Banklar, mikromoliya tashkilotlari | `kredit` | "Kredit xulosasi" PDF: bayroqlar birinchi, intizom va moliya bloki kengaytirilgan |
+| Lizing | Lizing kompaniyalari | `kredit`, O ustuni ×1.5 | Investitsiya va o'sish bloki |
+| Sug'urta | Sug'urta kompaniyalari | `muvozanatli` | Intizom va barqarorlik bloki |
+| Ta'minotchi tekshiruvi | Yirik korxonalar, xarid bo'limlari | `hamkor` | Ta'minotchilar ro'yxatini ommaviy tekshirish, oylik monitoring hisoboti |
+| Investor va eksport | Fondlar, eksportni qo'llab-quvvatlash tashkilotlari | `eksport` | OKED/hudud bo'yicha eksportchilar reytingi (faqat ball) |
+| Ijtimoiy dasturlar | Hokimliklar, xalqaro tashkilotlar | `ijtimoiy` | Inklyuzivlik bloki, hudud bo'yicha agregatlar (KR-37) |
+
+Korporativ so'rov: `/tariffs` dagi "Korporativ ulanish" formasi mavjud `ServiceRequests` orqali yaratiladi (yo'nalish, o'rinlar soni, taxminiy oylik hajm), menejer bog'lanadi, shartnoma individual.
+
+### 11.5. To'lov va faollashtirish ("alohida to'lov")
+
+ISH_REJASI 2.2 va 3.12 qoidasi saqlanadi: `backend/apps/payment/` o'zgarmaydi, onlayn to'lov qo'shilmaydi, `Transaction`/`Order` ga sintetik yozuv yo'q. Oqim:
+
+1. Foydalanuvchi `/tariffs` da scoring tarifini yoki top-up'ni tanlaydi → "Shartnoma tuzish" (mavjud oqim, K-09). Narx mavjud sektor/BHM mexanizmidan.
+2. Shartnoma DIDOX'da imzolanadi, bank o'tkazmasi, `payed_amount` (K-08 vaqt chizig'ida ko'rinadi: "To'lov kutilmoqda").
+3. Admin paketni faollashtiradi (mavjud qadam, `UserServicePackage` yaratiladi).
+4. **Yangi:** `UserServicePackage` yaratilganda signal "Scoring krediti" elementi limiticha `grant` yozadi. Idempotent: bitta paketga bitta grant (`source_package_id` unique). Oylik tariflarda Celery Beat har oy 1-sanada paket muddati ichida navbatdagi grant.
+5. Foydalanuvchiga xabarnoma: "Scoring 60 faollashdi, 60 kredit qo'shildi".
+6. Top-up xuddi shu yo'l bilan, alohida kichik shartnoma yoki mavjud shartnomaga qo'shimcha.
+
+Avtomatik faollashtirish (`payed_amount` to'liq bo'lganda, to'lov kodiga tegmasdan faqat o'qib) **OS-20**: default yo'q, admin qo'lda. Click orqali to'lash 2.2 bo'yicha keyinga qoldirilgan.
+
+### 11.6. UI
+
+- **Badge** (KR-34) o'zgarmaydi: bepul umumiy ball. Bosilganda kartochka.
+- **Qulflangan kartochka**: umumiy ball ochiq; ustunlar o'rnida xira statik radar va tugma "Kengaytirilgan ko'rish · 1 kredit (qoldiq 37)". Tarifi yo'q foydalanuvchida "Tarif tanlang" va `/tariffs#scoring`; mehmonda "Kirish".
+- **Tasdiqlash oynasi**: "1 kredit yechiladi, 30 kun ochiq turadi". "Bu seansda so'ramasin" belgisi.
+- **Balans chipi** sarlavhada va kabinetda; `/cabinet/credits`: balans, muddati yaqin kreditlar, ledger tarixi, ochilgan korxonalar ro'yxati (qolgan kunlar bilan), korporativda a'zolar bo'yicha sarf.
+- **`/tariffs`**: K-09 taqqoslash jadvaliga scoring tariflari qatori, korporativ yo'nalishlar kartochkalari, "Korporativ ulanish" formasi.
+- **Kabinet bosh paneli** (U-02): balans, kredit 20% dan kam qolsa ogohlantirish.
+- **Admin**: hamyonlar, ledger (faqat o'qish + `adjust`), `CreditPrice`, tarif elementlari, foydalanish statistikasi (A-01 ga blok).
+
+### 11.7. Ochiq savollar
+
+| ID | Savol | Default | Vazifa |
+|---|---|---|---|
+| OS-19 | "50, 60, 90" nima: oylik kredit, kun yoki narx? Ishlatilmagan kredit keyingi oyga o'tadimi? | Oylik kredit; o'tmaydi. Hammasi admin qiymati | KR-41 |
+| OS-20 | Paket shartnoma to'liq to'langanda avtomatik faollashsinmi? | Yo'q, admin qo'lda (mavjud oqim) | KR-41 |
+| OS-21 | Benchmark, bozor tahlili, hamkor eksporti ham umumiy kreditga o'tsinmi? | Hozircha yo'q, faqat scoring; jadval tayyor | KR-40 |
+
+---
+
+## 12. Vazifalar (KR-39..KR-44)
+
+Old shartlar: KR-29..KR-33 (scoring va API), B-07 (paket muddati), K-09 (tariflar sahifasi).
+
+### KR-39 · Kirish darajalari va backend darvozasi · **P0**
+
+1. `company-scores/<stir>/` javobi 11.1 bo'yicha qatlamlarga bo'linadi: ochilmagan bo'lsa faqat `overall`, `klass`, `coverage`, `locked: true`, `unlock_options: [{level, credits}]`.
+2. Ruxsat tekshiruvi bitta joyda (`can_view(user, stir, level)`): o'z korxonasi → hammasi; `CreditUnlock` amalda → shu daraja; tarif darajasi (2–3) tekshiriladi.
+3. Ro'yxat endpoint'lari (`?stir=a,b,c`, KTUT, `ktut/search`) faqat 0-daraja qaytaradi.
+4. XLSX eksportlarda ustunlar faqat Tarif 60+ va faqat ochilgan korxonalar uchun.
+
+**Qabul:** ochilmagan korxona uchun javobda `pillars`, `flags`, `indicators` kalitlari yo'q (test); o'z korxonasi har doim to'liq; kredit yo'q foydalanuvchi 402 emas, 200 + `locked`.
+
+### KR-40 · Kredit hamyoni va ledger · **P0**
+
+1. Modellar: `CreditWallet(organization | user)`, `CreditLedger(wallet, kind, amount, action_code, object_ref, source_package_id unique nullable, expires_at, created_by, reason)`, `CreditUnlock(wallet, stir, level, expires_at, unique)`, `CreditPrice(action_code, credits, is_active)`.
+2. Servis: `spend(wallet, action_code, object_ref)` — `transaction.atomic` + `select_for_update`, FIFO muddat bo'yicha, kunlik limit; `grant`, `refund`, `expire_due` (Celery Beat har kecha).
+3. `POST /api/credits/unlock/` `{stir, level}` → unlock + qolgan balans; `GET /api/credits/me/` (balans, muddatlar, ledger sahifalab).
+4. Demo: S-07 foydalanuvchilariga turli balansli hamyonlar (biri 3 kredit, biri 85, biri korporativ 500). Bu sintetik yozuvlar `Transaction` jadvaliga tegmaydi.
+
+**Qabul:** parallel 20 ta `unlock` so'rovida balans manfiy bo'lmaydi (test); 30 kun ichida qayta ochish ledger'ga yozuv qo'shmaydi; muddati o'tgan grant `expire` bilan yopiladi.
+
+### KR-41 · Tariflar va paketdan kredit berish · **P1**
+
+1. Admin'da yangi `Service` "Scoring krediti" va 4 ta paket (Scoring 50/60/90, Korporativ) hamda top-up paketlari; data migratsiya **faqat yangi yozuvlar** qo'shadi, mavjud 4 paketga tegmaydi. Har paketga imkoniyatlar ro'yxati (`features` JSON: darajalar, o'rinlar, monitoring limiti).
+2. `UserServicePackage` post_save signali → `grant` (11.5, idempotent). Oylik grant Celery Beat'da.
+3. Faollashganda xabarnoma (S-06 mexanizmi).
+4. OS-20 bayrog'i `SiteSettings.auto_activate_on_payment` (standart `False`); `True` bo'lsa `Contract.payed_amount >= summa` bo'lgan shartnoma uchun paket yaratish Celery task'i (faqat o'qish, `payment` app'iga tegilmaydi).
+
+**Qabul:** demo shartnomani admin faollashtirsa hamyonga aynan paket limiticha kredit tushadi va qayta saqlash ikkinchi grant bermaydi (test); mavjud 4 paket egalari hech narsa sezmaydi.
+
+### KR-42 · UI: qulflangan kartochka, balans, tariflar · **P1**
+
+11.6 dagi hammasi. Kredit yechadigan har tugma tasdiqlash oynasi bilan; ochilgandan keyin kartochka sahifa yangilanmasdan to'ladi. `/tariffs` dagi scoring bloki va korporativ forma.
+
+**Qabul:** demo foydalanuvchi (3 kredit) KTUT ro'yxatidan korxona ochadi → balans 2; 0 kreditda tugma "Kredit sotib olish"ga aylanadi; mehmon faqat umumiy ballni ko'radi; mobil (375px) holatlar buzilmaydi.
+
+### KR-43 · Korporativ: a'zolar, yo'nalishlar, ommaviy tekshiruv, monitoring · **P1**
+
+1. `OrganizationMember(role: admin|analyst, monthly_cap)`, tashkilot admini uchun a'zolar sahifasi; o'rinlar soni paket `features` dan.
+2. Yo'nalishlar (11.4): paketdagi `direction` → standart preset, hisobot shabloni, bosh sahifa bloklari.
+3. Ommaviy tekshiruv: XLSX yuklash (≤ 5000 STIR), Celery'da hisoblash, natija XLSX, har topilgan qator 0,5 kredit (topilmagan va "ma'lumot yetarli emas" qatorlari bepul).
+4. Monitoring: `WatchItem(wallet, stir)`, har `compute_company_scores` dan keyin sinf yoki bayroq o'zgarsa xabarnoma; oylik kredit Celery Beat'da.
+
+**Qabul:** a'zo oylik limiti tugasa hovuzda kredit bo'lsa ham 403 "Limit tashkilot admini tomonidan cheklangan"; 1000 qatorli fayl natijasi kredit hisobi bilan to'g'ri; sinf o'zgarishi testida xabarnoma yaratiladi.
+
+### KR-44 · API kalitlari va hisobotlar · **P2**
+
+1. S-16 API kalitlari orqali `company-scores/<stir>/` (1-daraja), `score_api` narxi, 30 kunlik qayta so'rov bepul.
+2. Admin analitika (A-01): sotilgan tariflar, kredit sarfi amal va yo'nalish bo'yicha, eng ko'p ochilgan OKED'lar.
+
+**Qabul:** kalit bilan so'rov ledger'ga yoziladi; kalitsiz yoki boshqa tashkilot kaliti bilan 401/403.
+
+### Bajarish tartibi
+
+1. KR-39 → KR-40 → KR-41 (backend).
+2. KR-42.
+3. KR-43, KR-44.
+
+---
+
+## 13. Korxona profili: "ball nimaga asoslangan" pullik qism
+
+> Egasining talabi (2026-10-19, hamkor qidiruvi sahifasidan): ro'yxatda ball ko'rinadi, lekin u **nimaga asoslanganini ko'rish pullik** bo'lsin; har korxonaning o'z profili bo'lsin, unga kirib chuqurroq tahlil qilish mumkin bo'lsin.
+
+### 13.1. Sahifa va kirish yo'llari
+
+- Yangi sahifa: **`/company/:stir`** (har qanday KTUT korxonasi). O'z korxonasi uchun `/cabinet/organization` (K-07) qoladi va ikkalasi bir xil komponentlardan foydalanadi (`mode="own"`).
+- Profilga olib boradigan joylar: `/partners` jadvalida korxona nomi va ball badge'i, KTUT ro'yxati, global qidiruv, `/orginfo` (u yerdagi `CompanyScoreCard` o'rniga "Profilni ochish" havolasi), hudud kartochkasidagi korxonalar, o'xshash korxonalar bloki.
+- Hamkor qidiruvidagi ro'yxat o'zgarishlari:
+  - ball ustuni bepul qoladi: "C 57" va "Namuna" belgisi, ball bo'yicha saralash va "Faqat A–B" filtri ham bepul;
+  - ball ustiga olib borilganda: "Ball nimaga asoslangan: profilda, 1 kredit";
+  - bali yo'q qatorlar bo'sh qolmaydi: "—" va tooltip "Ma'lumot yetarli emas" yoki "Hali hisoblanmagan" (seed `--limit` bilan ishlatilgan bo'lsa).
+
+### 13.2. Profil bo'limlari
+
+| Bo'lim | Nima bor | Kirish |
+|---|---|---|
+| **1. Umumiy ma'lumot** | KTUT rekvizitlari (nomi, STIR, tashkiliy-huquqiy shakl, OKED, hudud va tuman, mulkchilik, tashkil topgan yil), mahsulotlar soni (real sanoat jadvalidan), umumiy ball, sinf va uning ma'nosi, to'liqlik belgisi, "Namuna" belgisi | **Bepul** |
+| **2. Ball nimaga asoslangan** | 6 ustun radari; **ball tarkibi** (13.3): 50 dan boshlab har ustun necha ball qo'shdi yoki ayirdi; bayroqlar va ularning ta'siri (masalan "soliq qarzi: ball 57 bilan cheklangan"); tengdoshlar guruhi va o'rin ("C bo'lim, kichik korxonalar, 412 dan 37-o'rin"); preset almashtirish | **1 kredit**, 30 kun ochiq (11.1, 1-daraja) |
+| **3. Chuqur tahlil** | Har ko'rsatkich bo'yicha guruhdagi o'rni (percentil va p25/median/p75 oralig'idagi nuqta, xom qiymatsiz); 2023–2025 ball va ustunlar dinamikasi; kuchli va zaif 3 tadan ko'rsatkich; "nima bo'lsa" sezgirligi (13.4); o'xshash 5 korxona (ball va sinf, profillariga havola); hududiy kontekst (`SCORING_MODEL.md` dagi hudud indeksi va tarmoq ixtisosi); shu OKED va hudud bo'yicha sinflar taqsimoti; PDF | **3 kredit**, Tarif 60+ (2-daraja). Kengaytirilgan ochilgan bo'lsa farqi 2 kredit |
+| **4. Kuzatish** | "Kuzatuvga qo'shish": sinf o'zgarsa yoki bayroq chiqsa xabarnoma | Tarif 90 va korporativ (3-daraja) |
+
+Qulflangan bo'lim: sarlavha va qisqa tavsif ko'rinadi ("Bu bo'limda: 6 ustun, ball tarkibi, tengdoshlar orasidagi o'rin"), ostida xira statik namuna (haqiqiy qiymat emas) va tugma "Ochish · 1 kredit (qoldiq 37)". Tarif yo'q bo'lsa "Tarif tanlang", mehmon uchun "Kirish". Ochilmagan bo'lim ma'lumoti backend'dan kelmaydi (KR-39).
+
+Xom qiymatlar (tushum, foyda, ish haqi, soliq qarzi summasi) begona korxona uchun pullik qismda ham ko'rsatilmaydi: chuqur tahlil "guruhdagi o'rni" orqali beriladi. Bu 6-bo'lim qoidasining davomi; real ma'lumot ulanganda bu qoida OS-18 bilan birga qayta ko'riladi.
+
+### 13.3. Ball tarkibi (izohlanuvchanlik)
+
+Umumiy ball ustunlar bahosining vaznli o'rtachasi bo'lgani uchun uni aniq bo'laklarga ajratish mumkin:
+
+```
+w_P        = W_P / Σ_{P mavjud} W_P                  # mavjud ustunlar bo'yicha normallangan vazn
+hissa(P)   = w_P · (ustun(P) − 50)                    # ball: "+8.4", "−3.1"
+umumiy     = 50 + Σ_P hissa(P)                         # cheklovdan oldin aniq teng
+cheklov    = min(0, CAP_TAX_DEBT − umumiy) agar soliq qarzi bo'lsa   # alohida qator: "Soliq qarzi: −6.2"
+```
+
+- UI'da gorizontal "sharshara" (waterfall) diagramma: 50 → har ustun hissasi → cheklov → yakuniy ball. Ustun ustiga bosilganda shu ustundagi ko'rsatkichlar ro'yxati (2-bo'limda faqat nomlari va "guruhdan yuqori/past" belgisi, 3-bo'limda percentillar bilan).
+- Tashqi savdo tegishli bo'lmagan korxonada T qatori "Tegishli emas, vazni qolganlarga taqsimlandi" deb ko'rsatiladi.
+- Hisob backend'da, `indicators` JSON'iga `contribution` maydoni sifatida yoziladi (KR-31), frontend qayta hisoblamaydi.
+
+### 13.4. "Nima bo'lsa" sezgirligi (chuqur tahlilda)
+
+- Har ustun uchun: "Shu ustun 10 ball oshsa umumiy ball +X, sinf C → B" (hisob 13.3 formulasidan, `w_P × 10`).
+- Keyingi sinfgacha qancha ball yetishmasligi va qaysi 2 ustun eng tez yetkazishi.
+- Presetlar bo'yicha sinf: "Muvozanatli: C · Bank: D · Eksport: B" (ball barcha presetlar uchun oldindan hisoblangan, 4.8).
+
+### 13.5. Kredit va limitlar
+
+- Narxlar `CreditPrice` jadvalida: `profile_basis` = 1, `profile_deep` = 3 (kengaytirilgan ochilgan bo'lsa 2), `profile_pdf` = 0 (chuqur tahlil ochilgan bo'lsa bepul).
+- Ochilgan profil 30 kun davomida qayta kirishda kredit yechmaydi; ochilgan profillar ro'yxati `/cabinet/credits` da qolgan kunlar bilan.
+- Hamkor qidiruvidagi XLSX eksportga ochilgan korxonalar uchun ustunlar bahosi qo'shiladi (Tarif 60+), ochilmaganlar uchun faqat umumiy ball.
+- 11.3 dagi kunlik ochish limiti shu yerda ham amal qiladi.
+
+### 13.6. Ochiq savol
+
+| ID | Savol | Default | Vazifa |
+|---|---|---|---|
+| OS-22 | Pullik chuqur tahlilda begona korxonaning xom raqamlari (tushum, xodimlar soni) ko'rinsinmi? | Yo'q, faqat guruhdagi o'rni. Xodimlar soni K-04 dagi oraliq ("11–50") ko'rinishida bepul qismda | KR-45 |
+
+---
+
+## 14. Vazifalar (KR-45..KR-46)
+
+Old shartlar: KR-31 (ustunlar), KR-39 (darvoza), KR-40 (hamyon). KR-42 dagi qulflangan kartochka shu sahifada qayta ishlatiladi.
+
+### KR-45 · Korxona profili sahifasi `/company/:stir` · **P1**
+
+1. Backend: `GET /api/analytics/company-profile/<stir>/` bitta javobda 13.2 bo'limlari; har bo'lim `{locked, unlock_price}` yoki ma'lumot (KR-39 `can_view` orqali). `POST /api/credits/unlock/` ga `level=profile_basis|profile_deep`.
+2. KR-31 ga `contribution` (13.3) va sezgirlik (13.4) hisobini qo'shish; ular `EnterpriseScore.indicators` ga yoziladi.
+3. Frontend: `pages/company/CompanyProfile.tsx`; bo'limlar yorliq (tab) ko'rinishida, mobilda ketma-ket; waterfall va radar loyihaning grafik kutubxonasida (Recharts); PDF jsPDF bilan (lazy-load), "NAMUNA" suv belgisi.
+4. O'xshash korxonalar: shu tengdoshlar guruhida ustunlar vektori bo'yicha eng yaqin 5 ta (Evklid masofa), faqat ball va sinf.
+5. Sahifa sarlavhasi, `og:` teglari va ulashiladigan havola; qulflangan holatda ham sahifa ochiladi (bepul qism).
+
+**Qabul:**
+- Demo foydalanuvchi (3 kredit): profil bepul qismi ochiladi → "Ball nimaga asoslangan" ochiladi (balans 2) → waterfall'dagi hissalar yig'indisi + 50 umumiy ballga teng (±0.1, test) → 30 kun ichida qayta kirish kredit yechmaydi.
+- Ochilmagan holatda API javobida `pillars`, `contribution`, `indicators`, `flags` kalitlari yo'q (test).
+- Soliq qarzi bayroqli korxonada cheklov alohida qator bo'lib ko'rinadi.
+- Begona korxona profilida xom qiymat yo'q (test).
+
+### KR-46 · Profilga ulanish: hamkor qidiruvi va boshqa ro'yxatlar · **P1**
+
+1. `/partners`: nom va ball badge'i `/company/:stir` ga havola; tooltip (13.1); bali yo'q qatorda "—" va sababi.
+2. KTUT ro'yxati, global qidiruv, `/orginfo`, hudud kartochkasi, o'xshash korxonalar: profil havolasi. `/orginfo` dagi to'liq kartochka o'rniga umumiy ball va "Profilni ochish".
+3. XLSX eksport 13.5 bo'yicha.
+
+**Qabul:** 6-bo'lim jadvalidagi har joydan profilga bir bosishda o'tiladi; `/partners` da bali yo'q qator bo'sh katak bilan chiqmaydi.

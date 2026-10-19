@@ -19,6 +19,7 @@ import re
 from django.core.cache import cache
 from django.db.models import Count, F, Max, OuterRef, Q, Subquery
 from django.http import HttpResponse
+from django.utils import timezone
 from rest_framework import serializers, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -261,6 +262,27 @@ class PartnerFiltersAPIView(APIView):
                          "legal_forms": [{"code": c, "name": n} for c, n, _ in LEGAL_FORMS] + [{"code": "OTHER", "name": "Boshqa"}]})
 
 
+def opened_pillars(user, stirs):
+    """KORXONA_SCORING 13.5: XLSX'da ustunlar bahosi — faqat Tarif 60+ va faqat ochilgan (yoki o'z) korxonalar uchun,
+    qolganlarida faqat umumiy ball. -> (ustun kalitlari yoki [], {stir: {ustun: baho}})."""
+    from apps.analytics.company_scoring import api as score_api, config as score_config
+    from apps.analytics.models import EnterpriseScore
+    from apps.credits import service as credits
+    from apps.credits.models import CreditUnlock
+
+    wallet = credits.wallet_of(user)
+    if not scores_on() or wallet is None or wallet.plan_rank < credits.LEVEL_MIN_PLAN["deep"]:
+        return [], {}
+    allowed = set(CreditUnlock.objects.filter(wallet=wallet, stir__in=stirs, expires_at__gt=timezone.now())
+                  .values_list("stir", flat=True))
+    allowed |= {s for s in stirs if credits.is_privileged(user, s)}
+    cfg = score_config.get()
+    rows = EnterpriseScore.objects.filter(model_version=cfg["version"], preset=cfg["default_preset"],
+                                          year=score_api.latest_year(cfg), stir__in=allowed).values_list("stir", "pillars")
+    return list(cfg["pillars"]), {s: {k: (v if isinstance(v, (int, float)) else None) for k, v in (p or {}).items()}
+                                  for s, p in rows}
+
+
 class PartnerExportAPIView(APIView):
     """GET partners/export/?... — XLSX, ko'pi bilan 1000 qator; har eksport paket limitidan (slug "partners-export")."""
     permission_classes = [IsAuthenticated]
@@ -275,14 +297,16 @@ class PartnerExportAPIView(APIView):
         wb = Workbook()
         ws = wb.active
         ws.title = "Korxonalar"
-        ws.append(["STIR", "Nomi", "Tashkiliy-huquqiy shakl", "Viloyat", "Tuman", "Mahsulotlar soni", "Mahsulot guruhlari",
-                   "ball", "sinf", "namuna"])
         rows = attach_scores([_row(r) for r in companies(p)[:EXPORT_LIMIT]], p)
+        pillars, opened = opened_pillars(request.user, [r["stir"] for r in rows])
+        ws.append(["STIR", "Nomi", "Tashkiliy-huquqiy shakl", "Viloyat", "Tuman", "Mahsulotlar soni", "Mahsulot guruhlari",
+                   "ball", "sinf", "namuna"] + [f"ustun_{k}" for k in pillars])
         for row in rows:
             sc = row.get("score") or {}
             ws.append([row["stir"], row["name"], row["legal_form"]["name"], row["region"], row["district"],
                        row["products"], row["categories"], sc.get("overall"), sc.get("klass") or "",
-                       "ha" if sc.get("is_synthetic") else ""])
+                       "ha" if sc.get("is_synthetic") else ""]
+                      + [opened.get(row["stir"], {}).get(k) for k in pillars])
         ws.append([])
         ws.append([f"Manba: my.stat.uz, sanoat mahsulotlari reyestri. Ko'pi bilan {EXPORT_LIMIT} qator."])
         ws.append(["Ball va sinf — taxminiy baho, rasmiy baho emas; \"namuna\" — sintetik ko'rsatkichlardan."])

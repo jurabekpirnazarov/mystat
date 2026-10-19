@@ -14,7 +14,7 @@ from django.core.cache import cache
 from django.db import connection, transaction
 from django.utils import timezone
 
-from . import config, engine
+from . import config, engine, explain
 
 CACHE_VERSION_KEY = "company_scores:version"
 FIELDS = [f for f in engine.NUMERIC_FIELDS] + ["stir", "year", "oked_section", "oked_division", "region__code",
@@ -115,10 +115,14 @@ def compute_all(cfg=None, stdout=None):
             if preset != default and base["year"] != latest:
                 continue
             extra = {}
-            if preset == default:
-                extra = {"pillars": {p: _r(row.get(f"P_{p}"), 2) if row.get(f"appl_{p}") else "na" for p in pillars},
-                         "indicators": indicators_json(cfg, row), "flags": row["flags"]}
             overall = _r(row.get(f"overall_{preset}"), 2)
+            if preset == default:
+                pil = {p: _r(row.get(f"P_{p}"), 2) if row.get(f"appl_{p}") else "na" for p in pillars}
+                inds = indicators_json(cfg, row)
+                if overall is not None:   # KR-45: ball tarkibi (13.3) va sezgirlik (13.4)
+                    contrib = explain.contribution(cfg, pil, row["flags"], default)
+                    inds["_contrib"], inds["_sens"] = contrib, explain.sensitivity(cfg, contrib)
+                extra = {"pillars": pil, "indicators": inds, "flags": row["flags"]}
             objs.append(EnterpriseScore(preset=preset, overall=overall, klass=row.get(f"klass_{preset}") or "",
                                         coverage=_r(row.get(f"coverage_{preset}")) or 0.0, **base, **extra))
     t1 = time.monotonic()

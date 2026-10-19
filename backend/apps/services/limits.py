@@ -64,7 +64,7 @@ def consume(user, slug, request_data=None, once_per_day=False):
         if psi is not None and once_per_day and UserServicePackageItemUse.objects.filter(
                 usp=usp, psi=psi, request_data=request_data or {}, created_at__date=timezone.localdate()).exists():
             return {"configured": True, "limit": psi.limit, "used": used}
-        if psi is None or psi.limit <= 0 or used >= psi.limit:
+        if psi is None or psi.is_exhausted(used):
             raise LimitExceeded("Sizning limitingiz tugagan!", limit=psi.limit if psi else 0, used_count=used)
         use = UserServicePackageItemUse.objects.create(usp=usp, psi=psi, is_success=True,
                                                        request_data=request_data or {}, response_data=None)

@@ -8,6 +8,7 @@ import { login_api, oneid_login } from "../api/apiUrls";
 import { getCurrentDate } from "../utils/getCurrentDate";
 import toast from "react-hot-toast";
 import type { LoginResponse } from "../types/api";
+import { rememberReturnTo, safeReturnPath, takeReturnTo } from "../utils/loginRedirect";
 
 const Login = () => {
   const [userType, setUserType] = useState<"individual" | "legal">(
@@ -25,6 +26,8 @@ const Login = () => {
   const { user, nav } = useAuth();
 
   const { pathname } = useLocation();
+  // Login talab qilgan sahifa (`?next=`) — kirgandan keyin o'sha yerga qaytariladi
+  const next = safeReturnPath(searchParams.get("next"));
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -40,9 +43,9 @@ const Login = () => {
 
   useEffect(() => {
     if (user) {
-      navigate(`/${nav}`, { replace: true });
+      navigate(next ?? (takeReturnTo() || `/${nav}`), { replace: true });
     }
-  }, [navigate, user, nav]);
+  }, [navigate, user, nav, next]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,7 +79,7 @@ const Login = () => {
             userType,
             getCurrentDate()
           );
-          navigate(`/${nav}`);
+          navigate(next ?? (takeReturnTo() || `/${nav}`));
         } else {
           console.error("No tokens found in response:", response);
           setError("Login jarayonida xatolik yuz berdi");
@@ -96,6 +99,7 @@ const Login = () => {
   const handleOneIDLogin = () => {
     // Get current origin for redirect URI
     const redirectUri = `${window.location.origin}/auth/oneid/callback`;
+    rememberReturnTo(next);
     
     getRequest<{ one_id_url?: string }>(`${oneid_login}?redirect_uri=${encodeURIComponent(redirectUri)}`)
       .then((response: { one_id_url?: string }) => {

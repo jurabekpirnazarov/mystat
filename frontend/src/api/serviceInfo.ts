@@ -57,6 +57,7 @@ export interface ServiceInfoData {
   slug: string;
   icon: string | null;
   is_free: boolean;
+  requires_login?: boolean;
   is_active: boolean;
   is_popular: boolean;
   average_rating: number;

@@ -1,4 +1,5 @@
 import axiosT from "./baseUrl";
+import { redirectToLogin } from "../utils/loginRedirect";
 
 // Function to clear localStorage and redirect to login
 function clearLocalStorageAndRedirect() {
@@ -8,10 +9,8 @@ function clearLocalStorageAndRedirect() {
   localStorage.removeItem("user");
   localStorage.removeItem("user_data");
   localStorage.removeItem("user_profile");
-  
-  
-  // Redirect to login page
-  window.location.href = "/login";
+
+  redirectToLogin();
 }
 
 export const postRequest = <T = unknown>(

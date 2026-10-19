@@ -68,6 +68,7 @@ def registry():
     from .citizens import CitizensSeeder
     from .classifications import ClassificationsSeeder
     from .consultations import ConsultationsSeeder
+    from .credits import CreditsSeeder
     from .custom_requests import CustomRequestsSeeder
     from .demo_users import DemoUsersSeeder
     from .enterprise_scoring import EnterpriseScoringSeeder
@@ -91,5 +92,6 @@ def registry():
         CitizensSeeder,
         ApiSubscriptionsSeeder,
         ConsultationsSeeder,
+        CreditsSeeder,
     ]
     return {s.name: s for s in seeders}

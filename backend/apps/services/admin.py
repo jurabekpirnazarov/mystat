@@ -42,7 +42,7 @@ class ServiceCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
-    list_display = ('name_uz', 'is_free', 'duration', 'is_active', 'is_popular')
+    list_display = ('name_uz', 'is_free', 'requires_login', 'in_package', 'duration', 'is_active', 'is_popular')
     search_fields = ('name_uz', 'description_uz')
     list_filter = ('is_active', 'is_popular', 'duration')
     inlines = [ServiceItemInline]

@@ -6,6 +6,7 @@ import { asApiError } from "../api/errors";
 import { useAuth } from "../contexts/AuthContext";
 import useApi from "../hooks/useApi";
 import { DemoBadge, EmptyState, ErrorState, PageHeader, Skeleton } from "../components/ui";
+import { loginUrl } from "../utils/loginRedirect";
 
 const day = (iso: string) => new Date(iso).toLocaleDateString("uz-UZ", { weekday: "short", day: "numeric", month: "short" });
 const hm = (iso: string) => new Date(iso).toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" });
@@ -49,7 +50,7 @@ export default function Consultation() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <PageHeader title="Konsultant bilan konsultatsiya" description="Statistika mutaxassisi bilan onlayn yoki ofisda uchrashuv band qiling. Paket limiti bilan."
           breadcrumbs={[{ label: "Bosh sahifa", to: "/" }, { label: "Xizmatlar", to: "/services" }, { label: "Konsultatsiya" }]} />
-        {!isAuthenticated ? <p className="mb-4 text-sm"><Link to="/login" className="text-blue-600 underline">Kiring</Link> — band qilish faqat korxonalar uchun.</p>
+        {!isAuthenticated ? <p className="mb-4 text-sm"><Link to={loginUrl()} className="text-blue-600 underline">Kiring</Link> — band qilish faqat korxonalar uchun.</p>
           : !legal ? <p className="mb-4 text-sm text-amber-700 dark:text-amber-300">Konsultatsiya hozircha faqat korxonalar uchun. Savolingizni bepul "Savol bering" xizmati orqali yuborishingiz mumkin: <Link to="/answers" className="underline">Savol-javoblar</Link>.</p> : null}
         {result && <p role="status" className={`mb-4 text-sm ${result.ok ? "text-emerald-700" : "text-red-600"}`}>{result.text} {result.ok && <Link to="/cabinet" state={{ name: "consultations" }} className="underline">Konsultatsiyalarim</Link>}</p>}
 

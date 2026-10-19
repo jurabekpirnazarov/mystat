@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { CartesianGrid, Line, LineChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { AlertTriangle, ArrowRight, Info } from "lucide-react";
-import { fetchCompanyScore, fetchMyCompanyScore, PRESETS, type CompanyScoreDetail, type CompanyScoreIndicator } from "../../api/companyScores";
+import { fetchCompanyScore, fetchMyCompanyScore, PRESETS, type CompanyScoreDetail, type CompanyScoreIndicator, type CompanyScoreLocked } from "../../api/companyScores";
 import { useChartTheme } from "../../utils/chartTheme";
 import { formatValue } from "../../utils/mapScale";
 import { DemoBadge } from "../ui";
@@ -39,7 +39,7 @@ function formatOwn(i: CompanyScoreIndicator, v: number | null | undefined) {
 export default function CompanyScoreCard({ stir, mode = "public", preset: initial, onPresetChange, className = "" }: Props) {
   const chart = useChartTheme();
   const [preset, setPreset] = useState(initial || "muvozanatli");
-  const [data, setData] = useState<CompanyScoreDetail | null>(null);
+  const [data, setData] = useState<CompanyScoreDetail | CompanyScoreLocked | null>(null);
   const [state, setState] = useState<"loading" | "ok" | "none" | "error">("loading");
 
   useEffect(() => {
@@ -72,6 +72,8 @@ export default function CompanyScoreCard({ stir, mode = "public", preset: initia
 
   const klass = data.klass || "none";
   const none = klass === "none";
+  const profileUrl = `/company/${data.stir}`;
+  if (data.locked) return <LockedCard data={data} box={box} />;
   // Baholanmagan ustun radarda 0 bo'lib chizilmasin (chalg'itadi) — faqat bahosi borlari
   const radar = data.pillars_detail.filter((p) => p.applicable && p.score !== null).map((p) => ({ name: p.name, v: p.score ?? 0, avg: 50 }));
   const byPillar = data.pillars_detail.map((p) => ({ ...p, indicators: data.indicators.filter((i) => i.pillar === p.key) }));
@@ -192,8 +194,39 @@ export default function CompanyScoreCard({ stir, mode = "public", preset: initia
 
       <footer className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 dark:border-gray-700 pt-2 text-xs text-gray-500">
         <span className="inline-flex items-center gap-1"><Info className="h-3 w-3" aria-hidden="true" />{data.disclaimer}{data.sample_note && ` ${data.sample_note}`}</span>
-        <Link to="/methodology/company-score" className="text-blue-600 hover:underline">Qanday hisoblanadi</Link>
+        <span className="flex gap-3">
+          {mode === "public" && <Link to={profileUrl} className="text-blue-600 hover:underline">Profilni ochish</Link>}
+          <Link to="/methodology/company-score" className="text-blue-600 hover:underline">Qanday hisoblanadi</Link>
+        </span>
       </footer>
+    </section>
+  );
+}
+
+/** KR-39, KR-46: ochilmagan korxona — faqat umumiy ball, sinf va profilga havola (ustunlar backend'dan kelmaydi). */
+function LockedCard({ data, box }: { data: CompanyScoreLocked; box: string }) {
+  const klass = data.klass || "none";
+  const none = klass === "none";
+  const basis = data.unlock_options.find((o) => o.level === "basis");
+  return (
+    <section aria-label="Korxona bali" className={`${box} space-y-3`}>
+      <h3 className="flex items-center gap-2 text-sm font-semibold">Korxona bali, {data.year} {data.is_synthetic && <DemoBadge />}</h3>
+      <div className="flex items-center gap-3">
+        <span className={`inline-flex h-12 w-12 items-center justify-center rounded-full text-2xl font-bold ${KLASS_STYLE[klass].bg} ${KLASS_STYLE[klass].text}`}>{none ? "—" : data.klass}</span>
+        <div>
+          <p className="text-3xl font-bold tabular-nums leading-none">{none ? "—" : Math.round(data.overall ?? 0)}<span className="text-base font-normal text-gray-400">/100</span></p>
+          <p className="text-sm text-gray-600 dark:text-gray-300">{data.klass_info.name}{data.partial && <span className="ml-1 text-amber-600">· qisman ma'lumot</span>}</p>
+        </div>
+      </div>
+      {!none && (
+        <p className="text-sm text-gray-700 dark:text-gray-200">
+          Ball nimaga asoslangan (6 ustun, ball tarkibi, tengdoshlar orasidagi o'rin) — korxona profilida{basis?.credits ? `, ${basis.credits} kredit` : ""}.
+        </p>
+      )}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 pt-2 text-xs text-gray-500 dark:border-gray-700">
+        <span className="inline-flex items-center gap-1"><Info className="h-3 w-3" aria-hidden="true" />{data.disclaimer}</span>
+        <Link to={data.profile_url} className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">Profilni ochish <ArrowRight className="h-3 w-3" aria-hidden="true" /></Link>
+      </div>
     </section>
   );
 }

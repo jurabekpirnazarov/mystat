@@ -357,7 +357,11 @@ class YearlyUserStatAPIView(APIView):
     )
     def get(self, request, *args, **kwargs):
         current_year = datetime.now().year
-        year = int(request.query_params.get("year", current_year))
+        # Bosh sahifadagi ommaviy grafik: faqat oylik agregat sonlar, shaxsiy ma'lumot yo'q
+        try:
+            year = int(request.query_params.get("year", current_year))
+        except (TypeError, ValueError):
+            year = current_year
 
         q = (
             User.objects

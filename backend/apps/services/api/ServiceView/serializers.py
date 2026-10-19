@@ -82,7 +82,7 @@ class ServiceSerializer(serializers.ModelSerializer):
             "name_uz", "name_ru", "name_cry",
             "description_uz", "description_ru", "description_cry",
             "duration", "slug", "icon",
-            "is_free", "is_active", "is_popular",
+            "is_free", "requires_login", "is_active", "is_popular",
             "average_rating",
             "ratings_total",
             "rating_counts",

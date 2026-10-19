@@ -212,7 +212,7 @@ class BookDownloadAPIView(APIView):
                     is_success=True
                 ).count()
 
-                if psi.limit <= 0 or used_count >= psi.limit:
+                if psi.is_exhausted(used_count):
                     return Response(
                         {
                             "detail": "Sizning limitingiz tugagan!",

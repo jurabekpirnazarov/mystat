@@ -14,4 +14,6 @@ urlpatterns = [
     path("company-scores/distribution/", scores.CompanyScoreDistributionView.as_view(), name="company-scores-distribution"),
     path("company-scores/methodology/", scores.CompanyScoreMethodologyView.as_view(), name="company-scores-methodology"),
     path("company-scores/<str:stir>/", scores.CompanyScoreDetailView.as_view(), name="company-scores-detail"),
+    # KR-45: korxona profili
+    path("company-profile/<str:stir>/", scores.CompanyProfileView.as_view(), name="company-profile"),
 ]

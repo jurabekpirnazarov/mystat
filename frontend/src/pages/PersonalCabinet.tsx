@@ -17,6 +17,7 @@ import CustomRequests from "./cabinet/CustomRequests";
 import CitizenHome from "./cabinet/CitizenHome";
 import CitizenQuestions from "./cabinet/CitizenQuestions";
 import ApiKeys from "./cabinet/ApiKeys";
+import Credits from "./cabinet/Credits";
 import Subscriptions from "./cabinet/Subscriptions";
 import Consultations from "./cabinet/Consultations";
 import OnboardingTour from "../components/OnboardingTour";
@@ -35,6 +36,7 @@ import {
   Database,
   BellRing,
   KeyRound,
+  Coins,
   CalendarCheck,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
@@ -43,6 +45,7 @@ import PaymentModal from "../components/modals/BuyModal";
 import { unwrap, type MaybeWrapped, type UserProfile } from "../types/api";
 import { getRequest } from "../api/request";
 import { contracts_list, order_list, profile, me_package_items_api } from "../api/apiUrls";
+import { loginUrl } from "../utils/loginRedirect";
 
 
 const PersonalCabinet = () => {
@@ -107,6 +110,7 @@ const PersonalCabinet = () => {
     { id: "consultations", label: "Konsultatsiyalarim", icon: CalendarCheck, audience: "legal" },
     { id: "questions", label: "Savollarim", icon: HelpCircle, audience: "citizen" },
     { id: "subscriptions", label: "Obunalarim", icon: BellRing, audience: "all" },
+    { id: "credits", label: "Kreditlarim", icon: Coins, audience: "all" },
     { id: "api-keys", label: "API kalitlarim", icon: KeyRound, audience: "all" },
     { id: "payments", label: "To'lovlar", icon: CreditCard, audience: "all" },
     { id: "notifications", label: "Xabarnomalar", icon: Bell, audience: "all" },
@@ -296,11 +300,13 @@ const PersonalCabinet = () => {
 
               {activeTab === "api-keys" && <ApiKeys />}
 
+              {activeTab === "credits" && <Credits />}
+
               {activeTab === "consultations" && <Consultations />}
 
               {isCitizen && !visibleItems.some((i) => i.id === activeTab) && (
                 <div className="p-6 text-sm text-gray-700 dark:text-gray-200">
-                  Bu bo'lim korxonalar uchun. <a href="/login" className="text-blue-600 underline">Korxona sifatida kirish</a> yoki <button type="button" className="text-blue-600 underline" onClick={() => setActiveTab("overview")}>bosh panelga qaytish</button>.
+                  Bu bo'lim korxonalar uchun. <a href={loginUrl()} className="text-blue-600 underline">Korxona sifatida kirish</a> yoki <button type="button" className="text-blue-600 underline" onClick={() => setActiveTab("overview")}>bosh panelga qaytish</button>.
                 </div>
               )}
 

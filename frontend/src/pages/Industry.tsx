@@ -477,7 +477,7 @@ const Industry: React.FC = () => {
                               <h3 className="font-semibold text-lg text-gray-900 mb-2 flex flex-wrap items-center gap-2">
                                 {product.name}
                                 {/* KORXONA_SCORING.md KR-35: ishlab chiqaruvchi korxona bali */}
-                                <CompanyScoreBadge score={scores[product.inn]} />
+                                <CompanyScoreBadge score={scores[product.inn]} to={`/company/${product.inn}`} />
                               </h3>
                               <div className="space-y-2 text-sm">
                                 <div className="flex items-start gap-2">

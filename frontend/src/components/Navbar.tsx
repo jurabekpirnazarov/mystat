@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import NotificationBell from "./notifications/NotificationBell";
+import CreditBalanceChip from "./company-score/CreditBalanceChip";
 import CommandPalette from "./search/CommandPalette";
 import { Search } from "lucide-react";
 import { getRequest } from "../api/request";
@@ -100,15 +101,14 @@ const Navbar = () => {
       <nav className="bg-white dark:bg-gray-800 shadow-lg sticky top-0 z-30 transition-colors duration-300">
         <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10  rounded-full flex items-center justify-center">
-                <img src={logo} alt="my.stat.uz" />
-              </div>
-              <div className="hidden sm:block lg:hidden 2xl:block">
-                <h1 className="text-xs text-gray-600 dark:text-gray-300 ">
+          <div className="flex items-center shrink-0">
+            {/* shrink-0 + nowrap: logo bloki qisilib matn 5 qatorga sinmasin va 64px navbardan chiqib ketmasin */}
+            <Link to="/" className="flex items-center gap-2 shrink-0" aria-label="Milliy statistika qo'mitasi — interaktiv xizmatlar platformasi, bosh sahifa">
+              <img src={logo} alt="" width={40} height={40} className="w-10 h-10 shrink-0 object-contain" />
+              <div className="hidden sm:block lg:hidden 2xl:block leading-tight whitespace-nowrap">
+                <p className="text-[11px] tracking-wide text-gray-600 dark:text-gray-300">
                   MILLIY STATISTIKA QO‘MITASI
-                </h1>
+                </p>
                 <p className="text-xs font-bold text-gray-900 dark:text-white">
                   INTERAKTIV XIZMATLAR PLATFORMASI
                 </p>
@@ -119,7 +119,6 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-1 xl:gap-2">
             {navItems.map((item) => {
-              const Icon = item.icon;
               return (
                 <Link
                   key={item.path}
@@ -130,7 +129,7 @@ const Navbar = () => {
                       : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700"
                   }`}
                 >
-                  <Icon className="hidden 2xl:block w-4 h-4 shrink-0" />
+                  {/* Ikonka yo'q: logo matni, 7 band va o'ng tomon (balans, xabarlar, ism) 90rem konteynerga sig'sin */}
                   <span>{item.label}</span>
                 </Link>
               );
@@ -148,6 +147,7 @@ const Navbar = () => {
               <Search className="w-5 h-5" />
             </button>
             <CommandPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
+            {isAuthenticated && <CreditBalanceChip />}
             {isAuthenticated && <NotificationBell />}
 
             {isAuthenticated ? (

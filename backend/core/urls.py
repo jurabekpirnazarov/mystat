@@ -41,6 +41,7 @@ urlpatterns += [
     path('api/additional-services/', include('apps.additional_services.urls', namespace='additional_services')),
     path('api/notifications/', include('apps.notifications.urls', namespace='notifications')),
     path('api/analytics/', include('apps.analytics.urls', namespace='analytics')),
+    path('api/credits/', include('apps.credits.urls', namespace='credits')),  # KORXONA_SCORING KR-40
     path('api/citizens/', include('apps.citizens.urls', namespace='citizens')),
     path('api/open/', include('apps.open_api.urls', namespace='open_api')),
     path('api/consultations/', include('apps.consultations.urls', namespace='consultations')),

@@ -14,6 +14,7 @@ import { OrdersProvider } from "./contexts/OrdersContext";
 import { NotificationsProvider } from "./contexts/NotificationsContext";
 import ScrollToTop from "./components/ScrollToTop";
 import ErrorBoundary from "./components/ui/ErrorBoundary";
+import { loginUrl, redirectToLogin } from "./utils/loginRedirect";
 
 // Global 401 error handler
 function setupGlobalErrorHandler() {
@@ -24,8 +25,8 @@ function setupGlobalErrorHandler() {
     localStorage.removeItem("user");
     localStorage.removeItem("user_data");
     localStorage.removeItem("user_profile");
-    
-    window.location.href = "/login";
+
+    redirectToLogin();
   };
 
   // Listen for unhandled promise rejections (axios errors)
@@ -80,6 +81,7 @@ const CitizensHub = lazy(() => import("./pages/citizens/CitizensHub"));
 const Regions = lazy(() => import("./pages/Regions"));
 const CompanyScoreMethodology = lazy(() => import("./pages/CompanyScoreMethodology"));
 const CompanyScoreShowcase = lazy(() => import("./pages/CompanyScoreShowcase"));
+const CompanyProfile = lazy(() => import("./pages/company/CompanyProfile"));
 const RegionProfile = lazy(() => import("./pages/RegionProfile"));
 const MySalary = lazy(() => import("./pages/citizens/MySalary"));
 const Prices = lazy(() => import("./pages/citizens/Prices"));
@@ -102,7 +104,8 @@ const PageLoader = () => (
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   const { isAuthenticated } = useAuth();
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+  const location = useLocation();
+  return isAuthenticated ? children : <Navigate to={loginUrl(location.pathname + location.search)} replace />;
 }
 
 function AppRoutes() {
@@ -141,6 +144,7 @@ function AppRoutes() {
           <Route path="/regions" element={<Regions />} />
           <Route path="/methodology/company-score" element={<CompanyScoreMethodology />} />
           <Route path="/company-score/components" element={<CompanyScoreShowcase />} />
+          <Route path="/company/:stir" element={<CompanyProfile />} />
           <Route path="/regions/:id" element={<RegionProfile />} />
           <Route path="/my-salary" element={<MySalary />} />
           <Route path="/prices" element={<Prices />} />
@@ -177,6 +181,7 @@ function AppRoutes() {
               </ProtectedRoute>
             }
           />
+          <Route path="/cabinet/credits" element={<Navigate to="/cabinet" replace state={{ name: "credits" }} />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

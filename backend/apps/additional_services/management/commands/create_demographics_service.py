@@ -54,7 +54,7 @@ class Command(BaseCommand):
                 "Аҳоли сони, туғилиш, ўлим, никоҳ, ажрим ва миграция бўйича расмий "
                 "статистик маълумотлар (1989-йилдан бери)."
             ),
-            "is_free": False,
+            "is_free": True,  # sahifa va CSV eksport ochiq
             "duration": "now",
             "is_active": True,
             "is_popular": True,

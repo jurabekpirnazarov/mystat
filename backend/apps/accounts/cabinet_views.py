@@ -78,7 +78,7 @@ class CabinetSummaryAPIView(APIView):
             .values_list("psi")
             .annotate(n=Count("id"))
         )
-        items = PackageServiceItem.objects.filter(package=usp.service, limit__gt=0).select_related("package_service")
+        items = PackageServiceItem.objects.filter(package=usp.service).exclude(limit=0).select_related("package_service")
         return [
             {
                 "id": item.id,

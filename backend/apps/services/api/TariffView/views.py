@@ -45,10 +45,6 @@ def _money(pricing):
     return {k: (str(v) if not isinstance(v, int) else v) for k, v in pricing.items()}
 
 
-def _unlimited(item):
-    return item.limit <= 0 and _clean(item.name_uz).lower().startswith("barcha")
-
-
 class TariffCompareView(APIView):
     """GET /api/services/tariff-compare/?sector=<id> — paketlar × xizmatlar jadvali va narxlar."""
     permission_classes = (AllowAny,)
@@ -62,7 +58,7 @@ class TariffCompareView(APIView):
             ps = item.package_service
             row = rows.setdefault(ps.id, {"id": ps.id, "name": _clean(ps.name_uz), "cells": {}})
             row["cells"].setdefault(str(item.package_id), []).append({
-                "name": _clean(item.name_uz), "limit": item.limit, "unlimited": _unlimited(item)})
+                "name": _clean(item.name_uz), "limit": item.limit, "unlimited": item.is_unlimited})
         priced = sorted(((p, package_price(p, sector)) for p in packages), key=lambda x: x[1]["price"])
         sector_ids = ServicePackagePrice.objects.values_list("sector_id", flat=True).distinct()
         return Response({
@@ -97,12 +93,12 @@ class TariffRecommendView(APIView):
                 if not need[key]:
                     continue
                 item = items.get(slug)
-                if item is None or not (_unlimited(item) or item.limit >= need[key]):
+                if item is None or not (item.is_unlimited or item.limit >= need[key]):
                     fits = False
                     break
             if fits:
                 # narx teng bo'lsa kichikroq (limitlari kamroq) paket tavsiya qilinadi
-                size = sum(i.limit for i in items.values())
+                size = sum(max(i.limit, 0) for i in items.values())
                 candidates.append((package_price(package, sector)["price"], size, package))
         if not candidates:
             return Response({"package": None, "reason": "Talablaringizga mos paket topilmadi — eng katta paketni ko'ring yoki biz bilan bog'laning."})

@@ -118,14 +118,17 @@ def klass_info(cfg, klass, lang):
             {"uz": "Ma'lumot yetarli emas", "ru": "Недостаточно данных", "cry": "Маълумот етарли эмас"}[lang]}
 
 
-def short(score, base, cfg, lang):
-    """Ro'yxat/badge uchun ixcham obyekt."""
-    return {"stir": score.stir, "year": score.year, "preset": score.preset, "overall": score.overall,
+def short(score, base, cfg, lang, full=False):
+    """Ro'yxat/badge uchun ixcham obyekt. KR-39: ro'yxatlarda faqat 0-daraja (umumiy ball, sinf, to'liqlik) —
+    ustunlar va bayroqlar faqat `full=True` (ochilgan kartochka yoki o'z korxonasi)."""
+    data = {"stir": score.stir, "year": score.year, "preset": score.preset, "overall": score.overall,
             "klass": score.klass, "klass_name": klass_info(cfg, score.klass, lang)["name"], "coverage": score.coverage,
             "partial": score.overall is not None and score.coverage < cfg["params"]["coverage_full"],
-            "data_source": score.data_source, "is_synthetic": is_synthetic(score.data_source),
-            "pillars": {p: (None if v == "na" else v) for p, v in (base.pillars if base else {}).items()},
-            "flags": base.flags if base else []}
+            "data_source": score.data_source, "is_synthetic": is_synthetic(score.data_source)}
+    if full:
+        data["pillars"] = {p: (None if v == "na" else v) for p, v in (base.pillars if base else {}).items()}
+        data["flags"] = base.flags if base else []
+    return data
 
 
 def _rows(cfg, stirs, preset, year):
@@ -199,7 +202,7 @@ def detail_payload(cfg, stir, preset, year, lang, own=False):
         sources = {k: v for k, v in (row["sources"] or {}).items() if not k.startswith("_")}
     dynamics = list(qs.filter(preset=cfg["default_preset"]).order_by("year").values("year", "overall", "klass"))
     data = {
-        **short(score, base, cfg, lang), "klass_info": klass_info(cfg, score.klass, lang),
+        **short(score, base, cfg, lang, full=True), "klass_info": klass_info(cfg, score.klass, lang),
         "pillars_detail": pillar_list(cfg, base.pillars or {}, lang),
         "peer_group": base.peer_group, "peer_size": base.peer_size,
         "peer_label": peer_label(cfg, base.peer_group, base.peer_size, lang),
@@ -275,8 +278,31 @@ class CompanyScoreDetailView(APIView):
         year = request.query_params.get("year")
         year = int(year) if year and year.isdigit() else None
         lang = lang_of(request)
-        return Response(_cached(f"detail:{stir}:{preset}:{year}:{lang}",
-                                lambda: detail_payload(cfg, stir, preset, year, lang)))
+        data = _cached(f"detail:{stir}:{preset}:{year}:{lang}", lambda: detail_payload(cfg, stir, preset, year, lang))
+        return Response(gate_detail(request.user, stir, data))
+
+
+LEVEL0_KEYS = ("stir", "year", "preset", "overall", "klass", "klass_name", "klass_info", "coverage", "partial",
+               "data_source", "is_synthetic", "years", "presets", "model_version", "disclaimer", "sample_note")
+
+
+def gate_detail(user, stir, data):
+    """KR-39: ochilmagan korxona — faqat 0-daraja + `locked` va ochish narxi; ustunlar, bayroqlar, guruh — 1-daraja
+    (`basis`), ko'rsatkichlar baholari va dinamika — 2-daraja (`deep`). Ochilmagan qism javobga umuman kirmaydi."""
+    from apps.credits import service as credits
+
+    wallet = credits.wallet_of(user)
+    unlocks = credits.active_unlocks(wallet, stir) if wallet else {}
+    if credits.can_view(user, stir, "deep", wallet=wallet, unlocks=unlocks):
+        return {**data, "locked": False, "level": "deep"}
+    scored = data.get("overall") is not None
+    opts = credits.unlock_options(user, stir, scored, wallet=wallet, unlocks=unlocks)
+    if credits.can_view(user, stir, "basis", wallet=wallet, unlocks=unlocks):
+        out = {k: v for k, v in data.items() if k not in ("indicators", "dynamics")}
+        return {**out, "locked": False, "level": "basis", "unlock_options": [opts["options"]["deep"]]}
+    out = {k: data[k] for k in LEVEL0_KEYS if k in data}
+    return {**out, "locked": True, "level": "general", "unlock_options": list(opts["options"].values()),
+            "profile_url": f"/company/{stir}"}
 
 
 class MyCompanyScoreView(APIView):
@@ -406,3 +432,22 @@ class CompanyScoreMethodologyView(APIView):
     def get(self, request):
         lang = lang_of(request)
         return Response(_cached(f"methodology:{lang}", lambda: methodology_payload(config.get(), lang)))
+
+
+class CompanyProfileView(APIView):
+    """KR-45: korxona profili — bo'limlar bitta javobda, har biri ma'lumot yoki `{locked, unlock}`."""
+
+    permission_classes = (AllowAny,)
+
+    @extend_schema(tags=TAG, operation_id="company_profile", summary="Korxona profili (bepul qism + qulflangan bo'limlar)",
+                   parameters=[P_PRESET, P_LANG], responses={200: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT,
+                                                             404: OpenApiTypes.OBJECT})
+    def get(self, request, stir):
+        from .profile import profile_payload
+
+        cfg = config.get()
+        try:
+            preset = resolve_preset(cfg, request.query_params)
+        except BadRequest as exc:
+            return Response({"detail": str(exc)}, status=400)
+        return Response(profile_payload(request, stir.strip(), preset, lang_of(request)))

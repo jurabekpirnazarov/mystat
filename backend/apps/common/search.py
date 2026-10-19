@@ -71,7 +71,7 @@ def _companies(q):
             scores = {s: score_api.short(v[cfg["default_preset"]], v[cfg["default_preset"]], cfg, "uz")
                       for s, v in by.items() if cfg["default_preset"] in v}
     return [{"id": f"ktut-{r['id']}", "title": r["name"], "subtitle": f"STIR {r['inn']}", "stir": r["inn"],
-             "score": scores.get(r["inn"]), "url": f"/partners?q={r['inn']}"} for r in rows]
+             "score": scores.get(r["inn"]), "url": f"/company/{r['inn']}"} for r in rows]
 
 
 def global_search(query, user):

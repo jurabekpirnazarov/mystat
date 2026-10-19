@@ -66,6 +66,7 @@ LOCAL_APPS = [
     'apps.open_api',
     'apps.consultations',
     'apps.siat',
+    'apps.credits',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -310,6 +311,11 @@ PROVIDERS = {
     'return_url': config("RETURN_URL"),
 }
 
+# GoodSign (DIDOX) stage — `common/didox/*` sinov endpoint'lari uchun (faqat admin)
+GOODSIGN_TAX_ID = config('GOODSIGN_TAX_ID', default='')
+GOODSIGN_PASSWORD = config('GOODSIGN_PASSWORD', default='')
+GOODSIGN_COMPANY_ID = config('GOODSIGN_COMPANY_ID', default='')
+
 # Logging Configuration
 LOGGING = {
     'version': 1,
@@ -430,6 +436,11 @@ CELERY_BEAT_SCHEDULE = {
             hour=config("BEAT_SIAT_SYNC_HOUR", default=3, cast=int),
             minute=config("BEAT_SIAT_SYNC_MINUTE", default=30, cast=int),
         ),
+    },
+    # KORXONA_SCORING KR-40: muddati o'tgan kreditlar har kecha yopiladi
+    "credits-expire": {
+        "task": "apps.credits.tasks.expire_credits_task",
+        "schedule": crontab(hour=2, minute=10),
     },
 }
 

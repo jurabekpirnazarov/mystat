@@ -48,3 +48,45 @@ class SetupServiceLimitsTests(APITestCase):
         call_command("setup_service_limits", stdout=StringIO())
         self.assertEqual(PackageService.objects.filter(slug="benchmark").count(), 1)
         self.assertEqual(PackageServiceItem.objects.get(pk=item.pk).limit, 99)
+
+
+class UnlimitedLimitTests(APITestCase):
+    """XIZMATLAR_TAHLILI 6-band: limit=-1 — cheksiz, limit=0 — ruxsat yo'q."""
+
+    def setUp(self):
+        from apps.accounts.models import User
+        from apps.common.models import District, Region
+        from apps.services.models import PackageService, ServicePackage, UserServicePackage
+        self.user = User.objects.create_user(username="ul_user", password="x")
+        self.package = ServicePackage.objects.create(name_uz="4 - Tarif", name_ru="4", name_cry="4")
+        self.ps = PackageService.objects.create(name_uz="To'plamlar", name_ru="T", name_cry="T", slug="ul-prints")
+        region = Region.objects.create(name="UL v.", code="9951")
+        district = District.objects.create(name="UL t.", code="995101", region=region)
+        UserServicePackage.objects.create(region=region, district=district, year=2026, month=1,
+                                          service=self.package, created_by_user=self.user)
+
+    def _item(self, limit):
+        from apps.services.models import PackageServiceItem
+        return PackageServiceItem.objects.create(package=self.package, package_service=self.ps, name_uz="Barcha to'plamlar",
+                                                 name_ru="B", name_cry="B", limit=limit)
+
+    def test_unlimited_never_exhausted(self):
+        from apps.services.limits import consume
+        item = self._item(-1)
+        self.assertTrue(item.is_unlimited)
+        for _ in range(3):
+            consume(self.user, "ul-prints")
+        self.assertFalse(item.is_exhausted(10_000))
+
+    def test_zero_means_no_access(self):
+        from apps.services.limits import LimitExceeded, consume
+        item = self._item(0)
+        self.assertTrue(item.is_exhausted(0))
+        with self.assertRaises(LimitExceeded):
+            consume(self.user, "ul-prints")
+
+
+class CatalogAccessTests(APITestCase):
+    def test_requires_login_in_service_api(self):
+        from apps.services.api.ServiceView.serializers import ServiceSerializer
+        self.assertIn("requires_login", ServiceSerializer.Meta.fields)

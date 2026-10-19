@@ -65,7 +65,7 @@ const ReportsCalendarDetail: React.FC<ReportsCalendarDetailProps> = ({ reports, 
                   <Hash className="h-5 w-5 text-blue-600" />
                   <div className="text-left">
                     <p className="text-sm font-medium text-gray-600">STIR:</p>
-                    <p className="text-lg font-bold text-gray-900 flex items-center gap-2">{companyInfo.stir} <CompanyScoreBadge score={scores[companyInfo.stir]} /></p>
+                    <p className="text-lg font-bold text-gray-900 flex items-center gap-2">{companyInfo.stir} <CompanyScoreBadge score={scores[companyInfo.stir]} to={`/company/${companyInfo.stir}`} /></p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">

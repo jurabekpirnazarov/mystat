@@ -2,6 +2,7 @@ import axios from "axios";
 
 import { host, refresh_token } from "./apiUrls";
 import { getStorage, getStorageR, setStorage, setStorageR } from "./storage";
+import { redirectToLogin } from "../utils/loginRedirect";
 
 const axiosT = axios.create({
   baseURL: host + "api",
@@ -87,10 +88,8 @@ function clearLocalStorageAndRedirect() {
   localStorage.removeItem("user");
   localStorage.removeItem("user_data");
   localStorage.removeItem("user_profile");
-  
-  if (window.location.pathname !== "/login") {
-    window.location.href = "/login";
-  }
+
+  redirectToLogin();
 }
 
 export const headerConfig = () => {

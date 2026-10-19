@@ -217,6 +217,14 @@ class ApiTests(APITestCase):
         self.assertEqual(res.status_code, 200, res.content)
         item = res.json()["items"][self.stir]
         self.assertTrue(item["is_synthetic"])
+        self.assertNotIn("pillars", item)                    # KR-39: ro'yxatda faqat 0-daraja
+        self.assertNotIn("flags", item)
+        detail = self.client.get(f"/api/analytics/company-scores/{self.stir}/").json()
+        self.assertTrue(detail["locked"])                     # ochilmagan: faqat umumiy ball
+        for key in ("pillars", "pillars_detail", "flags", "flags_detail", "indicators", "peer_label"):
+            self.assertNotIn(key, detail)
+        staff = User.objects.create_user(username="cs_staff", password="x", is_staff=True)
+        self.client.force_authenticate(staff)
         detail = self.client.get(f"/api/analytics/company-scores/{self.stir}/").json()
         text = str(detail)
         for raw in ("'value'", "'median'", "revenue", "net_profit", "avg_wage", "tax_debt_amount", "'v':", "'m':"):

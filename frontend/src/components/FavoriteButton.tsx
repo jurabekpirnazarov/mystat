@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Star } from "lucide-react";
 import { addFavorite, fetchFavorites, removeFavorite, type Favorite } from "../api/citizens";
 import { useAuth } from "../contexts/AuthContext";
+import { loginUrl } from "../utils/loginRedirect";
 
 let cache: Promise<Favorite[]> | null = null;
 const same = (a: Record<string, unknown>, b: Record<string, unknown>) => JSON.stringify(a) === JSON.stringify(b);
@@ -32,7 +33,7 @@ export default function FavoriteButton({ kind, title, params = {} }: Props) {
 
   if (!isAuthenticated) {
     return (
-      <Link to="/login" title="Sevimlilarga qo'shish uchun kiring" className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-sm text-gray-600 dark:text-gray-300">
+      <Link to={loginUrl()} title="Sevimlilarga qo'shish uchun kiring" className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-sm text-gray-600 dark:text-gray-300">
         <Star className="w-4 h-4" /> Sevimli
       </Link>
     );

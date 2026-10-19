@@ -1,3 +1,4 @@
+from rest_framework.permissions import IsAdminUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -8,6 +9,9 @@ from django.conf import settings
 
 
 class TradeDataAPIView(APIView):
+    # Tashqi savdo bazasini qayta yuklaydi va serverga fayl yozadi — faqat admin (is_staff)
+    permission_classes = (IsAdminUser,)
+
     def post(self, request, *args, **kwargs):
         serializer = ExcelUploadSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

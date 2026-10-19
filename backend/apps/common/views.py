@@ -17,16 +17,19 @@ from .models import InformationModel
 from .serializers import InformationSerializer
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from django.db import transaction
-from rest_framework.permissions import IsAuthenticated
+from django.conf import settings
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from django.shortcuts import get_object_or_404
 
 
 
 class GoodsignPasswordAuthView(APIView):
-	
+	# Qo'mitaning o'z GoodSign akkauntidan foydalanadi — ommaga ochiq bo'lmasligi kerak
+	permission_classes = (IsAdminUser,)
+
 	def post(self, request):
-		tax_id = '50708045210022'
-		password = 'QoOm07082004..'
+		tax_id = settings.GOODSIGN_TAX_ID
+		password = settings.GOODSIGN_PASSWORD
 		if not tax_id or not password:
 			return Response({
 				'success': False,
@@ -56,12 +59,13 @@ class GoodsignPasswordAuthView(APIView):
 
 
 class GoodsignCompanyLoginView(APIView):
-	
+	permission_classes = (IsAdminUser,)
+
 	def post(self, request):
-		company_id = '200523356'
+		company_id = settings.GOODSIGN_COMPANY_ID
 		token = request.data.get('token')
-		tax_id = '50708045210022'
-		password = 'QoOm07082004..'
+		tax_id = settings.GOODSIGN_TAX_ID
+		password = settings.GOODSIGN_PASSWORD
 
 		# Avval tokenni tax_id va password orqali olish
 		if not token:
@@ -300,7 +304,7 @@ class ByulletenDownloadAPIView(APIView):
                     is_success=True
                 ).count()
 
-                if psi.limit <= 0 or used_count >= psi.limit:
+                if psi.is_exhausted(used_count):
                     return Response(
                         {
                             "detail": "Sizning limitingiz tugagan!",

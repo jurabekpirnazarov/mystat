@@ -10,6 +10,7 @@ import RegionBubbleMap from "../components/maps/RegionBubbleMap";
 import SavedQueries from "../components/SavedQueries";
 import CompanyScoreBadge from "../components/company-score/CompanyScoreBadge";
 import { PRESETS } from "../api/companyScores";
+import { loginUrl } from "../utils/loginRedirect";
 
 type FilterKey = "q" | "region" | "district" | "category" | "legal_form" | "page" | "klass" | "ordering" | "csp";
 
@@ -29,6 +30,8 @@ export default function Partners() {
     csp: params.get("csp") ?? undefined,
   }), [params]);
   const [q, setQ] = useState(filters.q ?? "");
+  // KR-46: korxona profiliga havola (tanlangan vazn preseti bilan)
+  const profileUrl = (stir: string) => `/company/${stir}${filters.csp ? `?csp=${filters.csp}` : ""}`;
   const [exportMsg, setExportMsg] = useState<string | null>(null);
 
   const options = useApi(() => partnerFilterOptions(filters.region), [filters.region]);
@@ -70,7 +73,7 @@ export default function Partners() {
                 <Download className="w-4 h-4" /> Excel (1000 tagacha)
               </button>
             ) : (
-              <Link to="/login" className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm">Eksport uchun kiring</Link>
+              <Link to={loginUrl()} className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm">Eksport uchun kiring</Link>
             )
           }
         />
@@ -177,8 +180,8 @@ export default function Partners() {
                   <tbody>
                     {results.data.results.map((r) => (
                       <tr key={r.stir} className="border-b border-gray-50 dark:border-gray-700/50">
-                        <td className="px-4 py-2 text-gray-900 dark:text-white">{r.name}</td>
-                        <td className="px-2"><CompanyScoreBadge score={r.score} /></td>
+                        <td className="px-4 py-2"><Link to={profileUrl(r.stir)} className="text-gray-900 hover:text-blue-700 hover:underline dark:text-white dark:hover:text-blue-300">{r.name}</Link></td>
+                        <td className="px-2"><CompanyScoreBadge score={r.score} to={profileUrl(r.stir)} emptyReason="Hali hisoblanmagan" /></td>
                         <td className="px-2 tabular-nums">{r.stir}</td>
                         <td className="px-2 text-xs">{r.legal_form.name}</td>
                         <td className="px-2 text-xs">{r.region}{r.district ? `, ${r.district}` : ""}</td>

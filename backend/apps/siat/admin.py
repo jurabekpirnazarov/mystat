@@ -8,8 +8,8 @@ from django.urls import path, reverse
 from django.utils.html import format_html, format_html_join
 
 from . import client
-from .models import (ForecastModelRun, ForecastVersion, ScoringReport, SiatIndicator, SiatSyncLog, Territory,
-                     TerritoryScore)
+from .models import (ForecastModelRun, ForecastVersion, PopulationAnchor, ReleaseEvent, ScoringReport, SiatIndicator,
+                     SiatSyncLog, Territory, TerritoryScore)
 from .sync import _indicator_for, bump_cache, load_payload, rebuild_derived, rebuild_groups, run_sync
 
 
@@ -197,3 +197,20 @@ class ForecastVersionAdmin(ReadOnlyAdmin):
 class ForecastModelRunAdmin(ReadOnlyAdmin):
     list_display = ("indicator", "level", "horizon", "model_kind", "data_until", "version", "trained_at")
     list_filter = ("indicator", "level", "horizon", "model_kind", "version")
+
+
+@admin.register(ReleaseEvent)
+class ReleaseEventAdmin(admin.ModelAdmin):
+    """JT-10: rasmiy e'lon sanalari. Kiritilgan sana kalendardagi taxminiy sanani almashtiradi."""
+    list_display = ("release_date", "release_time", "__str__", "reference_period", "status")
+    list_filter = ("status", "indicator__theme")
+    search_fields = ("title_uz", "title_ru", "indicator__name_uz")
+    autocomplete_fields = ("indicator",)
+    date_hierarchy = "release_date"
+
+
+@admin.register(PopulationAnchor)
+class PopulationAnchorAdmin(admin.ModelAdmin):
+    """JT-02: aholi soati qo'mitaning rasmiy raqamidan yuradi. Eng oxirgi "holatiga" vaqti olinadi."""
+    list_display = ("as_of", "population", "annual_growth_pct", "source")
+    date_hierarchy = "as_of"

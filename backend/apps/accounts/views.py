@@ -39,6 +39,9 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import  AllowAny, IsAuthenticated
 from rest_framework.views import APIView
+from rest_framework.exceptions import PermissionDenied
+
+from apps.accounts.throttles import AuthRateThrottle
 from django.core.cache import cache
 
 from ..common.models import InformationModel
@@ -68,6 +71,7 @@ class AccountRegisterView(generics.GenericAPIView):
 
 
 class LoginAPIView(generics.GenericAPIView):
+    throttle_classes = (AuthRateThrottle,)
     serializer_class = LoginSerializer
     permission_classes = [AllowAny]
     authentication_classes = []
@@ -101,6 +105,7 @@ class UpdatePassword(generics.UpdateAPIView):
 
 
 class RequestPasswordResetEmail(generics.GenericAPIView):
+    throttle_classes = (AuthRateThrottle,)
     serializer_class = ResetPasswordEmailRequestSerializer
 
     def post(self, request):
@@ -129,6 +134,7 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
 
 
 class PasswordTokenCheckAPI(generics.GenericAPIView):
+    throttle_classes = (AuthRateThrottle,)
     serializer_class = SetNewPasswordSerializer
 
     def get(self, request, uidb64, token):
@@ -173,6 +179,7 @@ class PasswordTokenCheckAPI(generics.GenericAPIView):
 
 
 class SetNewPasswordAPIView(generics.GenericAPIView):
+    throttle_classes = (AuthRateThrottle,)
     serializer_class = SetNewPasswordSerializer
     permission_classes = (permissions.AllowAny,)
 
@@ -209,31 +216,25 @@ class UserList(generics.ListAPIView):
         return Response(serializer.data)
 
 
-class UserUpdateView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = User.objects.all()
+class UserUpdateView(generics.RetrieveUpdateAPIView):
+    """Login (email) ni o'zgartirish — faqat o'z hisobi. ISH_REJASI 2.1: ilgari `DELETE`/`GET` begona foydalanuvchi
+    uchun ham ochiq edi va URL parametri (`email`) bilan tekshiruv (`username`) mos kelmasdi. O'chirish olib tashlandi."""
+
     serializer_class = UserUpdateEmailSerializer
     permission_classes = (IsAuthenticated,)
 
-    lookup_field = "username"
+    def get_object(self):
+        if self.kwargs.get("email") != self.request.user.username:
+            raise PermissionDenied("Faqat o'z hisobingiz ma'lumotini ko'rish va o'zgartirish mumkin.")
+        return self.request.user
 
     def update(self, request, *args, **kwargs):
-        if request.user.username != kwargs.get("username"):
-            return Response(
-                f"Вы не можете изменить почту пользователя {request.user.username}",
-                status=status.HTTP_400_BAD_REQUEST,
-            )
         instance = self.get_object()
-        username = instance.username
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        if status.HTTP_200_OK:
-            return Response(
-                f"Почта пользователя {username} изменен на {request.data['username']}",
-                status=status.HTTP_200_OK,
-            )
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(f"Почта пользователя {instance.username} изменена на {serializer.instance.email}",
+                        status=status.HTTP_200_OK)
 
 
 class UserRetrieveUpdate(generics.RetrieveUpdateAPIView):

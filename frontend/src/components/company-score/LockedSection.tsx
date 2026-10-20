@@ -46,7 +46,7 @@ function Placeholder() {
 
 /**
  * KORXONA_SCORING.md 11.6, 13.2: qulflangan bo'lim — sarlavha, qisqa tavsif, xira namuna va holatga qarab tugma:
- * "Ochish · 1 kredit (qoldiq 37)", "Tarif tanlang", "Kredit sotib olish", mehmon uchun "Kirish". Kredit yechadigan
+ * "Ochish · 1 StatCoin (qoldiq 37)", "Tarif tanlang", "StatCoin sotib olish", mehmon uchun "Kirish". StatCoin yechadigan
  * tugma tasdiqlash oynasi bilan ("Bu seansda so'ramasin"); ochilgach sahifa yangilanmasdan to'ladi.
  */
 export default function LockedSection({ stir, section, balance, onUnlocked }: Props) {
@@ -81,7 +81,7 @@ export default function LockedSection({ stir, section, balance, onUnlocked }: Pr
   let note: string | null = null;
   if (section.insufficient || opt?.reason === "insufficient_data") {
     action = <span className={`${btn} cursor-not-allowed bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300`}>Ma'lumot yetarli emas</span>;
-    note = "Bu korxona uchun ishonchli ball yo'q, shuning uchun bo'limni ochib bo'lmaydi va kredit yechilmaydi.";
+    note = "Bu korxona uchun ishonchli ball yo'q, shuning uchun bo'limni ochib bo'lmaydi va StatCoin yechilmaydi.";
   } else if (!opt || opt.reason === "login") {
     action = <Link to={loginUrl(location.pathname + location.search)} className={`${btn} bg-blue-600 text-white hover:bg-blue-700`}>Kirish</Link>;
     note = "Bo'limni ochish uchun tizimga kiring.";
@@ -89,7 +89,7 @@ export default function LockedSection({ stir, section, balance, onUnlocked }: Pr
     action = <Link to="/tariffs#scoring" className={`${btn} bg-blue-600 text-white hover:bg-blue-700`}>Tarif tanlang</Link>;
     note = `${PLAN_NAMES[opt.min_plan] ?? opt.min_plan} va undan yuqori tarifda ochiladi.`;
   } else if (opt.reason === "insufficient") {
-    action = <Link to="/tariffs#scoring" className={`${btn} bg-amber-500 text-white hover:bg-amber-600`}>Kredit sotib olish</Link>;
+    action = <Link to="/tariffs#scoring" className={`${btn} bg-amber-500 text-white hover:bg-amber-600`}>StatCoin sotib olish</Link>;
     note = `Kerak: ${formatCredits(credits)}, qoldiq: ${formatCredits(balance)}.`;
   } else if (opt.reason) {
     action = <span className={`${btn} cursor-not-allowed bg-gray-100 text-gray-500`}>Hozir mavjud emas</span>;

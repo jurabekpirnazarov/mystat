@@ -71,3 +71,22 @@
 .react-dropdown-select-dropdown .react-dropdown-select-input {
   display: none !important;
 }
+/* Statistik kartalar: mamlakat konturi atrofida yumshoq soya — hududlar fon bilan qo'shilib ketmasin */
+.stat-map .leaflet-overlay-pane svg {
+  filter: drop-shadow(0 1px 1.5px rgb(15 23 42 / 0.35)) drop-shadow(0 0 6px rgb(15 23 42 / 0.12));
+}
+/* Kartadagi doimiy yorliqlar (viloyat nomi, pufakcha qiymati): fonsiz, matn konturi bilan o'qiladi */
+.leaflet-tooltip.map-label {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #0f172a;
+  text-shadow: 0 0 2px #fff, 0 0 2px #fff, 0 0 3px #fff;
+  pointer-events: none;
+}
+.leaflet-tooltip.map-label::before { display: none; }
+.leaflet-tooltip.map-label.on-dark { color: #fff; text-shadow: 0 0 2px rgb(15 23 42 / 0.9), 0 0 3px rgb(15 23 42 / 0.8); }
+.dark .leaflet-tooltip.map-label { color: #f1f5f9; text-shadow: 0 0 2px #0f172a, 0 0 3px #0f172a; }

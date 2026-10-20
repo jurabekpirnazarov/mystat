@@ -66,9 +66,11 @@ def _name_of(stir):
     from apps.additional_services.models import Ktut
     from apps.organizations.models import Organization
 
+    from ..company_card import clean_okpo
+
     row = Ktut.objects.filter(inn=stir).values("name", "okpo").first()
     if row:
-        return row["name"], row["okpo"]
+        return row["name"], clean_okpo(row["okpo"])
     org = Organization.objects.filter(tin=stir).values_list("name", flat=True).first()
     return org, None
 
@@ -116,14 +118,28 @@ def general_section(cfg, stir, base, score, lang):
 
     sources = {k: v for k, v in ((ind.sources if ind else {}) or {}).items() if not k.startswith("_")}
     klass = score.klass if score else ""
+    region = ind.region.name if ind and ind.region_id else None
+    district = ind.district.name if ind and ind.district_id else None
+    # IHAMKOR_MUQOBIL IH-01: sanoat reyestrida real manzil bo'lsa, hudud undan (sintetik namuna o'rniga)
+    from apps.additional_services.api_endpoints.PartnersAPI import region_by_address
+    from apps.additional_services.models import IndustrialProduct
+    from apps.analytics.geo import REGION_NAME_UZ
+
+    real = (IndustrialProduct.objects.filter(inn=stir, is_active=True).exclude(adress_uz__isnull=True)
+            .exclude(adress_uz="").order_by("-updated_at").values("adress_uz", "soato_uz").first())
+    if real:
+        code = region_by_address(real["adress_uz"])
+        region = REGION_NAME_UZ.get(code) if code else None
+        district = real["soato_uz"] or None
+        sources = {**sources, "region": "real"}
     return {
         "name": name, "stir": stir, "okpo": okpo,
         "legal_form": (legal_form(name) or {}).get("name") if name else None,
         "oked_section": ind.oked_section if ind else None,
         "oked_name": _section_name(ind.oked_section) if ind else None,
         "oked_division": (ind.oked_division or None) if ind else None,
-        "region": ind.region.name if ind and ind.region_id else None,
-        "district": ind.district.name if ind and ind.district_id else None,
+        "region": region, "district": district,
+        "region_is_real": bool(real),
         "ownership": OWNERSHIP.get(ind.ownership) if ind else None,
         "founded_year": ind.founded_year if ind else None,
         "employees_range": _employees_range(cfg, base.size_class) if base else None,

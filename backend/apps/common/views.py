@@ -19,6 +19,9 @@ from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from django.db import transaction
 from django.conf import settings
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
+
+from apps.accounts.permissions import IsStaffOrReadOnly
+from apps.accounts.throttles import FormRateThrottle
 from django.shortcuts import get_object_or_404
 
 
@@ -180,17 +183,22 @@ class PlatFormStatAPIView(APIView):
 
 
 class ContactCreateAPIView(CreateAPIView):
+    throttle_classes = (FormRateThrottle,)
     queryset = Contact.objects.all()
     serializer_class = ContactSerializer
 
 
 class InformationListCreateView(ListCreateAPIView):
+    # ISH_REJASI 2.1: ilgari istalgan mehmon yozishi va o'chirishi mumkin edi
+    permission_classes = (IsStaffOrReadOnly,)
     queryset = InformationModel.objects.all()
     serializer_class = InformationSerializer
     parser_classes = (MultiPartParser, FormParser)
 
 
 class InformationDetailView(RetrieveUpdateDestroyAPIView):
+    # ISH_REJASI 2.1: ilgari istalgan mehmon yozishi va o'chirishi mumkin edi
+    permission_classes = (IsStaffOrReadOnly,)
     queryset = InformationModel.objects.all()
     serializer_class = InformationSerializer
     parser_classes = (MultiPartParser, FormParser)

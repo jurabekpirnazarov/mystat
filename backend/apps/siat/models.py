@@ -289,3 +289,83 @@ class ForecastVersion(models.Model):
 
     def __str__(self):
         return f"{self.version}{' · joriy' if self.is_current else ''}"
+
+
+class ReleaseEvent(models.Model):
+    """JAHON_TAJRIBASI JT-10: e'lonlar kalendari. Qo'mitaning rasmiy e'lon sanasi admin'da kiritiladi.
+
+    Ko'rsatkich uchun rasmiy sana bo'lmasa, kalendar SIAT'dagi oxirgi yangilanish va davriylikdan
+    taxminiy sanani hisoblaydi (`releases.py`). Rasmiy sana doim taxminiydan ustun.
+    """
+
+    STATUSES = (("planned", _("Rejalashtirilgan")), ("published", _("E'lon qilindi")),
+                ("postponed", _("Ko'chirildi")))
+
+    indicator = models.ForeignKey(SiatIndicator, on_delete=models.SET_NULL, null=True, blank=True,
+                                  related_name="releases", verbose_name=_("Ko'rsatkich"),
+                                  help_text=_("Bo'sh bo'lsa — umumiy e'lon (masalan, ro'yxat natijalari)"))
+    title_uz = models.CharField(max_length=300, blank=True, verbose_name=_("Nomi (uz)"),
+                                help_text=_("Bo'sh bo'lsa ko'rsatkich nomi olinadi"))
+    title_ru = models.CharField(max_length=300, blank=True, verbose_name=_("Nomi (ru)"))
+    release_date = models.DateField(db_index=True, verbose_name=_("E'lon sanasi"))
+    release_time = models.TimeField(null=True, blank=True, verbose_name=_("Vaqti"))
+    reference_period = models.CharField(max_length=40, blank=True, verbose_name=_("Davr"),
+                                        help_text=_("Masalan: 2026-yil, 2026-yil I chorak"))
+    status = models.CharField(max_length=10, choices=STATUSES, default="planned", verbose_name=_("Holat"))
+    url = models.URLField(blank=True, verbose_name=_("E'lon havolasi"))
+    note_uz = models.CharField(max_length=300, blank=True, verbose_name=_("Izoh"))
+
+    class Meta:
+        ordering = ["release_date", "release_time"]
+        verbose_name = _("E'lon (kalendar)")
+        verbose_name_plural = _("E'lonlar kalendari")
+
+    def __str__(self):
+        return f"{self.release_date} · {self.title()}"
+
+    def title(self, lang="uz"):
+        own = getattr(self, f"title_{lang}", "") or self.title_uz
+        if own:
+            return own
+        return self.indicator.localized("name", lang) if self.indicator_id else ""
+
+
+class PopulationAnchor(models.Model):
+    """JT-02: aholi soati uchun rasmiy boshlang'ich nuqta (qo'mita hisoblagichi yoki ro'yxat natijasi).
+
+    Eng oxirgi `as_of` li yozuv olinadi; bo'lmasa soat SIAT 246 (1-yanvar holati) dan hisoblanadi.
+    Ro'yxat-2026 dan keyin SIAT bahosi rasmiy hisoblagichdan sezilarli farq qilishi mumkin, shuning uchun
+    admin bu yerga qo'mita e'lon qilgan raqamni kiritadi.
+    """
+
+    population = models.PositiveBigIntegerField(verbose_name=_("Aholi soni (kishi)"))
+    as_of = models.DateTimeField(verbose_name=_("Qaysi vaqt holatiga"))
+    annual_growth_pct = models.FloatField(null=True, blank=True, verbose_name=_("Yillik o'sish, %"),
+                                          help_text=_("Bo'sh bo'lsa SIAT'dagi oxirgi o'sish sur'ati olinadi"))
+    source = models.CharField(max_length=300, blank=True, verbose_name=_("Manba"),
+                              help_text=_("Masalan: stat.uz aholi hisoblagichi"))
+    source_url = models.URLField(blank=True, verbose_name=_("Manba havolasi"))
+    # stat.uz hisoblagichi parametrlari: "har N soniyada bitta" tug'ilish/o'lim/kelish/ketish. Berilsa soat ular bo'yicha
+    # chiziqli yuradi (stat.uz bilan bir xil), aks holda `annual_growth_pct` bo'yicha.
+    birth_seconds = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Tug'ilish: har N soniyada"))
+    death_seconds = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("O'lim: har N soniyada"))
+    arrive_seconds = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Kelganlar: har N soniyada"))
+    depart_seconds = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Ketganlar: har N soniyada"))
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-as_of"]
+        verbose_name = _("Aholi soati: rasmiy qiymat")
+        verbose_name_plural = _("Aholi soati: rasmiy qiymatlar")
+
+    def __str__(self):
+        return f"{self.as_of:%Y-%m-%d %H:%M} · {self.population:,}".replace(",", " ")
+
+    @property
+    def net_per_second(self):
+        """Sof o'sish (kishi/soniya) stat.uz parametrlaridan; to'liq bo'lmasa None."""
+        parts = (self.birth_seconds, self.death_seconds, self.arrive_seconds, self.depart_seconds)
+        if not all(parts):
+            return None
+        b, d, a, p = parts
+        return 1 / b - 1 / d + 1 / a - 1 / p

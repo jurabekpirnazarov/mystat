@@ -130,8 +130,8 @@ test("KR-45: mehmon — bepul qism ochiq, pullik bo'limlar qulflangan va API'da 
   for (const key of ["pillars", "contribution", "indicators", "flags"]) expect(body.basis[key]).toBeUndefined();
 });
 
-test("KR-45: kredit bilan ochish — balans 1 ga kamayadi, qayta kirish bepul, hissalar yig'indisi = ball", async ({ page }) => {
-  await loginDemo(page, "demo_yuridik_3");       // korporativ demo hamyon (500 kredit)
+test("KR-45: StatCoin bilan ochish — balans 1 ga kamayadi, qayta kirish bepul, hissalar yig'indisi = ball", async ({ page }) => {
+  await loginDemo(page, "demo_yuridik_3");       // korporativ demo hamyon (500 StatCoin)
   await page.goto("/cabinet/credits");
   const token = await page.evaluate(() => localStorage.getItem("access_token"));
   const headers = { Authorization: `Bearer ${token}` };
@@ -140,10 +140,10 @@ test("KR-45: kredit bilan ochish — balans 1 ga kamayadi, qayta kirish bepul, h
   const stir = await scoredStir(page, credits.unlocks.map((u: { stir: string }) => u.stir));
   await page.goto(`/company/${stir}?tab=basis`);
   const panel = page.getByRole("tabpanel", { name: "Ball nimaga asoslangan" });
-  await panel.getByRole("button", { name: /Ochish · 1 kredit/ }).click();
+  await panel.getByRole("button", { name: /Ochish · 1 StatCoin/ }).click();
   await page.getByRole("dialog").getByRole("button", { name: /Ochish/ }).click();
   await expect(panel.getByRole("figure", { name: "Ball tarkibi" })).toBeVisible();
-  await expect(page.getByRole("link", { name: /Kredit balansi/ })).toHaveText(String(credits.balance - 1));
+  await expect(page.getByRole("link", { name: /StatCoin balansi/ })).toHaveText(String(credits.balance - 1));
   const body = await (await page.request.get(`${API}/analytics/company-profile/${stir}/`, { headers })).json();
   const c = body.basis.contribution;
   const sum = c.base + c.pillars.reduce((a: number, r: { contribution: number }) => a + r.contribution, 0) + (c.cap ?? 0);

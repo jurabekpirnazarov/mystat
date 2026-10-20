@@ -94,6 +94,15 @@ const Names = lazy(() => import("./pages/citizens/Names"));
 const PublicAnswers = lazy(() => import("./pages/citizens/PublicAnswers"));
 const Developers = lazy(() => import("./pages/Developers"));
 const Consultation = lazy(() => import("./pages/Consultation"));
+// JAHON_TAJRIBASI_TAKLIFLAR.md: JT-10, JT-17 (+JT-02), JT-15, JT-04
+const Dashboards = lazy(() => import("./pages/stat/Dashboards"));
+const ReleaseCalendarPage = lazy(() => import("./pages/stat/ReleaseCalendar"));
+const EmbedIndicator = lazy(() => import("./pages/stat/EmbedIndicator"));
+const StatCodes = lazy(() => import("./pages/stat/StatCodes"));
+const CertificateVerify = lazy(() => import("./pages/stat/CertificateVerify"));
+// IHAMKOR_MUQOBIL.md IH-08
+const CompanyCheck = lazy(() => import("./pages/company/CompanyCheck"));
+const CompanyCardMethodology = lazy(() => import("./pages/company/CompanyCardMethodology"));
 
 // Loading component
 const PageLoader = () => (
@@ -161,6 +170,14 @@ function AppRoutes() {
           <Route path="/cpi-calculator" element={<CpiCalculator />} />
           <Route path="/statistical-classifications" element={<StatisticalClassifications />} />
           <Route path="/report-calendar" element={<ReportCalendar />} />
+          <Route path="/release-calendar" element={<ReleaseCalendarPage />} />
+          <Route path="/dashboards" element={<Dashboards />} />
+          <Route path="/dashboards/:slug" element={<Dashboards />} />
+          <Route path="/embed/indicator/:key" element={<EmbedIndicator />} />
+          <Route path="/stat-codes" element={<StatCodes />} />
+          <Route path="/stat-codes/verify" element={<CertificateVerify />} />
+          <Route path="/check" element={<CompanyCheck />} />
+          <Route path="/methodology/company-card" element={<CompanyCardMethodology />} />
           <Route path="/reglaments" element={<Reglaments />} />
 
           <Route path="/login" element={<Login />} />
@@ -190,6 +207,23 @@ function AppRoutes() {
   );
 }
 
+/** JT-15: `/embed/...` sahifalari boshqa saytlarda iframe ichida — navbar va footer'siz. */
+function Shell() {
+  const { pathname } = useLocation();
+  if (pathname.startsWith("/embed/")) return <AppRoutes />;
+  return (
+    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
+      <a href="#main-content" className="skip-link">Asosiy kontentga o'tish</a>
+      <Navbar />
+      {/* min-h-screen: sahifa yuklanguncha footer ko'rinmaydi — keyin pastga "sakramaydi" (CLS) */}
+      <main id="main-content" tabIndex={-1} className="min-h-screen">
+        <AppRoutes />
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
 function App() {
   // Setup global error handler on app mount
   useEffect(() => {
@@ -201,15 +235,7 @@ function App() {
       <OrdersProvider>
         <NotificationsProvider>
         <Router>
-          <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
-            <a href="#main-content" className="skip-link">Asosiy kontentga o'tish</a>
-            <Navbar />
-            {/* min-h-screen: sahifa yuklanguncha footer ko'rinmaydi — keyin pastga "sakramaydi" (CLS) */}
-            <main id="main-content" tabIndex={-1} className="min-h-screen">
-              <AppRoutes />
-            </main>
-            <Footer />
-          </div>
+          <Shell />
         </Router>
         </NotificationsProvider>
       </OrdersProvider>

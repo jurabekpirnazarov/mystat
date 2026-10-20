@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { bounds, type GeoFeature } from "../../utils/mapGeo";
+import { bounds, labelPoint, type GeoFeature } from "../../utils/mapGeo";
 import { useTheme } from "../../contexts/ThemeContext";
 
 export interface ChoroplethProps {
@@ -24,6 +24,20 @@ export interface ChoroplethProps {
   label: string;
   /** Prognoz yili: ranglar shaffofroq va uzuq kontur — haqiqiy ma'lumot bilan adashtirilmasin (SCORING_MODEL.md 10.8) */
   dim?: boolean;
+  /** Hudud nomlari kartada (standart: hududlar 16 tadan kam bo'lsa — viloyatlar ko'rinishi) */
+  labels?: boolean;
+}
+
+/** "Samarqand viloyati" -> "Samarqand", "Qoraqalpog'iston Respublikasi" -> "Qoraqalpog'iston" */
+function shortName(name: string) {
+  return name.replace(/\s+(viloyati|Respublikasi|tumani)$/i, "").replace(/\s+shahri$/i, " sh.");
+}
+
+/** Yorliq faqat yetarlicha katta hududga (gradusda; Farg'ona vodiysi va Toshkent shahri — yozuvlar ustma-ust chiqmasin) */
+const LABEL_MIN_AREA = 0.6;
+function labelFits(f: GeoFeature) {
+  const b = bounds([f]);
+  return (b.maxX - b.minX) * (b.maxY - b.minY) >= LABEL_MIN_AREA;
 }
 
 const HATCH_ID = "siat-missing-hatch";
@@ -37,9 +51,10 @@ function bySizeDesc(features: GeoFeature[]) {
   return [...features].map((f) => [area(f), f] as const).sort((a, b) => b[0] - a[0]).map(([, f]) => f);
 }
 
+// Chegara to'q kulrang: bir xil sinfdagi qo'shni hududlar (masalan Buxoro va Navoiy) bir-biriga qo'shilib ketmasin
 const PALETTE = {
-  light: { bg: "#f8fafc", border: "#ffffff", context: "#e5e7eb", hover: "#111827" },
-  dark: { bg: "#0f172a", border: "#1e293b", context: "#334155", hover: "#f9fafb" },
+  light: { bg: "#f1f5f9", border: "#475569", gap: "#94a3b8", context: "#e2e8f0", hover: "#0f172a" },
+  dark: { bg: "#0b1220", border: "#cbd5e1", gap: "#475569", context: "#334155", hover: "#f9fafb" },
 };
 
 /** SVG renderer'ga "ma'lumot yo'q" shtrix naqshini qo'shadi (KR-06, N2). */
@@ -74,15 +89,18 @@ function ensureHatch(map: L.Map) {
  * Xoropleta karta (Leaflet, fon xaritasiz): hududlar SOATO kodi bo'yicha bo'yaladi (KR-06).
  * Fon tile'lari yo'q — statistik karta uchun ortiqcha va PNG eksportni buzadi.
  */
-export default function ChoroplethMap({ features, context, underlay, fill, tooltip, selected, compare, onSelect, fitKey, height = 480, label, dim = false }: ChoroplethProps) {
+export default function ChoroplethMap({ features, context, underlay, fill, tooltip, selected, compare, onSelect, fitKey, height = 480, label, dim = false, labels }: ChoroplethProps) {
   const box = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const main = useRef<L.GeoJSON | null>(null);
   const ctx = useRef<L.GeoJSON | null>(null);
   const under = useRef<L.GeoJSON | null>(null);
+  const names = useRef<L.LayerGroup | null>(null);
   const colors = PALETTE[useTheme().theme === "dark" ? "dark" : "light"];
-  const handlers = useRef({ fill, tooltip, onSelect, selected, compare, colors, dim });
-  handlers.current = { fill, tooltip, onSelect, selected, compare, colors, dim };
+  // Viloyatlar — qalinroq chegara; tumanlar (yuzlab) — ingichka, aks holda karta chiziqlarga to'lib ketadi
+  const lineWeight = features.length > 30 ? 0.45 : 1.1;
+  const handlers = useRef({ fill, tooltip, onSelect, selected, compare, colors, dim, lineWeight });
+  handlers.current = { fill, tooltip, onSelect, selected, compare, colors, dim, lineWeight };
 
   useEffect(() => {
     if (!box.current || map.current) return;
@@ -125,7 +143,7 @@ export default function ChoroplethMap({ features, context, underlay, fill, toolt
   };
 
   const styleFor = (code: string): L.PathOptions => {
-    const { fill: f, selected: s, compare: c, colors: p, dim: d } = handlers.current;
+    const { fill: f, selected: s, compare: c, colors: p, dim: d, lineWeight: w } = handlers.current;
     const color = f(code);
     const active = code === s || code === c;
     return {
@@ -133,7 +151,8 @@ export default function ChoroplethMap({ features, context, underlay, fill, toolt
       fillOpacity: d && color ? 0.55 : 1,
       dashArray: d && !active ? "3 3" : undefined,
       color: active ? (code === c ? "#7c3aed" : "#f97316") : p.border,
-      weight: active ? 3 : 0.8,
+      opacity: active ? 1 : 0.85,
+      weight: active ? 3 : w,
     };
   };
 
@@ -159,16 +178,17 @@ export default function ChoroplethMap({ features, context, underlay, fill, toolt
     ctx.current?.remove();
     under.current?.remove();
     main.current?.remove();
+    names.current?.remove();
     if (context?.length) {
       ctx.current = L.geoJSON(context as never, {
         interactive: false,
-        style: { fillColor: colors.context, fillOpacity: 1, color: colors.border, weight: 1 },
+        style: { fillColor: colors.context, fillOpacity: 1, color: colors.gap, weight: 0.8 },
       }).addTo(m);
     }
     if (underlay?.length) {
       under.current = L.geoJSON(underlay as never, {
         interactive: false,
-        style: { fillColor: colors.border, fillOpacity: 1, color: colors.border, weight: 1 },
+        style: { fillColor: colors.gap, fillOpacity: 1, color: colors.border, weight: 1 },
       }).addTo(m);
     }
     main.current = L.geoJSON(bySizeDesc(features) as never, {
@@ -192,6 +212,14 @@ export default function ChoroplethMap({ features, context, underlay, fill, toolt
     }).addTo(m);
     ensureHatch(m);
     raiseActive();
+    if (labels ?? features.length <= 16) {
+      names.current = L.layerGroup(features.filter(labelFits).map((f) => {
+        const [lng, lat] = labelPoint(f);
+        const name = shortName(f.properties.name_uz ?? "");
+        return L.tooltip({ permanent: true, direction: "center", className: "map-label", interactive: false })
+          .setLatLng([lat, lng]).setContent(name);
+      })).addTo(m);
+    }
     main.current.eachLayer((layer) => {
       const el = (layer as L.Path).getElement?.();
       const code = ((layer as L.GeoJSON).feature as unknown as GeoFeature)?.properties.soato;
@@ -203,7 +231,7 @@ export default function ChoroplethMap({ features, context, underlay, fill, toolt
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ranglar alohida effektda yangilanadi
-  }, [features, context, underlay, colors]);
+  }, [features, context, underlay, colors, labels]);
 
   // Faqat ranglar/tanlov o'zgarsa — qatlam qayta qurilmaydi
   useEffect(() => {
@@ -224,5 +252,5 @@ export default function ChoroplethMap({ features, context, underlay, fill, toolt
      
   }, [fitKey]);
 
-  return <div ref={box} style={{ height, background: colors.bg }} className="w-full rounded-xl overflow-hidden z-0 border border-gray-200 dark:border-gray-700" role="region" aria-label={label} />;
+  return <div ref={box} style={{ height, background: colors.bg }} className="stat-map w-full rounded-xl overflow-hidden z-0 border border-slate-300 dark:border-gray-700" role="region" aria-label={label} />;
 }

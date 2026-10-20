@@ -200,7 +200,20 @@ class PackageServiceItemSerializer(serializers.ModelSerializer):
         ]
 
 
-class PackageServiceWithItemsSerializer(serializers.ModelSerializer):
+class PlainNameMixin:
+    """PackageService nomlari admin'da RichTextField: API oddiy matn qaytaradi (`<p>`, `&lsquo;` siz)."""
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        from apps.common.text import rich_to_plain
+
+        for field in ("name_uz", "name_ru", "name_cry"):
+            if field in data:
+                data[field] = rich_to_plain(data[field])
+        return data
+
+
+class PackageServiceWithItemsSerializer(PlainNameMixin, serializers.ModelSerializer):
     service_items = serializers.SerializerMethodField()
 
     class Meta:
@@ -221,15 +234,29 @@ class PackageServiceWithItemsSerializer(serializers.ModelSerializer):
 class ServicePackageSerializer(serializers.ModelSerializer):
     package_services = serializers.SerializerMethodField()
     price = serializers.SerializerMethodField(read_only=True)
+    price_range = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = ServicePackage
         fields = [
             "id", "name_uz", "name_ru", "name_cry",
             "description_uz", "description_ru", "description_cry",
-            "price", "is_active", "duration_days", "file",
+            "price", "price_range", "is_active", "duration_days", "file",
             "package_services",
         ]
+
+    def get_price_range(self, obj):
+        """Bosh sahifa va tariflar uchun: narx tarmoqqa qarab (pricing.py: koeffitsient yozilmagan tarmoq — 1).
+        `personal` — narx foydalanuvchi tashkilotining tarmog'i bo'yicha hisoblangan (`price`). QQSsiz."""
+        bhm_value = self.context.get("bhm_value", 0)
+        if not bhm_value:
+            return None
+        multipliers = [p.bhm_count for p in obj.prices.all()] + [1]
+        base = obj.base_bhm_count * bhm_value
+        user = self.context.get("user")
+        org = getattr(user, "organization", None) if user and user.is_authenticated else None
+        return {"min": base * min(multipliers), "max": base * max(multipliers),
+                "personal": bool(org and org.sector_id), "vat_included": False}
 
     def get_package_services(self, obj):
         items = obj.package_service_items.all()

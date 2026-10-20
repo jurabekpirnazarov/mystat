@@ -1,3 +1,4 @@
+from apps.accounts.throttles import AuthRateThrottle
 from django.contrib.auth import authenticate
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -7,6 +8,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class TokenGenerationView(APIView):
+    throttle_classes = (AuthRateThrottle,)   # ISH_REJASI 2.1: login kabi — parol terishga qarshi
     state_param = openapi.Schema(
         type=openapi.TYPE_OBJECT,
         properties={

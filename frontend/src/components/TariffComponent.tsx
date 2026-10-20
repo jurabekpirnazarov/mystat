@@ -1,4 +1,4 @@
-import { Check, X, Eye, Star, Zap, Rocket, Crown } from "lucide-react";
+import { ArrowRight, Calculator, Check } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import ServiceModal from "./modals/ServiceModal";
 import OfferTermsModal from "./modals/OfferTermsModal";
@@ -7,84 +7,68 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import ContractNotificationModal from "./modals/ContractNotificationModal";
 import { getServicePackages } from "../api/reports";
-import { ServicePackage, Plan } from "../types";
+import type { ServicePackage } from "../types";
+import { stripHtml } from "../utils/format";
+import { formatInt } from "../utils/statPublic";
 
-// Function to map API data to UI data
-const mapServicePackagesToPlans = (packages: ServicePackage[]): Plan[] => {
-  // Helper function to strip HTML tags from text
-  const stripHtmlTags = (text: string): string => {
-    if (!text) return '';
-    return text.replace(/<[^>]*>/g, '').trim();
-  };
+/**
+ * Bosh sahifa: tarif paketlari. Narx — haqiqiy oraliq (API `price_range`: BHM × tarmoq koeffitsienti, QQSsiz);
+ * ilgari hamma tarifda "412 000" (1 BHM) ko'rinardi, 4-tarif esa tarmoqqa qarab 16,5 mln gacha. Kartochkada faqat
+ * paketdagi xizmat yo'nalishlari (ilgari 5 taga yetkazish uchun "API kirish", "24/7 yordam" qo'shilardi).
+ * Tarif tanlash oqimi (ServiceModal -> oferta -> kabinet) o'zgarmagan.
+ */
 
-  const iconMap: { [key: string]: React.ReactNode } = {
-    'Start': <Star className="w-6 h-6" />,
-    'Plus': <Zap className="w-6 h-6" />,
-    'Pro': <Rocket className="w-6 h-6" />,
-    'Premium': <Crown className="w-6 h-6" />,
-    'Старт': <Star className="w-6 h-6" />,
-    'Плюс': <Zap className="w-6 h-6" />,
-    'Про': <Rocket className="w-6 h-6" />,
-    'Премиум': <Crown className="w-6 h-6" />,
-  };
+interface TariffCard {
+  id: string;
+  order: number;
+  name: string;
+  description: string;
+  price: number;
+  range: ServicePackage["price_range"];
+  days: number;
+  services: string[];
+}
 
-  const colorMap: { [key: string]: string } = {
-    'Start': 'text-green-400',
-    'Plus': 'text-blue-400',
-    'Pro': 'text-purple-400',
-    'Premium': 'text-yellow-400',
-    'Старт': 'text-green-400',
-    'Плюс': 'text-blue-400',
-    'Про': 'text-purple-400',
-    'Премиум': 'text-yellow-400',
-  };
+const plain = (html: string) => stripHtml(html).replace(/\s+/g, " ").replace(/:$/, "");
 
-  const gradientMap: { [key: string]: string } = {
-    'Start': 'from-green-400 to-emerald-500',
-    'Plus': 'from-blue-400 to-cyan-500',
-    'Pro': 'from-purple-400 to-pink-500',
-    'Premium': 'from-yellow-400 to-orange-500',
-    'Старт': 'from-green-400 to-emerald-500',
-    'Плюс': 'from-blue-400 to-cyan-500',
-    'Про': 'from-purple-400 to-pink-500',
-    'Премиум': 'from-yellow-400 to-orange-500',
-  };
+function toCards(packages: ServicePackage[]): TariffCard[] {
+  return packages
+    .map((pkg) => ({
+      id: String(pkg.id),
+      order: parseInt(pkg.name_uz, 10) || pkg.id,
+      name: plain(pkg.name_uz || pkg.name_ru || pkg.name_cry),
+      description: plain(pkg.description_uz || pkg.description_ru || pkg.description_cry),
+      price: parseFloat(pkg.price) || 0,
+      range: pkg.price_range,
+      days: pkg.duration_days,
+      services: pkg.package_services.map((s) => plain(s.name_uz || s.name_ru || s.name_cry)),
+    }))
+    .sort((a, b) => a.order - b.order);
+}
 
-  return packages.map((pkg) => {
-    const price = parseFloat(pkg.price);
-    const formattedPrice = price === 0 ? 'Bepul' : 
-      `${(price / 1000).toFixed(0)},000`;
-    
-    // Create features list from package services
-    const features = pkg.package_services.slice(0, 5).map((service) => ({
-      name: service.name_uz || service.name_ru || service.name_cry,
-      included: true
-    }));
-
-    // Add some default features if less than 5
-    while (features.length < 5) {
-      const defaultFeatures = ["API kirish", "Kengaytirilgan analytics", "Premium qo'llab-quvvatlash", "Custom integratsiya", "24/7 yordam"];
-      features.push({
-        name: defaultFeatures[features.length] || "Qo'shimcha xizmat",
-        included: features.length < 3
-      });
-    }
-
-    return {
-      id: pkg.id.toString(),
-      name: pkg.name_uz || pkg.name_ru || pkg.name_cry,
-      price: formattedPrice,
-      period: price === 0 ? '' : ' so\'m',
-      description: stripHtmlTags(pkg.description_uz || pkg.description_ru || pkg.description_cry),
-      icon: iconMap[pkg.name_uz] || iconMap[pkg.name_ru] || <Star className="w-6 h-6" />,
-      color: colorMap[pkg.name_uz] || colorMap[pkg.name_ru] || 'text-blue-400',
-      gradient: gradientMap[pkg.name_uz] || gradientMap[pkg.name_ru] || 'from-blue-400 to-cyan-500',
-      popular: pkg.name_uz === 'Pro' || pkg.name_ru === 'Про',
-      features,
-      detailedFeatures: [] // We'll populate this if needed
-    };
-  });
-};
+function PriceBlock({ card }: { card: TariffCard }) {
+  const r = card.range;
+  const period = card.days >= 360 ? "yiliga" : card.days ? `${card.days} kunga` : "";
+  if (r?.personal || !r || r.min === r.max) {
+    return (
+      <div>
+        <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-white">
+          {card.price ? `${formatInt(card.price)}` : "—"} <span className="text-sm font-medium text-slate-500">so'm</span>
+        </p>
+        <p className="text-xs text-slate-500">{[period, "QQSsiz", r?.personal ? "tashkilotingiz tarmog'i bo'yicha" : null].filter(Boolean).join(" · ")}</p>
+      </div>
+    );
+  }
+  return (
+    <div>
+      <p className="text-xs text-slate-500">narxi</p>
+      <p className="text-xl font-bold tabular-nums leading-tight text-slate-900 dark:text-white">
+        {formatInt(r.min)} – {formatInt(r.max)} <span className="text-sm font-medium text-slate-500">so'm</span>
+      </p>
+      <p className="text-xs text-slate-500">{[period, "QQSsiz", "tashkilot tarmog'iga qarab"].filter(Boolean).join(" · ")}</p>
+    </div>
+  );
+}
 
 const TariffComponent = () => {
   const navigate = useNavigate();
@@ -94,27 +78,15 @@ const TariffComponent = () => {
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [isContractModalOpen, setIsContractModalOpen] = useState(false);
   const [isOffer, setIsOffer] = useState(false);
-  const [plans, setPlans] = useState<Plan[]>([]);
+  const [cards, setCards] = useState<TariffCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchServicePackages = async () => {
-      try {
-        setLoading(true);
-        const response = await getServicePackages();
-        const mappedPlans = mapServicePackagesToPlans(response.results);
-        setPlans(mappedPlans);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching service packages:', err);
-        setError('Xizmat to\'plamlarini yuklashda xatolik yuz berdi');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchServicePackages();
+    getServicePackages()
+      .then((response) => { setCards(toCards(response.results)); setError(null); })
+      .catch((err) => { console.error("Error fetching service packages:", err); setError("Tarif paketlarini yuklashda xatolik yuz berdi"); })
+      .finally(() => setLoading(false));
   }, []);
 
   const handlePayment = () => {
@@ -128,160 +100,90 @@ const TariffComponent = () => {
   };
 
   const handleDirect = () => {
-    if (id) {
-      addItem(id);
-    }
+    if (id) addItem(id);
     navigate("/cabinet", { state: { name: "payments", contract: false } });
   };
 
-  const onNext = (id: string) => {
+  const onNext = (planId: string) => {
     if (!isAuthenticated) {
       navigate("/login");
       setNav("");
     } else {
       setIsServiceModalOpen(true);
-      setId(id);
+      setId(planId);
     }
-  };
-
-  const handleViewDetails = (plan: string) => {
-    navigate(`/tariff/${plan}`);
   };
 
   return (
     <>
-      <section className="py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Yuridik va jismoniy shaxslar uchun konsalting xizmatlari
-          </h2>
-          <Link to="/tariffs" className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline">
-            Tariflarni taqqoslash va narx kalkulyatori →
+      <section aria-labelledby="tariffs-title" className="space-y-6">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="border-l-4 border-blue-900 pl-4 dark:border-blue-400">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-900 dark:text-blue-300">Pullik xizmatlar</p>
+            <h2 id="tariffs-title" className="mt-1 text-2xl font-bold text-slate-900 dark:text-white md:text-3xl">Tarif paketlari</h2>
+            <p className="mt-1 text-sm text-slate-600 dark:text-gray-300">
+              Yuridik va jismoniy shaxslar uchun statistik xizmatlar to'plami. Narx BHM asosida, tashkilot tarmog'iga qarab.
+            </p>
+          </div>
+          <Link to="/tariffs" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:border-blue-800 hover:text-blue-800 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+            <Calculator className="h-4 w-4" aria-hidden="true" />Taqqoslash va narx kalkulyatori
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
+        <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2 lg:grid-cols-4">
           {loading ? (
-            // Loading skeleton
-            [...Array(4)].map((_, index) => (
-              <div key={index} className="animate-pulse h-full">
-                <div className="bg-gray-300 dark:bg-gray-700 rounded-2xl h-full p-6 flex flex-col">
-                  <div className="h-24 bg-gray-400 dark:bg-gray-600 rounded-lg mb-4"></div>
-                  <div className="space-y-3 flex-grow">
-                    <div className="h-4 bg-gray-400 dark:bg-gray-600 rounded"></div>
-                    <div className="h-4 bg-gray-400 dark:bg-gray-600 rounded"></div>
-                    <div className="h-4 bg-gray-400 dark:bg-gray-600 rounded"></div>
-                    <div className="h-4 bg-gray-400 dark:bg-gray-600 rounded"></div>
-                  </div>
-                  <div className="mt-6 space-y-2">
-                    <div className="h-10 bg-gray-400 dark:bg-gray-600 rounded-lg"></div>
-                    <div className="h-10 bg-gray-400 dark:bg-gray-600 rounded-lg"></div>
-                  </div>
-                </div>
-              </div>
-            ))
+            [...Array(4)].map((_, i) => <div key={i} className="h-96 animate-pulse rounded-xl bg-slate-200 dark:bg-gray-700" />)
           ) : error ? (
-            // Error message
-            <div className="col-span-full text-center py-12">
-              <p className="text-red-500 text-lg mb-4">{error}</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Qayta yuklash
-              </button>
+            <div className="col-span-full rounded-xl border border-red-200 bg-red-50 p-6 text-center text-sm text-red-700">
+              {error}
+              <button type="button" onClick={() => window.location.reload()} className="ml-3 underline">Qayta yuklash</button>
             </div>
           ) : (
-            plans.map((plan, index) => (
-              <div
-                key={plan.id}
-                className={`relative group transform transition-all duration-500 hover:scale-105 h-full`}
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div
-                  className={`relative overflow-hidden rounded-2xl transition-all duration-300 dark:bg-gray-800 border dark:border-gray-700 dark:hover:border-gray-600 bg-white border-gray-200 hover:border-gray-300 shadow-xl hover:shadow-2xl h-full flex flex-col`}
-                >
-                  {/* Card Header */}
-                  <div
-                    className={`p-6 bg-gradient-to-r ${plan.gradient} text-white relative overflow-hidden`}
-                  >
-                    <div className="absolute top-0 right-0 w-32 h-32 transform rotate-45 translate-x-16 -translate-y-16 bg-white opacity-10"></div>
-                    <div className="relative z-10">
-                      <div className="flex items-center justify-between mb-4">
-                        <div
-                          className={`p-3 rounded-full bg-white bg-opacity-20 ${plan.color}`}
-                        >
-                          {plan.icon}
-                        </div>
-                      </div>
-                      <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                      <p className="text-white text-opacity-90 text-sm">
-                        {plan.description}
-                      </p>
+            cards.map((card) => (
+              <article key={card.id} className="flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+                <header className="border-b border-slate-100 p-5 dark:border-gray-700">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-900 text-lg font-bold text-white dark:bg-blue-700">{card.order}</span>
+                    <div className="min-w-0">
+                      <h3 className="font-semibold text-slate-900 dark:text-white">{card.name}</h3>
+                      {card.description && <p className="truncate text-xs text-slate-500" title={card.description}>{card.description}</p>}
                     </div>
                   </div>
+                  <div className="mt-4"><PriceBlock card={card} /></div>
+                </header>
 
-                  {/* Price Section */}
-                  <div className={`p-6 dark:bg-gray-800 bg-white flex-grow flex flex-col justify-between`}>
-                    <div className="space-y-3 mb-8 flex-grow">
-                      {plan.features.map((feature, idx) => (
-                        <div key={idx} className="flex items-center">
-                          {feature.included ? (
-                            <Check className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
-                          ) : (
-                            <X className="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" />
-                          )}
-                          <span
-                            className={`text-sm text-gray-500 dark:text-gray-300 `}
-                          >
-                            {feature.name}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Buttons */}
-                    <div className="space-y-3 mt-auto">
-                      <button
-                        onClick={() => handleViewDetails(plan.id)}
-                        className={`w-full py-3 px-4 rounded-lg border transition-all duration-200 flex items-center justify-center dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:border-gray-500 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400`}
-                      >
-                        <Eye className="w-4 h-4 mr-2" />
-                        Batafsil ko'rish
-                      </button>
-                      <button
-                        onClick={() => onNext(plan.id)}
-                        className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 flex items-center justify-center bg-gradient-to-r ${plan.gradient} text-white hover:shadow-lg`}
-                      >
-                        Tarifni tanlash
-                      </button>
-                    </div>
+                <div className="flex flex-1 flex-col p-5">
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{card.services.length} ta xizmat yo'nalishi</p>
+                  <ul className="flex-1 space-y-2.5">
+                    {card.services.slice(0, 4).map((name) => (
+                      <li key={name} className="flex gap-2 text-sm text-slate-700 dark:text-gray-200">
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
+                        <span className="line-clamp-2" title={name}>{name}</span>
+                      </li>
+                    ))}
+                    {card.services.length > 4 && (
+                      <li className="pl-6 text-xs text-slate-500">va yana {card.services.length - 4} ta yo'nalish</li>
+                    )}
+                  </ul>
+                  <div className="mt-5 space-y-2">
+                    <button type="button" onClick={() => onNext(card.id)}
+                      className="w-full rounded-lg bg-blue-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 dark:bg-blue-700 dark:hover:bg-blue-600">
+                      Tarifni tanlash
+                    </button>
+                    <Link to={`/tariff/${card.id}`} className="flex w-full items-center justify-center gap-1 rounded-lg px-4 py-2 text-sm font-medium text-blue-900 hover:bg-slate-50 dark:text-blue-300 dark:hover:bg-gray-700">
+                      Tarkibi batafsil <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    </Link>
                   </div>
                 </div>
-              </div>
+              </article>
             ))
           )}
         </div>
       </section>
 
-      <ServiceModal
-        isOpen={isServiceModalOpen}
-        onClose={() => setIsServiceModalOpen(false)}
-        onPayment={handlePayment}
-        onOffer={handleOffer}
-        id={id}
-      />
-
-      <OfferTermsModal
-        isOpen={isOffer}
-        onClose={() => setIsOffer(false)}
-        onPayment={handleDirect}
-      />
-
-      <ContractNotificationModal
-        isVisible={isContractModalOpen}
-        onClose={() => setIsContractModalOpen(false)}
-      />
+      <ServiceModal isOpen={isServiceModalOpen} onClose={() => setIsServiceModalOpen(false)} onPayment={handlePayment} onOffer={handleOffer} id={id} />
+      <OfferTermsModal isOpen={isOffer} onClose={() => setIsOffer(false)} onPayment={handleDirect} />
+      <ContractNotificationModal isVisible={isContractModalOpen} onClose={() => setIsContractModalOpen(false)} />
     </>
   );
 };

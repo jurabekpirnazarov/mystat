@@ -10,6 +10,7 @@ import ScoreWaterfall from "../../components/company-score/ScoreWaterfall";
 import { KLASS_STYLE } from "../../components/company-score/klassStyle";
 import { DemoBadge, ErrorState, Skeleton } from "../../components/ui";
 import { useChartTheme } from "../../utils/chartTheme";
+import { ProfileCardExtras } from "../../components/company-card/CardBlocks";
 import { exportElementToPdf } from "../../utils/exportPdf";
 
 type Tab = "general" | "basis" | "deep" | "watch";
@@ -54,7 +55,7 @@ function Card({ title, children, className = "", aside }: { title?: string; chil
 
 /**
  * KORXONA_SCORING.md KR-45: `/company/:stir` — har qanday KTUT korxonasining profili. Bo'limlar yorliqlarda (mobilda
- * ketma-ket). Bepul qism: rekvizitlar va umumiy ball; "Ball nimaga asoslangan" va "Chuqur tahlil" kredit bilan ochiladi —
+ * ketma-ket). Bepul qism: rekvizitlar va umumiy ball; "Ball nimaga asoslangan" va "Chuqur tahlil" StatCoin bilan ochiladi —
  * ochilmagan bo'lim ma'lumoti backend'dan umuman kelmaydi. Begona korxonaning xom qiymatlari hech qayerda yo'q.
  */
 export default function CompanyProfile() {
@@ -171,12 +172,12 @@ export default function CompanyProfile() {
       {/* 1. Umumiy ma'lumot — bepul */}
       <div className={panel("general")} role="tabpanel" aria-label="Umumiy ma'lumot">
         <div className="grid gap-4 md:grid-cols-3">
-          <Card title="Rekvizitlar" className="md:col-span-2" aside={g.requisites_synthetic ? <span className="text-xs text-amber-700 dark:text-amber-300">OKED, hudud va mulkchilik — namuna</span> : undefined}>
+          <Card title="Rekvizitlar" className="md:col-span-2" aside={g.requisites_synthetic ? <span className="text-xs text-amber-700 dark:text-amber-300">{g.region_is_real ? "OKED va mulkchilik — namuna" : "OKED, hudud va mulkchilik — namuna"}</span> : undefined}>
             <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
               {([
                 ["Nomi", g.name], ["STIR", g.stir], ["OKPO", g.okpo], ["Tashkiliy-huquqiy shakl", g.legal_form],
                 ["OKED", g.oked_section ? `${g.oked_section}${g.oked_division ? ` · ${g.oked_division}` : ""}${g.oked_name ? ` — ${g.oked_name}` : ""}` : null],
-                ["Hudud", [g.region, g.district].filter(Boolean).join(", ") || null], ["Mulkchilik", g.ownership],
+                ["Hudud", ([g.region, g.district].filter(Boolean).join(", ") || null) && `${[g.region, g.district].filter(Boolean).join(", ")}${g.region_is_real ? " (sanoat reyestri)" : ""}`], ["Mulkchilik", g.ownership],
                 ["Tashkil topgan yil", g.founded_year], ["Xodimlar (oraliq)", g.employees_range],
                 ["Mahsulot turlari", g.products_count ? `${g.products_count} ta (sanoat reyestri)` : "—"],
               ] as [string, string | number | null][]).map(([k, v]) => (
@@ -201,6 +202,8 @@ export default function CompanyProfile() {
             ) : <p className="text-sm text-gray-500">Bu korxona uchun ball hali hisoblanmagan.</p>}
           </Card>
         </div>
+        {/* IHAMKOR_MUQOBIL IH-02..IH-04: xulosa belgilari, statistik hisobotlar, ishlab chiqarish, rasmiy ma'lumotnoma */}
+        <ProfileCardExtras stir={stir} />
         <p className="text-xs text-gray-500 sm:hidden">Quyida pullik bo'limlar.</p>
       </div>
 

@@ -1,6 +1,6 @@
 import axiosT from "./baseUrl";
 
-/** KORXONA_SCORING.md KR-40: kredit hamyoni ("umumiy kredit"). */
+/** KORXONA_SCORING.md KR-40: StatCoin hamyoni (kodda `credits`, foydalanuvchiga "StatCoin"). */
 
 export interface CreditLedgerRow {
   id: number;
@@ -62,5 +62,5 @@ export const PLAN_NAMES: Record<string, string> = {
 
 export const formatCredits = (n: number) => {
   const v = Number.isInteger(n) ? String(n) : n.toFixed(1);
-  return `${v} kredit`;
+  return `${v} StatCoin`;
 };

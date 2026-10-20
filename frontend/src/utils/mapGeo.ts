@@ -47,6 +47,42 @@ export function featureAt(point: Position, features: GeoFeature[]) {
   return features.find((f) => polygons(f).some((poly) => inRing(point, poly[0]) && !poly.slice(1).some((h) => inRing(point, h))));
 }
 
+function ringArea(ring: Position[]) {
+  let a = 0;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) a += ring[j][0] * ring[i][1] - ring[i][0] * ring[j][1];
+  return a / 2;
+}
+
+/**
+ * Hudud ichidagi "ko'rinadigan markaz" [lng, lat] — yorliq va pufakcha uchun. Eng katta poligon tashqi halqasining
+ * og'irlik markazi; u hudud ichida bo'lmasa (botiq shakl yoki teshik — masalan, Toshkent viloyati ichida shahar),
+ * markazga eng yaqin ichki nuqta 24×24 to'rdan tanlanadi. Viloyat markaziy shahri emas (u ko'pincha chetda turadi).
+ */
+export function labelPoint(feature: GeoFeature): Position {
+  const polys = polygons(feature);
+  const main = polys.reduce((best, p) => (Math.abs(ringArea(p[0])) > Math.abs(ringArea(best[0])) ? p : best), polys[0]);
+  const ring = main[0];
+  const a = ringArea(ring);
+  let cx = 0, cy = 0;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const f = ring[j][0] * ring[i][1] - ring[i][0] * ring[j][1];
+    cx += (ring[j][0] + ring[i][0]) * f;
+    cy += (ring[j][1] + ring[i][1]) * f;
+  }
+  const c: Position = a ? [cx / (6 * a), cy / (6 * a)] : ring[0];
+  const inside = (pt: Position) => inRing(pt, ring) && !main.slice(1).some((h) => inRing(pt, h));
+  if (inside(c)) return c;
+  const b = bounds([{ ...feature, geometry: { type: "Polygon", coordinates: main } }]);
+  let best: Position | null = null, bestD = Infinity;
+  for (let i = 1; i < 24; i++)
+    for (let j = 1; j < 24; j++) {
+      const pt: Position = [b.minX + ((b.maxX - b.minX) * i) / 24, b.minY + ((b.maxY - b.minY) * j) / 24];
+      const d = (pt[0] - c[0]) ** 2 + (pt[1] - c[1]) ** 2;
+      if (d < bestD && inside(pt)) { best = pt; bestD = d; }
+    }
+  return best ?? c;
+}
+
 export function bounds(features: GeoFeature[]) {
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
   for (const f of features)

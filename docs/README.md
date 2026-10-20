@@ -13,6 +13,8 @@
 | [SIAT_KARTA_TAHLIL.md](SIAT_KARTA_TAHLIL.md) | SIAT tadqiqoti va hududlar xaritasi: KR-01..KR-14 | ✅ Bajarilgan |
 | [SCORING_MODEL.md](SCORING_MODEL.md) | Hududlar salohiyati va prognoz: KR-15..KR-28 | ✅ Bajarilgan |
 | [KORXONA_SCORING.md](KORXONA_SCORING.md) | Korxonalar scoringi: KR-29..KR-38 | ✅ Bajarilgan |
+| [JAHON_TAJRIBASI_TAKLIFLAR.md](JAHON_TAJRIBASI_TAKLIFLAR.md) | Jahon tajribasi: JT-01..JT-20 | ⚠️ Qisman: JT-02, 04, 10, 15, 17 bajarildi (2026-10-20); holat 0-bo'limda |
+| [CLAUDE_HISOBOT.md](CLAUDE_HISOBOT.md) | Claude uchun: joriy holat, qolgan ishlar, sessiyalar jurnali | Har sessiyada yangilanadi |
 | [XIZMATLAR_TAHLILI.md](XIZMATLAR_TAHLILI.md) | Barcha xizmatlar: kirishsiz, ro'yxatdan keyin, pullik, jismoniy/yuridik | Ma'lumotnoma (2026-10-19) |
 | [../README.md](../README.md) | Tez ishga tushirish, demo ma'lumot, production qadamlari | Ma'lumotnoma |
 | [../backend/README.md](../backend/README.md) | Endpoint'lar ro'yxati | Ma'lumotnoma |
@@ -206,20 +208,17 @@ OS-01..OS-17 ko'rsatilgan **default** bilan bajarildi (ISH_REJASI 14-bo'lim). Al
 5. Serverda `TELEGRAM_BOT_TOKEN` va `EMAIL_HOST` borligini tekshirish.
 6. Serverdagi nginx'ga `location = /sw.js { add_header Cache-Control "no-cache"; }` qo'shish.
 
-## 2. Xavfsizlik (ataylab qoldirilgan — ISH_REJASI 2.1)
+## 2. Xavfsizlik (ISH_REJASI 2.1)
 
-| Muammo | Daraja |
+2026-10-20 da yopildi: `trade-data/upload` (10-19), email yangilash (begona hisob, `DELETE`), `common/information/` yozish,
+`service-request` filtrlari, `service-response` (mijoz "admin javobi"), OneID `print()` (client_secret), `__debug__/`,
+login/parol tiklash/murojaat uchun rate limit. Batafsil: [CLAUDE_HISOBOT.md](CLAUDE_HISOBOT.md) 5.1.
+
+| Qolgan muammo | Daraja |
 |---|---|
-| `trade-data/upload` — mehmon fayl yuklay oladi | 🔴 Kritik |
-| `accounts/update/email/<username>/` — `DELETE` va `GET` da egasi tekshirilmaydi | 🔴 Kritik |
-| `common/information/` — yozish va o'chirishda ruxsat tekshiruvi yo'q | 🔴 Yuqori |
-| `services/service-request/` GET `?package_item=`/`?contract=` bilan begona so'rovlar qaytadi | 🔴 Yuqori |
-| `service-response/<pk>/` PATCH — mijoz o'ziga "admin javobi" yoza oladi | 🟠 O'rta |
-| OneID view'lari PINFL va kodni `print()` bilan log'ga chiqaradi | 🟠 O'rta |
-| `ALLOWED_HOSTS=['*']`, CORS hamma uchun + credentials | 🟠 O'rta |
-| `__debug__/` production'da ulangan | 🟠 O'rta |
-| Rate limit yo'q (login, parol tiklash, murojaat) | 🟠 O'rta |
+| `ALLOWED_HOSTS`/CORS — kod tayyor, serverdagi `.env` ga aniq qiymat yozish kerak (`check --deploy` W003/W004) | 🟠 O'rta |
 | CKEditor 4 eskirgan | 🟠 O'rta |
+| GoodSign paroli git tarixida — almashtirish kerak | 🟠 O'rta |
 | Parol tiklashda email mavjudligi oshkor; `SECRET_KEY` default; `CSRF_COOKIE_SECURE=False`; 500 MB upload | 🟡 Past |
 | JWT `localStorage` da | 🟡 Past |
 

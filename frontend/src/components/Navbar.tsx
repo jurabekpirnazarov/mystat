@@ -1,33 +1,60 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  Info,
-  BarChart3,
-  Grid3X3,
-  Phone,
-  LogIn,
-  User,
-  Menu,
-  X,
-  HelpCircle,
-  FileText,
-  Users,
+  AlertTriangle, BarChart3, Building2, ChevronDown, ExternalLink, FileText, Grid3X3, HelpCircle, Info, LayoutGrid, LogIn,
+  LogOut, Map as MapIcon, Menu, Phone, Search, User, Users, X,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import NotificationBell from "./notifications/NotificationBell";
 import CreditBalanceChip from "./company-score/CreditBalanceChip";
 import CommandPalette from "./search/CommandPalette";
-import { Search } from "lucide-react";
 import { getRequest } from "../api/request";
 import { profile } from "../api/apiUrls";
 import logo from "../img/stat.png";
 import { unwrap, type MaybeWrapped, type UserProfile } from "../types/api";
 
+/**
+ * Sayt sarlavhasi: (1) ingichka rasmiy qator — qo'mita nomi, portal haqida, reglamentlar, rasmiy saytlar;
+ * (2) asosiy menyu — statistikaga yo'naltirilgan bo'limlar; (3) test rejimi haqida sokin xabar.
+ * Ilgari: 7 ta bo'lim bir qatorda (logo matni ba'zi kengliklarda yashirinardi), qizil yuguruvchi qator.
+ */
+
+const MAIN_NAV = [
+  { path: "/dashboards", label: "Ko'rsatkichlar", icon: LayoutGrid, match: ["/dashboards", "/release-calendar"] },
+  { path: "/regions", label: "Hududlar", icon: MapIcon, match: ["/regions"] },
+  { path: "/check", label: "Korxonalar", icon: Building2, match: ["/check", "/company", "/partners", "/stat-codes"] },
+  { path: "/citizens", label: "Fuqarolar uchun", icon: Users, match: ["/citizens", "/my-salary", "/prices", "/learn", "/names", "/surveys"] },
+  { path: "/services", label: "Xizmatlar", icon: Grid3X3, match: ["/services", "/tariffs", "/tariff"] },
+  { path: "/questions", label: "Savol-javob", icon: HelpCircle, match: ["/questions"] },
+  { path: "/contact", label: "Aloqa", icon: Phone, match: ["/contact"] },
+];
+
+const UTILITY_NAV = [
+  { path: "/about", label: "Portal haqida", icon: Info },
+  { path: "/reglaments", label: "Reglamentlar", icon: FileText },
+  { path: "/statistics", label: "Portal statistikasi", icon: BarChart3 },
+];
+
+const OFFICIAL_SITES = [
+  { href: "https://stat.uz/uz/", label: "stat.uz" },
+  { href: "https://siat.stat.uz/", label: "SIAT" },
+];
+
+function initials(name: string) {
+  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("") || "?";
+}
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [profileData, setProfileData] = useState<UserProfile | null>(null);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const { isAuthenticated, user, logout } = useAuth();
+  const navigate = useNavigate();
 
-  // Ctrl+K / Cmd+K — global qidiruv
+  // Ctrl+K / Cmd+K — global qidiruv; sahifadagi qidiruv maydonlari (bosh sahifa banneri) `open-global-search` yuboradi
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
@@ -35,246 +62,178 @@ const Navbar = () => {
         setSearchOpen((v) => !v);
       }
     };
+    const onOpen = () => setSearchOpen(true);
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("open-global-search", onOpen);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("open-global-search", onOpen);
+    };
   }, []);
-  const [profileData, setProfileData] = useState<UserProfile | null>(null);
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  const location = useLocation();
-  const { isAuthenticated, user, logout } = useAuth();
-  const navigate = useNavigate();
 
-  // Profile ma'lumotlarini yuklash
   useEffect(() => {
-    if (isAuthenticated) {
-      const token = localStorage.getItem("access_token");
-      const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
-      
-      getRequest(profile, undefined, headers)
-        .then((response) => {
-          setProfileData(unwrap(response as MaybeWrapped<UserProfile>));
-        })
-        .catch((error) => {
-          console.error("Profile yuklashda xatolik:", error);
-        });
-    }
+    if (!isAuthenticated) return;
+    const token = localStorage.getItem("access_token");
+    getRequest(profile, undefined, token ? { Authorization: `Bearer ${token}` } : undefined)
+      .then((response) => setProfileData(unwrap(response as MaybeWrapped<UserProfile>)))
+      .catch((error) => console.error("Profile yuklashda xatolik:", error));
   }, [isAuthenticated]);
 
-  // Dropdown tashqarisini bosganida yopish
+  // Profil menyusi: tashqarini bosish yoki Escape bilan yopiladi
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const dropdown = document.querySelector('.profile-dropdown');
-      if (dropdown && !dropdown.contains(event.target as Node)) {
-        setIsProfileDropdownOpen(false);
-      }
+    if (!isProfileDropdownOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setIsProfileDropdownOpen(false);
     };
-
-    if (isProfileDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
+    const onEsc = (e: KeyboardEvent) => e.key === "Escape" && setIsProfileDropdownOpen(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onEsc);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onEsc);
     };
   }, [isProfileDropdownOpen]);
 
-  const navItems = [
-    // { path: "/", label: "Asosiy", icon: Home },
-    { path: "/about", label: "Portal haqida", icon: Info },
-    { path: "/statistics", label: "Statistika", icon: BarChart3, wideOnly: true },
-    { path: "/citizens", label: "Fuqarolar uchun", icon: Users },
-    { path: "/questions", label: "Savol-javob", icon: HelpCircle },
-    { path: "/services", label: "Barcha xizmatlar", icon: Grid3X3 },
-    { path: "/reglaments", label: "Reglamentlar", icon: FileText },
-    { path: "/contact", label: "Aloqa", icon: Phone },
-  ];
+  // Sahifa almashganda mobil menyu yopiladi
+  useEffect(() => setIsOpen(false), [location.pathname]);
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (item: (typeof MAIN_NAV)[number]) =>
+    item.match.some((m) => location.pathname === m || location.pathname.startsWith(`${m}/`));
+  const displayName = profileData
+    ? `${profileData.first_name || ""} ${profileData.last_name || ""}`.trim() || profileData.username
+    : user?.name || "Foydalanuvchi";
 
   const handleLogout = () => {
+    setIsProfileDropdownOpen(false);
     logout();
     navigate("/login", { replace: true });
   };
 
   return (
     <>
-      <nav className="bg-white dark:bg-gray-800 shadow-lg sticky top-0 z-30 transition-colors duration-300">
-        <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center shrink-0">
-            {/* shrink-0 + nowrap: logo bloki qisilib matn 5 qatorga sinmasin va 64px navbardan chiqib ketmasin */}
-            <Link to="/" className="flex items-center gap-2 shrink-0" aria-label="Milliy statistika qo'mitasi — interaktiv xizmatlar platformasi, bosh sahifa">
-              <img src={logo} alt="" width={40} height={40} className="w-10 h-10 shrink-0 object-contain" />
-              <div className="hidden sm:block lg:hidden 2xl:block leading-tight whitespace-nowrap">
-                <p className="text-[11px] tracking-wide text-gray-600 dark:text-gray-300">
-                  MILLIY STATISTIKA QO‘MITASI
-                </p>
-                <p className="text-xs font-bold text-gray-900 dark:text-white">
-                  INTERAKTIV XIZMATLAR PLATFORMASI
-                </p>
-              </div>
-            </Link>
-          </div>
-
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-1 xl:gap-2">
-            {navItems.map((item) => {
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`${"wideOnly" in item ? "hidden xl:flex" : "flex"} items-center gap-1.5 whitespace-nowrap leading-none px-2.5 xl:px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                    isActive(item.path)
-                      ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20"
-                      : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700"
-                  }`}
-                >
-                  {/* Ikonka yo'q: logo matni, 7 band va o'ng tomon (balans, xabarlar, ism) 90rem konteynerga sig'sin */}
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </div>
-
-          <div className="flex items-center gap-2 xl:gap-3 shrink-0">
-            <button
-              type="button"
-              onClick={() => setSearchOpen(true)}
-              aria-label="Qidiruv (Ctrl+K)"
-              title="Qidiruv (Ctrl+K)"
-              className="flex items-center p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              <Search className="w-5 h-5" />
-            </button>
-            <CommandPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
-            {isAuthenticated && <CreditBalanceChip />}
-            {isAuthenticated && <NotificationBell />}
-
-            {isAuthenticated ? (
-              <div className="flex items-center space-x-3 relative">
-                <button
-                  onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                  className="flex items-center gap-2 whitespace-nowrap px-3 xl:px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200"
-                >
-                  <User className="w-4 h-4" />
-                  <span className="hidden sm:inline lg:hidden xl:inline max-w-[11rem] truncate">
-                    {profileData ? 
-                      `${profileData.first_name || ""} ${profileData.last_name || ""}`.trim() || profileData.username
-                      : user?.name || "Foydalanuvchi"}
-                  </span>
-                </button>
-                
-                {/* Profile Dropdown */}
-                {isProfileDropdownOpen && (
-                  <div className="profile-dropdown absolute top-12 right-0 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {profileData ? 
-                          `${profileData.first_name || ""} ${profileData.last_name || ""}`.trim() || profileData.username
-                          : user?.name || "Foydalanuvchi"}
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {profileData?.email || "Email ma'lumoti yo'q"}
-                      </p>
-                      {profileData?.phone && (
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {profileData.phone}
-                        </p>
-                      )}
-                    </div>
-                    <Link
-                      to="/cabinet"
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      onClick={() => setIsProfileDropdownOpen(false)}
-                    >
-                      Shaxsiy kabinet
-                    </Link>
-                    <button
-                      onClick={() => {
-                        handleLogout();
-                        setIsProfileDropdownOpen(false);
-                      }}
-                      className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      Chiqish
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <Link
-                to="/login"
-                className="flex items-center gap-1.5 whitespace-nowrap px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200"
-              >
-                <LogIn className="w-4 h-4" />
-                <span>Login</span>
-              </Link>
-            )}
-
-            {/* Mobile menu button */}
-
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              aria-label={isOpen ? "Menyuni yopish" : "Menyuni ochish"}
-              aria-expanded={isOpen}
-              className="lg:hidden p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              {isOpen ? (
-                <X className="w-6 h-6" />
-              ) : (
-                <Menu className="w-6 h-6" />
-              )}
-            </button>
-          </div>
+      {/* 1. Rasmiy qator */}
+      <div className="hidden bg-[#0b2a5b] text-blue-100 md:block dark:bg-[#071a3a]">
+        <div className="mx-auto flex h-9 max-w-[90rem] items-center justify-between px-4 text-xs sm:px-6 lg:px-8">
+          <p className="truncate">O'zbekiston Respublikasi Milliy statistika qo'mitasi</p>
+          <nav aria-label="Qo'shimcha" className="flex items-center gap-4">
+            {UTILITY_NAV.map(({ path, label }) => (
+              <Link key={path} to={path} className={`hover:text-white ${location.pathname === path ? "text-white" : ""}`}>{label}</Link>
+            ))}
+            <span className="h-3 w-px bg-white/20" aria-hidden="true" />
+            {OFFICIAL_SITES.map(({ href, label }) => (
+              <a key={href} href={href} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-white">
+                {label}<ExternalLink className="h-3 w-3" aria-hidden="true" />
+              </a>
+            ))}
+          </nav>
         </div>
+      </div>
 
-        {/* Mobile Navigation */}
-        {isOpen && (
-          <div className="lg:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-gray-800 border-t dark:border-gray-700">
-              {navItems.map((item) => {
-                const Icon = item.icon;
+      {/* 2. Asosiy menyu */}
+      <nav aria-label="Asosiy" className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur transition-colors duration-300 dark:border-gray-700 dark:bg-gray-800/95">
+        <div className="mx-auto max-w-[90rem] px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between gap-4">
+            <Link to="/" className="flex shrink-0 items-center gap-2.5" aria-label="Milliy statistika qo'mitasi — interaktiv xizmatlar platformasi, bosh sahifa">
+              <img src={logo} alt="" width={40} height={40} className="h-10 w-10 shrink-0 object-contain" />
+              <span className="hidden whitespace-nowrap leading-tight sm:block">
+                <span className="block text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500 dark:text-gray-400">Milliy statistika qo'mitasi</span>
+                <span className="block text-sm font-bold text-blue-950 dark:text-white">Interaktiv xizmatlar platformasi</span>
+              </span>
+            </Link>
+
+            <div className="hidden h-full items-stretch lg:flex">
+              {MAIN_NAV.map((item) => {
+                const active = isActive(item);
                 return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => setIsOpen(false)}
-                    className={`flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                      isActive(item.path)
-                        ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20"
-                        : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700"
-                    }`}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span>{item.label}</span>
+                  <Link key={item.path} to={item.path} aria-current={active ? "page" : undefined}
+                    className={`flex items-center whitespace-nowrap border-b-2 px-2.5 text-sm font-medium transition-colors xl:px-3.5 ${
+                      active
+                        ? "border-blue-900 text-blue-950 dark:border-blue-400 dark:text-white"
+                        : "border-transparent text-slate-600 hover:border-slate-300 hover:text-blue-900 dark:text-gray-300 dark:hover:text-white"
+                    }`}>
+                    {item.label}
                   </Link>
                 );
               })}
             </div>
-          </div>
-        )}
-      </div>
-      </nav>
-      {/* Animated warning bar below navbar */}
-      <div className="relative w-full flex justify-center bg-red-600 overflow-hidden" style={{ minHeight: '38px' }}>
-        <div className="absolute left-0 top-0 w-full h-full flex items-center">
-          <div className="w-full overflow-hidden">
-            <div className="animate-marquee whitespace-nowrap text-white font-bold text-lg py-2 tracking-wide" style={{ animation: 'marquee 20s linear infinite' }}>
-              Ushbu platforma test sinovida ishlamoqda!!!
+
+            <div className="flex shrink-0 items-center gap-2">
+              <button type="button" onClick={() => setSearchOpen(true)} aria-label="Qidiruv (Ctrl+K)" title="Qidiruv (Ctrl+K)"
+                className="flex items-center gap-2 rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-slate-500 transition hover:border-slate-300 hover:text-slate-700 dark:border-gray-600 dark:text-gray-300">
+                <Search className="h-4 w-4" aria-hidden="true" />
+                <span className="hidden 2xl:inline">Qidirish</span>
+                <kbd className="hidden rounded border border-slate-200 px-1 text-[10px] text-slate-400 2xl:inline dark:border-gray-600">Ctrl K</kbd>
+              </button>
+              <CommandPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
+              {isAuthenticated && <CreditBalanceChip />}
+              {isAuthenticated && <NotificationBell />}
+
+              {isAuthenticated ? (
+                <div className="relative" ref={dropdownRef}>
+                  <button type="button" onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                    aria-haspopup="menu" aria-expanded={isProfileDropdownOpen}
+                    className="flex items-center gap-2 rounded-lg py-1 pl-1 pr-2 transition hover:bg-slate-100 dark:hover:bg-gray-700">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-900 text-xs font-bold text-white">{initials(displayName)}</span>
+                    <span className="hidden max-w-[10rem] truncate text-sm font-medium text-slate-800 xl:inline dark:text-gray-100">{displayName}</span>
+                    <ChevronDown className="hidden h-4 w-4 text-slate-400 xl:inline" aria-hidden="true" />
+                  </button>
+                  {isProfileDropdownOpen && (
+                    <div role="menu" className="absolute right-0 top-12 z-50 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                      <div className="border-b border-slate-100 px-4 py-3 dark:border-gray-700">
+                        <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{displayName}</p>
+                        <p className="truncate text-xs text-slate-500 dark:text-gray-400">{profileData?.email || "Email ko'rsatilmagan"}</p>
+                        {profileData?.phone && <p className="text-xs text-slate-500 dark:text-gray-400">{profileData.phone}</p>}
+                      </div>
+                      <Link to="/cabinet" role="menuitem" onClick={() => setIsProfileDropdownOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-gray-200 dark:hover:bg-gray-700">
+                        <User className="h-4 w-4 text-slate-400" aria-hidden="true" />Shaxsiy kabinet
+                      </Link>
+                      <button type="button" role="menuitem" onClick={handleLogout}
+                        className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-700">
+                        <LogOut className="h-4 w-4" aria-hidden="true" />Chiqish
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link to="/login" className="flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-blue-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-800">
+                  <LogIn className="h-4 w-4" aria-hidden="true" />Kirish
+                </Link>
+              )}
+
+              <button type="button" onClick={() => setIsOpen(!isOpen)} aria-label={isOpen ? "Menyuni yopish" : "Menyuni ochish"} aria-expanded={isOpen}
+                className="rounded-lg p-2 text-slate-700 hover:bg-slate-100 lg:hidden dark:text-gray-300 dark:hover:bg-gray-700">
+                {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
             </div>
           </div>
         </div>
-        <style>{`
-          @keyframes marquee {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-          }
-          .animate-marquee {
-            display: inline-block;
-            min-width: 100%;
-            will-change: transform;
-          }
-        `}</style>
+
+        {/* Mobil menyu: asosiy va qo'shimcha bo'limlar */}
+        {isOpen && (
+          <div className="border-t border-slate-200 bg-white px-2 pb-3 pt-2 lg:hidden dark:border-gray-700 dark:bg-gray-800">
+            {[...MAIN_NAV, ...UTILITY_NAV.map((u) => ({ ...u, match: [u.path] }))].map((item) => {
+              const Icon = item.icon;
+              const active = isActive(item);
+              return (
+                <Link key={item.path} to={item.path} aria-current={active ? "page" : undefined}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-base font-medium ${
+                    active ? "bg-blue-50 text-blue-950 dark:bg-blue-900/20 dark:text-white" : "text-slate-700 hover:bg-slate-50 dark:text-gray-300 dark:hover:bg-gray-700"
+                  }`}>
+                  <Icon className="h-5 w-5 text-slate-400" aria-hidden="true" />{item.label}
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </nav>
+
+      {/* 3. Test rejimi haqida xabar (ilgari qizil yuguruvchi qator) */}
+      <div className="border-b border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+        <p className="mx-auto flex max-w-[90rem] items-center gap-2 px-4 py-1.5 text-xs font-medium sm:px-6 lg:px-8">
+          <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+          Platforma test rejimida ishlamoqda: ayrim ma'lumotlar namunaviy bo'lishi mumkin.
+        </p>
       </div>
     </>
   );

@@ -19,8 +19,9 @@ const HomePage = () => {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Banner />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
-          <HomeHighlights />
+          {/* Xizmatlar birinchi: foydalanuvchi ko'pincha aniq xizmat uchun keladi */}
           <Interactive />
+          <HomeHighlights />
           <TariffComponent />
           <CalendarReport/>
         </div>

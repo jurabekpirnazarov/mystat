@@ -24,7 +24,6 @@ def create_organization(user, legal_info):
 
         service = RegisterService()
         registr_org_data = service.get_organization_detail(stir_number=int(legal_info.get("tin", "")))
-        print("registr_org_data:", registr_org_data)
         district_soato = registr_org_data.get("soato", "")[:7] if registr_org_data else None
         ifut_code = registr_org_data.get("okeds", [])[0].get("oked") if registr_org_data else None
         address = registr_org_data.get("address").get("address", None) if registr_org_data else ""

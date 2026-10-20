@@ -54,3 +54,17 @@ def sector_label(sector, with_code=True):
     name = fix_lookalikes((sector.name_uz or sector.name or "").strip())
     name = name[:1].upper() + name[1:].lower() if name.isupper() else name
     return f"{sector.code} · {name}" if with_code else name
+
+
+def rich_to_plain(html_text):
+    """RichTextField (CKEditor) qiymati — oddiy matn: teglar, `&lsquo;` kabi entity'lar, ortiqcha bo'shliq va
+    oxiridagi ":" olib tashlanadi. Nom sifatida ko'rsatiladigan maydonlar uchun (masalan `PackageService.name_uz`)."""
+    import html
+    import re
+
+    from django.utils.html import strip_tags
+
+    if not html_text:
+        return html_text or ""
+    text = html.unescape(strip_tags(html_text)).replace("\xa0", " ")
+    return re.sub(r"\s+", " ", fix_lookalikes(text)).strip().rstrip(":").strip()

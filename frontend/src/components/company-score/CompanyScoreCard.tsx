@@ -220,7 +220,7 @@ function LockedCard({ data, box }: { data: CompanyScoreLocked; box: string }) {
       </div>
       {!none && (
         <p className="text-sm text-gray-700 dark:text-gray-200">
-          Ball nimaga asoslangan (6 ustun, ball tarkibi, tengdoshlar orasidagi o'rin) — korxona profilida{basis?.credits ? `, ${basis.credits} kredit` : ""}.
+          Ball nimaga asoslangan (6 ustun, ball tarkibi, tengdoshlar orasidagi o'rin) — korxona profilida{basis?.credits ? `, ${basis.credits} StatCoin` : ""}.
         </p>
       )}
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 pt-2 text-xs text-gray-500 dark:border-gray-700">

@@ -70,7 +70,7 @@ export default function Names() {
                     </ResponsiveContainer>
                   </div>
                 </section>
-                <RegionBubbleMap height={300} items={(s.by_region ?? []).map((r) => ({ code: r.code, value: r.count, label: `${nf(r.count)} ta` }))} />
+                <RegionBubbleMap height={300} unit="kishi" items={(s.by_region ?? []).map((r) => ({ code: r.code, value: r.count, label: `${nf(r.count)} ta` }))} />
               </>
             ) : null}
           </div>

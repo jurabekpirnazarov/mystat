@@ -1,3 +1,4 @@
+import logging
 import requests
 from django.conf import settings
 from django.contrib.auth.models import update_last_login
@@ -17,6 +18,8 @@ from apps.organizations.models import Organization
 
 from .openapi_params import oneID_code_param
 from .serializers import OneIdTokenSerializer
+
+logger = logging.getLogger(__name__)
 
 
 class OneIdView(APIView):
@@ -124,9 +127,10 @@ class OneIdLoginView(generics.GenericAPIView):
             "redirect_uri": settings.SITE_URL,
             "code": code,
         }
-        print(code,data)
         response = self.poster(data)
-        print(response,response.text)
+        # ISH_REJASI 2.1: ilgari kod, client_secret va javob print() bilan log'ga yozilardi
+        if not isinstance(response, dict) and not response.ok:
+            logger.warning("OneID access_token olinmadi: HTTP %s", response.status_code)
         if isinstance(response, dict):
             return response.get("access_token")
         if response.ok:
@@ -143,7 +147,8 @@ class OneIdLoginView(generics.GenericAPIView):
             "scope": "user_id",
         }
         response = self.poster(data)
-        print(response,response.text)
+        if not isinstance(response, dict) and not response.ok:
+            logger.warning("OneID identifikatsiya javobi: HTTP %s", response.status_code)
         if isinstance(response, dict):
             return response
         if response.ok:
@@ -178,10 +183,8 @@ class OneIdLoginView(generics.GenericAPIView):
             )
         auth_data = self.get_auth_data(access_token)
 
-        print("auth_data", auth_data)
         if auth_data:
             jwt_token, message = self.get_jwt_token(auth_data, request)
-            print("jwt_token", jwt_token, message)
             if jwt_token:
                 return Response(jwt_token)
 

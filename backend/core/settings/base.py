@@ -437,6 +437,11 @@ CELERY_BEAT_SCHEDULE = {
             minute=config("BEAT_SIAT_SYNC_MINUTE", default=30, cast=int),
         ),
     },
+    # JT-02: aholi soati — stat.uz hisoblagichi (u oy boshida yangilanadi); yangi nuqta bo'lsa qo'shiladi
+    "population-clock-sync": {
+        "task": "apps.siat.tasks.sync_population_clock_task",
+        "schedule": crontab(minute=20, hour="*/6"),
+    },
     # KORXONA_SCORING KR-40: muddati o'tgan kreditlar har kecha yopiladi
     "credits-expire": {
         "task": "apps.credits.tasks.expire_credits_task",
@@ -464,6 +469,10 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 20000
 
 
 REGISTER_BASE_URL = config('REGISTER_BASE_URL', default='')
+
+# ISH_REJASI 2.1: apps/accounts/throttles.py — login, parol tiklash, murojaat formalari (IP bo'yicha)
+AUTH_THROTTLE_RATE = config('AUTH_THROTTLE_RATE', default='20/min')
+FORM_THROTTLE_RATE = config('FORM_THROTTLE_RATE', default='30/hour')
 X_DEVICE_ID = config('X_DEVICE_ID', default='')
 
 # Admin URL — .env'dan konfiguratsiyalanadi (default: markaz/)

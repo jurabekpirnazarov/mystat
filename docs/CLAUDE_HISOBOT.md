@@ -1,0 +1,226 @@
+# CLAUDE_HISOBOT — loyiha holati va davom etish yo'riqnomasi
+
+> **Bu fayl Claude (AI yordamchi) uchun.** Har yangi sessiyada ishni boshlashdan oldin shu faylni to'liq o'qing.
+> Unda: nima qilingan, nima qolgan, qayerda to'xtalgan va ishni qanday davom ettirish kerak.
+> Har ish bosqichi tugagach, **shu faylni yangilang** (7-bo'lim, "Sessiyalar jurnali").
+>
+> **Oxirgi yangilanish:** 2026-10-20 · **Oxirgi commit:** `d5d6629` (2026-10-19); JT ishlari commit qilinmagan (`git status`)
+
+---
+
+## 0. Yo'riqnoma: sessiya boshida nima qilish kerak
+
+1. **Shu faylni o'qing** (ayniqsa 4, 5 va 7-bo'limlar).
+2. **Haqiqiy holatni tekshiring.** Fayl eskirgan bo'lishi mumkin:
+   ```bash
+   git log --oneline -10      # 7-bo'limdagi oxirgi commit'dan keyin yangi commit bormi?
+   git status                 # tugallanmagan (commit qilinmagan) ish bormi?
+   ```
+   Agar 7-bo'limdagi oxirgi yozuvdan keyin commit'lar bo'lsa, ularni `git show --stat` bilan ko'rib, shu faylni yangilang.
+3. **Qayerda to'xtaganimizni aniqlang:** 7-bo'limdagi oxirgi yozuvning "Keyingi qadam" qatori.
+4. **Foydalanuvchi aniq vazifa bermagan bo'lsa**, 5-bo'limdagi tartib bo'yicha keyingi vazifani taklif qiling. O'zingiz boshlab yubormang, avval tasdiqlating.
+5. **Vazifa tafsilotlari** shu yerda emas, asl hujjatlarda (3-bo'lim). Vazifa ID'si (masalan `KR-41`) bo'yicha `grep` qiling.
+6. **Ishni tugatgach:**
+   - testlar (6-bo'lim) o'tishini tekshiring;
+   - tegishli hujjatdagi holatni yangilang (`docs/README.md` va vazifa hujjati);
+   - **shu faylning 4, 5 va 7-bo'limlarini yangilang**;
+   - commit faqat foydalanuvchi so'rasa. Uslub: o'zbekcha, vazifa ID'lari bilan (`KR-41: ...`).
+
+**Qoidalar (avvalgi sessiyalarda kelishilgan):**
+- Javoblar va hujjatlar **o'zbek tilida** (lotin).
+- Real yozuvlarni o'zgartirmang va o'chirmang. Sintetik ma'lumot faqat `seed_demo` orqali, `SyntheticRecord` reyestri bilan, faqat `DEBUG=True` da.
+- Mavjud 4 tarif paketi va `payment` app'iga tegilmaydi (KR-41 da ham "faqat yangi yozuvlar").
+- Egasining qarorini talab qiladigan masalalarda (4.4-bo'lim) o'zingiz hal qilmang. Hujjatdagi **default** bilan ishlang yoki so'rang.
+- **Atama: "StatCoin"** (2026-10-20, foydalanuvchi qarori). Scoring hamyonidagi birlik foydalanuvchiga va admin'da doim "StatCoin" deb yoziladi ("1 StatCoin", "StatCoin hamyoni", "StatCoin'lar muddati"). Kod nomlari o'zgarmaydi: `apps/credits`, `CreditWallet`, `/api/credits/`, `formatCredits`. Hujjatlardagi (KORXONA_SCORING 11–14) "kredit" = StatCoin. Bank krediti ma'nosidagi "kredit" (inflyatsiya kalkulyatori, "Bank / kredit" preseti) o'zgarmaydi.
+- Yangi ochiq savollar `OS-23` dan raqamlanadi (`OS-18..OS-22` ID'lari ikki hujjatda to'qnashgan).
+
+---
+
+## 1. Loyiha qisqacha
+
+**my.stat.uz** — Statistika agentligining konsalting platformasi (monorepo).
+
+| Qism | Texnologiya | Joyi |
+|---|---|---|
+| Backend | Django 5 + DRF, Celery, PostgreSQL 14, Redis | `backend/` (`core/` sozlamalar, `apps/` 18 ta app) |
+| Frontend | React 18 + Vite + TypeScript, Recharts | `frontend/src/` (`pages/`, `components/`) |
+| Baza | PostgreSQL dump | `db/dump/consult.dump` (git'da yo'q) |
+| Proxy | nginx | `nginx/default.conf.template` |
+| Deploy | GitLab CI (systemd + venv, Docker'siz) | `.gitlab-ci.yml` |
+
+Asosiy app'lar: `accounts`, `services` (tariflar, paketlar), `contracts`, `payment` (Click), `analytics` (korxona scoringi), `siat` (hududlar xaritasi, scoring, prognoz), `credits` (kredit hamyoni), `citizens`, `consultations`, `open_api`, `common` (seed_demo, qidiruv), `book_market`, `notifications`, `organizations`, `additional_services`. Tegilmagan: `chat`, `monitoring` (OS-07).
+
+## 2. Lokal muhit (bu mashina)
+
+- **Docker yo'q.** Portativ Postgres, port **5433**:
+  ```bash
+  C:/Users/j.pirnazarov/tools/pgsql/bin/pg_ctl.exe -D C:/Users/j.pirnazarov/tools/pgdata-mystat -l C:/Users/j.pirnazarov/tools/pg-mystat.log -o "-p 5433" start   # background'da
+  C:/Users/j.pirnazarov/tools/pgsql/bin/pg_isready.exe -h 127.0.0.1 -p 5433
+  ```
+  `connection refused 127.0.0.1:5433` — server ishlamayapti degani.
+- Backend: `backend/venv` (Python 3.12), `python manage.py runserver`.
+- Frontend: `cd frontend && npm run dev` (`VITE_API_URL=/`, Vite `:8000` ga proxy qiladi).
+- Demo akkauntga parolsiz kirish: `manage.py shell` da `user.tokens` → brauzer `localStorage` (`access_token`, `refresh_token`, `user`).
+- Demo akkauntlar: `demo_yuridik_1..5`, `demo_jismoniy_1..3`, `demo_tadqiqotchi`, `demo_konsultant_1..5`, `demo_bugalter`, `demo_employee`.
+
+## 3. Hujjatlar xaritasi
+
+| Fayl | Nima uchun o'qiladi |
+|---|---|
+| `docs/README.md` | **Yagona holat jadvali:** barcha vazifalar, bajarilgan va qolganlar (2026-10-16 holati, KR-39..46 kiritilmagan) |
+| `docs/LOYIHA.md` | Arxitektura, app'lar, sozlamalar |
+| `docs/ISH_REJASI.md` | Asosiy reja: F, B, S, U, K, FQ, A, Q vazifalari, OS-01..OS-22 savollari, xavfsizlik ro'yxati (2.1), to'lov muammolari (2.2) |
+| `docs/SIAT_KARTA_TAHLIL.md` | KR-01..KR-14 (hududlar xaritasi) |
+| `docs/SCORING_MODEL.md` | KR-15..KR-28 (hududlar salohiyati, prognoz) |
+| `docs/KORXONA_SCORING.md` | KR-29..KR-46 (korxona scoringi, kreditlar, profil). **0-bo'limda bajarilish holati**, 12-bo'limda KR-41..KR-44 tavsifi |
+| `docs/XIZMATLAR_TAHLILI.md` | Xizmatlar katalogi: kim, qanday shartda; 6-bo'limdagi muammolar yopilgan |
+| `IHAMKOR_MUQOBIL.md` (repo ildizida) | iHamkor muqobili — "Kontragent kartasi", IH-01..IH-12. **0-bo'limda kod bilan tekshiruv va holat jadvali**; 1-to'plam bajarildi (2026-10-20) |
+| `docs/JAHON_TAJRIBASI_TAKLIFLAR.md` | JT-01..JT-20: jahon tajribasi asosida yangi xizmatlar. **0-bo'limda kod bilan tekshiruv va holat jadvali** |
+| `docs/PROEKT_TAHLIL.md` | Boshlang'ich tahlil (tarixiy) |
+| `README.md`, `backend/README.md` | Ishga tushirish, seed_demo, production qadamlari, endpoint'lar |
+| `korxona_scoring/` | Namunaviy generator va scoring skripti, CSV'lar (KR-31 solishtirish manbai) |
+
+## 4. Bajarilgan ishlar (2026-10-20 holati)
+
+### 4.1. Asosiy reja (ISH_REJASI.md) — ✅ hammasi
+- **F** (poydevor): test runner, TS 37→0 xato, ESLint 0 xato, `console.log` olib tashlandi.
+- **B** (buzuq joylar): token yangilash, 500 xatolar, trade-flows, xabarnomalar, Celery Beat, paket muddati.
+- **S** (sintetik ma'lumot): `seed_demo` (`--only/--flush/--dry-run`), `SyntheticRecord`, "Namuna" belgisi, barcha bo'limlar uchun demo.
+- **U** (UI): kabinet, klassifikatorlar, global qidiruv Ctrl+K, Stat AI, kalendar, PWA, Lighthouse a11y/SEO 100.
+- **K** (korxonalar): autofill, benchmark, bozor tahlili, hamkor qidiruvi, pasport, shartnoma holati, tarif kalkulyatori.
+- **FQ** (fuqarolar): ochiq API, inflyatsiya kalkulyatori, maosh, narxlar, "Statistika oddiy tilda", so'rovnomalar.
+- **A** (admin): analitika paneli, obunalar, onlayn konsultatsiya.
+- **Q** (sifat): chunk 635→19 KB, Recharts'ga o'tish, CI. Q-01, Q-07 **qisman**.
+
+### 4.2. SIAT va hududlar — ✅ KR-01..KR-28
+- SIAT sinxronlash (`apps/siat`, `sync_siat`, har kuni 03:30), SOATO chegaralari, `/regions` xaritasi (drill-down, animatsiya, bivariant, eksport).
+- Hududlar salohiyati scoringi (`apps/siat/scoring/`, `compute_scores`) va prognoz (`apps/siat/forecast/`, `train_forecasts`, 80% oraliq, ssenariylar).
+
+### 4.3. Korxonalar scoringi — ✅ KR-29..KR-38, KR-39, KR-40, KR-45, KR-46; ⚠️ KR-42 qisman
+- `EnterpriseScore`, `company_scoring.yaml`, pandas dvigatel (65 545 korxona × 5 preset ≈ 81 s), API, badge/kartochka, ro'yxatlarga joylash, metodologiya sahifasi.
+- **2026-10-19 (`d5d6629`):** kirish darajalari (`credits.service.can_view`), `apps/credits` (hamyon, ledger, unlock, narxlar), korxona profili `/company/:stir` (ball tarkibi, sezgirlik, o'xshash korxonalar, qulflangan bo'limlar, PDF), profilga havolalar.
+- XIZMATLAR_TAHLILI 6-bo'lim yopildi: `trade-data/upload` va GoodSign `IsAdminUser`, GoodSign login/parol `.env` ga, limit `-1` = cheksiz, `Service.requires_login`, login'dan keyin `?next=` bilan qaytish.
+
+### 4.4. Jahon tajribasi (JAHON_TAJRIBASI_TAKLIFLAR.md) — ✅ JT-02, JT-04, JT-10, JT-15, JT-17 (2026-10-20)
+- **JT-10 e'lonlar kalendari:** `/release-calendar`, `/api/common/map/releases/` va `releases.ics`. Yangi model `siat.ReleaseEvent` (migratsiya `siat.0005`), admin'da rasmiy sana kiritiladi. Kiritilmasa SIAT `source_updated_at` + davriylikdan taxminiy sana. Kod: `apps/siat/public.py`, `views_public.py`.
+- **JT-17 mavzuli panellar:** `/dashboards/:slug` (iqtisodiyot, mehnat, aholi), `/api/common/map/dashboards/`. Panel ro'yxati `public.py` dagi `PANELS` da.
+- **JT-02 aholi soati:** panellarda va bosh sahifada (`HomeHighlights` → `PopulationRow`). Brauzerda hisoblanadi.
+  - **stat.uz bilan bir xil (2026-10-20):** `PopulationAnchor` (migratsiyalar `siat.0006`, `0007`) stat.uz hisoblagichining boshlang'ich nuqtasi va "har N soniyada" parametrlarini (tug'ilish/o'lim/kelish/ketish) saqlaydi; soat chiziqli: N0 + t·sof_o'sish. `python manage.py sync_population_clock [--dry-run]` (`apps/siat/population_sync.py`) stat.uz sahifasidagi JS o'zgaruvchilarni o'qiydi, o'zgargan bo'lsa yangi nuqta qo'shadi; Celery Beat har 6 soatda (`population-clock-sync`). Avvalgi xato: raqam 1-oktabr holatiga, 19-oktabr deb olingan edi (−46 ming).
+- **JT-15 ulashish:** `components/share/ShareBar.tsx` (havola, embed, APA/GOST iqtibos, PNG). Embed sahifasi `/embed/indicator/:key` navbar'siz chiqadi (`App.tsx` → `Shell`), API `/api/common/map/card/<key>/`.
+- **JT-04 statistik kodlar ma'lumotnomasi:** `/stat-codes?stir=` (login bilan, PDF) va `/stat-codes/verify?code=` (ochiq). Kod: `additional_services/api_endpoints/KtutReportAPI/certificate.py`. Imzo `django.core.signing`, bazaga yozilmaydi.
+- Ctrl+K'da 4 ta yangi yozuv. Sof funksiyalar: `frontend/src/utils/statPublic.ts`.
+- Testlar: `apps/siat/tests/test_public.py` (8), `apps/additional_services/tests_jt04.py` (3), `utils/statPublic.test.ts` (6). Butun backend: **308 test OK**; `tsc` 0, `eslint` 0 xato; brauzerda 5 sahifa tekshirildi.
+- **Bloklangan (real manba yo'q):** JT-07 va JT-14 uchun korxonaning ochilish va yopilish sanasi kerak, KTUT'da yo'q. JT-01, JT-03, JT-12 uchun ro'yxat-2026 natijalari bazada yo'q.
+
+### 4.4a. iHamkor muqobili (IHAMKOR_MUQOBIL.md) — ✅ IH-01..IH-04, IH-08, IH-11, IH-12 (metodologiya); IH-06 K-03 bilan qoplangan (2026-10-20)
+- **Kontragent kartasi:** `GET /api/analytics/company-card/<stir>/`, `company-card/search/?q=` (ochiq, mehmonga 120/soat, kesh 1 soat). Kod: `apps/analytics/company_card.py`, `views_card.py`.
+- **Manbalar (real):**
+  - `Ktut` — STIR, OKPO, nom. Bu to'liq registr emas, ~65 ming hisobot topshiruvchi;
+  - `KtutReportList` — majburiy shakllar;
+  - `IndustrialProduct` — ~39 ming ishlab chiqaruvchining tumani, manzili va mahsulotlari.
+  Telefon javobga kirmaydi.
+- **Frontend:**
+  - `/check` — `pages/company/CompanyCheck.tsx`;
+  - bloklar `components/company-card/CardBlocks.tsx`;
+  - profil "Umumiy ma'lumot" yorlig'ida `ProfileCardExtras`;
+  - Ctrl+K.
+- **Profil tuzatildi:**
+  - hudud sanoat reyestrida real bo'lsa sintetik namuna o'rniga real chiqadi (`region_is_real`);
+  - OKPO `.0` tozalandi (`clean_okpo`, ma'lumotnomada ham).
+- IH-11: `/check` da "Karta xulosasi (PDF)". IH-12: `/methodology/company-card` (`pages/company/CompanyCardMethodology.tsx`).
+- Testlar: `apps/analytics/tests_company_card.py` (6).
+- **Qolgan:**
+  - IH-05 (OS-26 huquqiy savol);
+  - IH-07 (OKED sintetik);
+  - IH-12 narxlari (StatCoin narxi — egasining qarori);
+  - IH-09, IH-10 bloklangan.
+
+### 4.5. Oxirgi tekshiruv natijalari
+- 2026-10-16: backend 271 test OK, `tsc` 0, `eslint` 0 xato, vitest 23 OK.
+- 2026-10-19: yangi testlar (credits, company_profile) OK, `npm run e2e` 19 test OK, `tsc`, `eslint`, `vite build` xatosiz.
+- 2026-10-20 (bu tahlil): testlar qayta ishga tushirilmadi. Kod tekshirildi: 5.1-bo'limdagi xavfsizlik muammolari **hali ham bor** (`ALLOWED_HOSTS=['*']`, `CORS_ALLOW_ALL_ORIGINS=True`, `__debug__/` ulangan, OneID'da `print()`).
+
+## 5. Qolgan ishlar (tavsiya etilgan tartibda)
+
+### 5.1. Xavfsizlik (ISH_REJASI 2.1) — 2026-10-20 da asosiy qismi yopildi
+| # | Muammo | Holat |
+|---|---|---|
+| 1 | `accounts/update/email/<email>/` — begona hisob, `DELETE` | ✅ Faqat o'z hisobi (403), `DELETE` olib tashlandi |
+| 2 | `common/information/` — yozish/o'chirish ochiq | ✅ `IsStaffOrReadOnly` (`apps/accounts/permissions.py`) |
+| 3 | `service-request/` filtrlari begona so'rovlarni qaytarardi | ✅ Filtrlar faqat o'z so'rovlari ichida; begona detail 403/404 |
+| 4 | `service-response/<pk>/` — mijoz "admin javobi" yozardi | ✅ `IsAssignedEmployee`: staff, employee/manager/admin roli yoki biriktirilgan foydalanuvchi |
+| 5 | OneID `print()` — kod, **client_secret**, auth javobi log'ga | ✅ `print` olib tashlandi, xatoda faqat HTTP status log'ga |
+| 6 | `ALLOWED_HOSTS=['*']`, CORS hamma uchun | ⚠️ `.env` dan sozlanadi (`ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`); standart avvalgicha ochiq (serverni buzmaslik uchun) — `check --deploy` W003/W004. **Serverda `.env` ga yozish kerak** |
+| 7 | `__debug__/` production'da | ✅ `production.py` toolbar middleware'ni olib tashlaydi, `urls.py` faqat middleware bo'lsa ulaydi |
+| 8 | Rate limit yo'q | ✅ `apps/accounts/throttles.py`: login, Token, parol tiklash — 20/min; murojaat formasi — 30/soat (IP bo'yicha, `.env` da o'zgaradi) |
+| 9 | CKEditor 4 eskirgan | ⏳ Admin'dagi rich-text maydonlar; almashtirish — alohida ish |
+| 10 | Past: email mavjudligi oshkor, `SECRET_KEY` default, `CSRF_COOKIE_SECURE=False`, 500 MB upload, JWT `localStorage` da | ⏳ |
+| 11 | ⚠ GoodSign paroli git tarixida | ⏳ **Egasi parolni almashtirishi kerak** |
+
+Testlar: `apps/services/tests_security.py` (6). `trade-data/upload` — 2026-10-19 da yopilgan.
+
+### 5.2. Korxona scoringi: tariflar va kreditlar (KORXONA_SCORING.md 12-bo'lim)
+1. **KR-41** — Tariflar va paketdan kredit berish (P1): "Scoring krediti" servisi, Scoring 50/60/90 va Korporativ paketlari, `UserServicePackage` signali → idempotent `grant`, oylik grant, `auto_activate_on_payment` bayrog'i. Hozir `CreditWallet.plan` va grant admin'da qo'lda.
+2. **KR-42 (qolgan qismi)** — `/tariffs` dagi scoring bloki, korporativ forma, bosh paneldagi 20% balans ogohlantirishi.
+3. **KR-43** — Korporativ: `OrganizationMember`, yo'nalishlar, ommaviy XLSX tekshiruv (≤5000 STIR), monitoring (`WatchItem`).
+4. **KR-44** — API kalitlari orqali scoring, admin analitikada kredit sarfi (P2).
+
+### 5.2a. Jahon tajribasi — qolgan JT vazifalari (JAHON_TAJRIBASI_TAKLIFLAR.md 0-bo'lim)
+1. **Real ma'lumot bilan bajarsa bo'ladiganlar:**
+   - JT-16 — shaxsiy inflyatsiya (avval CPI guruh indekslarini tekshirish kerak);
+   - JT-09 — respondent sahifasi va so'rovni tekshirish;
+   - JT-11 — qayta ko'rib chiqishlar jurnali (yangi `SiatValueRevision` jadvali, `sync` ichida);
+   - JT-08 — biznes kayfiyati so'rovi (FQ-08 dvigateli asosida).
+2. **Faqat "Namuna" belgisi bilan:** JT-05 (biznes ochish xaritasi). **Egasining qarori kerak:** JT-06 (OS-JT-2).
+3. **Bloklangan:** JT-07, JT-14 (korxona sanalari), JT-01, JT-03, JT-12 (ro'yxat-2026 natijalari), JT-13, JT-18..JT-20.
+4. Kichik qarzlar:
+   - JT-04 PDF'ida QR rasm yo'q (kutubxona qo'shish ruxsati kerak);
+   - JT-17 "Yoshlar" va "Ayollar" panellari uchun SIAT'dan ko'rsatkichlar katalogga qo'shilishi kerak;
+   - JT-10 rasmiy sanalarni admin kiritishi kerak.
+
+### 5.3. Production'ga chiqarish (README.md "Production")
+GitLab remote → push; serverni monorepo'ga ko'chirish; Celery worker/beat systemd unitlari; `migrate` → `setup_service_limits` → `check --deploy` → `sync_siat`; `TELEGRAM_BOT_TOKEN`, `EMAIL_HOST`; nginx'da `sw.js` `no-cache`.
+
+### 5.4. To'lov va biznes oqimi (ISH_REJASI 2.2)
+Kitob to'lov havolasi qattiq yozilgan; `Order` summasi 0; to'langan shartnoma paketni avtomatik faollashtirmaydi; shartnomani Click orqali to'lab bo'lmaydi; Payme yo'q; `PaymentMerchantRequestLog` yozilmaydi; `UserServicePackage...first()` tasodifiy paket; OneID callback POST/GET nomuvofiqligi.
+
+### 5.5. Egasining qarori kerak (o'zingiz hal qilmang)
+- OS-13 / KR-32: korxona, hudud, ish haqi, narxlar uchun **real manba**. Ungacha korxona bali production'da chiqmaydi.
+- OS-19: xodimlar soni manbai. OS-20: jahon savdosi. OS-18: shartnoma shablonidagi "Sirdaryo viloyati", "2025-yil".
+- OS-07: begona jadvallar (`test`, `uz`, `my_stat_uz_platforma_uchun`), `chat`, `monitoring` app'lari.
+- 38-xizmat (klassifikatorlar) `is_active=False`.
+
+### 5.6. SIAT ma'lumot muammolari (admin orqali)
+Investitsiya 2601/2603 ikkalasi "Qashqadaryo" (`group_region_override`); Buxoro investitsiya jadvali yo'q; 7 yangi tuman chegarasi yo'q (`data/boundary_overrides.json`); tashqi savdo 2023 ~16 marta kichik; `ReportList.deadline` 2025 da qotgan.
+
+### 5.7. Sifat va unumdorlik
+Lighthouse performance 59–76, LCP 5–8 s, `/services` CLS 0.30; Q-01: `BookStore.tsx` (~1750 qator), `ExternalTrade.tsx` (~1390) bo'linmagan (avval test); Q-07: `drf-yasg` qolgan; media zaxira rejasi yo'q; konsultatsiyalarda keraksiz 403 so'rov.
+
+### 5.8. Hujjat ishlari (mayda)
+- `docs/README.md` ni yangilash: KR-39..KR-46 holati, `trade-data/upload` yopilgani, holat sanasi.
+- Repo ildizidagi git'ga kirmagan `korxona_scoring/KORXONA_SCORING (1).md` — `docs/KORXONA_SCORING.md` ning **eski versiyasi** (holat bo'limlarisiz, 646 qator). Foydalanuvchidan so'rab o'chirish yoki e'tiborsiz qoldirish.
+
+## 6. Tekshiruv buyruqlari
+
+```bash
+cd backend && venv/Scripts/python manage.py test                 # Postgres 5433 ishlab turishi kerak
+cd backend && venv/Scripts/python manage.py makemigrations --check
+cd frontend && npx tsc --noEmit && npx eslint src && npm test
+cd frontend && npm run e2e                                         # Playwright (backend va frontend ishlab turishi kerak)
+```
+
+## 7. Sessiyalar jurnali (yangi yozuv pastga qo'shiladi)
+
+| Sana | Nima qilindi | Commit | Keyingi qadam |
+|---|---|---|---|
+| 2026-10-13..16 | ISH_REJASI (F..Q), SIAT KR-01..KR-28, korxona scoringi KR-29..KR-38 | `fe941cb`..`f0554ea` | — |
+| 2026-10-19 | KR-39, KR-40, KR-45, KR-46, KR-42 qisman; XIZMATLAR_TAHLILI 6-bo'lim; hujjatlar `docs/` ga | `d5d6629` | — |
+| 2026-10-20 | Loyiha tahlil qilindi, shu hisobot fayli va `CLAUDE.md` yozildi. Kod o'zgarmadi | — | — |
+| 2026-10-20 | `JAHON_TAJRIBASI_TAKLIFLAR.md` kod bilan tekshirildi (0-bo'lim). JT-02, JT-04, JT-10, JT-15, JT-17 bajarildi (4.4-bo'lim). Aholi soati qo'mitaning rasmiy raqamidan yuradi (`siat.PopulationAnchor`, migratsiya 0006: 2026-10-19 09:00 — 39 535 225). Kabinet "Kredit hamyoni" (`cabinet/Credits.tsx`) qayta joylashtirildi. "Mening xizmatlarim" (`cabinet/ServicesTab.tsx`): nomlar HTML'dan tozalandi, `limit=0` — "Paketda bor" (hisoblanmaydigan imkoniyat), "O'tish" 404 bermaydi (`PersonalCabinet.tsx` → `SLUG_TARGETS`). Kredit → **StatCoin** (UI, admin, xato xabarlari, e2e; migratsiya `credits.0003`). `consult.dump` tekshirildi: baza to'liq, `backend/media` fayllari yo'q (serverdan olish kerak) | commit qilinmagan | Foydalanuvchi bilan tanlash: **(a)** JT-16 → JT-09 → JT-11 → JT-08 (5.2a), **(b)** 5.1 xavfsizlik, **(c)** KR-41. Production'dan oldin 5.1 majburiy |
+| 2026-10-20 | Tariflar: nomlar HTML'dan tozalandi (API `PlainNameMixin`, `common.text.rich_to_plain`), soxta imkoniyatlar olib tashlandi. Raqobatchi narxlari yig'ildi (iHamkor, MyOrg, kredit byurosi). `IHAMKOR_MUQOBIL.md` tekshirildi va IH-01..IH-04, IH-08 bajarildi (4.4a) | commit qilinmagan | Egasining javobi kerak: StatCoin narxi (taklif 0,04 BHM) → IH-12 va KR-41. Keyin: IH-11 PDF yoki xavfsizlik (5.1) |
+| 2026-10-20 | IH-11 (karta PDF), IH-12 metodologiya. Xavfsizlik 5.1: 1–5, 7, 8 yopildi, 6 `.env` orqali (4.5 testlar: 321 OK) | commit qilinmagan | Egasidan: StatCoin narxi; serverdagi `.env` (`ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`); GoodSign parolini almashtirish. Keyin: KR-41 yoki 5.1 qolganlari (CKEditor, past daraja) |
+| 2026-10-20 | Aholi soati stat.uz bilan sinxron (`sync_population_clock`, Beat har 6 soat; farq 0). Bosh sahifa `HomeHighlights.tsx` qayta loyihalandi: "O'zbekiston raqamlarda" (aholi paneli, asosiy ko'rsatkichlar, tashqi savdo, e'lonlar kalendari, ochiq ma'lumotlar bazasi — to'liq raqamlar, manba va davr bilan) va "Portal faoliyati"; chalg'ituvchi "oylik yangi foydalanuvchilar" grafigi olib tashlandi | commit qilinmagan | Egasidan: StatCoin narxi, server `.env`, GoodSign paroli |
+| 2026-10-20 | Kartalar: `ChoroplethMap` — to'q chegaralar, mamlakat soyasi (`.stat-map` CSS), viloyat nomlari (`labelPoint`, kichik hududlarda yo'q); `RegionBubbleMap` — maydon ∝ qiymat (ilgari radiusga +4), pufakcha hudud markazida (markaziy shahar emas), rang shkalasi, qiymat yorliqlari (to'qnashuvsiz), o'lcham izohi. `utils/mapGeo.ts` `labelPoint` + test | commit qilinmagan | — |
+| 2026-10-20 | Bosh sahifa banneri (`Banner.tsx`) qayta loyihalandi: statistika uslubi, xarita siluetti, global qidiruv (`open-global-search` hodisasi → Navbar), tezkor havolalar, jonli aholi soni, portal faoliyati faqat haqiqiy raqamlar bilan (ilgari "+12.5%" kabi soxta o'zgarishlar kodda edi). "O'zbekiston raqamlarda" (`HomeHighlights.tsx`): 4 ta ko'rsatkich kartochkasi 10 yillik dinamika bilan, tashqi savdo (aylanma, eksport/import ulushi, saldo), e'lonlar kalendari sanalar bo'yicha guruhlangan, ochiq ma'lumotlar qatori. `fetchDashboards` 5 daqiqa kesh | commit qilinmagan | — |
+| 2026-10-20 | Bosh sahifa qolgan bo'limlari yagona uslubda: `Interactive.tsx` (haqiqiy havolalar, slug bo'yicha ikonka, toza tavsif, ishlatilmaydigan modallar olib tashlandi), `TariffComponent.tsx` (haqiqiy narx oralig'i — API `price_range`, `ServicePackageSerializer.get_price_range`; xizmat yo'nalishlari), `CalendarReport.tsx` (hafta dushanbadan, o'tgan muddatlar xira, yaqin muddatlar sana bo'yicha, "Рѕylik" kodlash xatosi tozalanadi) | commit qilinmagan | — |
+| 2026-10-20 | `Navbar.tsx` qayta loyihalandi: rasmiy qator (qo'mita, Portal haqida, Reglamentlar, Portal statistikasi, stat.uz, SIAT), statistikaga yo'naltirilgan menyu (Ko'rsatkichlar, Hududlar, Korxonalar, Fuqarolar uchun, Xizmatlar, Savol-javob, Aloqa; faol bo'lim tag chizig'i bilan), avatar-profil menyusi (Escape bilan yopiladi), qizil yuguruvchi qator o'rniga sokin "test rejimi" xabari. Ko'rsatkich kartochkalari grafiklari: yil o'qi, oxirgi nuqta, izoh oynasi, ma'lumotga mos shkala, davr xulosasi | commit qilinmagan | — |

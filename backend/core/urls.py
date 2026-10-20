@@ -65,8 +65,11 @@ if settings.DEBUG:
     else:
         urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-import debug_toolbar
+# ISH_REJASI 2.1: `__debug__/` faqat toolbar middleware faol bo'lsa (base.py: DEBUG=True). Ilgari production'da ham
+# ulangan edi. DEBUG emas, middleware tekshiriladi: testlar DEBUG=False bilan ishlaydi, lekin middleware qoladi.
+if 'debug_toolbar.middleware.DebugToolbarMiddleware' in settings.MIDDLEWARE:
+    import debug_toolbar
 
-urlpatterns += [
-    path('__debug__/', include(debug_toolbar.urls)),
-]
+    urlpatterns += [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ]

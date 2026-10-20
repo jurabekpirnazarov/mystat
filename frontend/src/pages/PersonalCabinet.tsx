@@ -110,7 +110,7 @@ const PersonalCabinet = () => {
     { id: "consultations", label: "Konsultatsiyalarim", icon: CalendarCheck, audience: "legal" },
     { id: "questions", label: "Savollarim", icon: HelpCircle, audience: "citizen" },
     { id: "subscriptions", label: "Obunalarim", icon: BellRing, audience: "all" },
-    { id: "credits", label: "Kreditlarim", icon: Coins, audience: "all" },
+    { id: "credits", label: "StatCoin hamyoni", icon: Coins, audience: "all" },
     { id: "api-keys", label: "API kalitlarim", icon: KeyRound, audience: "all" },
     { id: "payments", label: "To'lovlar", icon: CreditCard, audience: "all" },
     { id: "notifications", label: "Xabarnomalar", icon: Bell, audience: "all" },
@@ -186,8 +186,22 @@ const PersonalCabinet = () => {
 
   // Toggle service group expansion
   // Handle navigation for services
+  // PackageService.slug: ba'zilari alohida sahifa emas, kabinet bo'limi yoki boshqa sahifa (aks holda 404)
+  const SLUG_TARGETS: Record<string, { tab?: string; path?: string }> = {
+    "cabinet/statistic-byulleten": { tab: "requests" },
+    "cabinet/statistical-prints": { tab: "requests" },
+    "cabinet/statistical-analysis": { tab: "requests" },
+    benchmark: { tab: "benchmark" },
+    "partners-export": { path: "/partners" },
+  };
   const handleServiceNavigation = (serviceName: string) => {
-    navigate(`/${serviceName}`);
+    const target = SLUG_TARGETS[serviceName];
+    if (target?.tab) {
+      setActiveTab(target.tab);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    navigate(target?.path ?? `/${serviceName}`);
   };
 
   const toggleServiceExpansion = (serviceId: number) => {

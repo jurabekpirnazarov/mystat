@@ -126,6 +126,8 @@ export interface CompanyProfile {
     };
     real_fields: string[];
     requisites_synthetic: boolean;
+    /** IH-01: hudud sanoat reyestridagi real manzildan */
+    region_is_real?: boolean;
   };
   access: {
     authenticated: boolean; owner: boolean; privileged: boolean; plan: string; balance: number;

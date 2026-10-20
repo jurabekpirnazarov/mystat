@@ -16,6 +16,7 @@ from django.conf import settings
 from apps.accounts.models import Subscribe, User
 from apps.common.utils import TelegramTokenManager
 from apps.services.models import UserServicePackage, ServicePackage, PackageServiceItem, PackageService
+from apps.services.api.ServiceView.serializers import PlainNameMixin
 
 
 class JSONSerializerField(serializers.Field):
@@ -240,7 +241,8 @@ class UserListSerializer(serializers.ModelSerializer):
         return getattr(getattr(usp, "service", None), "name_cry", None) if usp else None
 
 
-class PackageServiceShortSerializer(serializers.ModelSerializer):
+
+class PackageServiceShortSerializer(PlainNameMixin, serializers.ModelSerializer):
     class Meta:
         model = PackageService
         fields = ("id", "name_uz", "name_ru", "name_cry", "slug")

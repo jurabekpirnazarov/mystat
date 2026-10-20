@@ -33,3 +33,16 @@ def refresh_models_task(force_forecast=False):
     count = store.compute_all()
     store.report()
     return {"scores": count}
+
+
+@shared_task
+def sync_population_clock_task():
+    """JT-02: stat.uz aholi hisoblagichi bilan solishtirish; o'zgargan bo'lsa yangi nuqta. Xatoda eski nuqta qoladi."""
+    from . import population_sync
+
+    try:
+        r = population_sync.sync()
+    except Exception as exc:  # tarmoq yoki sahifa tuzilishi — soat eski nuqta bilan yuraveradi
+        logger.warning("Aholi soati: stat.uz dan o'qib bo'lmadi: %s", exc)
+        return {"error": str(exc)}
+    return {"action": r["action"], "official": r["current"], "diff_before": r["diff_before"]}

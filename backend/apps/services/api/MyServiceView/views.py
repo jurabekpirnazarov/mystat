@@ -4,21 +4,28 @@ from rest_framework.generics import RetrieveAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from apps.accounts.permissions import IsAuthenticated
-from .permissions import IsAttachedUser
+from .permissions import IsAssignedEmployee, IsAttachedUser
 from .serializers import ServiceRequestSerializer, ServiceResponseSerializer
 from ...models import ServiceRequestResponse
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 
 
 class ServiceRequestAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        # ISH_REJASI 2.1: filtrlar faqat o'z (yoki biriktirilgan) so'rovlar ichida; ilgari `OR` bilan begona
+        # foydalanuvchilarning so'rovlari ham qaytardi
+        serivces = ServiceRequestResponse.objects.filter(
+            Q(contract__user=request.user) | Q(contract__attached_user=request.user)
+        )
         package_item = request.GET.get('package_item')
         contract = request.GET.get('contract')
-        serivces = ServiceRequestResponse.objects.filter(
-            Q(contract__user=request.user) | Q(contract__attached_user=request.user) | Q(package_item=package_item) | Q(contract=contract)
-        )
+        if package_item:
+            serivces = serivces.filter(package_item=package_item)
+        if contract:
+            serivces = serivces.filter(contract=contract)
         serializer = ServiceRequestSerializer(serivces, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -37,17 +44,17 @@ class ServiceRequestDetailAPIView(RetrieveAPIView):
         user = self.request.user
         pk = self.kwargs.get("pk")
 
-        try:
-            return ServiceRequestResponse.objects.filter(pk=pk).filter(Q(contract__user=user) | Q(contract__attached_user=user)).first()
-        except ServiceRequestResponse.DoesNotExist:
+        obj = ServiceRequestResponse.objects.filter(pk=pk).filter(Q(contract__user=user) | Q(contract__attached_user=user)).first()
+        if obj is None:
             raise NotFound("Bunday service request sizga tegishli emas yoki mavjud emas.")
+        return obj
 
 
 class ServiceResponseAPIView(APIView):
-    permission_classes = [IsAuthenticated, IsAttachedUser]
+    permission_classes = [IsAuthenticated, IsAssignedEmployee]
 
     def patch(self, request, pk):
-        instance = ServiceRequestResponse.objects.get(pk=pk)
+        instance = get_object_or_404(ServiceRequestResponse, pk=pk)
         serializer = ServiceResponseSerializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()

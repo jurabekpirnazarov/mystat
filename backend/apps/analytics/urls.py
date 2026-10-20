@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from . import views, views_card
 from .company_scoring import api as scores
 
 app_name = "analytics"
@@ -16,4 +16,7 @@ urlpatterns = [
     path("company-scores/<str:stir>/", scores.CompanyScoreDetailView.as_view(), name="company-scores-detail"),
     # KR-45: korxona profili
     path("company-profile/<str:stir>/", scores.CompanyProfileView.as_view(), name="company-profile"),
+    # IHAMKOR_MUQOBIL.md IH-08: kontragent kartasi
+    path("company-card/search/", views_card.CompanyCardSearchView.as_view(), name="company-card-search"),
+    path("company-card/<str:stir>/", views_card.CompanyCardView.as_view(), name="company-card"),
 ]

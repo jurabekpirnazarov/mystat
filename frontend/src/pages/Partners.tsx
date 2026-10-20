@@ -154,7 +154,8 @@ export default function Partners() {
 
           <div className="lg:col-span-3 space-y-4">
             <RegionBubbleMap
-              height={300}
+              height={340}
+              unit="korxona"
               selected={regionCode}
               items={(map.data ?? []).map((r) => ({ code: r.region_code, value: r.count, label: `${r.count.toLocaleString("ru-RU")} korxona` }))}
               onSelect={(code) => {

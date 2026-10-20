@@ -9,6 +9,7 @@ from apps.additional_services.views.trade_data_views import TradeDataAPIView
 from apps.additional_services.api_endpoints.StaticClassificationAPI.views import StatisticClassificationCategoryAPIView
 from apps.additional_services.api_endpoints.KtutReportAPI.calendar import ReportCalendarAPIView, ReportReminderAPIView
 from apps.additional_services.api_endpoints.KtutReportAPI.my_reports import MyReportsAPIView, ReportGuideAPIView
+from apps.additional_services.api_endpoints.KtutReportAPI.certificate import CertificateVerifyAPIView, KtutCertificateAPIView
 from apps.additional_services.api_endpoints.ExternalTradeAPI.market_report import HsSearchAPIView, MarketReportAPIView
 from apps.additional_services.api_endpoints.PartnersAPI import (
     PartnerExportAPIView, PartnerFiltersAPIView, PartnerMapAPIView, PartnerSearchAPIView, SavedQueryDetailAPIView,
@@ -42,6 +43,9 @@ urlpatterns = [
     path('reportlist/', ReportListAPIView.as_view()),
     path("priceindex-year-month", PriceIndexYearAndMonthView.as_view()),
     path('ktut/<int:stir_number>', KtutDetailAPIView.as_view()),
+    # JAHON_TAJRIBASI JT-04: statistik kodlar ma'lumotnomasi va uni tekshirish
+    path('ktut/<str:stir_number>/certificate/', KtutCertificateAPIView.as_view(), name='ktut-certificate'),
+    path('certificate/verify/', CertificateVerifyAPIView.as_view(), name='certificate-verify'),
     path('industrial-product-categories/', IndustrialProductCategoryAPIView.as_view(), name='industrial-product-categories'),
     path('industrial-products/<int:category_id>/', IndustrialProductListAPIView.as_view(), name='industrial-products-by-category'),
     path('trade-data/upload', TradeDataAPIView.as_view(), name='trade-data'),

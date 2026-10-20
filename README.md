@@ -160,7 +160,9 @@ Serverda bir martalik o'tish:
 7. Bir martalik: `python manage.py setup_service_limits` — benchmark, bozor tahlili, hamkor eksporti
    va konsultatsiya uchun tariflarga default limit (keyin admin'da o'zgartiriladi; qayta ishga tushirish
    admin limitlarini buzmaydi).
-8. `python manage.py check --deploy` — `common.W001`/`W002` email yoki Telegram sozlanmaganini bildiradi.
+8. `python manage.py check --deploy` — `common.W001`/`W002` email yoki Telegram sozlanmaganini, `W003`/`W004`
+   ochiq `ALLOWED_HOSTS` (`*`) va hamma uchun ochiq CORS'ni bildiradi. `.env` da `ALLOWED_HOSTS=my.stat.uz,...` va
+   `CORS_ALLOWED_ORIGINS=https://my.stat.uz` ni bering (standart qiymat hozirgi serverni buzmaslik uchun ochiq qoldirilgan).
 9. Shartnoma matni `backend/datas/contractContentTemplate.json` dan olinadi (repoda yo'q, serverda qoladi);
    fayl bo'lmasa `backend/contractTemplate.docx` bo'limlari ishlatiladi.
 

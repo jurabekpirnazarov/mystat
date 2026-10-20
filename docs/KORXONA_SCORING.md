@@ -5,6 +5,7 @@
 > **Asos:** `ISH_REJASI.md` (S-01, S-02, S-09, S-10, K-02, K-04, K-07 qoidalari), `SCORING_MODEL.md` (hududlar scoringi, KR-15..KR-28). Bu fayl uning davomi: vazifalar **KR-29..KR-38** (scoring) va **KR-39..KR-44** (tariflar va kreditlar, 11–12-bo'limlar), **KR-45..KR-46** (korxona profili, 13–14-bo'limlar).
 > **Qanday ishlatiladi:** Claude Code'ga "KORXONA_SCORING.md dagi `KR-30` ni bajar" deyish yetarli. Tartib 9-bo'limda.
 > **Namunaviy kod va ma'lumot:** `korxona_scoring/` papkasida: `generate_companies.py` (generator), `score_companies.py` (hisoblash), `namuna_korxonalar.csv` (3000 ta soxta korxona), `namuna_scoring.csv` (ularning bali). Ilovadagi kod shu ikki skript mantiqini takrorlaydi va natijasi ular bilan solishtiriladi (KR-31 qabul mezoni).
+> **Atama:** 11–14-bo'limlardagi "kredit" foydalanuvchiga **"StatCoin"** deb ko'rsatiladi (2026-10-20); kodda nomlar `credits` bo'lib qoladi.
 > **Muhim:** ball **rasmiy baho emas**. Sintetik ma'lumotdagi ball faqat `DEBUG=True` muhitda bor va doim "Namuna" belgisi bilan chiqadi (S-09).
 
 ---

@@ -180,6 +180,8 @@ export interface ServicePackage {
   description_ru: string;
   description_cry: string;
   price: string;
+  /** Tarmoqqa qarab narx oralig'i (QQSsiz); personal — narx foydalanuvchi tashkiloti tarmog'i bo'yicha */
+  price_range?: { min: number; max: number; personal: boolean; vat_included: boolean } | null;
   is_active: boolean;
   duration_days: number;
   file: string | null;

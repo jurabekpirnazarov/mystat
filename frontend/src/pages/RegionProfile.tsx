@@ -80,8 +80,8 @@ export default function RegionProfile() {
   const series = activeMetric ? merged(activeMetric) : [];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="text-gray-900 dark:text-gray-100 py-2">
+      <div className="w-full">
         {loading && !data ? (
           <Skeleton variant="chart" />
         ) : error || !data ? (

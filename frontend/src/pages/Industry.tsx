@@ -386,14 +386,14 @@ const Industry: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+    <div className="">
       <StepProgress />
       
       <div className="mt-8">
         {currentStep === 1 && <IndustryStep1 onNext={goToNextStep} serviceId={serviceId} />}
         {currentStep === 2 && <Step2 />}
         {currentStep === 3 && (
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="w-full">
             <div className="mb-6 flex justify-between items-center">
               <button
                 onClick={goToPreviousStep}

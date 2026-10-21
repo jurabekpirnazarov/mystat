@@ -2,9 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
+/* MG-01: dizayn tokenlari (src/theme/tokens.ts). RGB uchliklari — Tailwind `mg-*` ranglari shaffoflik bilan ishlashi uchun */
+:root {
+  --mg-primary: 0 104 224;
+  --mg-primary-dark: 1 83 178;
+  --mg-primary-light: 26 123 240;
+  --mg-accent: 0 220 130;
+  --mg-success: 45 178 87;
+  --mg-bg: 242 244 247;
+  --mg-surface: 255 255 255;
+  --mg-info: 229 239 252;
+  --mg-heading: 30 41 59;
+  --mg-text: 0 0 0;
+  --mg-muted: 53 72 98;
+  --mg-border: 227 232 239;
+  --mg-sos: 168 85 160;
+  --mg-personal-glow: 241 247 254;
+}
+/* Tungi rejim: my.gov.uz da yo'q — palitradan qorong'ilashtirilgan variant (kontrast >= 4.5:1) */
+.dark {
+  --mg-primary: 96 165 250;
+  --mg-primary-dark: 147 197 253;
+  --mg-primary-light: 59 130 246;
+  --mg-success: 34 197 94;
+  --mg-bg: 17 24 39;
+  --mg-surface: 31 41 55;
+  --mg-info: 30 58 95;
+  --mg-heading: 241 245 249;
+  --mg-text: 243 244 246;
+  --mg-muted: 203 213 225;
+  --mg-border: 55 65 81;
+  --mg-personal-glow: 30 58 95;
+}
+body {
+  font-family: Montserrat, ui-sans-serif, system-ui, sans-serif;
+  background-color: rgb(var(--mg-bg));
+}
+
 /* Kirish qulayligi (U-14): klaviatura fokusini aniq ko'rsatish, harakatni kamaytirish */
 :focus-visible {
-  outline: 2px solid #2563eb;
+  outline: 2px solid rgb(var(--mg-primary));
   outline-offset: 2px;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -22,7 +59,7 @@
   z-index: 100;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
-  background: #2563eb;
+  background: rgb(var(--mg-primary));
   color: #fff;
 }
 .skip-link:focus {

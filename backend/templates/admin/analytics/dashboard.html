@@ -70,6 +70,8 @@
   <div class="an-sec">
     <h3>Xizmatlar bo'yicha limit ishlatilishi</h3>
     {% for u in data.limit_usage %}<div class="an-row"><span class="l">{{ u.service|striptags }}</span><span>{{ u.count }}</span></div>{% empty %}<p class="an-note">Yo'q</p>{% endfor %}
+    <h3>Xizmatlar bo'yicha foydalanish (katalog, MG-10)</h3>
+    {% for u in data.catalog_usage %}<div class="an-row"><span class="l"><a href="/service/{{ u.service|slice:"1:" }}" target="_blank" rel="noopener">{{ u.service }}</a></span><span>{{ u.count }}{% if u.rating %} · {{ u.rating }} ★ ({{ u.ratings }}){% endif %}</span></div>{% empty %}<p class="an-note">Yo'q</p>{% endfor %}
   </div>
   <div class="an-sec">
     <h3>So'rovlar holati</h3>

@@ -4,7 +4,7 @@
 > Unda: nima qilingan, nima qolgan, qayerda to'xtalgan va ishni qanday davom ettirish kerak.
 > Har ish bosqichi tugagach, **shu faylni yangilang** (7-bo'lim, "Sessiyalar jurnali").
 >
-> **Oxirgi yangilanish:** 2026-10-20 · **Oxirgi commit:** `d5d6629` (2026-10-19); JT ishlari commit qilinmagan (`git status`)
+> **Oxirgi yangilanish:** 2026-10-21 · **Oxirgi commit:** `efc0d9b` (2026-10-20) — 2026-10-20 dagi barcha ishlar shu commit'da
 
 ---
 
@@ -48,7 +48,7 @@
 | Proxy | nginx | `nginx/default.conf.template` |
 | Deploy | GitLab CI (systemd + venv, Docker'siz) | `.gitlab-ci.yml` |
 
-Asosiy app'lar: `accounts`, `services` (tariflar, paketlar), `contracts`, `payment` (Click), `analytics` (korxona scoringi), `siat` (hududlar xaritasi, scoring, prognoz), `credits` (kredit hamyoni), `citizens`, `consultations`, `open_api`, `common` (seed_demo, qidiruv), `book_market`, `notifications`, `organizations`, `additional_services`. Tegilmagan: `chat`, `monitoring` (OS-07).
+Asosiy app'lar: `accounts`, `services` (tariflar, paketlar), `contracts`, `payment` (Click), `analytics` (korxona scoringi), `siat` (hududlar xaritasi, scoring, prognoz), `credits` (kredit hamyoni), `portal` (xizmat katalogi bo'yicha foydalanish, baho, sahifa fikri — MG-10/11), `citizens`, `consultations`, `open_api`, `common` (seed_demo, qidiruv), `book_market`, `notifications`, `organizations`, `additional_services`. Tegilmagan: `chat`, `monitoring` (OS-07).
 
 ## 2. Lokal muhit (bu mashina)
 
@@ -77,6 +77,10 @@ Asosiy app'lar: `accounts`, `services` (tariflar, paketlar), `contracts`, `payme
 | `IHAMKOR_MUQOBIL.md` (repo ildizida) | iHamkor muqobili — "Kontragent kartasi", IH-01..IH-12. **0-bo'limda kod bilan tekshiruv va holat jadvali**; 1-to'plam bajarildi (2026-10-20) |
 | `docs/JAHON_TAJRIBASI_TAKLIFLAR.md` | JT-01..JT-20: jahon tajribasi asosida yangi xizmatlar. **0-bo'limda kod bilan tekshiruv va holat jadvali** |
 | `docs/PROEKT_TAHLIL.md` | Boshlang'ich tahlil (tarixiy) |
+| `docs/MYGOV_DIZAYN.md` | my.gov.uz uslubidagi dizayn (2-etap, MG-00..MG-15). **0.5-bo'limda bajarilish holati** |
+| `docs/mygov-reference/` | MG-00 natijasi: o'lchangan tokenlar, skrinshotlar, jonli saytdan farqlar (`README.md`), 98% tekshiruvi (`checklist.md`) |
+| `docs/DIZAYN_HOZIRGI_HOLAT.md` | 1-etap dizayni (eskirgan, tarixiy) |
+| `docs/FEATURELAR_ESKI_VA_HOZIR.md` | Feature'lar: eski (`1e4e61e`) va hozirgi holat, kim uchun, har birining ma'lumot manbasi (real / SIAT / namuna) |
 | `README.md`, `backend/README.md` | Ishga tushirish, seed_demo, production qadamlari, endpoint'lar |
 | `korxona_scoring/` | Namunaviy generator va scoring skripti, CSV'lar (KR-31 solishtirish manbai) |
 
@@ -135,6 +139,17 @@ Asosiy app'lar: `accounts`, `services` (tariflar, paketlar), `contracts`, `payme
   - IH-12 narxlari (StatCoin narxi — egasining qarori);
   - IH-09, IH-10 bloklangan.
 
+### 4.4b. my.gov.uz uslubi — 2-etap (MYGOV_DIZAYN.md) — ✅ MG-00..MG-13; ⚠️ MG-02, MG-14, MG-15 qisman (2026-10-21)
+- **Layout:** `frontend/src/components/layout/` — chap ko'k sidebar, header (hisobot muddati, telefon, til, maxsus imkoniyatlar, Kirish), breadcrumb, fikr vidjeti, Ctrl+Enter, footer. Eski `Navbar.tsx`, `Footer.tsx`, `Interactive.tsx`, `AllServices.tsx`, `NewServices.tsx` o'chirildi.
+- **Tokenlar:** `theme/tokens.ts`, `index.css` (`--mg-*`), `tailwind.config.js` (`mg-*`); shrift Montserrat. Qiymatlar jonli my.gov.uz dan o'lchangan (`tools/mygov-reference/capture.ts`).
+- **Katalog:** `config/spheres.ts` (14), `serviceCatalog.ts` (50 xizmat, raqam = soha×100+tartib), `situations.ts`, `navigation.ts`. Sahifalar: `/spheres`, `/spheres/:id`, `/service/:n`, `/search`, `/popular`, `/situations`, `/privacy`, `/terms`, `/ai-usage`, `/sitemap`; `/services` → `/spheres`; `/statistics` = banner + "O'zbekiston raqamlarda" + top xizmatlar.
+- **Til:** `i18n/` — uz, cry (lotindan avtomatik), ru; faqat qobiq va katalog matnlari. `/ru/...` prefiksi tilni o'rnatadi va prefikssiz manzilga o'tadi.
+- **Backend `apps/portal`:** `ServiceUsage`, `ServiceReview` (sharh moderatsiyadan keyin), `ServiceReviewVote`, `PageFeedback`, `TypoReport`; `/api/portal/...`; seeder `portal` (18 329 foydalanish, 3 344 baho, faqat DEBUG). Sevimlilarga `kind="service"` (`citizens.0002`). Admin analitikada katalog bo'yicha foydalanish.
+- **Kabinet:** MG-12 menyu tartibi, "Tanlanganlar" (`cabinet/FavoritesTab.tsx`), `/cabinet?tab=` havolalari.
+- **Eski sahifalar:** 44 ta sahifadan to'liq ekran fon va markaziy konteyner olib tashlandi; `PageHeader` breadcrumb chizmaydi (layout'da bitta).
+- Testlar: `apps/portal/tests.py` (8), `config/serviceCatalog.test.ts` (5), `i18n/translit.test.ts` (3), `e2e/mygov.spec.ts` (7); vitest 46 OK, e2e 19 + 7 OK, `tsc` 0, `eslint` 0 xato, `vite build` OK.
+- **Checklist: 95,7%** (`docs/mygov-reference/checklist.md`), maqsad 98%.
+
 ### 4.5. Oxirgi tekshiruv natijalari
 - 2026-10-16: backend 271 test OK, `tsc` 0, `eslint` 0 xato, vitest 23 OK.
 - 2026-10-19: yangi testlar (credits, company_profile) OK, `npm run e2e` 19 test OK, `tsc`, `eslint`, `vite build` xatosiz.
@@ -178,6 +193,12 @@ Testlar: `apps/services/tests_security.py` (6). `trade-data/upload` — 2026-10-
    - JT-17 "Yoshlar" va "Ayollar" panellari uchun SIAT'dan ko'rsatkichlar katalogga qo'shilishi kerak;
    - JT-10 rasmiy sanalarni admin kiritishi kerak.
 
+### 5.2b. my.gov.uz uslubi — qolganlari (MYGOV_DIZAYN.md 0.5)
+1. 98% uchun: plitkalar illyustratsiyasi (dizayner), to'liq til prefiksli URL (`useLangPath()`), `@axe-core/playwright` (bog'liqlik qo'shish ruxsati kerak).
+2. Eski sahifalarning ichki ranglari (kulrang/ko'k Tailwind) hali tokenlarga o'tkazilmagan — har sahifa alohida (MG-15).
+3. Sahifa matnlari faqat o'zbekcha: ru/cry faqat qobiq va katalogda.
+4. Egasidan: OS-MG-08 (bosh sahifadan statistik bloklarni olib tashlashni rahbariyat tasdiqlashi), OS-MG-09 (my.gov.uz kabineti skrinshotlari), OS-MG-01 (ishonch telefoni raqami).
+
 ### 5.3. Production'ga chiqarish (README.md "Production")
 GitLab remote → push; serverni monorepo'ga ko'chirish; Celery worker/beat systemd unitlari; `migrate` → `setup_service_limits` → `check --deploy` → `sync_siat`; `TELEGRAM_BOT_TOKEN`, `EMAIL_HOST`; nginx'da `sw.js` `no-cache`.
 
@@ -207,6 +228,7 @@ cd backend && venv/Scripts/python manage.py test                 # Postgres 5433
 cd backend && venv/Scripts/python manage.py makemigrations --check
 cd frontend && npx tsc --noEmit && npx eslint src && npm test
 cd frontend && npm run e2e                                         # Playwright (backend va frontend ishlab turishi kerak)
+node tools/mygov-reference/capture.ts                             # MG-00: my.gov.uz tokenlari va skrinshotlarini qayta olish (proksi HTTPS_PROXY dan)
 ```
 
 ## 7. Sessiyalar jurnali (yangi yozuv pastga qo'shiladi)
@@ -224,3 +246,6 @@ cd frontend && npm run e2e                                         # Playwright 
 | 2026-10-20 | Bosh sahifa banneri (`Banner.tsx`) qayta loyihalandi: statistika uslubi, xarita siluetti, global qidiruv (`open-global-search` hodisasi → Navbar), tezkor havolalar, jonli aholi soni, portal faoliyati faqat haqiqiy raqamlar bilan (ilgari "+12.5%" kabi soxta o'zgarishlar kodda edi). "O'zbekiston raqamlarda" (`HomeHighlights.tsx`): 4 ta ko'rsatkich kartochkasi 10 yillik dinamika bilan, tashqi savdo (aylanma, eksport/import ulushi, saldo), e'lonlar kalendari sanalar bo'yicha guruhlangan, ochiq ma'lumotlar qatori. `fetchDashboards` 5 daqiqa kesh | commit qilinmagan | — |
 | 2026-10-20 | Bosh sahifa qolgan bo'limlari yagona uslubda: `Interactive.tsx` (haqiqiy havolalar, slug bo'yicha ikonka, toza tavsif, ishlatilmaydigan modallar olib tashlandi), `TariffComponent.tsx` (haqiqiy narx oralig'i — API `price_range`, `ServicePackageSerializer.get_price_range`; xizmat yo'nalishlari), `CalendarReport.tsx` (hafta dushanbadan, o'tgan muddatlar xira, yaqin muddatlar sana bo'yicha, "Рѕylik" kodlash xatosi tozalanadi) | commit qilinmagan | — |
 | 2026-10-20 | `Navbar.tsx` qayta loyihalandi: rasmiy qator (qo'mita, Portal haqida, Reglamentlar, Portal statistikasi, stat.uz, SIAT), statistikaga yo'naltirilgan menyu (Ko'rsatkichlar, Hududlar, Korxonalar, Fuqarolar uchun, Xizmatlar, Savol-javob, Aloqa; faol bo'lim tag chizig'i bilan), avatar-profil menyusi (Escape bilan yopiladi), qizil yuguruvchi qator o'rniga sokin "test rejimi" xabari. Ko'rsatkich kartochkalari grafiklari: yil o'qi, oxirgi nuqta, izoh oynasi, ma'lumotga mos shkala, davr xulosasi | commit qilinmagan | — |
+| 2026-10-21 | `docs/FEATURELAR_ESKI_VA_HOZIR.md` yozildi: eski va hozirgi feature'lar, foydalanuvchi turlari, ma'lumot manbalari xaritasi, production'da bo'sh qoladigan bo'limlar. Hisobot sarlavhasidagi commit `efc0d9b` ga yangilandi. Kod o'zgarmadi | commit qilinmagan | Avvalgi tanlov: KR-41, 5.1 qolganlari yoki JT (5.2a) |
+| 2026-10-21 | Bosh sahifa "Interaktiv xizmatlar" (`Interactive.tsx`): kartochkalardan tavsif olib tashlandi, faqat nom (kattaroq, `text-lg`), belgilar va havola qoldi | commit qilinmagan | — |
+| 2026-10-21 | **my.gov.uz uslubi, 2-etap (MYGOV_DIZAYN.md MG-00..MG-15)** — 4.4b-bo'lim. Jonli my.gov.uz o'lchandi (hujjat taxminlaridan farqlar: chap sidebar, breadcrumb, "Hayotiy vaziyatlar" va boshqa bloklar — `mygov-reference/README.md`). Yangi layout, tokenlar, katalog (14 soha, 50 xizmat), soha/pasport/qidiruv/statistika sahifalari, `apps/portal` (baho, foydalanish, fikr), kabinet MG-12. Checklist 95,7%. `MYGOV_DIZAYN (1).md` → `docs/MYGOV_DIZAYN.md` | commit qilinmagan | Foydalanuvchi bilan: commit (MG bosqichlari bo'yicha bo'lish mumkin); 98% uchun 5.2b-1; eski sahifalar ichki ranglari (MG-15) |

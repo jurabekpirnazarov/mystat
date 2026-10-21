@@ -11,6 +11,7 @@ export function favoriteLink(f: Favorite): string {
     case "names": return `/names${p.name ? `?q=${encodeURIComponent(String(p.name))}` : ""}`;
     case "trade": return "/trade-flows";
     case "demography": return "/demographics";
+    case "service": return p.number ? `/service/${p.number}` : "/spheres";
     default: return "/citizens";
   }
 }

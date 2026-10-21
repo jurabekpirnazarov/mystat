@@ -24,8 +24,8 @@ export default function Learn() {
     `inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-colors ${active ? "bg-blue-600 text-white" : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-300"}`;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="py-2">
+      <div className="w-full">
         <PageHeader
           title="Statistika oddiy tilda"
           description="Narxlar, maosh, aholi haqida — oddiy so'zlar bilan, 2 daqiqada o'qiladi. Notanish so'z uchrasa, lug'atga qarang."

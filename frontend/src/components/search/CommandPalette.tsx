@@ -3,11 +3,17 @@ import { useNavigate } from "react-router-dom";
 import { BookOpen, CornerDownLeft, FileText, HelpCircle, Layers, LayoutGrid, Library, Search, X } from "lucide-react";
 import { globalSearch, type SearchGroup, type SearchItem } from "../../api/support";
 import CompanyScoreBadge from "../company-score/CompanyScoreBadge";
+import { SERVICES } from "../../config/serviceCatalog";
+import { translate } from "../../i18n/LangContext";
 
 // Statik sahifalar — serverga so'rovsiz, darhol qidiriladi
 const PAGES: SearchItem[] = [
   { id: "p-home", title: "Bosh sahifa", subtitle: "Sahifa", url: "/" },
-  { id: "p-services", title: "Xizmatlar va tariflar", subtitle: "Sahifa", url: "/services" },
+  { id: "p-services", title: "Barcha xizmatlar (sohalar)", subtitle: "Sahifa", url: "/spheres" },
+  { id: "p-popular", title: "Ommabop xizmatlar", subtitle: "Sahifa", url: "/popular" },
+  { id: "p-search", title: "Kengaytirilgan qidiruv", subtitle: "Xizmatlar, savollar, korxonalar", url: "/search" },
+  { id: "p-situations", title: "Hayotiy vaziyatlar", subtitle: "Biznes, eksport, hisobot, tadqiqot", url: "/situations" },
+  { id: "p-sitemap", title: "Portal xaritasi", subtitle: "Sahifa", url: "/sitemap" },
   { id: "p-trade", title: "Tashqi savdo oqimlari", subtitle: "Eksport va import xaritasi", url: "/trade-flows" },
   { id: "p-ex-trade", title: "Tashqi savdo tahlili", subtitle: "Sahifa", url: "/ex-trade" },
   { id: "p-demo", title: "Demografik ma'lumotlar", subtitle: "Aholi, tug'ilish, migratsiya", url: "/demographics" },
@@ -41,6 +47,14 @@ const PAGES: SearchItem[] = [
   { id: "p-answers", title: "Savol bering — savol-javoblar", subtitle: "Sahifa", url: "/answers" },
   { id: "p-dev", title: "Ochiq ma'lumotlar API", subtitle: "Dasturchilar uchun", url: "/developers" },
 ];
+
+// MG-04/MG-08: katalogdagi har xizmatning pasporti — raqam bilan ham topiladi ("302", "#302")
+const CATALOG: SearchItem[] = SERVICES.filter((s) => s.status === "live").map((s) => ({
+  id: `svc-${s.number}`,
+  title: `#${s.number} ${translate(s.title, "uz")}`,
+  subtitle: translate(s.description, "uz"),
+  url: `/service/${s.number}`,
+}));
 
 const ICONS: Record<string, typeof Search> = {
   pages: LayoutGrid, services: Layers, faq: HelpCircle, reports: FileText, books: Library, classifications: Layers,
@@ -94,7 +108,9 @@ export default function CommandPalette({ open, onClose }: Props) {
 
   const groups = useMemo(() => {
     const term = norm(q.trim());
-    const pages = term ? PAGES.filter((p) => norm(`${p.title} ${p.subtitle}`).includes(term)) : PAGES.slice(0, 6);
+    const pages = term
+      ? [...PAGES, ...CATALOG].filter((p) => norm(`${p.title} ${p.subtitle}`).includes(term.replace(/^#/, ""))).slice(0, 12)
+      : PAGES.slice(0, 6);
     const list: SearchGroup[] = pages.length ? [{ type: "pages", label: "Sahifalar", items: pages.slice(0, 6) }] : [];
     return [...list, ...remote];
   }, [q, remote]);

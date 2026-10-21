@@ -61,8 +61,8 @@ export default function Partners() {
   const totalPages = results.data ? Math.ceil(results.data.count / results.data.page_size) : 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="py-2">
+      <div className="w-full">
         <PageHeader
           title="Hamkor va raqobatchilarni qidirish"
           description="Sanoat korxonalari reyestri bo'yicha: hudud, tuman, faoliyat turi va tashkiliy-huquqiy shakl."

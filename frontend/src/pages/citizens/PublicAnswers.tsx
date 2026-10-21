@@ -12,7 +12,7 @@ export default function PublicAnswers() {
   const [query, setQuery] = useState("");
   const { data, loading, error, reload } = useApi(() => fetchPublicAnswers(query || undefined), [query]);
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="py-2">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <PageHeader title="Fuqarolar savollariga javoblar" description="Statistika xodimlari javob bergan savollar. O'z savolingizni kabinetdan yuboring."
           breadcrumbs={[{ label: "Fuqarolar uchun", to: "/citizens" }, { label: "Savol-javoblar" }]}

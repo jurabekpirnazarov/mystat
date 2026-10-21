@@ -67,6 +67,7 @@ LOCAL_APPS = [
     'apps.consultations',
     'apps.siat',
     'apps.credits',
+    'apps.portal',  # MYGOV_DIZAYN MG-10, MG-11
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

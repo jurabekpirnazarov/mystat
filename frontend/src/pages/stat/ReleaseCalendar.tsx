@@ -89,7 +89,7 @@ export default function ReleaseCalendar() {
   const btn = "inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm hover:border-blue-300";
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="py-2">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <PageHeader
           title="E'lonlar kalendari"

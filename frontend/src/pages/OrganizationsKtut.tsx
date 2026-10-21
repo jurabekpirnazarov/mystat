@@ -31,7 +31,7 @@ function OrganizationsKtut() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+    <div className="flex items-center justify-center p-4 py-10">
       <div className="w-full max-w-lg">
         {/* Main Card */}
         <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">

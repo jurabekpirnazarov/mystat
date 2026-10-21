@@ -158,7 +158,7 @@ const StatisticalClassifications: React.FC = () => {
           Orqaga
         </button>
       </div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-slate-800 mb-2">
             Statistik klassifikatsiyalar
@@ -184,7 +184,7 @@ const StatisticalClassifications: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+    <div className="">
       <RatingModal
         isOpen={isRatingModalOpen}
         onClose={() => setIsRatingModalOpen(false)}

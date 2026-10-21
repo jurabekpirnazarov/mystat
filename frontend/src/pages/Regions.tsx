@@ -278,8 +278,8 @@ export default function Regions() {
   const regionName = region ? (values?.parent?.name || regionsGeo?.find((f) => f.properties.soato === region)?.properties.name_uz || region) : "";
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="text-gray-900 dark:text-gray-100 py-2">
+      <div className="w-full">
         <PageHeader
           title="Hududlar xaritasi"
           description="Rasmiy statistika (SIAT) viloyat va tumanlar kesimida. Hududni bosing — kartochka, viloyatni bosing — tumanlari."

@@ -73,8 +73,8 @@ export default function TradeFlows() {
     `px-4 py-2 text-sm font-medium transition ${active ? "bg-blue-600 text-white" : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"}`;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="py-2">
+      <div className="w-full">
         <PageHeader
           title="Tashqi savdo oqimlari"
           description="Davlatlar kesimida eksport va import: hajm, ulush va o'tgan yilning shu davriga nisbatan o'zgarish."

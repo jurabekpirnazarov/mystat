@@ -27,7 +27,7 @@ export default function CertificateVerify() {
   }, [code]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="py-2">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <PageHeader title="Ma'lumotnomani tekshirish"
           description="my.stat.uz bergan statistik kodlar ma'lumotnomasi haqiqiymi — kodni kiriting."

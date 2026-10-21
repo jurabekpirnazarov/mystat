@@ -46,8 +46,8 @@ export default function Consultation() {
   const legal = user?.type === "legal";
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="py-2">
+      <div className="w-full">
         <PageHeader title="Konsultant bilan konsultatsiya" description="Statistika mutaxassisi bilan onlayn yoki ofisda uchrashuv band qiling. Paket limiti bilan."
           breadcrumbs={[{ label: "Bosh sahifa", to: "/" }, { label: "Xizmatlar", to: "/services" }, { label: "Konsultatsiya" }]} />
         {!isAuthenticated ? <p className="mb-4 text-sm"><Link to={loginUrl()} className="text-blue-600 underline">Kiring</Link> — band qilish faqat korxonalar uchun.</p>

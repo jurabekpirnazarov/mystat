@@ -17,8 +17,8 @@ const ITEMS = [
 /** FQ: "Fuqarolar uchun" bo'limi — barcha bepul xizmatlar. */
 export default function CitizensHub() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="py-2">
+      <div className="w-full">
         <PageHeader title="Fuqarolar uchun" description="Bepul xizmatlar: raqamlar shaxsiy hayotingizga bog'lab, sodda tilda." breadcrumbs={[{ label: "Bosh sahifa", to: "/" }, { label: "Fuqarolar uchun" }]} />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {ITEMS.map(({ to, icon: Icon, title, text }) => (

@@ -53,7 +53,7 @@ const BookOrderPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-8">
+    <div className="py-2">
       <BookOrder
         cart={pageData.cart}
         books={pageData.books}

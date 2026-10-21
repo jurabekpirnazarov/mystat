@@ -115,7 +115,7 @@ const OneIDCallback = () => {
   }, []); // Dependencies bo'sh - faqat bir marta ishlaydi
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+    <div className="flex items-center justify-center py-10">
       <div className="text-center">
         <div className={`mx-auto w-16 h-16 rounded-xl flex items-center justify-center mb-4 ${
           error 

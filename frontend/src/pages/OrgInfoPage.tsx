@@ -100,7 +100,7 @@ const OrgInfoPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+    <div className="">
       {renderStepProgress()}
 
       {currentStep === 1 && <BookStep1 onNext={goToNextStep} serviceId={serviceId} />}

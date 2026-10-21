@@ -100,8 +100,8 @@ export default function MarketReport() {
   const chart = report?.dynamics.map((y) => ({ ...y, label: y.partial ? `${y.year}*` : String(y.year) })) ?? [];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="py-2">
+      <div className="w-full">
         <PageHeader
           title="Bozor tahlili"
           description="Mahsulot (HS kodi) bo'yicha eksport va import, asosiy hamkorlar, narx dinamikasi va bozor konsentratsiyasi."

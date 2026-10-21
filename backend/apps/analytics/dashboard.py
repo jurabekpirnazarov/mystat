@@ -96,8 +96,24 @@ def build_dashboard(date_from, date_to, include_demo=False):
         "ratings": list(ratings.values("service__name_uz").annotate(avg=Avg("value"), n=Count("id")).order_by("-n")[:10]),
         "funnel": [{"step": s, "count": n, "pct": round(n / funnel[0][1] * 100, 1) if funnel[0][1] else 0} for s, n in funnel],
         "company_scores": company_scores(include_demo),
+        "catalog_usage": catalog_usage(date_from, date_to, include_demo),
         "generated_at": today,
     }
+
+
+def catalog_usage(date_from, date_to, include_demo):
+    """MYGOV_DIZAYN MG-10: katalog xizmatlari (raqam bo'yicha) — davrdagi foydalanish soni va o'rtacha baho, top-15."""
+    from apps.portal.models import ServiceReview, ServiceUsage
+
+    usage = ServiceUsage.objects.filter(created_at__date__gte=date_from, created_at__date__lte=date_to)
+    reviews = ServiceReview.objects.all()
+    if not include_demo:
+        usage, reviews = usage.filter(is_synthetic=False), reviews.filter(is_synthetic=False)
+    rating = {r["service_number"]: r for r in reviews.values("service_number").annotate(a=Avg("score"), n=Count("id"))}
+    rows = usage.values("service_number").annotate(n=Count("id")).order_by("-n")[:15]
+    return [{"service": f"#{r['service_number']}", "count": r["n"],
+             "rating": round(rating[r["service_number"]]["a"], 2) if r["service_number"] in rating else None,
+             "ratings": rating.get(r["service_number"], {}).get("n", 0)} for r in rows]
 
 
 def company_scores(include_demo):
@@ -148,6 +164,7 @@ def _xlsx(data):
                               ("Shartnomalar (oy)", data["contracts_by_month"], ["month", "count", "sum"]),
                               ("Shartnomalar (hudud)", data["contracts_by_region"], ["region", "count", "sum"]),
                               ("Limit ishlatilishi", data["limit_usage"], ["service", "count"]),
+                              ("Katalog xizmatlari", data["catalog_usage"], ["service", "count", "rating", "ratings"]),
                               ("Voronka", data["funnel"], ["step", "count", "pct"])):
         sheet = wb.create_sheet(title[:31])
         sheet.append(cols)

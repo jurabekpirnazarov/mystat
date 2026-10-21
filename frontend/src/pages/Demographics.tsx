@@ -290,8 +290,8 @@ export default function Demographics() {
     `shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition ${active ? "bg-blue-600 text-white shadow" : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"}`;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="py-2">
+      <div className="w-full">
         <PageHeader
           title="Demografik ma'lumotlar"
           description="Aholi soni, tug'ilish, o'lim, nikoh, ajrim va migratsiya — hudud, yil va boshqa kesimlarda."

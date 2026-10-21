@@ -1152,7 +1152,7 @@ const ExternalTrade = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4">
+    <div className="p-4">
       <div className="w-full mx-auto">
         {/* Header */}
         {/* <div className="mb-8">

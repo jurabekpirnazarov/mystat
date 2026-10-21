@@ -34,8 +34,8 @@ export default function Dashboards() {
   }, [current]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="py-2">
+      <div className="w-full">
         <PageHeader
           title="Mavzuli panellar"
           description="Asosiy ko'rsatkichlar bir sahifada: oxirgi qiymat, o'tgan yilga nisbatan o'zgarish va dinamika."

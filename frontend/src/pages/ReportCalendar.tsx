@@ -325,7 +325,7 @@ const ReportCalendar: React.FC = () => {
           </div>
         </div>
       </div>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+      <div className="w-full mt-10">
         <ReportMonthCalendar />
       </div>
     </div>
@@ -417,7 +417,7 @@ const ReportCalendar: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+    <div className="">
       <Toaster />
       {renderStepProgress()}
 

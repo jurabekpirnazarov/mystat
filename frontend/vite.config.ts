@@ -12,6 +12,8 @@ const devProxy = {
 
 export default defineConfig({
   plugins: [react()],
+  // MG-11: "Oxirgi o'zgartirilgan sana" — build vaqti
+  define: { __BUILD_DATE__: JSON.stringify(new Date().toISOString()) },
   // Playwright e2e testlari (e2e/*.spec.ts) vitest'ga kirmaydi — `npm run e2e`
   test: { exclude: [...configDefaults.exclude, "e2e/**"] },
   resolve: {

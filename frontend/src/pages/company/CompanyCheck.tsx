@@ -57,7 +57,7 @@ export default function CompanyCheck() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 dark:bg-gray-900">
+    <div className="py-2">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <PageHeader
           title="Kontragentni tekshirish"

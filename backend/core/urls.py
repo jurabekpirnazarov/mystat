@@ -44,6 +44,7 @@ urlpatterns += [
     path('api/credits/', include('apps.credits.urls', namespace='credits')),  # KORXONA_SCORING KR-40
     path('api/citizens/', include('apps.citizens.urls', namespace='citizens')),
     path('api/open/', include('apps.open_api.urls', namespace='open_api')),
+    path('api/portal/', include('apps.portal.urls', namespace='portal')),  # MYGOV_DIZAYN MG-10, MG-11
     path('api/consultations/', include('apps.consultations.urls', namespace='consultations')),
 ]
 

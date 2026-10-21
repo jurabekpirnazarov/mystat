@@ -24,8 +24,8 @@ export default function Names() {
   const s = stats.data;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="py-2">
+      <div className="w-full">
         <PageHeader title="Ismlar statistikasi" description="Ismingiz yangi tug'ilgan chaqaloqlarga qanchalik tez-tez qo'yiladi?"
           breadcrumbs={[{ label: "Fuqarolar uchun", to: "/citizens" }, { label: "Ismlar" }]} />
         <SampleBanner text="Ismlar statistikasi to'liq namuna ma'lumot — real manba (FHDYo) hali ulanmagan." />

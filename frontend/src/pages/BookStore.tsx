@@ -699,9 +699,9 @@ const BookStore: React.FC = () => {
 
   // Step 2 Component - Service Usage
   const renderStep2 = () => (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+    <div className="">
       <div className="pt-5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full">
           <div className="flex items-center justify-between mb-5">
             <h1 className="text-3xl font-bold text-gray-900">
               Statistik nashrlar
@@ -729,7 +729,7 @@ const BookStore: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full">
         <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
           <div className="flex justify-between items-center p-1">
             <div className="flex space-x-2">
@@ -764,7 +764,7 @@ const BookStore: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full py-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4 sm:mb-0">
             {tabs.find((tab) => tab.id === activeTab)?.label.toUpperCase()}
@@ -1383,7 +1383,7 @@ const BookStore: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+    <div className="">
       <RatingModal
         isOpen={isRatingModalOpen}
         onClose={() => setIsRatingModalOpen(false)}

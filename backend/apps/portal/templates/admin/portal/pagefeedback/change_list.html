@@ -1,0 +1,13 @@
+{% extends "admin/change_list.html" %}
+{% block result_list %}
+  {% if summary %}
+  <h2 style="margin:8px 0">Sahifalar bo'yicha "Ha" foizi</h2>
+  <table style="margin-bottom:24px">
+    <thead><tr><th>Sahifa</th><th>Jami</th><th>Ha</th><th>Ha, %</th></tr></thead>
+    <tbody>
+    {% for r in summary %}<tr><td>{{ r.path }}</td><td>{{ r.total }}</td><td>{{ r.likes }}</td><td>{{ r.percent }}%</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}

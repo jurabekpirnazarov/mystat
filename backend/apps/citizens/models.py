@@ -205,7 +205,9 @@ class CitizenQuestion(models.Model):
 class FavoriteIndicator(models.Model):
     """FQ-04: fuqaro kabinetidagi sevimli ko'rsatkich (sahifa + parametrlar)."""
     KINDS = (("cpi", "CPI"), ("region", _("Hudud")), ("salary", _("Ish haqi")), ("prices", _("Narxlar")),
-             ("names", _("Ismlar")), ("trade", _("Tashqi savdo")), ("demography", _("Demografiya")))
+             ("names", _("Ismlar")), ("trade", _("Tashqi savdo")), ("demography", _("Demografiya")),
+             # MYGOV_DIZAYN MG-07: xizmat pasportidagi "Tanlanganlarga qo'shish" (params = {"number": 302})
+             ("service", _("Xizmat")))
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="favorite_indicators")
     kind = models.CharField(max_length=16, choices=KINDS)
     title = models.CharField(max_length=120)

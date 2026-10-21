@@ -74,6 +74,7 @@ def registry():
     from .enterprise_scoring import EnterpriseScoringSeeder
     from .misc import MiscSeeder
     from .notifications import NotificationsSeeder
+    from .portal import PortalSeeder
     from .report_guides import ReportGuidesSeeder
     from .service_requests import ServiceRequestsSeeder
 
@@ -93,5 +94,6 @@ def registry():
         ApiSubscriptionsSeeder,
         ConsultationsSeeder,
         CreditsSeeder,
+        PortalSeeder,
     ]
     return {s.name: s for s in seeders}

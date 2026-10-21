@@ -55,7 +55,7 @@ const NOT_INCLUDED = [
 export default function CompanyCardMethodology() {
   useEffect(() => { document.title = "Kontragent kartasi: manbalar va cheklovlar — my.stat.uz"; }, []);
   return (
-    <div className="min-h-screen bg-gray-50 py-8 dark:bg-gray-900">
+    <div className="py-2">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <PageHeader title="Kontragent kartasi: manbalar va cheklovlar"
           description="Kartadagi har bir ma'lumot qayerdan olinadi, qancha korxonani qamraydi va nima ataylab ko'rsatilmaydi."

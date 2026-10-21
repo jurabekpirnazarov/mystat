@@ -6,8 +6,8 @@ import {
   useLocation,
 } from "react-router-dom";
 import { Suspense, lazy, useEffect } from "react";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
+import MainLayout from "./components/layout/MainLayout";
+import { LangProvider, isLang, useLang } from "./i18n/LangContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { useAuth } from "./contexts/AuthContext";
 import { OrdersProvider } from "./contexts/OrdersContext";
@@ -48,8 +48,15 @@ function setupGlobalErrorHandler() {
 // Lazy loading pages
 const HomePage = lazy(() => import("./pages/HomePage"));
 const AboutPortal = lazy(() => import("./pages/AboutPortal"));
-const Statistics = lazy(() => import("./pages/Statistics"));
-const AllServices = lazy(() => import("./pages/AllServices"));
+// MYGOV_DIZAYN 2-etap: sohalar, xizmat pasporti, qidiruv, statistika, huquqiy sahifalar
+const StatisticsHub = lazy(() => import("./pages/portal/StatisticsHub"));
+const Spheres = lazy(() => import("./pages/portal/Spheres"));
+const ServicePage = lazy(() => import("./pages/portal/ServicePage"));
+const SearchPage = lazy(() => import("./pages/portal/Search"));
+const Popular = lazy(() => import("./pages/portal/Popular"));
+const Situations = lazy(() => import("./pages/portal/Situations"));
+const LegalPage = lazy(() => import("./pages/portal/LegalPage"));
+const Sitemap = lazy(() => import("./pages/portal/Sitemap"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Login = lazy(() => import("./pages/Login"));
 const PersonalCabinet = lazy(() => import("./pages/PersonalCabinet"));
@@ -128,8 +135,21 @@ function AppRoutes() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPortal />} />
-          <Route path="/statistics" element={<Statistics />} />
-          <Route path="/services" element={<AllServices />} />
+          <Route path="/statistics" element={<StatisticsHub />} />
+          {/* MG-06: eski "Barcha xizmatlar" katalogi sohalar sahifasiga almashdi */}
+          <Route path="/services" element={<Navigate to="/spheres" replace />} />
+          <Route path="/all-services" element={<Navigate to="/spheres" replace />} />
+          <Route path="/spheres" element={<Spheres />} />
+          <Route path="/spheres/:id" element={<Spheres />} />
+          <Route path="/service/:number" element={<ServicePage />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/popular" element={<Popular />} />
+          <Route path="/situations" element={<Situations />} />
+          <Route path="/situations/:slug" element={<Situations />} />
+          <Route path="/privacy" element={<LegalPage kind="privacy" />} />
+          <Route path="/terms" element={<LegalPage kind="terms" />} />
+          <Route path="/ai-usage" element={<LegalPage kind="ai-usage" />} />
+          <Route path="/sitemap" element={<Sitemap />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/questions" element={<FAQ />} />
           <Route path="/books" element={<BookStore />} />
@@ -207,20 +227,24 @@ function AppRoutes() {
   );
 }
 
-/** JT-15: `/embed/...` sahifalari boshqa saytlarda iframe ichida — navbar va footer'siz. */
+/**
+ * JT-15: `/embed/...` sahifalari boshqa saytlarda iframe ichida — layout'siz.
+ * MG-02: `/uz/...`, `/cry/...`, `/ru/...` — tilni o'rnatadi va prefikssiz manzilga o'tadi (eski havolalar o'zgarmaydi).
+ */
 function Shell() {
-  const { pathname } = useLocation();
+  const { pathname, search, hash } = useLocation();
+  const { setLang } = useLang();
+  const first = pathname.split("/")[1];
+  const prefixed = isLang(first);
+  useEffect(() => {
+    if (prefixed) setLang(first);
+  }, [prefixed, first, setLang]);
+  if (prefixed) return <Navigate to={`${pathname.slice(first.length + 1) || "/"}${search}${hash}`} replace />;
   if (pathname.startsWith("/embed/")) return <AppRoutes />;
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
-      <a href="#main-content" className="skip-link">Asosiy kontentga o'tish</a>
-      <Navbar />
-      {/* min-h-screen: sahifa yuklanguncha footer ko'rinmaydi — keyin pastga "sakramaydi" (CLS) */}
-      <main id="main-content" tabIndex={-1} className="min-h-screen">
-        <AppRoutes />
-      </main>
-      <Footer />
-    </div>
+    <MainLayout>
+      <AppRoutes />
+    </MainLayout>
   );
 }
 
@@ -232,6 +256,7 @@ function App() {
 
   return (
     <ThemeProvider>
+      <LangProvider>
       <OrdersProvider>
         <NotificationsProvider>
         <Router>
@@ -239,6 +264,7 @@ function App() {
         </Router>
         </NotificationsProvider>
       </OrdersProvider>
+      </LangProvider>
     </ThemeProvider>
   );
 }

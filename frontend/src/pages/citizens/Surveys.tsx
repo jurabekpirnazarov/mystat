@@ -12,7 +12,7 @@ import { loginUrl } from "../../utils/loginRedirect";
 export function SurveyList() {
   const { data, loading, error, reload } = useApi(fetchSurveys, []);
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="py-2">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <PageHeader title="Aholi so'rovnomalari" description="Qisqa so'rovnomalarda qatnashing; natijalar hamma uchun ochiq."
           breadcrumbs={[{ label: "Fuqarolar uchun", to: "/citizens" }, { label: "So'rovnomalar" }]} />
@@ -166,7 +166,7 @@ export function SurveyPage() {
   const view = params.get("view") === "results" ? "results" : "form";
   const { data } = useApi(() => fetchSurvey(slug), [slug]);
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="py-2">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <PageHeader title={data?.title ?? "So'rovnoma"} description={data?.description}
           breadcrumbs={[{ label: "Fuqarolar uchun", to: "/citizens" }, { label: "So'rovnomalar", to: "/surveys" }, { label: data?.title ?? "" }]}

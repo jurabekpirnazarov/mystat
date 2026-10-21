@@ -54,8 +54,8 @@ export default function Prices() {
   const yearAgo = (basketSeries.data?.series ?? []).slice(-13)[0]?.total;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="py-2">
+      <div className="w-full">
         <PageHeader title="Narxlar monitoringi" description="Asosiy iste'mol mahsulotlari narxi hududlar bo'yicha va oyma-oy. O'z savatingizni tuzing."
           breadcrumbs={[{ label: "Fuqarolar uchun", to: "/citizens" }, { label: "Narxlar" }]} />
         <SampleBanner show={data?.data_source !== "real"} text="Mahsulot narxlari hozircha namuna. Umumiy inflyatsiya uchun real ISN — inflyatsiya kalkulyatorida." />

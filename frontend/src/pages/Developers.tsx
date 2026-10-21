@@ -17,7 +17,7 @@ const ENDPOINTS = [
 export default function Developers() {
   const { isAuthenticated } = useAuth();
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="py-2">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <PageHeader title="Ochiq ma'lumotlar API" description="Tadqiqotchi, jurnalist va dasturchilar uchun: statistik ko'rsatkichlarni JSON yoki CSV ko'rinishida oling."
           breadcrumbs={[{ label: "Fuqarolar uchun", to: "/citizens" }, { label: "Dasturchilar" }]}

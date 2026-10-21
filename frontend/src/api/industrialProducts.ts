@@ -41,9 +41,12 @@ export const getIndustrialProducts = async (params?: {
 export interface IndustryCategory {
   id: number;
   children: IndustryCategory[];
+  /** Toifa va uning quyi toifalaridagi ishlab chiqaruvchilar soni (backend `rollup_counts`) */
+  product_count?: number;
   name_uz: string | null;
   name_ru: string | null;
-  name_cry: string | null;
+  name_cry?: string | null;
+  name_cyr?: string | null;
   created_at: string | null;
   updated_at: string | null;
   is_active: boolean | null;
@@ -101,31 +104,34 @@ export interface IndustryCategoriesResponse {
 
 export const getIndustryCategories = async (): Promise<IndustryCategory[]> => {
   const response = await getRequest(industry_service);
-  
+
   // Check if response has results array (paginated response)
   if (response && typeof response === 'object' && 'results' in response) {
     const paginatedResponse = response as IndustryCategoriesResponse;
     return paginatedResponse.results;
   }
-  
+
   // Fallback for direct array response
   if (Array.isArray(response)) {
     return response as IndustryCategory[];
   }
-  
+
   console.warn('⚠️ Unexpected response format:', response);
   return [];
 };
 
 // Get industrial products filtered by category ID
 export const getIndustrialProductsByCategory = async (categoryId: number, params?: {
-  page?: number;
+  offset?: number;
   search?: string;
   limit?: number;
+  lang?: string;
 }): Promise<DetailedIndustrialProductsResponse> => {
   const apiUrl = `${industrial_products_api}${categoryId}/`;
-  
-  const response = await getRequest(apiUrl, params as Record<string, string>);
-  
+  const query: Record<string, string> = {};
+  for (const [k, v] of Object.entries(params ?? {})) if (v !== undefined && v !== "") query[k] = String(v);
+
+  const response = await getRequest(apiUrl, query);
+
   return response as DetailedIndustrialProductsResponse;
 };

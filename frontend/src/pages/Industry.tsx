@@ -5,9 +5,29 @@ import { getIndustryCategories, IndustryCategory, getIndustrialProductsByCategor
 import { useServiceId } from '../utils/useServiceId';
 import CompanyScoreBadge from '../components/company-score/CompanyScoreBadge';
 import { useCompanyScores } from '../api/companyScores';
+import { useLang } from '../i18n/LangContext';
+
+const PAGE_SIZE = 20;
+
+/** Daraxtdan toifani topish (ikkinchi va uchinchi daraja ham). */
+function findCategory(list: IndustryCategory[], id: number): IndustryCategory | undefined {
+  for (const c of list) {
+    if (c.id === id) return c;
+    const hit = findCategory(c.children ?? [], id);
+    if (hit) return hit;
+  }
+  return undefined;
+}
+
+/** Ishlab chiqaruvchisi bor toifalar (bo'sh toifalar yashiriladi). */
+const nonEmpty = (list: IndustryCategory[]) => list.filter((c) => (c.product_count ?? 1) > 0);
 
 const Industry: React.FC = () => {
   const { serviceId } = useServiceId(); // get real ID from API
+  const { lang } = useLang();
+  // Toifa nomi tanlangan tilda (ilgari doim ruscha chiqardi)
+  const catName = (c?: IndustryCategory | null) =>
+    (lang === 'ru' ? c?.name_ru : lang === 'cry' ? (c?.name_cry ?? c?.name_cyr) : c?.name_uz) || c?.name_uz || c?.name_ru || '';
 
   // Component unmount bo'lganda localStorage'ni tozalash
   useEffect(() => {
@@ -15,7 +35,7 @@ const Industry: React.FC = () => {
       localStorage.removeItem("industry_currentStep");
     };
   }, []);
-  
+
   // Step management (persisted in localStorage)
   const getInitialStep = () => {
     const saved = localStorage.getItem("industry_currentStep");
@@ -24,17 +44,17 @@ const Industry: React.FC = () => {
   };
 
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(getInitialStep());
-  
+
   // API state
   const [industryCategories, setIndustryCategories] = useState<IndustryCategory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Step 2 state
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedParent, setSelectedParent] = useState<IndustryCategory | null>(null);
   const [expandedParent, setExpandedParent] = useState<number | null>(null);
-  
+
   // Step 3 state
   const [industrialProducts, setIndustrialProducts] = useState<DetailedIndustrialProduct[]>([]);
   // Sahifadagi barcha ishlab chiqaruvchilar uchun bitta batch so'rov (KR-34)
@@ -42,6 +62,8 @@ const Industry: React.FC = () => {
   const [productsLoading, setProductsLoading] = useState(false);
   const [productsError, setProductsError] = useState<string | null>(null);
   const [totalProducts, setTotalProducts] = useState(0);
+  const [page, setPage] = useState(0);
+  const [search, setSearch] = useState('');
 
   // Fetch industry categories from API
   const fetchIndustryCategories = async () => {
@@ -49,10 +71,10 @@ const Industry: React.FC = () => {
       setIsLoading(true);
       setError(null);
       const categories = await getIndustryCategories();
-      
+
       if (Array.isArray(categories) && categories.length > 0) {
         // Filter only parent categories (those without parent)
-        const parentCategories = categories.filter(item => item.parent === null);
+        const parentCategories = categories.filter(item => item.parent === null && (item.product_count ?? 1) > 0);
         setIndustryCategories(parentCategories);
       } else {
         console.warn('⚠️ No categories found or invalid response');
@@ -77,12 +99,13 @@ const Industry: React.FC = () => {
   const goToNextStep = () => {
     if (currentStep < 3) {
       const nextStep = (currentStep + 1) as 1 | 2 | 3;
-      
+
       // If going to Step 3, fetch industrial products
       if (nextStep === 3 && selectedCategory) {
-        fetchIndustrialProducts(Number(selectedCategory));
+        setSearch('');
+        fetchIndustrialProducts(Number(selectedCategory), 0, '');
       }
-      
+
       setCurrentStep(nextStep);
       localStorage.setItem("industry_currentStep", String(nextStep));
     }
@@ -101,13 +124,16 @@ const Industry: React.FC = () => {
 
 
   // Fetch industrial products for Step 3
-  const fetchIndustrialProducts = async (categoryId: number) => {
+  const fetchIndustrialProducts = async (categoryId: number, pageIndex = 0, query = search) => {
     try {
       setProductsLoading(true);
       setProductsError(null);
-      
-      const response = await getIndustrialProductsByCategory(categoryId, { limit: 20 });
-      
+      setPage(pageIndex);
+
+      const response = await getIndustrialProductsByCategory(categoryId, {
+        limit: PAGE_SIZE, offset: pageIndex * PAGE_SIZE, search: query.trim(), lang,
+      });
+
       setIndustrialProducts(response.results);
       setTotalProducts(response.count);
     } catch (err) {
@@ -132,7 +158,7 @@ const Industry: React.FC = () => {
       product.name_ru,
       product.name_uz
     ].filter(Boolean).join(' ').toLowerCase();
-    
+
     if (text.includes('tog') || text.includes('kon') || text.includes('горно') || text.includes('геоло')) {
       return <Building2 className="w-5 h-5" />;
     } else if (text.includes('qayta') || text.includes('ishlash') || text.includes('перераб') || text.includes('производ')) {
@@ -227,8 +253,8 @@ const Industry: React.FC = () => {
               <div className="text-center">
                 <div className="text-red-600 mb-2">⚠️</div>
                 <p className="text-red-600">{error}</p>
-                <button 
-                  onClick={() => window.location.reload()} 
+                <button
+                  onClick={() => window.location.reload()}
                   className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
                   Qayta urinish
@@ -250,7 +276,7 @@ const Industry: React.FC = () => {
                 </svg>
                 Topilgan kategoriyalar: {industryCategories.length} ta asosiy yo'nalish
               </div>
-              
+
               {industryCategories.map((parentCategory: IndustryCategory) => (
                 <div key={parentCategory.id} className="border rounded-lg overflow-hidden">
                   {/* Parent Category Header */}
@@ -273,10 +299,10 @@ const Industry: React.FC = () => {
                         </div>
                         <div>
                           <h3 className="font-semibold text-gray-800 text-lg">
-                            {parentCategory.name_ru}
+                            {catName(parentCategory)}
                           </h3>
                           <p className="text-sm text-gray-600">
-                            {parentCategory.children ? `${parentCategory.children.length} ta kategoriya` : 'Kategoriyalar yo\'q'}
+                            {nonEmpty(parentCategory.children ?? []).length} ta kategoriya · {(parentCategory.product_count ?? 0).toLocaleString('ru-RU')} ta korxona
                           </p>
                         </div>
                       </div>
@@ -297,7 +323,7 @@ const Industry: React.FC = () => {
                   {expandedParent === parentCategory.id && parentCategory.children && (
                     <div className="bg-gray-50 p-2">
                       <div className="space-y-2">
-                        {parentCategory.children.map((child: IndustryCategory) => (
+                        {nonEmpty(parentCategory.children).map((child: IndustryCategory) => (
                           <div
                             key={child.id}
                             onClick={() => {
@@ -313,13 +339,12 @@ const Industry: React.FC = () => {
                             <div className="flex items-center justify-between">
                               <div>
                                 <h4 className="font-medium text-gray-800">
-                                  {child.name_ru}
+                                  {catName(child)}
                                 </h4>
-                                {child.children && child.children.length > 0 && (
-                                  <p className="text-xs text-gray-500 mt-1">
-                                    {child.children.length} ta sub-kategoriya
-                                  </p>
-                                )}
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {(child.product_count ?? 0).toLocaleString('ru-RU')} ta korxona
+                                  {nonEmpty(child.children ?? []).length > 0 && ` · ${nonEmpty(child.children).length} ta sub-kategoriya`}
+                                </p>
                               </div>
                               {selectedCategory === child.id.toString() && (
                                 <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
@@ -327,6 +352,22 @@ const Industry: React.FC = () => {
                                 </svg>
                               )}
                             </div>
+                            {/* Quyi toifa: tanlangan toifa ichidan torroq tanlash */}
+                            {(selectedCategory === child.id.toString() || nonEmpty(child.children ?? []).some((g) => g.id.toString() === selectedCategory))
+                              && nonEmpty(child.children ?? []).length > 0 && (
+                              <div className="mt-3 flex flex-wrap gap-2" onClick={(e) => e.stopPropagation()}>
+                                <button type="button" onClick={() => setSelectedCategory(child.id.toString())}
+                                  className={`rounded-full border px-3 py-1 text-xs ${selectedCategory === child.id.toString() ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300 text-gray-700'}`}>
+                                  Hammasi
+                                </button>
+                                {nonEmpty(child.children).map((g) => (
+                                  <button key={g.id} type="button" onClick={() => setSelectedCategory(g.id.toString())}
+                                    className={`rounded-full border px-3 py-1 text-xs ${selectedCategory === g.id.toString() ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300 text-gray-700'}`}>
+                                    {catName(g)} ({(g.product_count ?? 0).toLocaleString('ru-RU')})
+                                  </button>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -345,16 +386,16 @@ const Industry: React.FC = () => {
                   <span className="font-medium">Tanlangan yo'nalish:</span>
                 </div>
                 <p className="mt-2 text-green-800 font-semibold">
-                  {selectedParent.name_ru}
+                  {catName(selectedParent)}
                   {selectedCategory && (
                     <span className="text-gray-600">
                       {' → '}
-                      {selectedParent.children?.find(child => child.id === Number(selectedCategory))?.name_ru}
+                      {catName(findCategory(selectedParent.children ?? [], Number(selectedCategory)))}
                     </span>
                   )}
                 </p>
               </div>
-              
+
               <div className="mt-6 flex justify-end">
                 <button
                   onClick={goToNextStep}
@@ -388,7 +429,7 @@ const Industry: React.FC = () => {
   return (
     <div className="">
       <StepProgress />
-      
+
       <div className="mt-8">
         {currentStep === 1 && <IndustryStep1 onNext={goToNextStep} serviceId={serviceId} />}
         {currentStep === 2 && <Step2 />}
@@ -424,10 +465,10 @@ const Industry: React.FC = () => {
                       <p className="text-gray-600 mt-1">
                         {selectedParent && selectedCategory && (
                           <>
-                            <span className="font-medium">{selectedParent.name_ru}</span>
+                            <span className="font-medium">{catName(selectedParent)}</span>
                             <span className="text-gray-400 mx-2">→</span>
                             <span className="text-blue-600">
-                              {selectedParent.children?.find(child => child.id === Number(selectedCategory))?.name_ru}
+                              {catName(findCategory(selectedParent.children ?? [], Number(selectedCategory)))}
                             </span>
                           </>
                         )}
@@ -439,6 +480,14 @@ const Industry: React.FC = () => {
                       </div>
                     )}
                   </div>
+
+                  <form className="mb-4 flex gap-2" onSubmit={(e) => { e.preventDefault(); if (selectedCategory) fetchIndustrialProducts(Number(selectedCategory), 0, search); }}>
+                    <label htmlFor="industry-search" className="sr-only">Korxona nomi yoki STIR bo'yicha qidirish</label>
+                    <input id="industry-search" type="search" value={search} onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Korxona nomi yoki STIR bo'yicha qidirish"
+                      className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm" />
+                    <button type="submit" className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700">Qidirish</button>
+                  </form>
 
                   {productsLoading ? (
                     <div className="flex items-center justify-center py-12">
@@ -452,8 +501,8 @@ const Industry: React.FC = () => {
                       <div className="text-center">
                         <div className="text-red-500 text-4xl mb-4">⚠️</div>
                         <p className="text-red-600 text-lg">{productsError}</p>
-                        <button 
-                          onClick={() => selectedCategory && fetchIndustrialProducts(Number(selectedCategory))} 
+                        <button
+                          onClick={() => selectedCategory && fetchIndustrialProducts(Number(selectedCategory), page)}
                           className="mt-4 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                         >
                           Qayta urinish
@@ -504,7 +553,7 @@ const Industry: React.FC = () => {
                                   <div><span className="font-medium">Nom:</span> {product.skp.name}</div>
                                 </div>
                               </div>
-                              
+
                               <div className="bg-blue-50 p-3 rounded-lg">
                                 <h4 className="font-medium text-gray-800 mb-2">Identifikatorlar</h4>
                                 <div className="text-sm space-y-1">
@@ -517,6 +566,20 @@ const Industry: React.FC = () => {
                         </div>
                       ))}
                     </div>
+                  )}
+
+                  {totalProducts > PAGE_SIZE && (
+                    <nav aria-label="Sahifalash" className="mt-6 flex items-center justify-between gap-3">
+                      <button type="button" disabled={page === 0 || productsLoading}
+                        onClick={() => selectedCategory && fetchIndustrialProducts(Number(selectedCategory), page - 1)}
+                        className="rounded-lg border border-gray-300 px-4 py-2 text-sm disabled:opacity-40">← Oldingi</button>
+                      <span className="text-sm text-gray-600">
+                        {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, totalProducts)} / {totalProducts.toLocaleString('ru-RU')}
+                      </span>
+                      <button type="button" disabled={(page + 1) * PAGE_SIZE >= totalProducts || productsLoading}
+                        onClick={() => selectedCategory && fetchIndustrialProducts(Number(selectedCategory), page + 1)}
+                        className="rounded-lg border border-gray-300 px-4 py-2 text-sm disabled:opacity-40">Keyingi →</button>
+                    </nav>
                   )}
                 </div>
               </div>

@@ -1,5 +1,6 @@
 from rest_framework import viewsets, filters, generics
 from rest_framework.decorators import action
+from django.db.models import Exists, OuterRef
 from django_filters.rest_framework import DjangoFilterBackend
 from apps.common.pagination import CustomLimitOffsetPagination
 from ...models.ex_trade import Country, CountryGroup, Region, Unit, TradeData, Product, Year, SITC
@@ -213,7 +214,8 @@ class YearViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API endpoint uchun yillarni ko'rish va filterlash
     """
-    queryset = Year.objects.all().order_by('-year')
+    # Faqat savdo ma'lumoti bor yillar: bazada 2021 va 2026 yozuvi bor, lekin ularda ma'lumot yo'q (tanlansa natija bo'sh)
+    queryset = Year.objects.filter(Exists(TradeData.objects.filter(year=OuterRef('year')))).order_by('-year')
     serializer_class = YearSerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['year']
@@ -503,7 +505,7 @@ class TradeDataGetDataView(generics.CreateAPIView):
         return paginator.get_paginated_response(output_serializer.data)
  
 
-from django.db.models import Sum, Count, F, Q, Case, When, CharField, Value
+from django.db.models import Exists, OuterRef, Sum, Count, F, Q, Case, When, CharField, Value
 from rest_framework import generics, status
 from rest_framework.response import Response
 

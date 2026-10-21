@@ -43,6 +43,30 @@ interface ApiResponseType {
 
 type StepType = 'info' | 'settings' | 'results';
 
+const VALUE_FIELD = /^(qiymat|стоимость|қиймат|value)_/i;
+
+/**
+ * Backend qiymatlarni doim "ming AQSh dollari"da qaytaradi (`units: ['USD 1000']`). "Million" tanlansa raqamlar 1000 ga
+ * bo'linadi va sarlavha/birlik yangilanadi. Excel yuklash ham shu natijadan olinadi, shuning uchun mos keladi.
+ */
+function applyMeasurement(res: ApiTradeData, unit: string): ApiTradeData {
+  if (unit !== 'million') return { data: res.data, total: res.total, filters: res.filters, headers: res.headers, units: res.units, missing: res.missing };
+  const fields = res.headers.map((h) => h.field).filter((f) => VALUE_FIELD.test(f));
+  const toMln = (v: unknown) => (typeof v === 'number' ? Math.round((v / 1000) * 1000) / 1000 : v);
+  return {
+    data: res.data.map((row) => {
+      const out = { ...row };
+      for (const f of fields) if (f in out) out[f] = toMln(out[f]) as number;
+      return out;
+    }),
+    total: res.total,
+    filters: res.filters,
+    headers: res.headers.map((h) => ({ ...h, label: h.label.replace('(USD 1000)', '(USD mln)') })),
+    units: res.units.map((u) => (u === 'USD 1000' ? 'USD mln' : u)),
+    missing: res.missing,
+  };
+}
+
 const ExternalTrade = () => {
   const { lang } = useLang();
   // So'rov xatosi (400 va h.k.): ilgari yashirinib "Ma'lumot topilmadi" ko'rinardi
@@ -200,18 +224,19 @@ const ExternalTrade = () => {
   ];
 
   const monthOptions: OptionType[] = [
+    // Bazadagi qiymatlar jamlanma (kumulyativ): M2 = yanvar–fevral yig'indisi, M12 = butun yil. Nomlar shuni aks ettiradi.
     { value: 'M1', label: 'Yanvar' },
-    { value: 'M2', label: 'Fevral' },
-    { value: 'M3', label: 'Mart' },
-    { value: 'M4', label: 'Aprel' },
-    { value: 'M5', label: 'May' },
-    { value: 'M6', label: 'Iyun' },
-    { value: 'M7', label: 'Iyul' },
-    { value: 'M8', label: 'Avgust' },
-    { value: 'M9', label: 'Sentyabr' },
-    { value: 'M10', label: 'Oktyabr' },
-    { value: 'M11', label: 'Noyabr' },
-    { value: 'M12', label: 'Dekabr' },
+    { value: 'M2', label: 'Yanvar–Fevral' },
+    { value: 'M3', label: 'Yanvar–Mart' },
+    { value: 'M4', label: 'Yanvar–Aprel' },
+    { value: 'M5', label: 'Yanvar–May' },
+    { value: 'M6', label: 'Yanvar–Iyun' },
+    { value: 'M7', label: 'Yanvar–Iyul' },
+    { value: 'M8', label: 'Yanvar–Avgust' },
+    { value: 'M9', label: 'Yanvar–Sentyabr' },
+    { value: 'M10', label: 'Yanvar–Oktyabr' },
+    { value: 'M11', label: 'Yanvar–Noyabr' },
+    { value: 'M12', label: 'Yanvar–Dekabr (butun yil)' },
   ];
 
   const measurementOptions: OptionType[] = [
@@ -1067,14 +1092,7 @@ const ExternalTrade = () => {
       // Handle new API response format
       if (response.success && response.data) {
         // Store the complete API response with metadata
-        setApiTradeData({
-          data: response.data,
-          total: response.total,
-          filters: response.filters,
-          headers: response.headers,
-          units: response.units,
-          missing: response.missing
-        });
+        setApiTradeData(applyMeasurement(response, String(measurementUnit[0]?.value ?? 'thousand')));
         
       } else {
         // Fallback for other formats

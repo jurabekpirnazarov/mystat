@@ -68,7 +68,7 @@ const ServiceResultsStep = ({ onPrevious, tradeData, handleDownloadData }: Servi
   const placeNameFields = nameFields.filter((f) => !/^(hs|sitc)/i.test(f));
 
   const unit = tradeData.units?.[0];
-  const unitLabel = unit === 'USD 1000' ? "ming AQSh dollari" : unit || "AQSh dollari";
+  const unitLabel = unit === 'USD 1000' ? "ming AQSh dollari" : unit === 'USD mln' ? "million AQSh dollari" : unit || "AQSh dollari";
 
   const num = (v: unknown) => (typeof v === 'number' ? v : parseFloat(String(v ?? '0')) || 0);
 

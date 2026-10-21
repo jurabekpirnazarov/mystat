@@ -36,7 +36,24 @@ class TradeDataGetView(CreateAPIView):
         grouped_queryset = self._apply_database_grouping(queryset, grouping_config, data)
 
         # Build response
+        self._true_totals = self._unique_totals(queryset, data)
         return self._build_response_from_queryset(grouped_queryset, grouping_config, data)
+
+    def _unique_totals(self, queryset, data):
+        """Davr ustunlari bo'yicha haqiqiy jami (har yozuv bir marta). Davlat guruhi bo'yicha guruhlashda bitta davlat
+        bir nechta guruhga kirsa (IHT va MO), guruh qatorlarini qo'shish jamini oshirib yuborardi."""
+        quarters = data.get('quarters', [])
+        out = {}
+        for row in queryset.values('year__year', 'month').annotate(v=Sum('value')):
+            m = row['month']
+            if quarters:
+                period = {'M3': 'Q1', 'M6': 'Q2', 'M9': 'Q3', 'M12': 'Q4'}.get(m)
+                if not period:
+                    continue
+            else:
+                period = m
+            out[f"{row['year__year']}_{period}"] = float(row['v'] or 0)
+        return out
 
     def _apply_filters(self, data):
         """Apply all filters to base queryset"""
@@ -512,6 +529,11 @@ class TradeDataGetView(CreateAPIView):
                         dim_key_parts.append(f"group_{group_code}")
                         meta[field_map['country_group_code']] = group_code
                         meta[field_map['country_group_name']] = group_name
+                    else:
+                        # Hech bir guruhga kirmagan davlatlar — ilgari nomsiz (bo'sh) qator chiqardi
+                        dim_key_parts.append("group_none")
+                        meta[field_map['country_group_code']] = '—'
+                        meta[field_map['country_group_name']] = {'uz': 'Boshqa davlatlar', 'ru': 'Остальные страны', 'cry': 'Бошқа давлатлар'}.get(lang, 'Boshqa davlatlar')
 
                 elif dimension == 'region':
                     region_code = item.get('region__soato') or item.get('region_code')
@@ -594,7 +616,12 @@ class TradeDataGetView(CreateAPIView):
 
         total_label = f"{trade_type_name}, {labels.get('Total','Total')}:"
         total_row = {'label': total_label, 'isGroupSummary': True}
+        # Davlat guruhi bo'yicha guruhlashda yig'indi emas, unique jami (guruhlar kesishishi mumkin)
+        dims = config.get('dimensions') or []
+        unique = getattr(self, '_true_totals', None) if 'country_group' in dims else None
         for col_name in columns:
+            if unique is not None and col_name in unique:
+                total_values[col_name]['value'] = unique[col_name]
             total_row[f"{value_prefix}{col_name}"] = round(total_values[col_name]['value'], 2)
             if include_quantity:
                 total_row[f"{quantity_prefix}{col_name}"] = round(total_values[col_name]['quantity'], 2)

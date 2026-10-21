@@ -27,9 +27,9 @@ export default function LanguageSwitcher() {
     <div className="relative" ref={ref}>
       <button type="button" onClick={() => setOpen((v) => !v)} aria-haspopup="listbox" aria-expanded={open}
         aria-label={`${t(UI.language)}: ${current.label}`}
-        className="flex flex-col items-center rounded-md px-2 py-1 text-mg-primary hover:bg-mg-primary/5">
-        <span className="text-lg font-semibold leading-6">{current.short}</span>
-        <ChevronDown className="h-4 w-4" aria-hidden="true" />
+        className="flex h-9 items-center gap-1 rounded-full px-2.5 text-sm font-bold text-mg-heading hover:bg-mg-info">
+        {current.short}
+        <ChevronDown className={`h-4 w-4 text-mg-muted transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true" />
       </button>
       {open && (
         <ul role="listbox" aria-label={t(UI.language)}

@@ -3,14 +3,17 @@ import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { POPULAR } from "../../config/serviceCatalog";
 import { useLang } from "../../i18n/LangContext";
+import TileArt from "./TileArt";
 import { UI } from "../../i18n/ui";
 
-// Plitkalar foni: my.gov.uz dagi rasmlar o'rnida o'z uslubimizdagi gradientlar (tashqi rasm ishlatilmaydi)
-const TILE_BG = [
-  "from-sky-400 to-blue-700", "from-violet-400 to-indigo-700", "from-emerald-400 to-teal-700", "from-amber-400 to-orange-600",
-  "from-rose-400 to-pink-700", "from-cyan-400 to-blue-600", "from-lime-400 to-green-700", "from-fuchsia-400 to-purple-700",
-  "from-teal-300 to-cyan-700", "from-blue-400 to-indigo-800", "from-orange-300 to-red-600", "from-green-400 to-emerald-700",
-];
+/** Plitka foni (yuqori och, pastga qarab xizmat rangiga) — my.gov.uz plitkalaridagi kabi yorug' sahna. */
+const TILE_BG: Record<number, string> = {
+  101: "from-[#EAF3FF] to-[#D6E6FD]", 102: "from-[#EEF9F2] to-[#D7F0E0]", 201: "from-[#F1EEFF] to-[#E0D9FF]",
+  301: "from-[#E9F5FF] to-[#D3E8FB]", 302: "from-[#EEF4FF] to-[#DCE7FB]", 401: "from-[#EFFAF4] to-[#D7EFE2]",
+  501: "from-[#FFF5E6] to-[#FBE3C0]", 601: "from-[#FFF0EE] to-[#F8DCD8]", 701: "from-[#EDFAF1] to-[#D4F0DE]",
+  801: "from-[#EAF3FF] to-[#D3E3FA]", 1001: "from-[#FFF7E9] to-[#F6E5C6]", 1201: "from-[#EEF1F7] to-[#D9DFEA]",
+};
+
 
 /** Plitkadagi qisqa nom (1–3 so'z, fe'lsiz) — MYGOV_DIZAYN 2.1. */
 const SHORT: Record<number, { uz: string; ru: string }> = {
@@ -54,18 +57,17 @@ export default function HomeHero() {
       <div className="relative mt-5">
         <ul ref={rail} aria-label={t(UI.popular)}
           className="flex snap-x gap-4 overflow-x-auto pb-2 pr-4 [scrollbar-width:none] sm:pr-6 [&::-webkit-scrollbar]:hidden">
-          {POPULAR.map((s, i) => {
-            const Icon = s.icon;
-            return (
-              <li key={s.number} className="snap-start">
-                <Link to={`/service/${s.number}`}
-                  className={`relative flex h-[150px] w-[106px] flex-col justify-end overflow-hidden rounded-mg-tile border-2 border-white/70 bg-gradient-to-br p-2.5 transition hover:-translate-y-0.5 ${TILE_BG[i % TILE_BG.length]}`}>
-                  <Icon className="absolute -right-3 top-3 h-20 w-20 text-white/35" strokeWidth={1.25} aria-hidden="true" />
-                  <span className="relative text-[11px] font-semibold leading-tight text-white">{t(SHORT[s.number] ?? s.title)}</span>
-                </Link>
-              </li>
-            );
-          })}
+          {POPULAR.map((s) => (
+            <li key={s.number} className="snap-start">
+              <Link to={`/service/${s.number}`}
+                className={`group relative flex h-[150px] w-[106px] flex-col justify-end overflow-hidden rounded-mg-tile border-[3px] border-white/80 bg-gradient-to-b p-2.5 shadow-sm transition hover:-translate-y-0.5 hover:border-white ${TILE_BG[s.number] ?? "from-[#EAF3FF] to-[#D6E6FD]"}`}>
+                <TileArt number={s.number} className="absolute left-1/2 top-0.5 h-[98px] w-[98px] -translate-x-1/2 transition-transform duration-300 group-hover:scale-105" />
+                {/* Pastdan ko'k gradient — yozuv har qanday sahnada o'qiladi (my.gov.uz dagi kabi) */}
+                <span className="absolute inset-x-0 bottom-0 h-[46%] bg-gradient-to-t from-[#0058C2]/95 via-[#0068E0]/55 to-transparent" aria-hidden="true" />
+                <span className="relative text-[11.5px] font-semibold leading-tight text-white">{t(SHORT[s.number] ?? s.title)}</span>
+              </Link>
+            </li>
+          ))}
         </ul>
         <button type="button" onClick={() => scroll(-1)} aria-label={t({ uz: "Oldingi", ru: "Назад" })}
           className="absolute left-1 top-1/2 hidden -translate-y-1/2 rounded-full bg-white p-1.5 text-mg-primary shadow md:block">

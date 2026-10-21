@@ -147,10 +147,10 @@ export default function Spheres() {
         </ol>
       </nav>
 
-      <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
-        <div className="hidden lg:block"><SpheresSidebar activeId={sphere?.id} activeSub={sub} /></div>
+      <div className="grid gap-6 xl:grid-cols-[300px_1fr]">
+        <div className="hidden xl:block"><SpheresSidebar activeId={sphere?.id} activeSub={sub} /></div>
         {/* Mobil: sohalar gorizontal chip'lar */}
-        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 lg:hidden">
+        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 xl:hidden">
           {SPHERES.map((sp) => (
             <Link key={sp.id} to={`/spheres/${sp.id}`} aria-current={sp.id === sphere?.id ? "page" : undefined}
               className={`shrink-0 rounded-mg border px-3 py-1.5 text-sm ${sp.id === sphere?.id ? "border-mg-primary bg-mg-primary text-white" : "border-mg-border bg-mg-surface text-mg-text"}`}>

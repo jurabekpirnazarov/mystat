@@ -40,8 +40,8 @@ export default function AccessibilityMenu() {
     <div className="relative" ref={ref}>
       <button type="button" onClick={() => setOpen((v) => !v)} aria-haspopup="dialog" aria-expanded={open}
         aria-label={t(UI.accessibility)} title={t(UI.accessibility)}
-        className="rounded-md p-2 text-mg-primary hover:bg-mg-primary/5">
-        <Accessibility className="h-7 w-7" aria-hidden="true" />
+        className="flex h-9 w-9 items-center justify-center rounded-full text-mg-primary hover:bg-mg-info">
+        <Accessibility className="h-5 w-5" aria-hidden="true" />
       </button>
       {open && (
         <div role="dialog" aria-label={t(UI.accessibility)}

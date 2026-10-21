@@ -45,11 +45,11 @@ export default function NotificationBell() {
         onClick={() => setOpen((v) => !v)}
         aria-label={`Xabarnomalar${unreadCount ? `, ${unreadCount} ta o'qilmagan` : ""}`}
         aria-expanded={open}
-        className="relative p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+        className="relative flex h-12 w-12 items-center justify-center rounded-full border border-mg-border bg-mg-surface text-mg-heading shadow-sm transition hover:border-mg-primary/40 hover:text-mg-primary"
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[1.15rem] h-[1.15rem] px-1 bg-red-600 text-white rounded-full flex items-center justify-center text-[11px] font-semibold">
+          <span className="absolute top-1 right-1 min-w-[1.15rem] h-[1.15rem] px-1 ring-2 ring-white bg-red-600 text-white rounded-full flex items-center justify-center text-[11px] font-semibold">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}

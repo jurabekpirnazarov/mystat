@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ExternalLink, Facebook, Instagram, Send, Youtube } from "lucide-react";
-import logo from "../../img/stat.png";
+import uzstat from "../../img/stat.png";
+import { Logo } from "../brand/Logo";
 import { CONTACT } from "../../config/serviceCatalog";
 import { useLang, type I18nText } from "../../i18n/LangContext";
 import { UI } from "../../i18n/ui";
@@ -73,10 +74,7 @@ export default function Footer() {
   const link = "text-[14.4px] leading-[21.6px] text-[#454545] hover:text-mg-primary dark:text-gray-300";
   return (
     <footer className="pb-8 pt-4">
-      <div className="flex items-center gap-3">
-        <img src={logo} alt="" width={48} height={48} className="h-12 w-12 object-contain" />
-        <span className="font-serif text-2xl font-bold text-mg-primary">my.stat.uz</span>
-      </div>
+      <Link to="/" aria-label={t(UI.home)}><Logo size={48} org /></Link>
       <p className="mt-4 max-w-xl text-lg font-medium leading-snug text-mg-heading">{t(UI.portalFull)}</p>
       <p className="mt-3 max-w-xl text-xs font-medium text-mg-heading">{t(UI.typoHint)}</p>
 
@@ -91,7 +89,7 @@ export default function Footer() {
         ))}
       </div>
 
-      <div className="mt-8 flex flex-col gap-4 border-t border-mg-border pt-6 lg:flex-row lg:items-center lg:justify-between">
+      <div className="mt-8 flex flex-col gap-4 border-t border-mg-border pt-6 lg:flex-row lg:items-center lg:justify-between lg:pr-20">
         <div className="flex items-center gap-3">
           {SOCIAL.map(({ href, label, icon: Icon }) => (
             <a key={href} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}
@@ -103,7 +101,9 @@ export default function Footer() {
         <ul className="flex flex-wrap gap-x-5 gap-y-1">
           {LEGAL.map((l) => <li key={t(l.label)}><FLink l={l} className={`${link} text-sm`} /></li>)}
         </ul>
+        {/* Qo'mitaning rasmiy emblemi — my.gov.uz footer'idagi hamkor logolari o'rnida */}
         <a href="https://stat.uz/uz/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-mg-primary">
+          <img src={uzstat} alt="" width={36} height={36} className="h-9 w-9 object-contain" />
           stat.uz <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
         </a>
       </div>

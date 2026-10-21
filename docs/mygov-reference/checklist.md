@@ -59,7 +59,7 @@
 |---|---|---|
 | 2.1 | Sidebar sichqoncha borganda yozuvlar bilan ochiladi, faol band ajratilgan | ✅ |
 | 2.2 | Til ro'yxatida "English BETA", "Qaraqalpaqsha BETA" | ➖ (OS-MG-02: faqat uz/cry/ru) |
-| 2.3 | Plitkalar: rasmli "story" kartochkalar | ❌ (rasm o'rnida gradient + ikonka; o'z illyustratsiyalari kerak) |
+| 2.3 | Plitkalar: rasmli "story" kartochkalar | ✅ 12 ta o'z SVG sahnasi (`components/home/TileArt.tsx`), pastdan ko'k gradient va oq yozuv |
 | 2.4 | Shaxsiy bloklarda illyustratsiya va son belgisi | ✅ |
 | 2.5 | Soha kartochkasi: nuqtali 2 xizmat, "› Barchasi", o'ng pastda och doira ikonka | ✅ |
 | 2.6 | Xizmat kartochkasi: `#raqam`, doira ikonka, reyting · foydalanish · vaqt, yulduzcha | ✅ |
@@ -103,16 +103,15 @@
 | Guruh | ✅ | ❌ | ➖ istisno |
 |---|---|---|---|
 | 1. Tuzilma | 40 | 0 | 4 |
-| 2. Komponentlar | 7 | 1 | 1 |
+| 2. Komponentlar | 8 | 0 | 1 |
 | 3. Tokenlar | 12 | 0 | 0 |
 | 4. Xatti-harakat | 7 | 2 | 0 |
-| **Jami** | **66** | **3** | **5** |
+| **Jami** | **67** | **2** | **5** |
 
-**O'xshashlik: 66 / 69 = 95,7%** (istisnolarsiz). Maqsad ≥ 98% — **bajarilmagan**.
+**O'xshashlik: 67 / 69 = 97,1%** (istisnolarsiz). Maqsad ≥ 98% — **bajarilmagan** (bitta band yetmaydi).
 
-98% ga yetish uchun qolgan 3 band (yangi vazifalar taklifi):
-1. **2.3** — plitkalar uchun 12 ta o'z illyustratsiyasi (dizayner ishi; `frontend/src/assets/popular/`).
-2. **4.1** — to'liq til prefiksli URL: barcha ichki havolalarni `useLangPath()` orqali yasash.
-3. **4.9** — `@axe-core/playwright` ni e2e'ga qo'shish (bog'liqlik qo'shishga ruxsat kerak).
+98% ga yetish uchun qolgan 2 band (birortasi bajarilsa — 98,6%):
+1. **4.1** — to'liq til prefiksli URL: barcha ichki havolalarni `useLangPath()` orqali yasash.
+2. **4.9** — `@axe-core/playwright` ni e2e'ga qo'shish (bog'liqlik qo'shishga ruxsat kerak).
 
-Ikkitasi bajarilsa: 68 / 69 = 98,6% — maqsadga yetadi.
+

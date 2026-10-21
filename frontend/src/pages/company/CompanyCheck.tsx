@@ -6,6 +6,7 @@ import { ApiErrorState, EmptyState, PageHeader, Skeleton } from "../../component
 import CompanyScoreBadge from "../../components/company-score/CompanyScoreBadge";
 import { CardBadges, CertificateLink, DisciplineBlock, PassportBlock, ProductionBlock } from "../../components/company-card/CardBlocks";
 import { exportElementToPdf } from "../../utils/exportPdf";
+import NotFoundCard from "../../components/company-card/NotFoundCard";
 import { formatDateTime } from "../../utils/format";
 
 /**
@@ -78,6 +79,11 @@ export default function CompanyCheck() {
 
         {loading ? (
           <div className="space-y-4"><Skeleton variant="card" /><Skeleton variant="table" rows={5} /></div>
+        ) : error && stir && (error as { response?: { status?: number } }).response?.status === 404 ? (
+          <NotFoundCard stir={stir} onSearchByName={() => {
+            setInput("");
+            document.querySelector<HTMLInputElement>("main form input")?.focus();
+          }} />
         ) : error ? (
           <ApiErrorState error={error} />
         ) : card ? (

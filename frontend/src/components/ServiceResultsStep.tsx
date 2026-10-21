@@ -57,74 +57,59 @@ const ServiceResultsStep = ({ onPrevious, tradeData, handleDownloadData }: Servi
     return num.toLocaleString('en-US', { minimumFractionDigits: 1 });
   };
 
-  // Helper function to get country name from various possible fields
-  const getCountryName = (item: TradeDataItem): string => {
-    if (item.isGroupSummary && item.label) {
-      return item.label;
-    }
-    return String(item.country_name || item.country || item.name || item.label || 'Unknown');
-  };
+  // Backend (ExternalTradeAPI/newviews.py) ustun nomlarini tilga qarab beradi: qiymat_2022_M1 / стоимость_2022_M1 /
+  // қиймат_2022_M1, hs2_nomi / hs2_наименование / hs2_номи. Shuning uchun maydonlar `headers` dan aniqlanadi.
+  const headerFields = (tradeData.headers ?? []).map((h) => h.field);
+  const isValueField = (f: string) => /^(qiymat|стоимость|қиймат|value)_/i.test(f);
+  const isNameField = (f: string) => /(nomi|наименование|номи|_name)$/i.test(f);
+  const valueFields = headerFields.filter(isValueField);
+  const nameFields = headerFields.filter(isNameField);
+  const productNameFields = nameFields.filter((f) => /^(hs|sitc)/i.test(f));
+  const placeNameFields = nameFields.filter((f) => !/^(hs|sitc)/i.test(f));
 
-  // Helper function to get value from various possible fields
+  const unit = tradeData.units?.[0];
+  const unitLabel = unit === 'USD 1000' ? "ming AQSh dollari" : unit || "AQSh dollari";
+
+  const num = (v: unknown) => (typeof v === 'number' ? v : parseFloat(String(v ?? '0')) || 0);
+
+  // Qatorning qiymati: tanlangan barcha davrlar (yil/oy) ustunlari yig'indisi
   const getValue = (item: TradeDataItem): number => {
-    // For group summary rows, try to get total value from dynamic fields
-    if (item.isGroupSummary) {
-      // Look for value fields in dynamic columns
-      const valueFields = Object.keys(item).filter(key => key.includes('value_'));
-      if (valueFields.length > 0) {
-        return valueFields.reduce((sum, field) => {
-          const value = item[field];
-          return sum + (typeof value === 'number' ? value : parseFloat(value?.toString() || '0') || 0);
-        }, 0);
-      }
-    }
-    
-    // Handle both string and number types for value
-    const apiValue = item.value;
-    if (typeof apiValue === 'string') {
-      return parseFloat(apiValue) || 0;
-    }
-    if (typeof apiValue === 'number') {
-      return apiValue;
-    }
-    
-    // Try dynamic value fields (like value_2022_M1, etc.)
-    const valueFields = Object.keys(item).filter(key => key.includes('value_'));
-    if (valueFields.length > 0) {
-      return valueFields.reduce((sum, field) => {
-        const value = item[field];
-        return sum + (typeof value === 'number' ? value : parseFloat(value?.toString() || '0') || 0);
-      }, 0);
-    }
-    
-    return Number(item.july || item.amount || item.total || 0);
+    const fields = valueFields.length ? valueFields : Object.keys(item).filter((k) => k.includes('value_'));
+    if (fields.length) return fields.reduce((sum, f) => sum + num(item[f]), 0);
+    return num(item.value ?? item.july ?? item.amount ?? item.total);
   };
 
-  // Helper function to get product name
+  const pick = (item: TradeDataItem, fields: string[]) =>
+    fields.map((f) => item[f]).filter((v) => v !== undefined && v !== null && v !== '').join(' · ');
+
+  // Qator nomi: hudud/davlat (bo'lsa), aks holda tovar nomi
+  const getCountryName = (item: TradeDataItem): string => {
+    if (item.isGroupSummary && item.label) return item.label;
+    return pick(item, placeNameFields) || pick(item, productNameFields)
+      || String(item.country_name || item.country || item.name || item.label || '—');
+  };
+
   const getProductName = (item: TradeDataItem): string => {
-    if (item.isGroupSummary && item.label) {
-      return item.label;
-    }
-    return item.hs2_name || item.product_name || item.sitc_name || 'Unknown Product';
+    if (item.isGroupSummary && item.label) return item.label;
+    return pick(item, productNameFields) || item.hs2_name || item.product_name || item.sitc_name || '';
   };
 
-  // Helper function to get trade type
   const getTradeType = (item: TradeDataItem): string => {
     if (tradeData.filters && tradeData.filters.trade_type_name) {
       return String(tradeData.filters.trade_type_name);
     }
-    return item.trade_type_display || 'Unknown';
+    return item.trade_type_display || '';
   };
 
-  // Ensure we have valid data
   const validTradeData = tradeData.data.filter((item: TradeDataItem) => item && typeof item === 'object');
-  
-  // Check if we have any data
-  const hasData = validTradeData.length > 0;
-  
-  const totalSum = validTradeData.reduce((sum: number, item: TradeDataItem) => sum + getValue(item), 0);
-  const topCountries = validTradeData.slice(0, 5);
-  const averageValue = validTradeData.length > 0 ? totalSum / validTradeData.length : 0;
+  // "Jami" qatorlari jadvalda qoladi, lekin statistika va Top-5 ga qo'shilmaydi (aks holda yig'indi ikki barobar bo'lardi)
+  const rows = validTradeData.filter((item) => !item.isGroupSummary);
+  const summaryRow = validTradeData.find((item) => item.isGroupSummary);
+  const hasData = rows.length > 0;
+
+  const totalSum = summaryRow ? getValue(summaryRow) : rows.reduce((sum, item) => sum + getValue(item), 0);
+  const topCountries = [...rows].sort((a, b) => getValue(b) - getValue(a)).slice(0, 5);
+  const averageValue = rows.length > 0 ? totalSum / rows.length : 0;
 
   // Render empty state if no data
   if (!hasData) {
@@ -211,7 +196,7 @@ const ServiceResultsStep = ({ onPrevious, tradeData, handleDownloadData }: Servi
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-blue-600 font-medium">Jami Yozuvlar</p>
-                  <p className="text-2xl font-bold text-blue-900">{tradeData.data.length}</p>
+                  <p className="text-2xl font-bold text-blue-900">{rows.length}</p>
                 </div>
                 <div className="bg-blue-100 p-3 rounded-lg">
                   <Eye className="w-6 h-6 text-blue-600" />
@@ -224,7 +209,7 @@ const ServiceResultsStep = ({ onPrevious, tradeData, handleDownloadData }: Servi
                 <div>
                   <p className="text-sm text-green-700 font-medium">Jami Qiymat</p>
                   <p className="text-2xl font-bold text-green-900">{formatNumber(totalSum)}</p>
-                  <p className="text-xs text-green-700">AQSh dollari</p>
+                  <p className="text-xs text-green-700">{unitLabel}</p>
                 </div>
                 <div className="bg-green-100 p-3 rounded-lg">
                   <TrendingUp className="w-6 h-6 text-green-700" />
@@ -237,7 +222,7 @@ const ServiceResultsStep = ({ onPrevious, tradeData, handleDownloadData }: Servi
                 <div>
                   <p className="text-sm text-purple-600 font-medium">O'rtacha Qiymat</p>
                   <p className="text-2xl font-bold text-purple-900">{formatNumber(averageValue)}</p>
-                  <p className="text-xs text-purple-600">AQSh dollari</p>
+                  <p className="text-xs text-purple-600">{unitLabel}</p>
                 </div>
                 <div className="bg-purple-100 p-3 rounded-lg">
                   <BarChart3 className="w-6 h-6 text-purple-600" />
@@ -250,7 +235,7 @@ const ServiceResultsStep = ({ onPrevious, tradeData, handleDownloadData }: Servi
                 <div>
                   <p className="text-sm text-orange-600 font-medium">Eng Katta Qiymat</p>
                   <p className="text-lg font-bold text-orange-900">{getCountryName(topCountries[0] || {})}</p>
-                  <p className="text-xs text-orange-600">{formatNumber(getValue(topCountries[0] || {}))} USD</p>
+                  <p className="text-xs text-orange-600">{formatNumber(getValue(topCountries[0] || {}))} {unitLabel}</p>
                 </div>
                 <div className="bg-orange-100 p-3 rounded-lg">
                   <FileSpreadsheet className="w-6 h-6 text-orange-600" />
@@ -265,7 +250,7 @@ const ServiceResultsStep = ({ onPrevious, tradeData, handleDownloadData }: Servi
       <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-semibold text-gray-900">Top 5 Eng Katta Qiymatlar</h3>
-          <div className="text-sm text-gray-500">AQSh dollari</div>
+          <div className="text-sm text-gray-500">{unitLabel}</div>
         </div>
         
         <div className="space-y-4">
@@ -309,7 +294,7 @@ const ServiceResultsStep = ({ onPrevious, tradeData, handleDownloadData }: Servi
                     <p className="text-xl font-bold text-gray-900">
                       {formatNumber(getValue(item))}
                     </p>
-                    <p className="text-sm text-gray-600">USD</p>
+                    <p className="text-sm text-gray-600">{unitLabel}</p>
                     <p className="text-xs text-gray-500">{percentage.toFixed(1)}%</p>
                   </div>
                 </div>
@@ -449,11 +434,11 @@ const ServiceResultsStep = ({ onPrevious, tradeData, handleDownloadData }: Servi
               </li>
               <li className="flex items-start">
                 <span className="inline-block w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                <span>Eng katta operatsiya: {formatNumber(getValue(topCountries[0] || {}))} USD</span>
+                <span>Eng katta qiymat: {formatNumber(getValue(topCountries[0] || {}))} {unitLabel}</span>
               </li>
               <li className="flex items-start">
                 <span className="inline-block w-2 h-2 bg-purple-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                <span>O'rtacha operatsiya qiymati: {formatNumber(averageValue)} USD</span>
+                <span>O'rtacha qiymat: {formatNumber(averageValue)} {unitLabel}</span>
               </li>
             </ul>
           </div>

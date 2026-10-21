@@ -6,10 +6,10 @@
  * - Login talab qiladigan so'rovlar (Authorization sarlavhasi bor) va kabinet ma'lumotlari HECH QACHON keshlanmaydi.
  * - Navigatsiya: tarmoq, bo'lmasa keshdagi ilova qobig'i (index.html).
  */
-const VERSION = "v1";
+const VERSION = "v2"; // v2: yangi portal belgisi (docs/LOGO.md) — eski ikonkalar keshdan tushadi
 const STATIC_CACHE = `mystat-static-${VERSION}`;
 const API_CACHE = `mystat-api-${VERSION}`;
-const SHELL = ["/", "/manifest.webmanifest", "/icons/icon-192.png", "/icons/icon-512.png"];
+const SHELL = ["/", "/manifest.webmanifest", "/favicon.svg", "/icons/icon-192.png", "/icons/icon-512.png"];
 
 // Faqat ochiq, shaxsiy bo'lmagan endpoint'lar
 const PUBLIC_API = [

@@ -12,6 +12,8 @@ export default {
     extend: {
       fontFamily: {
         sans: ["Montserrat", ...defaultTheme.fontFamily.sans],
+        // Portal yozuvi "my.stat.uz" (docs/LOGO.md)
+        brand: ["Literata", "Georgia", ...defaultTheme.fontFamily.serif],
       },
       colors: {
         mg: {

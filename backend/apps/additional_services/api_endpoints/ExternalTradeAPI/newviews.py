@@ -241,7 +241,8 @@ class TradeDataGetView(CreateAPIView):
                     # Substr returns string slice starting from 1
                     annotations.update({
                         'hs4_code': Substr('product__code', 1, 4),
-                        'hs4_name': F('product__name_uz')
+                        # Nom — 4 xonali toifaniki (mahsulotning ota-onasi), quyi mahsulotniki emas
+                        'hs4_name': F('product__parent__name_uz')
                     })
                     group_fields.append('hs4_code')
 
@@ -249,7 +250,7 @@ class TradeDataGetView(CreateAPIView):
                 if 'hs2' in hs_levels:
                     annotations.update({
                         'hs2_code': Substr('product__code', 1, 2),
-                        'hs2_name': F('product__name_uz')
+                        'hs2_name': F('product__parent__parent__name_uz')
                     })
                     group_fields.append('hs2_code')
 
@@ -268,7 +269,7 @@ class TradeDataGetView(CreateAPIView):
                 if 'sitc3' in sitc_levels:
                     annotations.update({
                         'sitc3_code': Substr('sitc__code', 1, 3),
-                        'sitc3_name': F('sitc__name_uz')
+                        'sitc3_name': F('sitc__parent__name_uz')
                     })
                     group_fields.append('sitc3_code')
 
@@ -276,7 +277,7 @@ class TradeDataGetView(CreateAPIView):
                 if 'sitc2' in sitc_levels:
                     annotations.update({
                         'sitc2_code': Substr('sitc__code', 1, 2),
-                        'sitc2_name': F('sitc__name_uz')
+                        'sitc2_name': F('sitc__parent__parent__name_uz')
                     })
                     group_fields.append('sitc2_code')
 
@@ -284,7 +285,7 @@ class TradeDataGetView(CreateAPIView):
                 if 'sitc1' in sitc_levels:
                     annotations.update({
                         'sitc1_code': Substr('sitc__code', 1, 1),
-                        'sitc1_name': F('sitc__name_uz')
+                        'sitc1_name': F('sitc__parent__parent__parent__name_uz')
                     })
                     group_fields.append('sitc1_code')
 
@@ -426,6 +427,8 @@ class TradeDataGetView(CreateAPIView):
                 'Region Code': 'Region kod',
                 'Region': 'Region',
                 'Value': 'Qiymat',
+                'Name': 'nomi',
+                'Code': 'kodi',
                 'Quantity': 'Miqdor',
                 'Total': 'Jami'
             },
@@ -437,6 +440,8 @@ class TradeDataGetView(CreateAPIView):
                 'Region Code': 'Код региона',
                 'Region': 'Регион',
                 'Value': 'Стоимость',
+                'Name': 'наименование',
+                'Code': 'код',
                 'Quantity': 'Количество',
                 'Total': 'Итого'
             },
@@ -448,6 +453,8 @@ class TradeDataGetView(CreateAPIView):
                 'Region Code': 'Регион код',
                 'Region': 'Регион',
                 'Value': 'Қиймат',
+                'Name': 'номи',
+                'Code': 'коди',
                 'Quantity': 'Миқдор',
                 'Total': 'Жами'
             }
@@ -685,7 +692,7 @@ class TradeDataGetView(CreateAPIView):
                         {'field': field_map.get(code_key, code_key),
                          'label': f"{level.upper()} {labels.get('Code','Code')}"},
                         {'field': field_map.get(name_key, name_key),
-                         'label': f"{level.upper()} {labels.get('Value','Product Name')}"}
+                         'label': f"{level.upper()} {labels.get('Name','Product Name')}"}
                     ])
             elif dimension == 'sitc':
                 sitc_levels = config.get('sitc_levels', [])
@@ -696,7 +703,7 @@ class TradeDataGetView(CreateAPIView):
                         {'field': field_map.get(code_key, code_key),
                          'label': f"{level.upper()} {labels.get('Code','Code')}"},
                         {'field': field_map.get(name_key, name_key),
-                         'label': f"{level.upper()} {labels.get('Value','Category Name')}"}
+                         'label': f"{level.upper()} {labels.get('Name','Category Name')}"}
                     ])
 
         # Add period headers (value_XXXX and quantity_XXXX localized)

@@ -27,8 +27,14 @@ export default function CreditBalanceChip() {
   if (balance === null) return null;
   return (
     <Link to="/cabinet/credits" title="StatCoin balansi" aria-label={`StatCoin balansi: ${balance}`}
-      className="hidden items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-sm font-medium tabular-nums text-amber-800 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-200 sm:inline-flex">
-      <Coins className="h-4 w-4" aria-hidden="true" /> {balance}
+      className="hidden h-12 items-center gap-2 rounded-full border border-mg-border bg-mg-surface py-1 pl-1 pr-3.5 shadow-sm transition hover:border-amber-300 sm:inline-flex">
+      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-300">
+        <Coins className="h-[18px] w-[18px]" aria-hidden="true" />
+      </span>
+      <span className="leading-tight">
+        <span className="block text-sm font-bold tabular-nums text-mg-heading">{balance}</span>
+        <span className="block text-[10px] font-medium uppercase tracking-wide text-mg-muted">StatCoin</span>
+      </span>
     </Link>
   );
 }

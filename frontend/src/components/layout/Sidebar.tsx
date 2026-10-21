@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ChevronDown, X } from "lucide-react";
-import logo from "../../img/stat.png";
+import { Logo, LogoMark } from "../brand/Logo";
 import { NAV_GROUPS, isNavActive } from "../../config/navigation";
 import { useLang } from "../../i18n/LangContext";
 import { UI } from "../../i18n/ui";
@@ -58,24 +58,19 @@ function Brand({ expanded }: { expanded: boolean }) {
   const { t } = useLang();
   return (
     <Link to="/" aria-label={`${t(UI.portalFull)} — ${t(UI.home)}`}
-      className={`flex shrink-0 items-center gap-2.5 py-5 ${expanded ? "px-6" : "justify-center"}`}>
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white">
-        <img src={logo} alt="" width={36} height={36} className="h-9 w-9 object-contain" />
-      </span>
-      {expanded && <span className="whitespace-nowrap font-serif text-xl font-bold text-white">my.stat.uz</span>}
+      className={`flex shrink-0 items-center py-5 ${expanded ? "px-5" : "justify-center"}`}>
+      {expanded ? <Logo size={44} tone="dark" org /> : <LogoMark size={44} tone="dark" />}
     </Link>
   );
 }
 
+/** Desktop: doim ochiq (268px, yozuvlar bilan) — foydalanuvchi talabi, 2026-10-21. Kontent `MainLayout` da o'ngga surilgan. */
 export function DesktopSidebar() {
-  const [hover, setHover] = useState(false);
   return (
-    <aside aria-label="Bo'limlar" className="fixed bottom-3 left-[22px] top-3 z-40 hidden lg:block"
-      onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
-      onFocus={() => setHover(true)} onBlur={(e) => !e.currentTarget.contains(e.relatedTarget) && setHover(false)}>
-      <div className={`flex h-full flex-col rounded-mg-side bg-mg-primary shadow-lg transition-[width] duration-200 dark:bg-blue-900 ${hover ? "w-[268px]" : "w-[85px]"}`}>
-        <Brand expanded={hover} />
-        <NavList expanded={hover} />
+    <aside aria-label="Bo'limlar" className="fixed bottom-3 left-[22px] top-3 z-40 hidden lg:block">
+      <div className="flex h-full w-[268px] flex-col rounded-mg-side bg-mg-primary shadow-lg dark:bg-blue-900">
+        <Brand expanded />
+        <NavList expanded />
       </div>
     </aside>
   );

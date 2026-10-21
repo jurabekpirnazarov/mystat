@@ -84,7 +84,7 @@
 ### 0.5. Bajarilish holati (2026-10-21)
 
 > 2-etap bitta sessiyada 0.3 tartibida bajarildi (2A → 2G). Commit qilinmagan. Jonli my.gov.uz o'lchovi (MG-00) hujjatdagi 1-bo'lim taxminlaridan bir necha joyda farq qildi — jonli tuzilma olindi, farqlar [`mygov-reference/README.md`](mygov-reference/README.md) 2-bo'limida.
-> **O'xshashlik: 66 / 69 = 95,7%** ([`mygov-reference/checklist.md`](mygov-reference/checklist.md)); maqsad 98% — bajarilmagan, qolgan 3 band pastda.
+> **O'xshashlik: 67 / 69 = 97,1%** ([`mygov-reference/checklist.md`](mygov-reference/checklist.md)); maqsad 98% — bajarilmagan, qolgan 3 band pastda.
 
 | Vazifa | Holat | Nima qilindi (asosiy fayllar) |
 |---|---|---|
@@ -105,7 +105,7 @@
 | **MG-14** | ⚠️ | 360 px, burger, Esc, skip-link — `e2e/mygov.spec.ts`. axe-core CI'da yo'q (bog'liqlik qo'shish ruxsati kerak) |
 | **MG-15** | ⚠️ | 44 ta sahifadan to'liq ekran fon va 7xl konteyner olib tashlandi, `PageHeader` breadcrumb'siz va ko'k H1. Checklist: 95,7% |
 
-**98% gacha qolgan bandlar:** (1) plitkalar uchun o'z illyustratsiyalari (dizayner); (2) to'liq til prefiksli URL; (3) `@axe-core/playwright`.
+**98% gacha qolgan bandlar (birortasi yetarli):** (1) to'liq til prefiksli URL; (2) `@axe-core/playwright`. Plitka illyustratsiyalari 2026-10-21 da qo'shildi (`components/home/TileArt.tsx`).
 
 **Ochiq savollar (7-bo'lim) — default bilan ishlandi:** OS-MG-01 (telefon: saytdagi +998 71 233-45-67, "24/7" yozilmadi), OS-MG-02 (English yo'q), OS-MG-03 (nom: "Milliy statistika qo'mitasi · Yagona onlayn statistika portali"), OS-MG-04 (katalog statik), OS-MG-05 (plitka → pasport, "story" yo'q), OS-MG-06 (namuna matn belgisi bilan), OS-MG-07 (sharh moderatsiyadan keyin), OS-MG-08 (statistik bloklar `/statistics` da; bosh sahifada faqat qisqa "raqamlarda" bloki — rahbariyat tasdig'i kerak), OS-MG-09 (kabinet skrinshotlari yo'q).
 

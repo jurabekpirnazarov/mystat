@@ -8,6 +8,7 @@ import { useServiceId } from '../utils/useServiceId';
 import RatingModal from '../components/modals/RatingModal';
 import { createRating } from '../api/rating';
 import type { ApiTradeData, HeaderItem, TradeDataItem } from '../components/ServiceResultsStep';
+import { useLang } from '../i18n/LangContext';
 
 /** trade-data/ POST so'rovi: filtr ro'yxatlari va bir nechta skalyar maydon */
 type TradeQueryPayload = { [key: string]: (string | number)[] | string | number | undefined } & {
@@ -33,6 +34,7 @@ interface ApiResponseType {
   name_ru?: string,
   name_uz?: string,
   code?: string,
+  soato?: string,
   level?: number,
   level_display?: string,
   parent?: number | null,
@@ -42,6 +44,9 @@ interface ApiResponseType {
 type StepType = 'info' | 'settings' | 'results';
 
 const ExternalTrade = () => {
+  const { lang } = useLang();
+  // So'rov xatosi (400 va h.k.): ilgari yashirinib "Ma'lumot topilmadi" ko'rinardi
+  const [queryError, setQueryError] = useState<string | null>(null);
   const { serviceId } = useServiceId(); // get real ID from API
 
   // UI State
@@ -360,7 +365,7 @@ const ExternalTrade = () => {
       };
 
       const sortData = response.results?.map(item => ({
-        value: String(item.id ?? ''),
+        value: String(item.code ?? ''), // backend country_group__code bo'yicha filtrlaydi
         label: item.name_uz ?? ''
       })) || [];
 
@@ -501,7 +506,7 @@ const ExternalTrade = () => {
       };
 
       const sortData = response.results?.map(item => ({
-        value: item.id ?? '',
+        value: item.soato ?? '', // backend region__soato bo'yicha filtrlaydi (id emas)
         label: item.name_uz ?? item.name ?? ''
       })) || [];
 
@@ -533,7 +538,7 @@ const ExternalTrade = () => {
       };
 
       const sortData = response.results?.map(item => ({
-        value: item.id ?? '',
+        value: item.soato ?? '', // backend region__soato bo'yicha filtrlaydi (id emas)
         label: item.name_uz ?? item.name ?? ''
       })) || [];
 
@@ -599,7 +604,7 @@ const ExternalTrade = () => {
       const response = res as ApiResponseType[];
 
       const sortData = response?.map(item => ({
-        value: item.id ?? '',
+        value: item.code ?? '', // backend HS/SITC kodini kutadi ("01"), bazadagi id emas
         label: `${item.code ?? ''} - ${item.name_uz ?? item.name ?? ''}`
       })) || [];
 
@@ -646,7 +651,7 @@ const ExternalTrade = () => {
       const response = res as ApiResponseType[];
 
       const sortData = response?.map(item => ({
-        value: item.id ?? '',
+        value: item.code ?? '', // backend HS/SITC kodini kutadi ("01"), bazadagi id emas
         label: `${item.code ?? ''} - ${item.name_uz ?? item.name ?? ''}`
       })) || [];
 
@@ -693,7 +698,7 @@ const ExternalTrade = () => {
       const response = res as ApiResponseType[];
 
       const sortData = response?.map(item => ({
-        value: item.id ?? '',
+        value: item.code ?? '', // backend HS/SITC kodini kutadi ("01"), bazadagi id emas
         label: `${item.code ?? ''} - ${item.name_uz ?? item.name ?? ''}`
       })) || [];
 
@@ -741,7 +746,7 @@ const ExternalTrade = () => {
       const response = res as ApiResponseType[];
 
       const sortData = response?.map(item => ({
-        value: item.id ?? '',
+        value: item.code ?? '', // backend HS/SITC kodini kutadi ("01"), bazadagi id emas
         label: `${item.code ?? ''} - ${item.name_uz ?? item.name ?? ''}`
       })) || [];
 
@@ -788,7 +793,7 @@ const ExternalTrade = () => {
       const response = res as ApiResponseType[];
 
       const sortData = response?.map(item => ({
-        value: item.id ?? '',
+        value: item.code ?? '', // backend HS/SITC kodini kutadi ("01"), bazadagi id emas
         label: `${item.code ?? ''} - ${item.name_uz ?? item.name ?? ''}`
       })) || [];
 
@@ -835,7 +840,7 @@ const ExternalTrade = () => {
       const response = res as ApiResponseType[];
 
       const sortData = response?.map(item => ({
-        value: item.id ?? '',
+        value: item.code ?? '', // backend HS/SITC kodini kutadi ("01"), bazadagi id emas
         label: `${item.code ?? ''} - ${item.name_uz ?? item.name ?? ''}`
       })) || [];
 
@@ -882,7 +887,7 @@ const ExternalTrade = () => {
       const response = res as ApiResponseType[];
 
       const sortData = response?.map(item => ({
-        value: item.id ?? '',
+        value: item.code ?? '', // backend HS/SITC kodini kutadi ("01"), bazadagi id emas
         label: `${item.code ?? ''} - ${item.name_uz ?? item.name ?? ''}`
       })) || [];
 
@@ -943,6 +948,9 @@ const ExternalTrade = () => {
     try {
       // Build POST payload based on enabled fields
       const payload: TradeQueryPayload = {};
+      setQueryError(null);
+      // Backend serializer'ida `lang` majburiy (ustun nomlari tili); ilgari yuborilmagani uchun har so'rov 400 qaytarardi
+      payload.lang = lang;
 
       // Set trade_type with default value of 1
       payload.trade_type = tradeFlows.length > 0 ? Number(tradeFlows[0].value) : 1;
@@ -1085,8 +1093,12 @@ const ExternalTrade = () => {
       setCurrentStep('results');
     } catch (error) {
       console.error('Error fetching data:', error);
-      // Still go to results step to show error state or empty data
-      setCurrentStep('results');
+      // Xatoni ko'rsatamiz va sozlamalarda qolamiz (natija sahifasiga o'tib "ma'lumot yo'q" demaymiz)
+      const data = (error as { response?: { data?: unknown } }).response?.data;
+      const detail = data && typeof data === 'object'
+        ? Object.entries(data as Record<string, unknown>).map(([k, v]) => `${k}: ${JSON.stringify(v)}`).join('; ')
+        : '';
+      setQueryError(`So'rovni bajarib bo'lmadi. Parametrlarni tekshirib qayta urinib ko'ring.${detail ? ` (${detail})` : ''}`);
     } finally {
       setIsLoading(false);
     }
@@ -1218,6 +1230,12 @@ const ExternalTrade = () => {
         {/* Step Content */}
         {currentStep === 'info' && (
           <ServiceInfoStep onNext={goToNext} serviceId={serviceId} />
+        )}
+
+        {currentStep === 'settings' && queryError && (
+          <div role="alert" className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200">
+            {queryError}
+          </div>
         )}
 
         {currentStep === 'settings' && (

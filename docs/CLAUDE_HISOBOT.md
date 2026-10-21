@@ -4,7 +4,7 @@
 > Unda: nima qilingan, nima qolgan, qayerda to'xtalgan va ishni qanday davom ettirish kerak.
 > Har ish bosqichi tugagach, **shu faylni yangilang** (7-bo'lim, "Sessiyalar jurnali").
 >
-> **Oxirgi yangilanish:** 2026-10-21 · **Oxirgi commit:** `efc0d9b` (2026-10-20) — 2026-10-20 dagi barcha ishlar shu commit'da
+> **Oxirgi yangilanish:** 2026-10-21 · **Oxirgi commit:** `f19ca4b` (2026-10-21, GitHub `main` ga push qilingan) — MG-00..MG-15 shu commit'da
 
 ---
 
@@ -80,6 +80,7 @@ Asosiy app'lar: `accounts`, `services` (tariflar, paketlar), `contracts`, `payme
 | `docs/MYGOV_DIZAYN.md` | my.gov.uz uslubidagi dizayn (2-etap, MG-00..MG-15). **0.5-bo'limda bajarilish holati** |
 | `docs/mygov-reference/` | MG-00 natijasi: o'lchangan tokenlar, skrinshotlar, jonli saytdan farqlar (`README.md`), 98% tekshiruvi (`checklist.md`) |
 | `docs/DIZAYN_HOZIRGI_HOLAT.md` | 1-etap dizayni (eskirgan, tarixiy) |
+| `docs/LOGO.md` | my.stat.uz portal belgisi: nega yangi, qanday tuzilgan, qayerda ishlatiladi |
 | `docs/FEATURELAR_ESKI_VA_HOZIR.md` | Feature'lar: eski (`1e4e61e`) va hozirgi holat, kim uchun, har birining ma'lumot manbasi (real / SIAT / namuna) |
 | `README.md`, `backend/README.md` | Ishga tushirish, seed_demo, production qadamlari, endpoint'lar |
 | `korxona_scoring/` | Namunaviy generator va scoring skripti, CSV'lar (KR-31 solishtirish manbai) |
@@ -194,7 +195,7 @@ Testlar: `apps/services/tests_security.py` (6). `trade-data/upload` — 2026-10-
    - JT-10 rasmiy sanalarni admin kiritishi kerak.
 
 ### 5.2b. my.gov.uz uslubi — qolganlari (MYGOV_DIZAYN.md 0.5)
-1. 98% uchun: plitkalar illyustratsiyasi (dizayner), to'liq til prefiksli URL (`useLangPath()`), `@axe-core/playwright` (bog'liqlik qo'shish ruxsati kerak).
+1. 98% uchun (birortasi yetarli): to'liq til prefiksli URL (`useLangPath()`), `@axe-core/playwright` (bog'liqlik qo'shish ruxsati kerak).
 2. Eski sahifalarning ichki ranglari (kulrang/ko'k Tailwind) hali tokenlarga o'tkazilmagan — har sahifa alohida (MG-15).
 3. Sahifa matnlari faqat o'zbekcha: ru/cry faqat qobiq va katalogda.
 4. Egasidan: OS-MG-08 (bosh sahifadan statistik bloklarni olib tashlashni rahbariyat tasdiqlashi), OS-MG-09 (my.gov.uz kabineti skrinshotlari), OS-MG-01 (ishonch telefoni raqami).
@@ -248,4 +249,10 @@ node tools/mygov-reference/capture.ts                             # MG-00: my.go
 | 2026-10-20 | `Navbar.tsx` qayta loyihalandi: rasmiy qator (qo'mita, Portal haqida, Reglamentlar, Portal statistikasi, stat.uz, SIAT), statistikaga yo'naltirilgan menyu (Ko'rsatkichlar, Hududlar, Korxonalar, Fuqarolar uchun, Xizmatlar, Savol-javob, Aloqa; faol bo'lim tag chizig'i bilan), avatar-profil menyusi (Escape bilan yopiladi), qizil yuguruvchi qator o'rniga sokin "test rejimi" xabari. Ko'rsatkich kartochkalari grafiklari: yil o'qi, oxirgi nuqta, izoh oynasi, ma'lumotga mos shkala, davr xulosasi | commit qilinmagan | — |
 | 2026-10-21 | `docs/FEATURELAR_ESKI_VA_HOZIR.md` yozildi: eski va hozirgi feature'lar, foydalanuvchi turlari, ma'lumot manbalari xaritasi, production'da bo'sh qoladigan bo'limlar. Hisobot sarlavhasidagi commit `efc0d9b` ga yangilandi. Kod o'zgarmadi | commit qilinmagan | Avvalgi tanlov: KR-41, 5.1 qolganlari yoki JT (5.2a) |
 | 2026-10-21 | Bosh sahifa "Interaktiv xizmatlar" (`Interactive.tsx`): kartochkalardan tavsif olib tashlandi, faqat nom (kattaroq, `text-lg`), belgilar va havola qoldi | commit qilinmagan | — |
-| 2026-10-21 | **my.gov.uz uslubi, 2-etap (MYGOV_DIZAYN.md MG-00..MG-15)** — 4.4b-bo'lim. Jonli my.gov.uz o'lchandi (hujjat taxminlaridan farqlar: chap sidebar, breadcrumb, "Hayotiy vaziyatlar" va boshqa bloklar — `mygov-reference/README.md`). Yangi layout, tokenlar, katalog (14 soha, 50 xizmat), soha/pasport/qidiruv/statistika sahifalari, `apps/portal` (baho, foydalanish, fikr), kabinet MG-12. Checklist 95,7%. `MYGOV_DIZAYN (1).md` → `docs/MYGOV_DIZAYN.md` | commit qilinmagan | Foydalanuvchi bilan: commit (MG bosqichlari bo'yicha bo'lish mumkin); 98% uchun 5.2b-1; eski sahifalar ichki ranglari (MG-15) |
+| 2026-10-21 | **my.gov.uz uslubi, 2-etap (MYGOV_DIZAYN.md MG-00..MG-15)** — 4.4b-bo'lim. Jonli my.gov.uz o'lchandi (hujjat taxminlaridan farqlar: chap sidebar, breadcrumb, "Hayotiy vaziyatlar" va boshqa bloklar — `mygov-reference/README.md`). Yangi layout, tokenlar, katalog (14 soha, 50 xizmat), soha/pasport/qidiruv/statistika sahifalari, `apps/portal` (baho, foydalanish, fikr), kabinet MG-12. Checklist 95,7%. `MYGOV_DIZAYN (1).md` → `docs/MYGOV_DIZAYN.md` | `f19ca4b` (push) | Foydalanuvchi bilan: commit (MG bosqichlari bo'yicha bo'lish mumkin); 98% uchun 5.2b-1; eski sahifalar ichki ranglari (MG-15) |
+| 2026-10-21 | Yangi portal belgisi (`docs/LOGO.md`): `components/brand/Logo.tsx` (ikki kartochka + o'suvchi ustunlar, my.gov.uz oilasiga mos), `favicon.svg`, PWA ikonkalari, manifest rangi, SW kesh `v2`. UZSTAT emblemi footer'da stat.uz havolasi bilan qoldi | commit qilinmagan | Egasidan: belgini rahbariyat bilan kelishish |
+| 2026-10-21 | Logo davlat tashkilotiga moslandi: yozuv shrifti Literata 700 (`font-brand`, 8 ta serif solishtirildi), orqa kartochka bayroq yashili, rasmiy lockup "MILLIY STATISTIKA QO'MITASI" (sidebar, footer). `docs/LOGO.md` yangilandi | commit qilinmagan | Egasidan: belgi va shriftni tasdiqlash |
+| 2026-10-21 | **Tashqi savdo (`/ex-trade`) tahlili ishlamasdi** — tuzatildi: (1) frontend `lang` yubormasdi, serializer majburiy deb 400 qaytarardi — har so'rov; (2) HS/SITC, hudud va davlat guruhi filtrlari kod/SOATO o'rniga bazadagi `id` yuborardi; (3) xato yashirinib "Ma'lumot topilmadi" chiqardi — endi xabar ko'rsatiladi; (4) natija sahifasi yangi API maydonlarini (`qiymat_…`, `hs2_nomi`) tanimasdi, "Jami" qatori yig'indini ikki barobar qilardi; (5) backend HS2/HS4/SITC1–3 nomini quyi mahsulotdan olardi, nom ustuni "Qiymat" deb yozilardi. Fayllar: `pages/ExternalTrade.tsx`, `components/ServiceResultsStep.tsx`, `ExternalTradeAPI/newviews.py` | commit qilinmagan | — |
+| 2026-10-21 | Chap sidebar desktopda doim ochiq (268px, foydalanuvchi talabi; my.gov.uz da yopiq/hover — ataylab farq). Kontent `lg:pl-[290px]`; 1024–1279px da header'dagi portal nomi yashiriladi (sidebar lockup'ida bor), soha sahifasining ichki "Sohalar" ro'yxati `xl` dan boshlab, undan torroqda chip'lar | commit qilinmagan | — |
+| 2026-10-21 | Bosh sahifa plitkalariga 12 ta ma'noli SVG sahna (`components/home/TileArt.tsx`, my.gov.uz "story" uslubida: pastel fon, qurilma va kartochkalar, pastdan ko'k gradient). Checklist 97,1% | commit qilinmagan | — |
+| 2026-10-21 | Header qayta loyihalandi: yordamchi panel (qidiruv, hisobot muddati, telefon, til, maxsus imkoniyatlar) bitta oq "pill" ichida, StatCoin / xabarnoma / profil bir xil uslubda, matnlar bo'linmaydi (kirganda yozuvlar `2xl` dan). `/check`: STIR manbada yo'q bo'lsa (masalan 306210288 — KTUT va sanoat reyestrida yo'q) sabablar va keyingi qadamlar (`company-card/NotFoundCard.tsx`). Bepul kartaga tashqi reyestrni (#101, pullik) ulash — egasining qarori | push qilindi | Egasidan: `/check` ga tashqi STIR reyestrini ulash kerakmi |

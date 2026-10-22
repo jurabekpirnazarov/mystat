@@ -4,10 +4,10 @@
  * Tungi rejim: `.dark` (ThemeContext) yoki `[data-theme="dark"]`.
  */
 :root {
-  --ds-ink: 11 29 47;
-  --ds-brand: 16 42 67;
+  --ds-ink: 17 24 39;
+  --ds-brand: 31 41 55;
   --ds-on-brand: 255 255 255;
-  --ds-on-brand-muted: 200 212 227;
+  --ds-on-brand-muted: 209 213 219;
   --ds-primary: 21 94 239;
   --ds-primary-hover: 15 75 200;
   --ds-primary-soft: 235 242 254;
@@ -47,8 +47,8 @@
 
 .dark,
 [data-theme="dark"] {
-  --ds-ink: 6 14 28;
-  --ds-brand: 11 26 51;
+  --ds-ink: 10 14 22;
+  --ds-brand: 24 32 45;
   --ds-on-brand-muted: 184 196 214;
   --ds-primary: 91 141 239;
   --ds-primary-hover: 122 164 243;

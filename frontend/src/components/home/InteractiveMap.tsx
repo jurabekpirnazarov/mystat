@@ -64,7 +64,7 @@ export default function InteractiveMap({ features, fill, tip, selected, onSelect
       <svg viewBox={`-10 -${LIFT + 10} ${geo.w + 20} ${geo.h + DEPTH + LIFT + 24}`} className="h-full w-full" role="img" aria-label={label} preserveAspectRatio="xMidYMid meet">
         <defs>
           <filter id="map-shadow" x="-10%" y="-10%" width="120%" height="130%">
-            <feDropShadow dx="0" dy="10" stdDeviation="6" floodColor="#102A43" floodOpacity="0.18" />
+            <feDropShadow dx="0" dy="10" stdDeviation="6" floodColor="#1F2937" floodOpacity="0.18" />
           </filter>
           <filter id="map-glow" x="-20%" y="-20%" width="140%" height="140%">
             <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor="#155EEF" floodOpacity="0.55" />
@@ -90,7 +90,7 @@ export default function InteractiveMap({ features, fill, tip, selected, onSelect
               <path d={r.d} fill={fill(r.code) ?? "url(#map-missing)"} stroke={sel ? "#ffffff" : "rgba(255,255,255,.85)"} strokeWidth={sel ? 3 : 1.4} strokeLinejoin="round"
                 filter={sel ? "url(#map-glow)" : undefined} cursor="pointer" onPointerEnter={() => setHover(r.code)} onClick={() => onSelect(r.code)}
                 className="map-pop" style={{ transition: "fill .5s, stroke-width .2s", animationDelay: `${r.i * 45}ms`, filter: on && !sel ? "brightness(1.08) saturate(1.1)" : undefined }} />
-              {r.big && <text x={r.cx} y={r.cy} textAnchor="middle" dominantBaseline="middle" pointerEvents="none" fontSize="22" fontWeight="700" fill="#102A43"
+              {r.big && <text x={r.cx} y={r.cy} textAnchor="middle" dominantBaseline="middle" pointerEvents="none" fontSize="22" fontWeight="700" fill="#1F2937"
                 stroke="rgba(255,255,255,.9)" strokeWidth="5" paintOrder="stroke" strokeLinejoin="round">{r.name}</text>}
             </g>
           );

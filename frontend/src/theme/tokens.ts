@@ -25,7 +25,7 @@ export const mg = {
   flow: { export: "#2563EB", import: "#D97706", total: "#667085" },
   radius: { card: 10, tile: 16, sidebar: 25, pill: 9999 },
   gradient: {
-    hero: "#102A43",
+    hero: "#1F2937",
     button: "#155EEF",
     personal: "radial-gradient(120% 120% at 92% 50%, #EBF2FE 0, #FFFFFF 46%)",
   },
@@ -37,9 +37,9 @@ export const mg = {
 
 /** H1: yagona `--ds-*` tokenlari (kunduzgi qiymatlar; tungi rejim `theme/tokens.css` da). Grafiklar shu yerdan oladi. */
 export const ds = {
-  ink: "#0B1D2F",
-  brand: "#102A43",
-  onBrandMuted: "#C9D6EA",
+  ink: "#111827",
+  brand: "#1F2937",
+  onBrandMuted: "#D1D5DB",
   primary: "#155EEF",
   primaryHover: "#0F4BC8",
   primarySoft: "#EBF2FE",

@@ -43,31 +43,30 @@ export function PortalNumbers() {
   }, []);
   const live = SERVICES.filter((s) => s.status === "live").length;
   const usage = Object.values(items).reduce((n, x) => n + x.usage, 0);
-  const tile = "relative flex flex-col justify-end rounded-mg p-5 text-white";
+  const stats = [
+    { icon: Users, value: users !== null ? users.toLocaleString("ru-RU") : "—", label: t({ uz: "Foydalanuvchilar", ru: "Пользователи" }) },
+    { icon: Layers, value: String(live), label: t({ uz: "Onlayn xizmat", ru: "Онлайн-услуг" }) },
+    { icon: LineChart, value: usage ? usage.toLocaleString("ru-RU") : "—", label: t({ uz: "Xizmatdan foydalanish", ru: "Использований услуг" }) },
+  ];
+  // Ixcham, bir qatorli: matn va tugma chapda, uch raqam o'ngda (avval 3 ta katta plitka ~560 px joy olardi)
   return (
-    <div className="rounded-mg border border-mg-border bg-mg-surface p-6 sm:p-8">
-      <h2 className="text-2xl font-bold text-black sm:text-[34px] sm:leading-tight dark:text-white">{t(UI.inNumbers)}</h2>
-      <p className="mt-3 max-w-3xl text-mg-text">{t(UI.inNumbersText)}</p>
-      <Link to="/statistics" className="mt-5 inline-flex items-center gap-2 rounded-mg bg-[rgb(var(--ds-brand))] px-5 py-2 text-sm font-medium text-white hover:brightness-125">
-        {t(UI.learnMore)} <ArrowRight className="h-4 w-4" aria-hidden="true" />
-      </Link>
-      <div className="mt-6 grid max-w-xl gap-4 sm:grid-cols-2">
-        <div className={`${tile} min-h-[150px] bg-slate-600 sm:row-span-2 sm:min-h-[300px]`}>
-          <Users className="absolute right-4 top-4 h-10 w-10 rounded-lg bg-white/30 p-2" aria-hidden="true" />
-          <p className="text-4xl font-bold">{users !== null ? users.toLocaleString("ru-RU") : "—"}</p>
-          <p className="text-lg font-semibold">{t({ uz: "Foydalanuvchilar", ru: "Пользователи" })}</p>
-        </div>
-        <div className={`${tile} min-h-[140px] bg-slate-500`}>
-          <Layers className="absolute right-4 top-4 h-10 w-10 rounded-lg bg-white/30 p-2" aria-hidden="true" />
-          <p className="text-4xl font-bold">{live}</p>
-          <p className="text-lg font-semibold">{t({ uz: "onlayn xizmat", ru: "онлайн-услуг" })}</p>
-        </div>
-        <div className={`${tile} min-h-[140px] bg-slate-700`}>
-          <LineChart className="absolute right-4 top-4 h-10 w-10 rounded-lg bg-white/30 p-2" aria-hidden="true" />
-          <p className="text-4xl font-bold">{usage ? usage.toLocaleString("ru-RU") : "—"}</p>
-          <p className="text-lg font-semibold">{t({ uz: "xizmatdan foydalanish", ru: "использований услуг" })}</p>
-        </div>
+    <section aria-labelledby="home-numbers" className="grid items-center gap-6 rounded-mg border border-[rgb(var(--ds-panel-line))] bg-[rgb(var(--ds-panel))] p-5 sm:p-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+      <div>
+        <h2 id="home-numbers" className="text-xl font-bold leading-snug text-mg-heading sm:text-2xl">{t(UI.inNumbers)}</h2>
+        <p className="mt-2 text-sm text-[rgb(var(--ds-on-panel-muted))] sm:text-base">{t(UI.inNumbersText)}</p>
+        <Link to="/statistics" className="mt-4 inline-flex items-center gap-2 rounded-mg bg-[rgb(var(--ds-brand))] px-4 py-2 text-sm font-medium text-white hover:brightness-125">
+          {t(UI.learnMore)} <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        </Link>
       </div>
-    </div>
+      <dl className="grid grid-cols-3 gap-2 sm:gap-3">
+        {stats.map(({ icon: Icon, value, label }) => (
+          <div key={label} className="flex min-w-0 flex-col rounded-mg border border-mg-border bg-mg-surface p-3 sm:p-4">
+            <Icon className="h-5 w-5 text-[rgb(var(--ds-on-panel-muted))]" aria-hidden="true" />
+            <dd className="order-2 mt-2 text-xl font-bold tabular-nums leading-7 text-mg-heading sm:text-[28px] sm:leading-8">{value}</dd>
+            <dt className="order-3 mt-0.5 text-[11px] leading-tight text-mg-muted sm:text-xs">{label}</dt>
+          </div>
+        ))}
+      </dl>
+    </section>
   );
 }

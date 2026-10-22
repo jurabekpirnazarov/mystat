@@ -16,7 +16,7 @@ import WeatherWidget from "./WeatherWidget";
  * Ma'lumot mavjud manbalardan (SIAT karta API'si, dashboards), ob-havo — backend keshi orqali. Bitta vidjet xatosi boshqalarni to'xtatmaydi.
  * Mobilda tartib: kartochkalar → ob-havo → karta.
  */
-export default function HomeDashboard({ className = "mt-10", middle, showCards = true }: { className?: string; middle?: ReactNode; showCards?: boolean }) {
+export default function HomeDashboard({ className = "mt-10", middle, showCards = true, showControls = true }: { className?: string; middle?: ReactNode; showCards?: boolean; showControls?: boolean }) {
   const { t } = useLang();
   const api = useHomeLayout();
   const { layout } = api;
@@ -77,8 +77,10 @@ export default function HomeDashboard({ className = "mt-10", middle, showCards =
 
   return (
     <section aria-labelledby="home-today" className={className}>
+      <h2 id="home-today" className="sr-only">{t({ uz: "O'zbekiston bugun", ru: "Узбекистан сегодня" })}</h2>
+      {showControls && (
       <div className="mb-4 flex flex-wrap items-center justify-end gap-3">
-        <h2 id="home-today" className="sr-only">{t({ uz: "O'zbekiston bugun", ru: "Узбекистан сегодня" })}</h2>
+
         <div className="flex flex-wrap items-center gap-3">
           <RegionSelect value={layout.region} onChange={api.setRegion} />
           <button ref={opener} type="button" onClick={() => setOpen(true)} aria-haspopup="dialog"
@@ -87,6 +89,8 @@ export default function HomeDashboard({ className = "mt-10", middle, showCards =
           </button>
         </div>
       </div>
+
+      )}
 
       <div className={`grid grid-cols-1 gap-4 ${cols}`}>
         {(order[0] === "weather" ? ["weather", "map"] as const : ["map", "weather"] as const).map((k) => (k === "weather" ? (sideOn ? widget(k) : null) : on(k) ? widget(k) : null))}
@@ -113,7 +117,7 @@ export default function HomeDashboard({ className = "mt-10", middle, showCards =
         </>
       )}
 
-      <HomeSettingsDrawer api={api} open={open} onClose={close} />
+      {showControls && <HomeSettingsDrawer api={api} open={open} onClose={close} />}
     </section>
   );
 }

@@ -47,7 +47,7 @@ export default function HomePage() {
   return (
     <div>
       <HomeHero showTiles={false} />
-      <HomeDashboard className="mt-10" showCards={false} />
+      <HomeDashboard className="mt-10" showCards={false} showControls={false} />
       <div className="mt-9"><PersonalBlocks /></div>
       <Section id="home-spheres" title={t(UI.spheres)} link><SpheresGrid /></Section>
       <Section id="home-situations" title={t(UI.situations)}>

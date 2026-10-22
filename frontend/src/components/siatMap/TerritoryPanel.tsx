@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Area, CartesianGrid, ComposedChart, Legend, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, CartesianGrid, ComposedChart, Legend, Line, ReferenceArea, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowDown, ArrowUp, ExternalLink, GitCompare, X } from "lucide-react";
 import type { ForecastBlock, ScoreQuery, TerritoryCard, TerritoryIndicator } from "../../api/siatMap";
 import { formatValue } from "../../utils/mapScale";
+import { ds } from "../../theme/tokens";
 import { formatAxis, niceAxis, useChartTheme } from "../../utils/chartTheme";
 import ScorePanel from "./ScorePanel";
 import WhatIfPanel from "./WhatIfPanel";
@@ -235,6 +236,8 @@ function Dynamics({ ind, card, other, otherInd, period }: { ind: TerritoryIndica
   const preliminary = new Set(ind.preliminary ? [ind.period] : []);
   const forecastPeriods = new Set(fc?.forecast.map((p) => p.period) ?? []);
   const marker = period && rows.some((p) => p.period === period) ? period : ind.period;
+  const lastActualPeriod = known[known.length - 1]?.period;
+  const endPeriod = rows[rows.length - 1]?.period;
   const axisValues = rows.flatMap((p) => [p.a, p.b, p.f, ...(p.band ?? []), ...(p.scen ?? [])]);
 
   return (
@@ -262,23 +265,27 @@ function Dynamics({ ind, card, other, otherInd, period }: { ind: TerritoryIndica
                 return [`${formatValue(v === null ? null : Number(v))} ${ind.unit}`, name];
               }} />
             {(other || fc) && <Legend wrapperStyle={{ fontSize: 11 }} iconType="plainline" />}
-            {showScenarios && <Area dataKey="scen" name="Ssenariylar" stroke="none" fill="#a78bfa" fillOpacity={0.15} isAnimationActive={false} connectNulls />}
-            {fc && <Area dataKey="band" name="80% oraliq" stroke="none" fill="#f97316" fillOpacity={0.18} isAnimationActive={false} connectNulls />}
-            <Line type="monotone" dataKey="a" name={card.name} stroke="#f97316" strokeWidth={2} animationDuration={400}
+            {fc && lastActualPeriod && endPeriod && lastActualPeriod !== endPeriod && (
+              <ReferenceArea x1={lastActualPeriod} x2={endPeriod} fill={ds.textMuted} fillOpacity={0.07} stroke="none"
+                label={{ value: "PROGNOZ", position: "insideTopRight", fontSize: 10, fontWeight: 700, fill: chart.axis }} />
+            )}
+            {showScenarios && <Area dataKey="scen" name="Ssenariylar (ijobiy–salbiy)" stroke="none" fill={ds.accentStrong} fillOpacity={0.18} isAnimationActive={false} connectNulls />}
+            {fc && <Area dataKey="band" name="80% ishonch oralig'i" stroke="none" fill={ds.primary} fillOpacity={0.16} isAnimationActive={false} connectNulls />}
+            <Line type="monotone" dataKey="a" name={card.name} stroke={ds.primary} strokeWidth={2} animationDuration={400}
               dot={rows.length <= 20 ? { r: 2.5, fill: chart.dotFill, strokeWidth: 1.5 } : false} activeDot={{ r: 4 }} connectNulls={false} />
             {fc && (
-              <Line type="monotone" dataKey="f" name="Prognoz" stroke="#f97316" strokeWidth={2} strokeDasharray="5 4" animationDuration={400}
-                dot={{ r: 2.5, fill: chart.dotFill, strokeWidth: 1.5 }} connectNulls />
+              <Line type="monotone" dataKey="f" name="Prognoz" stroke={ds.primary} strokeWidth={2.5} strokeDasharray="2 5" strokeLinecap="round" animationDuration={400}
+                dot={(p: { index?: number; cx?: number; cy?: number; payload?: Row }) => (p.payload?.a === null && p.cx != null && p.cy != null ? <circle key={p.index} cx={p.cx} cy={p.cy} r={3.2} fill={chart.dotFill} stroke={ds.primary} strokeWidth={1.8} /> : <g key={p.index} />)} connectNulls />
             )}
             {other && (
-              <Line type="monotone" dataKey="b" name={other.name} stroke="#7c3aed" strokeWidth={2} animationDuration={400}
+              <Line type="monotone" dataKey="b" name={other.name} stroke={ds.textMuted} strokeWidth={2} animationDuration={400}
                 dot={rows.length <= 20 ? { r: 2.5, fill: chart.dotFill, strokeWidth: 1.5 } : false} activeDot={{ r: 4 }} />
             )}
             {marker && <ReferenceLine x={marker} stroke={chart.axis} strokeDasharray="3 3" />}
           </ComposedChart>
         </ResponsiveContainer>
       </div>
-      {fc && <ForecastSummary fc={fc} showScenarios={showScenarios} onToggle={() => setShowScenarios((v) => !v)}
+      {fc && <ForecastSummary fc={fc} unit={ind.unit} showScenarios={showScenarios} onToggle={() => setShowScenarios((v) => !v)}
         whatIf={card.level === "district" ? card.soato : null} />}
     </figure>
   );
@@ -286,37 +293,59 @@ function Dynamics({ ind, card, other, otherInd, period }: { ind: TerritoryIndica
 
 const signed = (v: number | null, unit: string) => (v === null ? "—" : `${v >= 0 ? "+" : "−"}${formatValue(Math.abs(v))}${unit === "%" ? "%" : ` ${unit}`}`);
 
-function ForecastSummary({ fc, showScenarios, onToggle, whatIf }: { fc: ForecastBlock; showScenarios: boolean; onToggle: () => void; whatIf: string | null }) {
+function ForecastSummary({ fc, showScenarios, onToggle, whatIf, unit }: { fc: ForecastBlock; showScenarios: boolean; onToggle: () => void; whatIf: string | null; unit: string }) {
   const g = fc.growth;
   const per = g.unit === "%" ? "%" : "p.p.";
+  const end = fc.forecast[fc.forecast.length - 1];
   return (
-    <div className="mt-2 space-y-1.5 text-xs text-gray-600 dark:text-gray-300">
-      {g.per_year !== null && (
-        <p>
-          {Number(g.from) + 1}–{g.to} kutilayotgan o'sish: <b className="text-gray-800 dark:text-gray-100">yiliga {signed(g.per_year, per)}</b>
-          {g.lo !== null && g.hi !== null && <> (oraliq {signed(g.lo, per)} … {signed(g.hi, per)})</>}
-          {g.national !== null && <>, respublikada {signed(g.national, per)}</>}.
-          {g.direction_uncertain && <span className="ml-1 text-amber-700 dark:text-amber-300">Yo'nalish noaniq: oraliq pasayishni ham, o'sishni ham qamraydi.</span>}
-        </p>
-      )}
+    <div className="mt-3 space-y-2.5 rounded-lg border border-mg-border bg-mg-bg/60 p-3 text-xs text-mg-muted">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-mg-text">Prognoz</span>
+        <span className="rounded-full bg-mg-surface px-2 py-0.5 text-[11px] font-medium ring-1 ring-mg-border">rasmiy emas · statistik baho</span>
+      </div>
+      <div className="space-y-2">
+        {g.per_year !== null && (
+          <div className="flex items-center justify-between gap-3 rounded-md bg-mg-surface p-2.5 ring-1 ring-mg-border">
+            <div className="min-w-0">
+              <p className="text-[11px]">{Number(g.from) + 1}–{g.to}: yillik o'sish</p>
+              {g.lo !== null && g.hi !== null && <p className="text-[11px] tabular-nums">oraliq {signed(g.lo, per)} … {signed(g.hi, per)}</p>}
+            </div>
+            <p className="shrink-0 text-xl font-bold tabular-nums text-mg-heading">{signed(g.per_year, per)}</p>
+          </div>
+        )}
+        {end && (
+          <div className="flex items-center justify-between gap-3 rounded-md bg-mg-surface p-2.5 ring-1 ring-mg-border">
+            <div className="min-w-0">
+              <p className="text-[11px]">{end.period}-yil, kutilayotgan</p>
+              <p className="text-[11px] tabular-nums">{end.lo80 !== null && end.hi80 !== null ? `80%: ${formatValue(end.lo80)} – ${formatValue(end.hi80)}` : unit}</p>
+            </div>
+            <p className="shrink-0 text-xl font-bold tabular-nums text-mg-heading">{formatValue(end.value)}</p>
+          </div>
+        )}
+      </div>
+      {g.national !== null && <p>Respublikada: <b className="text-mg-text">{signed(g.national, per)}</b> yiliga.</p>}
+      {g.direction_uncertain && <p className="rounded-md bg-[rgb(var(--ds-warning-bg))] px-2 py-1 text-[rgb(var(--ds-warning))]">Yo'nalish noaniq: oraliq pasayishni ham, o'sishni ham qamraydi.</p>}
+      <div role="group" aria-label="Prognoz ko'rinishi" className="inline-flex rounded-md border border-mg-border bg-mg-surface p-0.5">
+        {[{ on: false, label: "Asosiy" }, { on: true, label: "Ssenariylar" }].map((o) => (
+          <button key={o.label} type="button" aria-pressed={showScenarios === o.on} onClick={() => showScenarios !== o.on && onToggle()}
+            className={`rounded px-2.5 py-1 text-[11px] font-semibold ${showScenarios === o.on ? "bg-[rgb(var(--ds-brand))] text-white" : "text-mg-text hover:bg-mg-info"}`}>{o.label}</button>
+        ))}
+      </div>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <button type="button" onClick={onToggle} aria-pressed={showScenarios} className="text-blue-600 hover:underline">
-          {showScenarios ? "Ssenariylarni yashirish" : "Ijobiy va salbiy ssenariylar (5 yil)"}
-        </button>
         <details className="basis-full">
-          <summary className="cursor-pointer text-blue-600">Nega shunday prognoz?</summary>
+          <summary className="cursor-pointer font-medium text-mg-text">Nega shunday prognoz?</summary>
           {fc.basis === "factors" && fc.drivers.length > 0 ? (
             <>
               <p className="mt-1">Prognozga eng ko'p ta'sir qilgan omillar:</p>
               <ul className="mt-0.5 space-y-0.5">
                 {fc.drivers.map((d) => (
                   <li key={d.feature} className="flex items-center gap-1">
-                    {d.effect === "up" ? <ArrowUp className="w-3 h-3 text-emerald-600" aria-label="oshiradi" /> : <ArrowDown className="w-3 h-3 text-red-600" aria-label="kamaytiradi" />}
+                    {d.effect === "up" ? <ArrowUp className="h-3 w-3" aria-label="oshiradi" /> : <ArrowDown className="h-3 w-3" aria-label="kamaytiradi" />}
                     {d.name}
                   </li>
                 ))}
               </ul>
-              <p className="mt-1 text-gray-500">Bu statistik bog'liqlik, sabab-oqibat emas.</p>
+              <p className="mt-1">Bu statistik bog'liqlik, sabab-oqibat emas.</p>
             </>
           ) : (
             <p className="mt-1">Prognoz shu hududning o'tgan yillardagi o'sish sur'atiga asoslangan.</p>
@@ -325,14 +354,14 @@ function ForecastSummary({ fc, showScenarios, onToggle, whatIf }: { fc: Forecast
         {whatIf && <WhatIfPanel soato={whatIf} />}
       </div>
       {fc.model && (
-        <p className="text-gray-500">
+        <p>
           Usul: {fc.model.method}
           {fc.model.error_pct !== null && <> · o'tgan yillarda 1 yillik prognozning o'rtacha xatosi {formatValue(fc.model.error_pct)}%</>}
           {fc.model.error_pct_last !== null && fc.model.horizons[1] > 1 && <>, {fc.model.horizons[1]} yillikniki {formatValue(fc.model.error_pct_last)}%</>}
           {fc.model.direction_pct !== null && <> · o'sish yo'nalishi {formatValue(fc.model.direction_pct)}% hollarda to'g'ri</>}.
         </p>
       )}
-      <p className="text-gray-500">Prognoz rasmiy emas: SIAT ma'lumotiga asoslangan statistik baho. Lenta — 80% ishonch oralig'i.</p>
+      <p>Soyali lenta — 80% ishonch oralig'i. Ma'lumot: SIAT.</p>
     </div>
   );
 }

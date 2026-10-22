@@ -48,7 +48,8 @@ export default function HomePage() {
   return (
     <div>
       <HomeGreeting />
-      <HomeDashboard className="mt-6" middle={<HomeHero />} />
+      <div className="mt-6"><HomeHero /></div>
+      <HomeDashboard className="mt-10" showCards={false} />
       <div className="mt-9"><PersonalBlocks /></div>
       <Section id="home-spheres" title={t(UI.spheres)} link><SpheresGrid /></Section>
       <Section id="home-situations" title={t(UI.situations)}>

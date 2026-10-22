@@ -15,7 +15,7 @@ import WeatherWidget from "./WeatherWidget";
  * Ma'lumot mavjud manbalardan (SIAT karta API'si, dashboards), ob-havo — backend keshi orqali. Bitta vidjet xatosi boshqalarni to'xtatmaydi.
  * Mobilda tartib: kartochkalar → ob-havo → karta.
  */
-export default function HomeDashboard({ className = "mt-10", middle }: { className?: string; middle?: ReactNode }) {
+export default function HomeDashboard({ className = "mt-10", middle, showCards = true }: { className?: string; middle?: ReactNode; showCards?: boolean }) {
   const { t } = useLang();
   const api = useHomeLayout();
   const { layout } = api;
@@ -86,6 +86,8 @@ export default function HomeDashboard({ className = "mt-10", middle }: { classNa
         {(order[0] === "weather" ? ["weather", "map"] as const : ["map", "weather"] as const).map((k) => (on(k) && (k !== "weather" || !weatherFailed) ? widget(k) : null))}
       </div>
       {middle && <div className="mt-8">{middle}</div>}
+      {showCards && (
+        <>
       <div className="mt-8">
         <div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(220px,1fr))]">
@@ -101,6 +103,9 @@ export default function HomeDashboard({ className = "mt-10", middle }: { classNa
         </div>
       </div>
       <p className="mt-2 text-xs text-mg-muted">{t({ uz: "Aholi soni — yil boshiga rasmiy qiymat; bosh sahifa tepasidagi jonli hisoblagich boshqa usulda hisoblanadi.", ru: "Население — официальные данные на начало года; счётчик вверху страницы считается иначе." })}</p>
+
+        </>
+      )}
 
       <HomeSettingsDrawer api={api} open={open} onClose={close} />
     </section>

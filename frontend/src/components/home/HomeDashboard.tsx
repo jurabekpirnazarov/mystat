@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Settings2 } from "lucide-react";
 import { loadHomeCards, type HomeCards } from "../../api/homeWidgets";
 import { CARD_BY_KEY, HOME_CARDS, MIN_CARDS, REPUBLIC } from "../../config/homeWidgets";
@@ -15,7 +15,7 @@ import WeatherWidget from "./WeatherWidget";
  * Ma'lumot mavjud manbalardan (SIAT karta API'si, dashboards), ob-havo — backend keshi orqali. Bitta vidjet xatosi boshqalarni to'xtatmaydi.
  * Mobilda tartib: kartochkalar → ob-havo → karta.
  */
-export default function HomeDashboard({ className = "mt-10" }: { className?: string }) {
+export default function HomeDashboard({ className = "mt-10", middle }: { className?: string; middle?: ReactNode }) {
   const { t } = useLang();
   const api = useHomeLayout();
   const { layout } = api;
@@ -83,7 +83,11 @@ export default function HomeDashboard({ className = "mt-10" }: { className?: str
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-        <div className="order-1 col-span-1 lg:order-last lg:col-span-12">
+        {(order[0] === "weather" ? ["weather", "map"] as const : ["map", "weather"] as const).map((k) => (on(k) && (k !== "weather" || !weatherFailed) ? widget(k) : null))}
+      </div>
+      {middle && <div className="mt-8">{middle}</div>}
+      <div className="mt-8">
+        <div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(220px,1fr))]">
             {!cards
               ? Array.from({ length: MIN_CARDS }, (_, i) => <div key={i} className="min-h-[168px] animate-pulse rounded-mg border border-mg-border bg-mg-surface" aria-busy="true" />)
@@ -95,7 +99,6 @@ export default function HomeDashboard({ className = "mt-10" }: { className?: str
           </div>
           {cardsFailed && <p role="alert" className="mt-3 text-sm text-mg-muted">{t({ uz: "Ko'rsatkichlarni yuklab bo'lmadi.", ru: "Не удалось загрузить показатели." })}</p>}
         </div>
-        {(order[0] === "weather" ? ["weather", "map"] as const : ["map", "weather"] as const).map((k) => (on(k) && (k !== "weather" || !weatherFailed) ? widget(k) : null))}
       </div>
       <p className="mt-2 text-xs text-mg-muted">{t({ uz: "Aholi soni — yil boshiga rasmiy qiymat; bosh sahifa tepasidagi jonli hisoblagich boshqa usulda hisoblanadi.", ru: "Население — официальные данные на начало года; счётчик вверху страницы считается иначе." })}</p>
 

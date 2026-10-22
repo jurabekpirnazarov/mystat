@@ -38,7 +38,7 @@ export default function WeatherWidget({ region, forecast, onError }: { region: s
 
   return (
     <section aria-label={t({ uz: "Ob-havo", ru: "Погода" })}
-      className={`relative flex h-full min-h-[420px] flex-col overflow-hidden rounded-[12px] border border-[rgb(var(--ds-panel-line))] p-5 text-[rgb(var(--ds-on-panel))] ${failed ? "bg-slate-700" : sky}`}>
+      className={`relative flex flex-col overflow-hidden rounded-[12px] border border-[rgb(var(--ds-panel-line))] p-5 text-[rgb(var(--ds-on-panel))] ${failed ? "bg-slate-700" : sky}`}>
       <p className="relative text-xs font-semibold uppercase tracking-wider text-[rgb(var(--ds-on-panel-muted))]">{t({ uz: "Ob-havo", ru: "Погода" })}</p>
       <h3 className="relative text-xl font-bold">{w ? w.city : " "}</h3>
       {failed ? (
@@ -47,31 +47,31 @@ export default function WeatherWidget({ region, forecast, onError }: { region: s
         <div className="relative mt-4 animate-pulse space-y-3" aria-busy="true"><div className="h-20 w-2/3 rounded-xl bg-mg-surface/80" /><div className="h-4 w-1/2 rounded bg-mg-surface/80" /><div className="h-24 rounded-xl bg-mg-surface/80" /></div>
       ) : (
         <>
-          <div aria-live="polite" className="relative mt-4 flex items-center justify-between gap-3">
+          <div aria-live="polite" className="relative mt-2 flex items-center justify-between gap-2">
             <div>
-              <p className="text-[56px] font-bold leading-none tracking-tight tabular-nums">{sign(w.current.temp)}</p>
-              <p className="mt-2 text-base font-medium">{t(WEATHER_LABEL[w.current.code])}</p>
+              <p className="text-[40px] font-bold leading-none tracking-tight tabular-nums">{sign(w.current.temp)}</p>
+              <p className="mt-1 text-sm font-medium">{t(WEATHER_LABEL[w.current.code])}</p>
               <p className="text-sm text-[rgb(var(--ds-on-panel-muted))]">{t({ uz: "his qilinadi", ru: "ощущается" })} {sign(w.current.feels_like)}</p>
             </div>
-            <span className="text-mg-primary"><WeatherIcon code={w.current.code} size={96} /></span>
+            <span className="text-mg-primary"><WeatherIcon code={w.current.code} size={60} /></span>
           </div>
-          <p className="relative mt-4 flex flex-wrap gap-2 text-sm">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-mg-surface/80 px-3 py-1"><Wind className="h-4 w-4" aria-hidden="true" />{w.current.wind_ms} {t({ uz: "m/s", ru: "м/с" })}</span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-mg-surface/80 px-3 py-1"><Droplets className="h-4 w-4" aria-hidden="true" />{w.current.humidity}%</span>
+          <p className="relative mt-3 flex flex-wrap gap-1.5 text-sm">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-mg-surface/80 px-2.5 py-0.5 text-xs"><Wind className="h-4 w-4" aria-hidden="true" />{w.current.wind_ms} {t({ uz: "m/s", ru: "м/с" })}</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-mg-surface/80 px-2.5 py-0.5 text-xs"><Droplets className="h-4 w-4" aria-hidden="true" />{w.current.humidity}%</span>
           </p>
           {forecast && (
-            <ul className="relative mt-5 grid grid-cols-3 gap-2">
+            <ul className="relative mt-3 grid grid-cols-3 gap-1.5">
               {w.daily.map((d) => (
-                <li key={d.date} className="flex flex-col items-center rounded-xl bg-mg-surface/80 px-2 py-3 text-center">
+                <li key={d.date} className="flex flex-col items-center rounded-xl bg-mg-surface/80 px-1 py-2 text-center">
                   <span className="text-sm font-semibold">{day(d.date)}</span>
-                  <span className="my-1 text-mg-primary"><WeatherIcon code={d.code} size={32} /><span className="sr-only">{t(WEATHER_LABEL[d.code])}</span></span>
+                  <span className="my-1 text-mg-primary"><WeatherIcon code={d.code} size={24} /><span className="sr-only">{t(WEATHER_LABEL[d.code])}</span></span>
                   <span className="text-sm font-semibold tabular-nums">{sign(d.t_max)}</span>
                   <span className="text-xs tabular-nums text-[rgb(var(--ds-on-panel-muted))]">{sign(d.t_min)}</span>
                 </li>
               ))}
             </ul>
           )}
-          <p className="relative mt-auto pt-4 text-xs text-[rgb(var(--ds-on-panel-muted))]">
+          <p className="relative mt-3 text-[11px] text-[rgb(var(--ds-on-panel-muted))]">
             {t({ uz: "Manba", ru: "Источник" })}: <a href={w.source.url} className="underline" target="_blank" rel="noreferrer">{w.source.name}</a> ({w.source.license}) · {w.observed_at.slice(11, 16)}
             {(w.stale || old) && <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-mg-surface px-2 py-0.5 font-medium"><AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />{t({ uz: "Yangilanmagan", ru: "Не обновлено" })}</span>}
           </p>

@@ -55,12 +55,13 @@ export default function HomeDashboard({ className = "mt-10", middle, showCards =
   const mapOn = !!on("map");
   const order = layout.widgets.map((w) => w.key);
   const both = weatherOn && mapOn;
-  const span = (k: "map" | "weather") => (both ? (k === "map" ? "lg:col-span-7" : "lg:col-span-5") : "lg:col-span-12");
+  const span = () => (both ? "" : "lg:col-span-2");
+  const cols = !both ? "lg:grid-cols-2" : order[0] === "weather" ? "lg:grid-cols-[272px_minmax(0,1fr)]" : "lg:grid-cols-[minmax(0,1fr)_272px]";
   // Mobil: kartochkalar (order-1) → ob-havo (order-2) → karta (order-3)
   const mobile = { map: "order-3", weather: "order-2" } as const;
 
   const widget = (k: "map" | "weather") => (
-    <div key={k} className={`${mobile[k]} lg:order-none ${span(k)}`}>
+    <div key={k} className={`${mobile[k]} lg:order-none ${span()} ${k === "weather" ? "lg:self-start" : ""}`}>
       {k === "map" ? (
         <HomeMap region={layout.region} indicator={layout.map.indicator} onIndicator={api.setMapIndicator} onRegion={api.setRegion} />
       ) : (
@@ -82,7 +83,7 @@ export default function HomeDashboard({ className = "mt-10", middle, showCards =
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+      <div className={`grid grid-cols-1 gap-4 ${cols}`}>
         {(order[0] === "weather" ? ["weather", "map"] as const : ["map", "weather"] as const).map((k) => (on(k) && (k !== "weather" || !weatherFailed) ? widget(k) : null))}
       </div>
       {middle && <div className="mt-8">{middle}</div>}

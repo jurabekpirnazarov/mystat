@@ -7,6 +7,7 @@ import { useLang } from "../../i18n/LangContext";
 import HomeMap from "./HomeMap";
 import HomeSettingsDrawer from "./HomeSettingsDrawer";
 import HomeStatCard from "./HomeStatCard";
+import HomeStatList from "./HomeStatList";
 import RegionSelect from "./RegionSelect";
 import WeatherWidget from "./WeatherWidget";
 
@@ -52,20 +53,24 @@ export default function HomeDashboard({ className = "mt-10", middle, showCards =
 
   const on = (k: "map" | "weather") => layout.widgets.find((w) => w.key === k)?.enabled;
   const weatherOn = !!on("weather") && !weatherFailed;
+  const sideOn = true;
   const mapOn = !!on("map");
   const order = layout.widgets.map((w) => w.key);
-  const both = weatherOn && mapOn;
+  const both = sideOn && mapOn;
   const span = () => (both ? "" : "lg:col-span-2");
   const cols = !both ? "lg:grid-cols-2" : order[0] === "weather" ? "lg:grid-cols-[272px_minmax(0,1fr)]" : "lg:grid-cols-[minmax(0,1fr)_272px]";
   // Mobil: kartochkalar (order-1) → ob-havo (order-2) → karta (order-3)
   const mobile = { map: "order-3", weather: "order-2" } as const;
 
   const widget = (k: "map" | "weather") => (
-    <div key={k} className={`${mobile[k]} lg:order-none ${span()} ${k === "weather" ? "lg:self-start" : ""}`}>
+    <div key={k} className={`${mobile[k]} lg:order-none ${span()} ${k === "weather" ? "flex flex-col gap-4" : ""}`}>
       {k === "map" ? (
         <HomeMap region={layout.region} indicator={layout.map.indicator} onIndicator={api.setMapIndicator} onRegion={api.setRegion} />
       ) : (
-        <WeatherWidget region={layout.region} forecast={layout.weather.forecast} onError={setWeatherFailed} />
+        <>
+          {weatherOn && <WeatherWidget region={layout.region} forecast={layout.weather.forecast} onError={setWeatherFailed} />}
+          <HomeStatList keys={visible} cards={cards} region={layout.region} />
+        </>
       )}
     </div>
   );
@@ -84,7 +89,7 @@ export default function HomeDashboard({ className = "mt-10", middle, showCards =
       </div>
 
       <div className={`grid grid-cols-1 gap-4 ${cols}`}>
-        {(order[0] === "weather" ? ["weather", "map"] as const : ["map", "weather"] as const).map((k) => (on(k) && (k !== "weather" || !weatherFailed) ? widget(k) : null))}
+        {(order[0] === "weather" ? ["weather", "map"] as const : ["map", "weather"] as const).map((k) => (k === "weather" ? (sideOn ? widget(k) : null) : on(k) ? widget(k) : null))}
       </div>
       {middle && <div className="mt-8">{middle}</div>}
       {showCards && (

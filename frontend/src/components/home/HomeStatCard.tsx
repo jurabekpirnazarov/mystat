@@ -1,6 +1,6 @@
 import { useId } from "react";
 import { Link } from "react-router-dom";
-import { Area, AreaChart, ResponsiveContainer } from "recharts";
+import { Area, AreaChart, ResponsiveContainer, YAxis } from "recharts";
 import { Activity, ArrowDownRight, ArrowUpRight, Briefcase, Coins, EyeOff, Landmark, TrendingUp, Users, Wallet, type LucideIcon } from "lucide-react";
 import type { HomeCardData } from "../../api/homeWidgets";
 import type { HomeCardDef, HomeCardKey } from "../../config/homeWidgets";
@@ -60,7 +60,8 @@ export default function HomeStatCard({ def, data, showScopeNote }: { def: HomeCa
                     <stop offset="100%" stopColor={ds.primary} stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <Area type="monotone" dataKey="v" stroke={ds.primary} strokeWidth={2} fill={`url(#${gid})`} isAnimationActive={false}
+                <YAxis hide domain={["dataMin", "dataMax"]} />
+                              <Area type="monotone" dataKey="v" stroke={ds.primary} strokeWidth={2} fill={`url(#${gid})`} isAnimationActive={false}
                   dot={(p: { index?: number; cx?: number; cy?: number }) => (p.index === data.series.length - 1 ? <circle key="last" cx={p.cx} cy={p.cy} r={4} fill={ds.accentStrong} stroke="#fff" strokeWidth={1.5} /> : <g key={p.index} />)} />
               </AreaChart>
             </ResponsiveContainer>

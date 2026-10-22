@@ -36,7 +36,7 @@ const SHORT: Record<number, { uz: string; ru: string }> = {
  * MG-05 (MG-00 tartibi): gradientli hero — "Xush kelibsiz!", qidiruv maydoni va "Ommabop xizmatlar" plitkalari
  * (gorizontal skroll, desktopda o'q tugmalari). Qidiruv `/search?q=` ga olib boradi.
  */
-export default function HomeHero() {
+export default function HomeHero({ showTiles = true }: { showTiles?: boolean }) {
   const { t } = useLang();
   const navigate = useNavigate();
   const [q, setQ] = useState("");
@@ -61,6 +61,7 @@ export default function HomeHero() {
           <button type="submit" className="h-9 shrink-0 rounded-lg bg-[rgb(var(--ds-accent))] px-4 text-sm font-semibold text-[rgb(24_33_47)] transition hover:brightness-95">{t({ uz: "Izlash", ru: "Найти" })}</button>
         </form>
       </div>
+      {showTiles && (
       <div className="relative mt-6">
         <ul ref={rail} aria-label={t(UI.popular)}
           className="flex snap-x gap-4 overflow-x-auto pb-2 pr-4 [scrollbar-width:none] sm:pr-6 [&::-webkit-scrollbar]:hidden">
@@ -85,6 +86,7 @@ export default function HomeHero() {
           <ChevronRight className="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
+      )}
     </section>
   );
 }

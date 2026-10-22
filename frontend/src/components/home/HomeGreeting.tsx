@@ -18,7 +18,7 @@ function partOfDay(h: number): { icon: LucideIcon; uz: string; ru: string } {
   return { icon: Moon, uz: "Xayrli tun", ru: "Доброй ночи" };
 }
 
-/** Sahifa tepasidagi salom: sarlavha (h1), kun vaqtiga mos salomlashuv va bugungi sana. Dekorsiz — faqat matn va ikonka. */
+/** Hero panelidagi salom: sarlavha (h1), kun vaqtiga mos salomlashuv va bugungi sana. Dekorsiz — faqat matn va ikonka. */
 export default function HomeGreeting() {
   const { t, lang } = useLang();
   const now = new Date();
@@ -27,15 +27,15 @@ export default function HomeGreeting() {
   const Icon = part.icon;
   const date = `${DAYS[k][now.getDay()]}, ${now.getDate()} ${MONTHS[k][now.getMonth()]} ${now.getFullYear()}`;
   return (
-    <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2 pt-2">
+    <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
       <div className="flex items-center gap-4">
         <span aria-hidden="true" className="h-12 w-1.5 rounded-full bg-mg-primary" />
         <div>
-          <p className="flex items-center gap-1.5 text-sm font-medium text-mg-muted"><Icon className="h-4 w-4 text-[rgb(var(--ds-accent-strong))]" aria-hidden="true" />{t(part)}</p>
-          <h1 className="text-[32px] font-bold leading-9 tracking-tight text-mg-heading sm:text-[40px] sm:leading-[44px]">{t(UI.welcome)}</h1>
+          <p className="flex items-center gap-1.5 text-sm font-medium text-[rgb(var(--ds-on-panel-muted))]"><Icon className="h-4 w-4 text-[rgb(var(--ds-accent-strong))]" aria-hidden="true" />{t(part)}</p>
+          <h1 id="hero-title" className="text-[30px] font-bold leading-9 tracking-tight text-[rgb(var(--ds-on-panel))] sm:text-[38px] sm:leading-[42px]">{t(UI.welcome)}</h1>
         </div>
       </div>
-      <p className="text-sm text-mg-muted">{date}</p>
+      <p className="text-sm text-[rgb(var(--ds-on-panel-muted))]">{date}</p>
     </div>
   );
 }

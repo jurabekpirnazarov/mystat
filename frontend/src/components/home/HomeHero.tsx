@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { POPULAR } from "../../config/serviceCatalog";
 import { useLang } from "../../i18n/LangContext";
+import HomeGreeting from "./HomeGreeting";
 import TileArt from "./TileArt";
 import { UI } from "../../i18n/ui";
 
@@ -50,7 +51,7 @@ export default function HomeHero() {
       </div>
       <div className="relative pr-4 sm:pr-6">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[rgb(var(--ds-on-panel-muted))]">{t({ uz: "Milliy statistika qo'mitasi · rasmiy portal", ru: "Национальный комитет по статистике · официальный портал" })}</p>
-        <h2 id="hero-title" className="mt-1 text-[24px] font-bold leading-[32px] text-[rgb(var(--ds-on-panel))] sm:text-[28px] sm:leading-[34px]">{t({ uz: "Kerakli xizmat yoki ko'rsatkichni toping", ru: "Найдите нужную услугу или показатель" })}</h2>
+        <div className="mt-3"><HomeGreeting /></div>
         <form role="search" className="mt-5 flex h-12 items-center gap-3 rounded-[10px] border border-[rgb(var(--ds-panel-line))] bg-mg-surface pl-4 pr-1.5"
           onSubmit={(e) => { e.preventDefault(); navigate(q.trim() ? `/search?q=${encodeURIComponent(q.trim())}` : "/search"); }}>
           <Search className="h-5 w-5 shrink-0 text-mg-primary" aria-hidden="true" />

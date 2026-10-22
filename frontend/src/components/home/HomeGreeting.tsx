@@ -29,7 +29,7 @@ export default function HomeGreeting() {
   return (
     <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
       <div className="flex items-center gap-4">
-        <span aria-hidden="true" className="h-12 w-1.5 rounded-full bg-mg-primary" />
+        <span aria-hidden="true" className="h-12 w-1.5 rounded-full bg-[rgb(var(--ds-brand))]" />
         <div>
           <p className="flex items-center gap-1.5 text-sm font-medium text-[rgb(var(--ds-on-panel-muted))]"><Icon className="h-4 w-4 text-[rgb(var(--ds-accent-strong))]" aria-hidden="true" />{t(part)}</p>
           <h1 id="hero-title" className="text-[30px] font-bold leading-9 tracking-tight text-[rgb(var(--ds-on-panel))] sm:text-[38px] sm:leading-[42px]">{t(UI.welcome)}</h1>

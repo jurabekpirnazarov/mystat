@@ -65,7 +65,7 @@ export default function ServiceCard({ s, stats, rich, preview }: { s: ServiceCat
           <>
             <span className="mt-2 block text-[13px] leading-snug text-mg-text">{t(s.description)}</span>
             {preview && <span className="mt-3 block">{preview}</span>}
-            <span className="mt-3 inline-block rounded-full bg-mg-info px-2.5 py-0.5 text-[11px] font-semibold text-mg-primary">{t(ACCESS_BADGE[s.access])}</span>
+            <span className="mt-3 inline-block rounded-full bg-[rgb(var(--ds-panel))] px-2.5 py-0.5 text-[11px] font-semibold text-mg-text">{t(ACCESS_BADGE[s.access])}</span>
           </>
         )}
       </span>

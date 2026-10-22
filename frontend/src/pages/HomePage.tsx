@@ -20,7 +20,7 @@ function Section({ id, title, link, children, badge }: { id: string; title: stri
   return (
     <section aria-labelledby={id} className="mt-10">
       <div className="mb-5 flex items-center justify-between gap-4">
-        <h2 id={id} className="flex items-center gap-3 text-[24.5px] font-normal leading-9 text-mg-primary">{title}{badge}</h2>
+        <h2 id={id} className="flex items-center gap-3 text-[24.5px] font-semibold leading-9 text-mg-heading">{title}{badge}</h2>
         {link && (
           <Link to="/spheres" className="inline-flex items-center gap-2 text-sm font-medium text-mg-heading hover:text-mg-primary">
             {t(UI.allServices)} <ArrowRight className="h-5 w-5" aria-hidden="true" />

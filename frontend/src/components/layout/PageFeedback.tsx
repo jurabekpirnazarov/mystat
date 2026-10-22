@@ -48,7 +48,7 @@ export default function PageFeedback() {
   };
 
   const built = new Date(__BUILD_DATE__);
-  const btn = "inline-flex items-center gap-2 rounded-[10px] border border-mg-primary-dark/60 px-4 py-1.5 text-sm font-medium text-mg-primary-dark hover:bg-mg-info";
+  const btn = "inline-flex items-center gap-2 rounded-[10px] border border-[rgb(var(--ds-panel-line))] bg-mg-surface px-4 py-1.5 text-sm font-medium text-mg-text hover:bg-[rgb(var(--ds-panel))]";
 
   return (
     <section aria-label={t(UI.feedbackQuestion)} className="mt-12 border-t border-transparent pb-6">
@@ -70,7 +70,7 @@ export default function PageFeedback() {
           <textarea id="page-feedback-comment" value={comment} maxLength={500} rows={3} onChange={(e) => setComment(e.target.value)}
             className="w-full rounded-[10px] border border-mg-border bg-mg-surface p-3 text-sm text-mg-text" />
           <div className="flex gap-2">
-            <button type="submit" className="rounded-[10px] bg-mg-primary px-4 py-1.5 text-sm font-medium text-white">{t({ uz: "Yuborish", ru: "Отправить" })}</button>
+            <button type="submit" className="rounded-[10px] bg-[rgb(var(--ds-brand))] px-4 py-1.5 text-sm font-medium text-white">{t({ uz: "Yuborish", ru: "Отправить" })}</button>
             <button type="button" className={btn} onClick={() => setState("idle")}>{t({ uz: "Bekor qilish", ru: "Отмена" })}</button>
           </div>
         </form>

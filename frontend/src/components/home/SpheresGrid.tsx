@@ -24,11 +24,11 @@ export default function SpheresGrid() {
               {featuredOfSphere(sp.id).map((s) => (
                 <li key={s.number} className="flex gap-2 text-[17px] font-medium leading-snug">
                   <span className="text-black dark:text-white" aria-hidden="true">•</span>
-                  <Link to={`/service/${s.number}`} className="text-mg-primary-dark hover:underline">{t(s.title)}</Link>
+                  <Link to={`/service/${s.number}`} className="text-mg-text hover:text-mg-primary hover:underline">{t(s.title)}</Link>
                 </li>
               ))}
             </ul>
-            <Link to={`/spheres/${sp.id}`} className="mt-4 inline-flex items-center gap-1 pl-1 text-base font-semibold text-mg-primary-dark hover:underline">
+            <Link to={`/spheres/${sp.id}`} className="mt-4 inline-flex items-center gap-1 pl-1 text-base font-semibold text-mg-muted hover:text-mg-primary hover:underline">
               <ChevronRight className="h-5 w-5" aria-hidden="true" />{t(UI.all)}
             </Link>
             <span className={`absolute bottom-5 right-4 flex h-20 w-20 items-center justify-center rounded-full border border-mg-border opacity-70 ${sp.tint}`} aria-hidden="true">

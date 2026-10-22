@@ -24,7 +24,7 @@ export function PortalFeatures() {
     <div className="grid gap-x-12 gap-y-7 rounded-mg border border-mg-border bg-mg-surface p-6 sm:p-8 md:grid-cols-2">
       {FEATURES.map(({ icon: Icon, title, text }) => (
         <div key={t(title)}>
-          <Icon className="h-7 w-7 text-mg-primary" aria-hidden="true" />
+          <Icon className="h-7 w-7 text-[rgb(var(--ds-on-panel-muted))]" aria-hidden="true" />
           <h3 className="mt-2 text-base font-bold text-black dark:text-white">{t(title)}</h3>
           <p className="mt-0.5 text-sm leading-relaxed text-mg-text">{t(text)}</p>
         </div>
@@ -48,21 +48,21 @@ export function PortalNumbers() {
     <div className="rounded-mg border border-mg-border bg-mg-surface p-6 sm:p-8">
       <h2 className="text-2xl font-bold text-black sm:text-[34px] sm:leading-tight dark:text-white">{t(UI.inNumbers)}</h2>
       <p className="mt-3 max-w-3xl text-mg-text">{t(UI.inNumbersText)}</p>
-      <Link to="/statistics" className="mt-5 inline-flex items-center gap-2 rounded-mg bg-mg-primary px-5 py-2 text-sm font-medium text-white shadow-lg hover:brightness-110">
+      <Link to="/statistics" className="mt-5 inline-flex items-center gap-2 rounded-mg bg-[rgb(var(--ds-brand))] px-5 py-2 text-sm font-medium text-white hover:brightness-125">
         {t(UI.learnMore)} <ArrowRight className="h-4 w-4" aria-hidden="true" />
       </Link>
       <div className="mt-6 grid max-w-xl gap-4 sm:grid-cols-2">
-        <div className={`${tile} min-h-[150px] bg-slate-400 sm:row-span-2 sm:min-h-[300px]`}>
+        <div className={`${tile} min-h-[150px] bg-slate-600 sm:row-span-2 sm:min-h-[300px]`}>
           <Users className="absolute right-4 top-4 h-10 w-10 rounded-lg bg-white/30 p-2" aria-hidden="true" />
           <p className="text-4xl font-bold">{users !== null ? users.toLocaleString("ru-RU") : "—"}</p>
           <p className="text-lg font-semibold">{t({ uz: "Foydalanuvchilar", ru: "Пользователи" })}</p>
         </div>
-        <div className={`${tile} min-h-[140px] bg-emerald-500/80`}>
+        <div className={`${tile} min-h-[140px] bg-slate-500`}>
           <Layers className="absolute right-4 top-4 h-10 w-10 rounded-lg bg-white/30 p-2" aria-hidden="true" />
           <p className="text-4xl font-bold">{live}</p>
           <p className="text-lg font-semibold">{t({ uz: "onlayn xizmat", ru: "онлайн-услуг" })}</p>
         </div>
-        <div className={`${tile} min-h-[140px] bg-mg-primary-light/80`}>
+        <div className={`${tile} min-h-[140px] bg-slate-700`}>
           <LineChart className="absolute right-4 top-4 h-10 w-10 rounded-lg bg-white/30 p-2" aria-hidden="true" />
           <p className="text-4xl font-bold">{usage ? usage.toLocaleString("ru-RU") : "—"}</p>
           <p className="text-lg font-semibold">{t({ uz: "xizmatdan foydalanish", ru: "использований услуг" })}</p>

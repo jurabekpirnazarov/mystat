@@ -10,7 +10,7 @@ export default function SituationCard({ slug }: { slug: string }) {
   return (
     <Link to={`/situations/${s.slug}`}
       className="flex min-h-[95px] items-center gap-4 rounded-mg border border-mg-border bg-mg-surface px-5 py-4 transition hover:border-mg-primary/40 hover:shadow-sm">
-      <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[10px] bg-mg-info text-mg-primary">
+      <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[10px] bg-[rgb(var(--ds-panel))] text-[rgb(var(--ds-on-panel-muted))]">
         <Icon className="h-7 w-7" strokeWidth={1.5} aria-hidden="true" />
       </span>
       <span className="text-[15px] font-semibold text-black dark:text-white">{t(s.title)}</span>

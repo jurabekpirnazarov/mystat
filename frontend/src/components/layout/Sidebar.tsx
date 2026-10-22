@@ -23,8 +23,8 @@ function NavList({ expanded, onNavigate }: { expanded: boolean; onNavigate?: () 
         return (
           <div key={g.id} className="mt-2">
             <button type="button" onClick={() => setClosed((c) => ({ ...c, [g.id]: open }))} aria-expanded={open}
-              className={`flex w-full items-center rounded-lg py-2 text-[rgb(var(--ds-on-panel))] hover:text-mg-primary ${expanded ? "justify-between px-3" : "justify-center"}`}>
-              <span className={expanded ? "text-[17px] font-bold leading-tight" : "sr-only"}>{t(g.label)}</span>
+              className={`flex w-full items-center rounded-lg py-2 text-[rgb(var(--ds-on-panel-muted))] hover:text-[rgb(var(--ds-on-panel))] ${expanded ? "justify-between px-3" : "justify-center"}`}>
+              <span className={expanded ? "text-xs font-semibold uppercase leading-tight tracking-[0.08em]" : "sr-only"}>{t(g.label)}</span>
               <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${open ? "" : "-rotate-90"}`} aria-hidden="true" />
             </button>
             {open && (
@@ -36,10 +36,10 @@ function NavList({ expanded, onNavigate }: { expanded: boolean; onNavigate?: () 
                     <li key={item.to} className="border-b border-[rgb(var(--ds-panel-line))] last:border-b-0">
                       <Link to={item.to} onClick={onNavigate} aria-current={active ? "page" : undefined}
                         title={expanded ? undefined : t(item.label)}
-                        className={`flex items-center gap-3 rounded-lg py-3 text-[14px] font-semibold text-[rgb(var(--ds-on-panel))] transition-colors ${
+                        className={`flex items-center gap-3 rounded-lg py-3 text-[14px] font-medium text-[rgb(var(--ds-on-panel))] transition-colors ${
                           expanded ? "px-3" : "justify-center"
-                        } ${active ? "bg-mg-surface text-mg-primary shadow-mg-card" : "hover:bg-mg-surface/70"}`}>
-                        <Icon className="h-[22px] w-[22px] shrink-0 text-mg-primary" aria-hidden="true" />
+                        } ${active ? "bg-mg-surface shadow-mg-card ring-1 ring-[rgb(var(--ds-panel-line))]" : "hover:bg-mg-surface/70"}`}>
+                        <Icon className={`h-[20px] w-[20px] shrink-0 ${active ? "text-mg-primary" : "text-[rgb(var(--ds-on-panel-muted))]"}`} aria-hidden="true" />
                         <span className={expanded ? "leading-tight" : "sr-only"}>{t(item.label)}</span>
                       </Link>
                     </li>

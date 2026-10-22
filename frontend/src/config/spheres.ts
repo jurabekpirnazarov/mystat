@@ -21,7 +21,7 @@ export interface Sphere {
 
 export const SPHERES: Sphere[] = [
   {
-    id: 1, slug: "companies", icon: Building2, tint: "text-sky-500 bg-sky-50 dark:bg-sky-900/30",
+    id: 1, slug: "companies", icon: Building2, tint: "text-[rgb(var(--ds-on-panel-muted))] bg-[rgb(var(--ds-panel))]",
     title: { uz: "Korxonalar va tashkilotlar", ru: "Предприятия и организации" },
     subcategories: [
       { id: "reference", title: { uz: "Ma'lumotnomalar", ru: "Справки" } },
@@ -29,7 +29,7 @@ export const SPHERES: Sphere[] = [
     ],
   },
   {
-    id: 2, slug: "reporting", icon: ClipboardList, tint: "text-violet-500 bg-violet-50 dark:bg-violet-900/30",
+    id: 2, slug: "reporting", icon: ClipboardList, tint: "text-[rgb(var(--ds-on-panel-muted))] bg-[rgb(var(--ds-panel))]",
     title: { uz: "Hisobot topshirish", ru: "Сдача отчётности" },
     subcategories: [
       { id: "calendar", title: { uz: "Kalendar", ru: "Календарь" } },
@@ -37,7 +37,7 @@ export const SPHERES: Sphere[] = [
     ],
   },
   {
-    id: 3, slug: "trade", icon: Globe2, tint: "text-emerald-500 bg-emerald-50 dark:bg-emerald-900/30",
+    id: 3, slug: "trade", icon: Globe2, tint: "text-[rgb(var(--ds-on-panel-muted))] bg-[rgb(var(--ds-panel))]",
     title: { uz: "Tashqi savdo", ru: "Внешняя торговля" },
     subcategories: [
       { id: "stats", title: { uz: "Statistika", ru: "Статистика" } },
@@ -45,7 +45,7 @@ export const SPHERES: Sphere[] = [
     ],
   },
   {
-    id: 4, slug: "business", icon: Briefcase, tint: "text-amber-500 bg-amber-50 dark:bg-amber-900/30",
+    id: 4, slug: "business", icon: Briefcase, tint: "text-[rgb(var(--ds-on-panel-muted))] bg-[rgb(var(--ds-panel))]",
     title: { uz: "Biznes tahlili", ru: "Бизнес-аналитика" },
     subcategories: [
       { id: "competition", title: { uz: "Raqobat", ru: "Конкуренция" } },
@@ -54,7 +54,7 @@ export const SPHERES: Sphere[] = [
     ],
   },
   {
-    id: 5, slug: "prices", icon: Percent, tint: "text-rose-500 bg-rose-50 dark:bg-rose-900/30",
+    id: 5, slug: "prices", icon: Percent, tint: "text-[rgb(var(--ds-on-panel-muted))] bg-[rgb(var(--ds-panel))]",
     title: { uz: "Narxlar va inflyatsiya", ru: "Цены и инфляция" },
     subcategories: [
       { id: "calc", title: { uz: "Kalkulyatorlar", ru: "Калькуляторы" } },
@@ -62,17 +62,17 @@ export const SPHERES: Sphere[] = [
     ],
   },
   {
-    id: 6, slug: "population", icon: Users, tint: "text-pink-500 bg-pink-50 dark:bg-pink-900/30",
+    id: 6, slug: "population", icon: Users, tint: "text-[rgb(var(--ds-on-panel-muted))] bg-[rgb(var(--ds-panel))]",
     title: { uz: "Aholi va demografiya", ru: "Население и демография" },
     subcategories: [],
   },
   {
-    id: 7, slug: "labour", icon: Wallet, tint: "text-teal-500 bg-teal-50 dark:bg-teal-900/30",
+    id: 7, slug: "labour", icon: Wallet, tint: "text-[rgb(var(--ds-on-panel-muted))] bg-[rgb(var(--ds-panel))]",
     title: { uz: "Mehnat va ish haqi", ru: "Труд и заработная плата" },
     subcategories: [],
   },
   {
-    id: 8, slug: "regions", icon: MapPinned, tint: "text-blue-500 bg-blue-50 dark:bg-blue-900/30",
+    id: 8, slug: "regions", icon: MapPinned, tint: "text-[rgb(var(--ds-on-panel-muted))] bg-[rgb(var(--ds-panel))]",
     title: { uz: "Hududlar", ru: "Регионы" },
     subcategories: [
       { id: "map", title: { uz: "Xarita", ru: "Карта" } },
@@ -80,12 +80,12 @@ export const SPHERES: Sphere[] = [
     ],
   },
   {
-    id: 9, slug: "industry", icon: Factory, tint: "text-orange-500 bg-orange-50 dark:bg-orange-900/30",
+    id: 9, slug: "industry", icon: Factory, tint: "text-[rgb(var(--ds-on-panel-muted))] bg-[rgb(var(--ds-panel))]",
     title: { uz: "Sanoat", ru: "Промышленность" },
     subcategories: [],
   },
   {
-    id: 10, slug: "publications", icon: Library, tint: "text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30",
+    id: 10, slug: "publications", icon: Library, tint: "text-[rgb(var(--ds-on-panel-muted))] bg-[rgb(var(--ds-panel))]",
     title: { uz: "Nashrlar", ru: "Публикации" },
     subcategories: [
       { id: "bulletins", title: { uz: "Byulletenlar va to'plamlar", ru: "Бюллетени и сборники" } },
@@ -93,12 +93,12 @@ export const SPHERES: Sphere[] = [
     ],
   },
   {
-    id: 11, slug: "classifiers", icon: BookOpen, tint: "text-cyan-600 bg-cyan-50 dark:bg-cyan-900/30",
+    id: 11, slug: "classifiers", icon: BookOpen, tint: "text-[rgb(var(--ds-on-panel-muted))] bg-[rgb(var(--ds-panel))]",
     title: { uz: "Tasniflagichlar va metodologiya", ru: "Классификаторы и методология" },
     subcategories: [],
   },
   {
-    id: 12, slug: "open-data", icon: Database, tint: "text-green-600 bg-green-50 dark:bg-green-900/30",
+    id: 12, slug: "open-data", icon: Database, tint: "text-[rgb(var(--ds-on-panel-muted))] bg-[rgb(var(--ds-panel))]",
     title: { uz: "Ochiq ma'lumotlar", ru: "Открытые данные" },
     subcategories: [
       { id: "api", title: { uz: "API", ru: "API" } },
@@ -106,12 +106,12 @@ export const SPHERES: Sphere[] = [
     ],
   },
   {
-    id: 13, slug: "citizens", icon: UserRound, tint: "text-fuchsia-500 bg-fuchsia-50 dark:bg-fuchsia-900/30",
+    id: 13, slug: "citizens", icon: UserRound, tint: "text-[rgb(var(--ds-on-panel-muted))] bg-[rgb(var(--ds-panel))]",
     title: { uz: "Fuqarolar uchun", ru: "Для граждан" },
     subcategories: [],
   },
   {
-    id: 14, slug: "tariffs", icon: FileSignature, tint: "text-slate-500 bg-slate-100 dark:bg-slate-800",
+    id: 14, slug: "tariffs", icon: FileSignature, tint: "text-[rgb(var(--ds-on-panel-muted))] bg-[rgb(var(--ds-panel))]",
     title: { uz: "Tariflar va shartnomalar", ru: "Тарифы и договоры" },
     subcategories: [
       { id: "packages", title: { uz: "Paketlar", ru: "Пакеты" } },

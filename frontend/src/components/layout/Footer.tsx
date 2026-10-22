@@ -71,7 +71,7 @@ function FLink({ l, className }: { l: FooterLink; className: string }) {
 
 export default function Footer() {
   const { t } = useLang();
-  const link = "text-[14.4px] leading-[21.6px] text-[#454545] hover:text-mg-primary dark:text-gray-300";
+  const link = "text-[14.4px] leading-[21.6px] text-mg-muted hover:text-mg-heading hover:underline";
   return (
     <footer className="pb-8 pt-4">
       <Link to="/" aria-label={t(UI.home)}><Logo size={48} org /></Link>
@@ -81,7 +81,7 @@ export default function Footer() {
       <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-[226px_233px_1fr]">
         {COLUMNS.map((c) => (
           <details key={t(c.title)} open className="group sm:[&>summary]:pointer-events-none">
-            <summary className="mb-2.5 cursor-pointer list-none text-[14.5px] font-bold text-[#151515] dark:text-white">{t(c.title)}</summary>
+            <summary className="mb-2.5 cursor-pointer list-none text-[14.5px] font-bold text-mg-heading">{t(c.title)}</summary>
             <ul className="space-y-1">
               {c.links.map((l) => <li key={t(l.label)}><FLink l={l} className={link} /></li>)}
             </ul>
@@ -93,7 +93,7 @@ export default function Footer() {
         <div className="flex items-center gap-3">
           {SOCIAL.map(({ href, label, icon: Icon }) => (
             <a key={href} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-mg-primary/10 text-mg-primary hover:bg-mg-primary hover:text-white">
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-[rgb(var(--ds-panel))] text-[rgb(var(--ds-on-panel-muted))] hover:bg-[rgb(var(--ds-brand))] hover:text-white">
               <Icon className="h-4 w-4" aria-hidden="true" />
             </a>
           ))}
@@ -102,7 +102,7 @@ export default function Footer() {
           {LEGAL.map((l) => <li key={t(l.label)}><FLink l={l} className={`${link} text-sm`} /></li>)}
         </ul>
         {/* Qo'mitaning rasmiy emblemi — my.gov.uz footer'idagi hamkor logolari o'rnida */}
-        <a href="https://stat.uz/uz/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-mg-primary">
+        <a href="https://stat.uz/uz/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-mg-text">
           <img src={uzstat} alt="" width={36} height={36} className="h-9 w-9 object-contain" />
           stat.uz <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
         </a>

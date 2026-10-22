@@ -53,7 +53,7 @@ export default function WeatherWidget({ region, forecast, onError }: { region: s
               <p className="mt-1 text-sm font-medium">{t(WEATHER_LABEL[w.current.code])}</p>
               <p className="text-sm text-[rgb(var(--ds-on-panel-muted))]">{t({ uz: "his qilinadi", ru: "ощущается" })} {sign(w.current.feels_like)}</p>
             </div>
-            <span className="text-mg-primary"><WeatherIcon code={w.current.code} size={60} /></span>
+            <span className="text-[rgb(var(--ds-on-panel))]"><WeatherIcon code={w.current.code} size={60} /></span>
           </div>
           <p className="relative mt-3 flex flex-wrap gap-1.5 text-sm">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-mg-surface/80 px-2.5 py-0.5 text-xs"><Wind className="h-4 w-4" aria-hidden="true" />{w.current.wind_ms} {t({ uz: "m/s", ru: "м/с" })}</span>
@@ -64,7 +64,7 @@ export default function WeatherWidget({ region, forecast, onError }: { region: s
               {w.daily.map((d) => (
                 <li key={d.date} className="flex flex-col items-center rounded-xl bg-mg-surface/80 px-1 py-2 text-center">
                   <span className="text-sm font-semibold">{day(d.date)}</span>
-                  <span className="my-1 text-mg-primary"><WeatherIcon code={d.code} size={24} /><span className="sr-only">{t(WEATHER_LABEL[d.code])}</span></span>
+                  <span className="my-1 text-[rgb(var(--ds-on-panel))]"><WeatherIcon code={d.code} size={24} /><span className="sr-only">{t(WEATHER_LABEL[d.code])}</span></span>
                   <span className="text-sm font-semibold tabular-nums">{sign(d.t_max)}</span>
                   <span className="text-xs tabular-nums text-[rgb(var(--ds-on-panel-muted))]">{sign(d.t_min)}</span>
                 </li>

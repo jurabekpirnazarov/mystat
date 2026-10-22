@@ -63,7 +63,7 @@ export default function HomeHero() {
                 className={`group relative flex h-[150px] w-[106px] flex-col justify-end overflow-hidden rounded-mg-tile border-[3px] border-white/80 bg-gradient-to-b p-2.5 shadow-sm transition hover:-translate-y-0.5 hover:border-white ${TILE_BG[s.number] ?? "from-[#EAF3FF] to-[#D6E6FD]"}`}>
                 <TileArt number={s.number} className="absolute left-1/2 top-0.5 h-[98px] w-[98px] -translate-x-1/2 transition-transform duration-300 group-hover:scale-105" />
                 {/* Pastdan ko'k gradient — yozuv har qanday sahnada o'qiladi (my.gov.uz dagi kabi) */}
-                <span className="absolute inset-x-0 bottom-0 h-[46%] bg-gradient-to-t from-[#0058C2]/95 via-[#0068E0]/55 to-transparent" aria-hidden="true" />
+                <span className="absolute inset-x-0 bottom-0 h-[46%] bg-gradient-to-t from-[#0058C2]/95 via-[#1D5FBF]/55 to-transparent" aria-hidden="true" />
                 <span className="relative text-[11.5px] font-semibold leading-tight text-white">{t(SHORT[s.number] ?? s.title)}</span>
               </Link>
             </li>

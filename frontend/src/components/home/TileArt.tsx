@@ -6,9 +6,9 @@ import { useId, type ReactNode } from "react";
  * Har sahna xizmat ma'nosini beradi (docs/LOGO.md 4-bo'lim).
  */
 const C = {
-  blue: "#0068E0", blueL: "#CFE0FA", blueXL: "#E6F0FD", green: "#2DB257", greenL: "#D3F2DD", amber: "#F5A524",
+  blue: "#1D5FBF", blueL: "#CFE0FA", blueXL: "#E6F0FD", green: "#18794A", greenL: "#D3F2DD", amber: "#F5A524",
   amberL: "#FDEBC8", coral: "#F26B5B", violet: "#7C5CFF", violetL: "#E6E0FF", gray: "#E3E8EF", grayD: "#B8C4D6",
-  white: "#FFFFFF", ink: "#1E293B",
+  white: "#FFFFFF", ink: "#18212F",
 };
 
 function Check({ x, y, r = 9 }: { x: number; y: number; r?: number }) {
@@ -54,7 +54,7 @@ const SCENES: Record<number, (sh: string) => ReactNode> = {
         <rect x="46" y="24" width="56" height="70" rx="8" fill={C.white} />
       </g>
       <rect x="54" y="33" width="26" height="6" rx="3" fill={C.blue} />
-      <text x="54" y="51" fontSize="7" fontWeight="700" fill={C.ink} fontFamily="Montserrat, sans-serif">STIR</text>
+      <text x="54" y="51" fontSize="7" fontWeight="700" fill={C.ink} fontFamily="Inter Variable, sans-serif">STIR</text>
       <rect x="72" y="45.5" width="22" height="6" rx="2" fill={C.blueXL} />
       <Lines x={54} y={60} widths={[40, 32, 36, 24]} />
       <Lens x={90} y={88} r={10} />
@@ -89,7 +89,7 @@ const SCENES: Record<number, (sh: string) => ReactNode> = {
         const hot = r === 1 && c === 3;
         return <rect key={`${r}${c}`} x={21 + c * 13.5} y={50 + r * 14} width="10" height="10" rx="2.5" fill={hot ? C.coral : r === 0 && c < 2 ? C.violetL : C.gray} />;
       }))}
-      <text x="66.5" y="71.4" fontSize="6.5" fontWeight="700" fill={C.white} fontFamily="Montserrat, sans-serif" textAnchor="middle">25</text>
+      <text x="66.5" y="71.4" fontSize="6.5" fontWeight="700" fill={C.white} fontFamily="Inter Variable, sans-serif" textAnchor="middle">25</text>
       <g filter={sh}>
         <circle cx="94" cy="88" r="16" fill={C.white} />
       </g>
@@ -129,7 +129,7 @@ const SCENES: Record<number, (sh: string) => ReactNode> = {
       <circle cx="76" cy="50" r="3.5" fill={C.blue} />
       {[0, 1, 2, 3].map((i) => <rect key={i} x={32 + i * 11} y={96 - [4, 7, 5, 9][i]} width="6" height={[4, 7, 5, 9][i]} rx="1.5" fill={C.grayD} />)}
       <Lens x={90} y={78} r={13} color={C.green} />
-      <text x="90" y="81" fontSize="8" fontWeight="800" fill={C.green} fontFamily="Montserrat, sans-serif" textAnchor="middle">HS</text>
+      <text x="90" y="81" fontSize="8" fontWeight="800" fill={C.green} fontFamily="Inter Variable, sans-serif" textAnchor="middle">HS</text>
     </>
   ),
   // Hamkor qidirish: xaritada korxonalar va ular orasidagi aloqalar
@@ -160,7 +160,7 @@ const SCENES: Record<number, (sh: string) => ReactNode> = {
       <g filter={sh} transform="rotate(-14 92 26)">
         <path d="M76 16 H104 a4 4 0 0 1 4 4 V36 a4 4 0 0 1 -4 4 H76 L68 28 Z" fill={C.white} />
       </g>
-      <text x="90" y="33" fontSize="13" fontWeight="800" fill={C.coral} fontFamily="Montserrat, sans-serif" textAnchor="middle" transform="rotate(-14 92 26)">%</text>
+      <text x="90" y="33" fontSize="13" fontWeight="800" fill={C.coral} fontFamily="Inter Variable, sans-serif" textAnchor="middle" transform="rotate(-14 92 26)">%</text>
       <path d="M14 40 L24 30 L30 34 L40 22" stroke={C.coral} strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M34 21 L40 22 L39 28" stroke={C.coral} strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
     </>
@@ -224,7 +224,7 @@ const SCENES: Record<number, (sh: string) => ReactNode> = {
       <g filter={sh} transform="rotate(8 82 50)">
         <rect x="58" y="16" width="48" height="66" rx="5" fill={C.white} />
         <rect x="64" y="23" width="36" height="7" rx="2" fill={C.blue} />
-        <text x="82" y="42" fontSize="9" fontWeight="800" fill={C.ink} fontFamily="Montserrat, sans-serif" textAnchor="middle">2026</text>
+        <text x="82" y="42" fontSize="9" fontWeight="800" fill={C.ink} fontFamily="Inter Variable, sans-serif" textAnchor="middle">2026</text>
         {[0, 1, 2, 3].map((i) => <rect key={i} x={66 + i * 8} y={70 - [8, 14, 10, 18][i]} width="5" height={[8, 14, 10, 18][i]} rx="1.2" fill={i === 3 ? C.green : "#9CC0F5"} />)}
       </g>
     </>

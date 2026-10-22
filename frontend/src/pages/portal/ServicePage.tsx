@@ -148,7 +148,7 @@ function UsageStats({ number }: { number: number }) {
             <BarChart data={data.monthly} margin={{ top: 5, right: 5, left: 5, bottom: 0 }}>
               <XAxis dataKey="month" tick={{ fontSize: 11 }} tickFormatter={(m: string) => m.slice(5)} />
               <Tooltip formatter={(v: number) => [v, t({ uz: "Foydalanish", ru: "Использования" })]} />
-              <Bar dataKey="count" fill="#0068E0" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="count" fill="#1D5FBF" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

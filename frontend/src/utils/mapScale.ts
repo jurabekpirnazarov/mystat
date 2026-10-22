@@ -24,9 +24,9 @@ export interface Scale {
   max: number;
 }
 
-// Portal tizimi: bitta ko'k gamma (och → to'q), markazli shkala uchun amber–ko'k (rang ko'rmaslikda ham ajraladi)
-export const SEQUENTIAL = ["#E8EFFD", "#B9CFF8", "#7DA6F1", "#3E79E8", "#1745B5"];
-const DIVERGING = ["#B45309", "#F0BC7E", "#F1F3F6", "#8DB3F2", "#155EEF"];
+// Portal tizimi: sokin kulrang-ko'k gamma (och → to'q), markazli shkala uchun amber–ko'k (rang ko'rmaslikda ham ajraladi)
+export const SEQUENTIAL = ["#EDF0F5", "#C9D3E2", "#97AAC6", "#5E7EAD", "#2D4E83"];
+const DIVERGING = ["#9A5A1E", "#DDBF98", "#EDEFF2", "#9CB2D4", "#3C629F"];
 export const MISSING_COLOR = "#D0D5DD";
 
 /** Rang ustidagi matn: och fonda to'q, to'q fonda oq (WCAG nisbiy yorqinlik). */

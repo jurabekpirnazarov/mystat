@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import { Area, AreaChart, ResponsiveContainer, YAxis } from "recharts";
 import { ArrowDownRight, ArrowUpRight, Briefcase, Coins, EyeOff, Landmark, TrendingUp, Users, Wallet, Activity, type LucideIcon } from "lucide-react";
 import type { HomeCards } from "../../api/homeWidgets";
-import { CARD_BY_KEY, REPUBLIC, type HomeCardKey } from "../../config/homeWidgets";
+import { ArrowRight } from "lucide-react";
+import { CARD_BY_KEY, HOME_REGIONS, REPUBLIC, type HomeCardKey } from "../../config/homeWidgets";
 import { useLang } from "../../i18n/LangContext";
 import { ds } from "../../theme/tokens";
 
@@ -17,12 +18,16 @@ const nf = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 });
  */
 export default function HomeStatList({ keys, cards, region }: { keys: HomeCardKey[]; cards: HomeCards | null; region: string }) {
   const { t } = useLang();
+  const reg = HOME_REGIONS.find((r) => r.soato === region);
   return (
     <section aria-label={t({ uz: "Asosiy ko'rsatkichlar", ru: "Основные показатели" })} className="flex flex-1 flex-col rounded-[12px] border border-mg-border bg-mg-surface p-4">
-      <h3 className="text-xs font-semibold uppercase tracking-wider text-mg-primary">{t({ uz: "Asosiy ko'rsatkichlar", ru: "Основные показатели" })}</h3>
-      <ul className="mt-2 flex flex-1 flex-col divide-y divide-mg-border">
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="whitespace-nowrap text-sm font-bold text-mg-heading">{t({ uz: "Asosiy ko'rsatkichlar", ru: "Основные показатели" })}</h3>
+        {reg && <span className="max-w-[46%] truncate rounded-full bg-mg-info px-2.5 py-0.5 text-[11px] font-semibold text-mg-text">{t(reg).replace(/\s+(viloyati|Respublikasi|область)$/i, "").replace(/^Республика /, "")}</span>}
+      </div>
+      <ul className="mt-3 flex flex-1 flex-col gap-1.5">
         {!cards
-          ? Array.from({ length: 4 }, (_, i) => <li key={i} className="h-[68px] animate-pulse py-3" aria-busy="true"><span className="block h-full rounded bg-mg-info" /></li>)
+          ? Array.from({ length: 4 }, (_, i) => <li key={i} className="h-[72px] animate-pulse" aria-busy="true"><span className="block h-full rounded-lg bg-mg-info" /></li>)
           : keys.map((k) => {
               const def = CARD_BY_KEY.get(k);
               const d = cards[k];
@@ -32,28 +37,29 @@ export default function HomeStatList({ keys, cards, region }: { keys: HomeCardKe
               const Arrow = ch !== null && ch < 0 ? ArrowDownRight : ArrowUpRight;
               return (
                 <li key={k} className="flex-1">
-                  <Link to={`/regions?ind=${def.siat}`} className="group flex h-full min-h-[64px] items-center gap-3 py-2.5">
-                    <span aria-hidden="true" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-mg-info text-mg-primary transition group-hover:bg-mg-primary group-hover:text-white"><Icon className="h-[18px] w-[18px]" /></span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-xs font-medium leading-4 text-mg-muted">{t({ uz: def.uz, ru: def.ru })}</span>
-                      <span className="block text-[19px] font-bold leading-6 tabular-nums text-mg-heading">{def.format(d.value)}</span>
-                      <span className="block truncate text-[11px] text-mg-muted">
-                        {d.period}{d.scope === "country" && region !== REPUBLIC ? ` · ${t({ uz: "Respublika", ru: "Республика" })}` : ""}
-                      </span>
+                  <Link to={`/regions?ind=${def.siat}`} className="group flex h-full flex-col justify-between gap-1.5 rounded-lg border border-transparent bg-mg-bg/60 px-3 py-2.5 transition hover:border-mg-border hover:bg-mg-info">
+                    <span className="flex items-center gap-2">
+                      <span aria-hidden="true" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-mg-surface text-mg-primary ring-1 ring-mg-border"><Icon className="h-4 w-4" /></span>
+                      <span className="text-xs font-semibold leading-4 text-mg-muted">{t({ uz: def.uz, ru: def.ru })}</span>
                     </span>
-                    <span className="flex shrink-0 flex-col items-end gap-1">
+                    <span className="flex items-end justify-between gap-2">
+                      <span className="text-[24px] font-bold leading-7 tabular-nums text-mg-heading">{def.format(d.value)}</span>
                       {d.series.length > 1 && (
-                        <span className="h-6 w-14" aria-hidden="true">
+                        <span className="mb-0.5 h-7 w-[72px] shrink-0" aria-hidden="true">
                           <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={d.series.map((v, i) => ({ v, i }))} margin={{ top: 2, right: 2, left: 0, bottom: 0 }}>
+                            <AreaChart data={d.series.map((v, i) => ({ v, i }))} margin={{ top: 2, right: 3, left: 0, bottom: 0 }}>
                               <YAxis hide domain={["dataMin", "dataMax"]} />
-                              <Area type="monotone" dataKey="v" stroke={ds.primary} strokeWidth={1.8} fill={ds.primary} fillOpacity={0.12} isAnimationActive={false} dot={false} />
+                              <Area type="monotone" dataKey="v" stroke={ds.primary} strokeWidth={1.8} fill={ds.primary} fillOpacity={0.12} isAnimationActive={false}
+                                dot={(p: { index?: number; cx?: number; cy?: number }) => (p.index === d.series.length - 1 ? <circle key="l" cx={p.cx} cy={p.cy} r={3} fill={ds.accentStrong} /> : <g key={p.index} />)} />
                             </AreaChart>
                           </ResponsiveContainer>
                         </span>
                       )}
+                    </span>
+                    <span className="flex items-center justify-between gap-2 text-[11px] text-mg-muted">
+                      <span className="truncate">{d.period}{d.scope === "country" && region !== REPUBLIC ? ` · ${t({ uz: "Respublika", ru: "Республика" })}` : ""}</span>
                       {ch !== null && (
-                        <span className="inline-flex items-center gap-0.5 whitespace-nowrap rounded-full bg-mg-info px-2 py-0.5 text-[11px] font-bold text-mg-text">
+                        <span className="inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-md border border-mg-border bg-mg-surface px-1.5 py-0.5 font-bold text-mg-text">
                           <Arrow className="h-3 w-3" aria-hidden="true" />
                           <span className="sr-only">{ch < 0 ? t({ uz: "pasayish", ru: "снижение" }) : t({ uz: "o'sish", ru: "рост" })}</span>
                           {ch > 0 ? "+" : ch < 0 ? "−" : ""}{nf.format(Math.abs(ch))}{def.change === "pct" ? " %" : " p.p."}
@@ -65,7 +71,10 @@ export default function HomeStatList({ keys, cards, region }: { keys: HomeCardKe
               );
             })}
       </ul>
-      <p className="mt-1 text-[11px] text-mg-muted">{cards ? Object.values(cards)[0]?.sourceName : " "}</p>
+      <div className="mt-3 flex items-center justify-between gap-2 text-[11px] text-mg-muted">
+        <span className="truncate">{cards ? Object.values(cards)[0]?.sourceName : " "}</span>
+        <Link to="/regions" className="inline-flex shrink-0 items-center gap-1 font-semibold text-mg-primary hover:underline">{t({ uz: "Barchasi", ru: "Все" })}<ArrowRight className="h-3 w-3" aria-hidden="true" /></Link>
+      </div>
     </section>
   );
 }

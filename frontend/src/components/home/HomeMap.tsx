@@ -85,17 +85,17 @@ export default function HomeMap({ region, indicator, onIndicator, onRegion }: {
 
   return (
     <section ref={box} aria-label={t({ uz: "O'zbekiston kartasi", ru: "Карта Узбекистана" })}
-      className="relative flex h-full min-h-[420px] flex-col overflow-hidden rounded-[12px] border border-mg-border bg-mg-surface p-5">
+      className="relative flex h-full min-h-[420px] flex-col overflow-hidden rounded-[12px] border border-[rgb(var(--ds-panel-line))] bg-[rgb(var(--ds-panel))] p-5">
       <div className="relative flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-mg-primary">{t({ uz: "Hududlar kesimida", ru: "По регионам" })}</p>
-          <h3 className="mt-0.5 text-xl font-bold text-mg-heading">{focus ? focus.name : t({ uz: "O'zbekiston", ru: "Узбекистан" })}</h3>
+          <p className="text-xs font-semibold uppercase tracking-wider text-[rgb(var(--ds-on-panel-muted))]">{t({ uz: "Hududlar kesimida", ru: "По регионам" })}</p>
+          <h3 className="mt-0.5 text-xl font-bold text-[rgb(var(--ds-on-panel))]">{focus ? focus.name : t({ uz: "O'zbekiston", ru: "Узбекистан" })}</h3>
         </div>
         <div className="text-right">
-          <p className="text-3xl font-extrabold leading-none tabular-nums text-mg-heading">
+          <p className="text-3xl font-bold leading-none tabular-nums text-[rgb(var(--ds-on-panel))]">
             {focus ? (focus.value !== null ? def.format(focus.value) : "—") : values?.republic != null ? def.format(values.republic) : "—"}
           </p>
-          <p className="mt-1 text-xs text-mg-muted">
+          <p className="mt-1 text-xs text-[rgb(var(--ds-on-panel-muted))]">
             {unit}{values ? ` · ${values.period}` : ""}
             {focusRank ? ` · ${ranked.length} ${t({ uz: "dan", ru: "из" })} ${focusRank}-${t({ uz: "o'rin", ru: "место" })}` : ""}
           </p>
@@ -105,7 +105,7 @@ export default function HomeMap({ region, indicator, onIndicator, onRegion }: {
       <div role="group" aria-label={t({ uz: "Karta ko'rsatkichi", ru: "Показатель карты" })} className="relative mt-4 flex gap-2 overflow-x-auto pb-1">
         {MAP_CARDS.map((c) => (
           <button key={c.key} type="button" aria-pressed={c.key === indicator} onClick={() => onIndicator(c.key)}
-            className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${c.key === indicator ? "border-mg-primary bg-mg-primary text-white" : "border-mg-border bg-mg-surface/80 text-mg-text hover:border-mg-primary/50"}`}>
+            className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${c.key === indicator ? "border-[rgb(var(--ds-brand))] bg-[rgb(var(--ds-brand))] text-white" : "border-[rgb(var(--ds-panel-line))] bg-mg-surface text-mg-text hover:border-[rgb(var(--ds-brand))]"}`}>
             {t({ uz: c.uz, ru: c.ru })}
           </button>
         ))}
@@ -123,8 +123,8 @@ export default function HomeMap({ region, indicator, onIndicator, onRegion }: {
       </div>
 
       {values && rows.length > 0 && (
-        <div className="relative mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-mg-muted">
-          <div className="flex min-w-[220px] flex-1 overflow-hidden rounded-full ring-1 ring-mg-border" role="list" aria-label={t({ uz: "Rang shkalasi", ru: "Цветовая шкала" })}>
+        <div className="relative mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[rgb(var(--ds-on-panel-muted))]">
+          <div className="flex min-w-[220px] flex-1 overflow-hidden rounded-full ring-1 ring-[rgb(var(--ds-panel-line))]" role="list" aria-label={t({ uz: "Rang shkalasi", ru: "Цветовая шкала" })}>
             {rows.map((r) => (
               <span key={r.color + r.from} role="listitem" className="flex-1 px-1 py-0.5 text-center font-medium tabular-nums" style={{ background: r.color, color: readableOn(r.color) }}
                 title={`${def.format(r.from)} – ${def.format(r.to)}`}>{def.format(r.from)}</span>
@@ -134,9 +134,9 @@ export default function HomeMap({ region, indicator, onIndicator, onRegion }: {
           {values.preliminary && <span>{t({ uz: "dastlabki", ru: "предварительно" })}</span>}
         </div>
       )}
-      <p className="relative mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-mg-muted">
+      <p className="relative mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-[rgb(var(--ds-on-panel-muted))]">
         <span>{values ? `${values.source.name} · ${t({ uz: "hududni bosing", ru: "нажмите на регион" })}` : " "}</span>
-        <Link to={link} className="inline-flex items-center gap-1 text-sm font-semibold text-mg-primary hover:underline">{t({ uz: "Kartani to'liq ochish", ru: "Открыть карту полностью" })}<ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>
+        <Link to={link} className="inline-flex items-center gap-1 text-sm font-semibold text-[rgb(var(--ds-on-panel))] underline-offset-2 hover:underline">{t({ uz: "Kartani to'liq ochish", ru: "Открыть карту полностью" })}<ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>
       </p>
     </section>
   );

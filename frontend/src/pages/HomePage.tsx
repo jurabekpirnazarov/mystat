@@ -6,6 +6,7 @@ import { SITUATIONS } from "../config/situations";
 import { useLang } from "../i18n/LangContext";
 import { UI } from "../i18n/ui";
 import HomeHero from "../components/home/HomeHero";
+import HomeDashboard from "../components/home/HomeDashboard";
 import PersonalBlocks from "../components/home/PersonalBlocks";
 import SpheresGrid from "../components/home/SpheresGrid";
 import { PortalFeatures, PortalNumbers } from "../components/home/PortalBlocks";
@@ -46,6 +47,7 @@ export default function HomePage() {
   return (
     <div>
       <HomeHero />
+      <HomeDashboard />
       <div className="mt-9"><PersonalBlocks /></div>
       <Section id="home-spheres" title={t(UI.spheres)} link><SpheresGrid /></Section>
       <Section id="home-situations" title={t(UI.situations)}>

@@ -1,39 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ReportMonthCalendar from '../components/reports/ReportMonthCalendar';
 import { Search } from 'lucide-react';
-import BookStep1 from '../components/BookStep1';
 import ReportsCalendarDetail from './ReportsCalendarDetail';
 import { getReportsByStir } from '../api/reports';
 import { ReportData, ReportCalendarResponse } from '../types/report';
-import { useServiceId } from '../utils/useServiceId';
 import toast, { Toaster } from 'react-hot-toast';
-import RatingModal from '../components/modals/RatingModal';
 import { asApiError } from '../api/errors';
 
 const ReportCalendar: React.FC = () => {
-  const { serviceId } = useServiceId(); // get real ID from API
-
-  // Component unmount bo'lganda localStorage'ni tozalash
-  useEffect(() => {
-    return () => {
-      localStorage.removeItem("reportcalendar_currentStep");
-    };
-  }, []);
-  
-  // Step management (persisted in localStorage)
-  const getInitialStep = () => {
-    const saved = localStorage.getItem("reportcalendar_currentStep");
-    if (saved === "2" || saved === "3") return Number(saved) as 2 | 3;
-    return 1;
-  };
-
-  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(getInitialStep());
+  // Taqvim to'g'ridan-to'g'ri ochiladi: 2 — STIR kiritish, 3 — hisobotlar (xizmat haqida / oferta bosqichi yo'q)
+  const [currentStep, setCurrentStep] = useState<2 | 3>(2);
   const [stirNumber, setStirNumber] = useState('');
   const [reports, setReports] = useState<ReportData[]>([]);
   const [companyName, setCompanyName] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showRatingModal, setShowRatingModal] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -57,10 +38,6 @@ const ReportCalendar: React.FC = () => {
             setReports(response.data);
             setCompanyName(response.org_name || 'Noma\'lum korxona');
             goToNextStep();
-            // Show rating after viewing reports for 3 seconds
-            setTimeout(() => {
-              setShowRatingModal(true);
-            }, 3000);
           } else {
             setError('Ushbu STIR uchun hisobotlar topilmadi');
           }
@@ -109,155 +86,37 @@ const ReportCalendar: React.FC = () => {
     }
   };
 
-  // Keep localStorage in sync if currentStep changes elsewhere
-  useEffect(() => {
-    localStorage.setItem("reportcalendar_currentStep", String(currentStep));
-  }, [currentStep]);
-
-  // Step navigation functions
-  const goToNextStep = () => {
-    if (currentStep < 3) {
-      setCurrentStep((prev) => {
-        const next = (prev + 1) as 1 | 2 | 3;
-        localStorage.setItem("reportcalendar_currentStep", String(next));
-        return next;
-      });
-    }
-  };
-
-  const goToPreviousStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep((prev) => {
-        const prevStep = (prev - 1) as 1 | 2 | 3;
-        localStorage.setItem("reportcalendar_currentStep", String(prevStep));
-        return prevStep;
-      });
-    }
-  };
+  const goToNextStep = () => setCurrentStep(3);
+  const goToPreviousStep = () => setCurrentStep(2);
 
   // Create array of 9 positions for underlines
   const inputPositions = Array.from({ length: 9 }, (_, i) => i);
 
-  // Step Progress Bar
+  // Bosqichlar: 1 — STIR kiritish, 2 — hisobotlar
   const renderStepProgress = () => (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-      <div className="relative">
-        <div className="absolute left-0 top-2/4 h-0.5 w-full bg-gray-200">
-          <div
-            className="absolute h-full bg-blue-600 transition-all duration-500"
-            style={{ width: `${((currentStep - 1) / 2) * 100}%` }}
-          />
-        </div>
-        <div className="relative flex justify-between">
-          <div className="flex flex-col items-center">
-            <div
-              className={`flex h-10 w-10 items-center justify-center rounded-full border-2 bg-white transition-all ${
-                currentStep === 1
-                  ? "border-blue-600 text-blue-600"
-                  : currentStep > 1
-                  ? "border-blue-600 bg-blue-600"
-                  : "border-gray-300 text-gray-900"
-              }`}
-            >
-              <span className="text-sm font-semibold">1</span>
-            </div>
-            <span
-              className={`mt-2 text-sm font-medium ${
-                currentStep === 1
-                  ? "text-blue-600"
-                  : currentStep > 1
-                  ? "text-gray-900"
-                  : "text-gray-400"
-              }`}
-            >
-              Xizmat haqida
-            </span>
-          </div>
-
-          <div className="flex flex-col items-center">
-            <div
-              className={`flex h-10 w-10 items-center justify-center rounded-full border-2 bg-white transition-all ${
-                currentStep === 2
-                  ? "border-blue-600 text-blue-600"
-                  : currentStep > 2
-                  ? "border-blue-600 bg-blue-600"
-                  : "border-gray-300 text-gray-900"
-              }`}
-            >
-              <span className="text-sm font-semibold">2</span>
-            </div>
-            <span
-              className={`mt-2 text-sm font-medium ${
-                currentStep === 2
-                  ? "text-blue-600"
-                  : currentStep > 2
-                  ? "text-gray-900"
-                  : "text-gray-400"
-              }`}
-            >
-              STIR kiritish
-            </span>
-          </div>
-
-          <div className="flex flex-col items-center">
-            <div
-              className={`flex h-10 w-10 items-center justify-center rounded-full border-2 bg-white transition-all ${
-                currentStep === 3
-                  ? "border-blue-600 text-blue-600"
-                  : currentStep > 3
-                  ? "border-blue-600 bg-blue-600 text-white"
-                  : "border-gray-300 text-gray-900"
-              }`}
-            >
-              <span className="text-sm font-semibold">3</span>
-            </div>
-            <span
-              className={`mt-2 text-sm font-medium ${
-                currentStep === 3
-                  ? "text-blue-600"
-                  : currentStep > 3
-                  ? "text-gray-900"
-                  : "text-gray-400"
-              }`}
-            >
-              Hisobotlar
-            </span>
-          </div>
-        </div>
-      </div>
+    <div className="max-w-xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <ol className="flex items-center gap-3" aria-label="Bosqichlar">
+        {[{ n: 1, step: 2, label: 'STIR kiritish' }, { n: 2, step: 3, label: 'Hisobotlar' }].map((it, i) => {
+          const active = currentStep === it.step;
+          const done = currentStep > it.step;
+          return (
+            <li key={it.n} className="flex flex-1 items-center gap-3" aria-current={active ? 'step' : undefined}>
+              <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-sm font-semibold ${
+                active ? 'border-mg-primary text-mg-primary bg-white' : done ? 'border-mg-primary bg-mg-primary text-white' : 'border-gray-300 text-gray-500 bg-white'
+              }`}>{it.n}</span>
+              <span className={`text-sm font-medium ${active ? 'text-mg-primary' : done ? 'text-gray-900' : 'text-gray-400'}`}>{it.label}</span>
+              {i === 0 && <span className="h-0.5 flex-1 bg-gray-200"><span className={`block h-full bg-mg-primary transition-all duration-500 ${currentStep === 3 ? 'w-full' : 'w-0'}`} /></span>}
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
-
-  // Step 1 Component - Service Information
-  const renderStep1 = () => <BookStep1 onNext={goToNextStep} serviceId={serviceId} />;
 
   // Step 2 Component - STIR Input
   const renderStep2 = () => (
     <div>
-      <div className="fixed left-8 top-28 z-10">
-        <button
-          onClick={goToPreviousStep}
-          className="flex items-center px-4 py-2 bg-white text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors duration-200"
-        >
-          <svg
-            className="w-5 h-5 mr-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-          Orqaga
-        </button>
-      </div>
-
-      <div className="bg-gray-50 flex items-center justify-center p-4 mt-4">
+      <div className="flex items-center justify-center p-4 mt-4">
         <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
           {/* Header */}
           <div className="text-center mb-8">
@@ -421,29 +280,9 @@ const ReportCalendar: React.FC = () => {
       <Toaster />
       {renderStepProgress()}
 
-      {currentStep === 1 && renderStep1()}
-      {currentStep === 2 && renderStep2()}
+            {currentStep === 2 && renderStep2()}
       {currentStep === 3 && renderStep3()}
       
-      <RatingModal
-        isOpen={showRatingModal}
-        onClose={() => setShowRatingModal(false)}
-        onSubmit={async (rating: number, comment: string) => {
-          try {
-            const { createRating } = await import('../api/rating');
-            await createRating({
-              service: serviceId || 11, // Report Calendar service ID
-              value: rating,
-              comment: comment || "Hisobotlar taqvimi xizmati"
-            });
-            setShowRatingModal(false);
-          } catch (error) {
-            console.error('Rating submission error:', error);
-            setShowRatingModal(false);
-          }
-        }}
-        serviceName="Hisobotlar taqvimi"
-      />
     </div>
   );
 };

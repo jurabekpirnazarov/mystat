@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CalendarClock, ChevronDown, LogIn, LogOut, Menu, Phone, Search, User } from "lucide-react";
 import axiosT from "../../api/baseUrl";
 import { calendar, profile } from "../../api/apiUrls";
@@ -98,10 +98,8 @@ const Divider = () => <span className="hidden h-7 w-px bg-mg-border md:block" ar
 export default function Header({ onOpenMenu }: { onOpenMenu: () => void }) {
   const { t } = useLang();
   const { isAuthenticated } = useAuth();
-  const { pathname } = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
   const deadline = useNextDeadline();
-  const isHome = pathname === "/";
 
   // Ctrl+K / Cmd+K — global qidiruv; sahifadagi qidiruv maydonlari `open-global-search` yuboradi
   useEffect(() => {
@@ -142,7 +140,7 @@ export default function Header({ onOpenMenu }: { onOpenMenu: () => void }) {
       <div className="flex shrink-0 items-center gap-2">
         {/* Yordamchi panel: qidiruv, hisobot muddati, aloqa, til, maxsus imkoniyatlar — bitta oq "pill" ichida */}
         <div className="flex h-12 items-center gap-1 rounded-full border border-mg-border bg-mg-surface px-1.5">
-          {!isHome && (
+          {(
             <button type="button" onClick={() => setSearchOpen(true)} aria-label={`${t(UI.search)} (Ctrl+K)`} title={`${t(UI.search)} (Ctrl+K)`}
               className="flex h-9 w-9 items-center justify-center rounded-full text-mg-primary hover:bg-mg-info">
               <Search className="h-5 w-5" aria-hidden="true" />

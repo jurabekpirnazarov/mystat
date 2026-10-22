@@ -15,7 +15,7 @@ import WeatherWidget from "./WeatherWidget";
  * Ma'lumot mavjud manbalardan (SIAT karta API'si, dashboards), ob-havo — backend keshi orqali. Bitta vidjet xatosi boshqalarni to'xtatmaydi.
  * Mobilda tartib: kartochkalar → ob-havo → karta.
  */
-export default function HomeDashboard() {
+export default function HomeDashboard({ className = "mt-10" }: { className?: string }) {
   const { t } = useLang();
   const api = useHomeLayout();
   const { layout } = api;
@@ -70,7 +70,7 @@ export default function HomeDashboard() {
   );
 
   return (
-    <section aria-labelledby="home-today" className="mt-10">
+    <section aria-labelledby="home-today" className={className}>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 id="home-today" className="text-[24.5px] font-normal leading-9 text-mg-primary">{t({ uz: "O'zbekiston bugun", ru: "Узбекистан сегодня" })}</h2>
         <div className="flex flex-wrap items-center gap-3">

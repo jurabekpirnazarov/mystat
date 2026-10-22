@@ -43,27 +43,39 @@ export default function HomeHero() {
   const scroll = (dir: number) => rail.current?.scrollBy({ left: dir * 360, behavior: "smooth" });
 
   return (
-    <section aria-labelledby="hero-title" className="rounded-mg bg-mg-hero pb-4 pl-4 pt-6 sm:pb-[15px] sm:pl-[25px] sm:pt-[25px]">
-      <div className="pr-4 sm:pr-6">
-        <h1 id="hero-title" className="text-[26px] font-bold leading-[30px] text-white sm:text-[34px]">{t(UI.welcome)}</h1>
-        <form role="search" className="mt-5 flex h-11 items-center gap-3 rounded-[10px] border border-white/60 bg-white px-4"
+    <section aria-labelledby="hero-title" className="relative overflow-hidden rounded-mg bg-[rgb(var(--ds-brand))] pb-4 pl-4 pt-8 sm:pb-[18px] sm:pl-[28px] sm:pt-[32px]">
+      {/* Rasmiy belgi: davlat bayrog'i ranglaridagi ingichka chiziq */}
+      <div aria-hidden="true" className="absolute inset-x-0 top-0 flex h-[6px]">
+        <span className="flex-1 bg-[#1CA7E8]" /><span className="w-px bg-[#CE1126]" /><span className="flex-1 bg-white" /><span className="w-px bg-[#CE1126]" /><span className="flex-1 bg-[#1EB53A]" />
+      </div>
+      {/* Nozik naqsh: konsentrik halqalar va nuqtali to'r */}
+      <svg aria-hidden="true" className="pointer-events-none absolute -right-24 -top-24 h-[420px] w-[420px] text-white/[0.07]" viewBox="0 0 400 400" fill="none" stroke="currentColor" strokeWidth="1.5">
+        {[60, 100, 140, 180, 220].map((r) => <circle key={r} cx="200" cy="200" r={r} />)}
+        <path d="M200 0v400M0 200h400M58 58l284 284M342 58 58 342" />
+      </svg>
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle,#fff_1px,transparent_1.5px)] [background-size:22px_22px]" />
+      <div className="relative pr-4 sm:pr-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[rgb(var(--ds-on-brand-muted))]">{t({ uz: "Milliy statistika qo'mitasi · rasmiy portal", ru: "Национальный комитет по статистике · официальный портал" })}</p>
+        <h1 id="hero-title" className="mt-1 text-[26px] font-bold leading-[32px] text-white sm:text-[36px] sm:leading-[42px]">{t(UI.welcome)}</h1>
+        <form role="search" className="mt-5 flex h-12 items-center gap-3 rounded-[10px] bg-white pl-4 pr-1.5 shadow-lg shadow-black/20"
           onSubmit={(e) => { e.preventDefault(); navigate(q.trim() ? `/search?q=${encodeURIComponent(q.trim())}` : "/search"); }}>
           <Search className="h-5 w-5 shrink-0 text-mg-primary" aria-hidden="true" />
           <label htmlFor="hero-search" className="sr-only">{t(UI.search)}</label>
           <input id="hero-search" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t(UI.searchPlaceholder)}
             className="w-full bg-transparent text-base text-black outline-none placeholder:text-slate-400" />
+          <button type="submit" className="h-9 shrink-0 rounded-lg bg-[rgb(var(--ds-accent))] px-4 text-sm font-semibold text-[rgb(24_33_47)] transition hover:brightness-95">{t({ uz: "Izlash", ru: "Найти" })}</button>
         </form>
       </div>
-      <div className="relative mt-5">
+      <div className="relative mt-6">
         <ul ref={rail} aria-label={t(UI.popular)}
           className="flex snap-x gap-4 overflow-x-auto pb-2 pr-4 [scrollbar-width:none] sm:pr-6 [&::-webkit-scrollbar]:hidden">
           {POPULAR.map((s) => (
             <li key={s.number} className="snap-start">
               <Link to={`/service/${s.number}`}
-                className={`group relative flex h-[150px] w-[106px] flex-col justify-end overflow-hidden rounded-mg-tile border-[3px] border-white/80 bg-gradient-to-b p-2.5 shadow-sm transition hover:-translate-y-0.5 hover:border-white ${TILE_BG[s.number] ?? "from-[#EAF3FF] to-[#D6E6FD]"}`}>
+                className={`group relative flex h-[150px] w-[106px] flex-col justify-end overflow-hidden rounded-mg-tile border-[3px] border-white/90 bg-gradient-to-b p-2.5 shadow-sm transition hover:-translate-y-0.5 hover:border-white ${TILE_BG[s.number] ?? "from-[#EAF3FF] to-[#D6E6FD]"}`}>
                 <TileArt number={s.number} className="absolute left-1/2 top-0.5 h-[98px] w-[98px] -translate-x-1/2 transition-transform duration-300 group-hover:scale-105" />
                 {/* Pastdan ko'k gradient — yozuv har qanday sahnada o'qiladi (my.gov.uz dagi kabi) */}
-                <span className="absolute inset-x-0 bottom-0 h-[46%] bg-gradient-to-t from-[#0058C2]/95 via-[#1D5FBF]/55 to-transparent" aria-hidden="true" />
+                <span className="absolute inset-x-0 bottom-0 h-[46%] bg-gradient-to-t from-[#0E2647]/95 via-[#174CA8]/55 to-transparent" aria-hidden="true" />
                 <span className="relative text-[11.5px] font-semibold leading-tight text-white">{t(SHORT[s.number] ?? s.title)}</span>
               </Link>
             </li>

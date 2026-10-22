@@ -48,16 +48,10 @@ export default function HomeHero() {
       <div aria-hidden="true" className="absolute inset-x-0 top-0 flex h-[6px]">
         <span className="flex-1 bg-[#1CA7E8]" /><span className="w-px bg-[#CE1126]" /><span className="flex-1 bg-white" /><span className="w-px bg-[#CE1126]" /><span className="flex-1 bg-[#1EB53A]" />
       </div>
-      {/* Nozik naqsh: konsentrik halqalar va nuqtali to'r */}
-      <svg aria-hidden="true" className="pointer-events-none absolute -right-24 -top-24 h-[420px] w-[420px] text-white/[0.07]" viewBox="0 0 400 400" fill="none" stroke="currentColor" strokeWidth="1.5">
-        {[60, 100, 140, 180, 220].map((r) => <circle key={r} cx="200" cy="200" r={r} />)}
-        <path d="M200 0v400M0 200h400M58 58l284 284M342 58 58 342" />
-      </svg>
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle,#fff_1px,transparent_1.5px)] [background-size:22px_22px]" />
       <div className="relative pr-4 sm:pr-6">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[rgb(var(--ds-on-brand-muted))]">{t({ uz: "Milliy statistika qo'mitasi · rasmiy portal", ru: "Национальный комитет по статистике · официальный портал" })}</p>
         <h1 id="hero-title" className="mt-1 text-[26px] font-bold leading-[32px] text-white sm:text-[36px] sm:leading-[42px]">{t(UI.welcome)}</h1>
-        <form role="search" className="mt-5 flex h-12 items-center gap-3 rounded-[10px] bg-white pl-4 pr-1.5 shadow-lg shadow-black/20"
+        <form role="search" className="mt-5 flex h-12 items-center gap-3 rounded-[10px] bg-white pl-4 pr-1.5"
           onSubmit={(e) => { e.preventDefault(); navigate(q.trim() ? `/search?q=${encodeURIComponent(q.trim())}` : "/search"); }}>
           <Search className="h-5 w-5 shrink-0 text-mg-primary" aria-hidden="true" />
           <label htmlFor="hero-search" className="sr-only">{t(UI.search)}</label>

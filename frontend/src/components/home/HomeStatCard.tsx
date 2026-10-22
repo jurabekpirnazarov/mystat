@@ -22,16 +22,13 @@ export default function HomeStatCard({ def, data, showScopeNote }: { def: HomeCa
   const gid = useId();
   const Icon = ICON[def.key];
   const ch = data.change;
-  const good = ch === null || def.better === null || ch === 0 ? null : (ch > 0) === def.better;
-  const pill = good === null
-    ? "bg-mg-info text-mg-muted"
-    : good ? "bg-[rgb(var(--ds-success-bg))] text-[rgb(var(--ds-success))]" : "bg-[rgb(var(--ds-danger-bg))] text-[rgb(var(--ds-danger))]";
+  // O'sish har doim ham yaxshi emas (masalan ishsizlik): o'zgarish neytral rangda, ma'nosi matn va belgi bilan
+  const pill = "bg-mg-info text-mg-text";
   const Arrow = ch !== null && ch < 0 ? ArrowDownRight : ArrowUpRight;
   const rankPct = data.rank && data.of ? ((data.of - data.rank + 1) / data.of) * 100 : null;
   return (
     <Link to={`/regions?ind=${def.siat}`}
-      className="group relative flex min-h-[200px] flex-col overflow-hidden rounded-2xl border border-mg-border bg-mg-surface p-5 transition hover:-translate-y-0.5 hover:border-mg-primary/40 hover:shadow-ds-popover">
-      <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-mg-primary to-mg-primary/20" />
+      className="group relative flex min-h-[200px] flex-col overflow-hidden rounded-[12px] border border-mg-border bg-mg-surface p-5 transition hover:border-mg-primary/50">
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-[15px] font-semibold leading-5 text-mg-muted">{t({ uz: def.uz, ru: def.ru })}</h3>
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-mg-info text-mg-primary transition group-hover:bg-mg-primary group-hover:text-white" aria-hidden="true">
@@ -39,7 +36,7 @@ export default function HomeStatCard({ def, data, showScopeNote }: { def: HomeCa
         </span>
       </div>
 
-      <p className="mt-3 text-[32px] font-extrabold leading-9 tracking-tight tabular-nums text-mg-heading">{def.format(data.value)}</p>
+      <p className="mt-3 text-[30px] font-bold leading-9 tracking-tight tabular-nums text-mg-heading">{def.format(data.value)}</p>
       <p className="mt-0.5 text-xs text-mg-muted">
         {t(def.unit)}{data.preliminary && ` · ${t({ uz: "dastlabki", ru: "предварительно" })}`}
         {showScopeNote && data.scope === "country" && <span className="ml-1 rounded-full bg-mg-info px-2 py-0.5 font-medium text-mg-primary">{t({ uz: "Respublika bo'yicha", ru: "По республике" })}</span>}

@@ -85,8 +85,7 @@ export default function HomeMap({ region, indicator, onIndicator, onRegion }: {
 
   return (
     <section ref={box} aria-label={t({ uz: "O'zbekiston kartasi", ru: "Карта Узбекистана" })}
-      className="relative flex h-full min-h-[420px] flex-col overflow-hidden rounded-2xl border border-mg-border bg-gradient-to-br from-mg-info via-mg-surface to-mg-surface p-5">
-      <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-mg-primary/10 blur-3xl" />
+      className="relative flex h-full min-h-[420px] flex-col overflow-hidden rounded-[12px] border border-mg-border bg-mg-surface p-5">
       <div className="relative flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-mg-primary">{t({ uz: "Hududlar kesimida", ru: "По регионам" })}</p>
@@ -106,7 +105,7 @@ export default function HomeMap({ region, indicator, onIndicator, onRegion }: {
       <div role="group" aria-label={t({ uz: "Karta ko'rsatkichi", ru: "Показатель карты" })} className="relative mt-4 flex gap-2 overflow-x-auto pb-1">
         {MAP_CARDS.map((c) => (
           <button key={c.key} type="button" aria-pressed={c.key === indicator} onClick={() => onIndicator(c.key)}
-            className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${c.key === indicator ? "border-mg-primary bg-mg-primary text-white shadow-sm" : "border-mg-border bg-mg-surface/80 text-mg-text hover:border-mg-primary/50"}`}>
+            className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${c.key === indicator ? "border-mg-primary bg-mg-primary text-white" : "border-mg-border bg-mg-surface/80 text-mg-text hover:border-mg-primary/50"}`}>
             {t({ uz: c.uz, ru: c.ru })}
           </button>
         ))}

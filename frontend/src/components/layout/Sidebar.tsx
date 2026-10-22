@@ -68,7 +68,7 @@ function Brand({ expanded }: { expanded: boolean }) {
 export function DesktopSidebar() {
   return (
     <aside aria-label="Bo'limlar" className="fixed bottom-3 left-[22px] top-3 z-40 hidden lg:block">
-      <div className="flex h-full w-[268px] flex-col rounded-mg-side bg-mg-primary shadow-lg dark:bg-blue-900">
+      <div className="flex h-full w-[268px] flex-col rounded-mg-side bg-[rgb(var(--ds-brand))] shadow-mg-card">
         <Brand expanded />
         <NavList expanded />
       </div>
@@ -83,7 +83,7 @@ export function MobileSidebar({ open, onClose }: { open: boolean; onClose: () =>
     <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label={t(UI.groupServices)}
       onKeyDown={(e) => e.key === "Escape" && onClose()}>
       <button type="button" aria-label={t(UI.closeMenu)} onClick={onClose} className="absolute inset-0 bg-slate-900/40" />
-      <div className="absolute bottom-0 left-0 top-0 flex w-[290px] max-w-[85vw] flex-col bg-mg-primary dark:bg-blue-900">
+      <div className="absolute bottom-0 left-0 top-0 flex w-[290px] max-w-[85vw] flex-col bg-[rgb(var(--ds-brand))]">
         <div className="flex items-center justify-between pr-3">
           <Brand expanded />
           <button type="button" onClick={onClose} aria-label={t(UI.closeMenu)} autoFocus

@@ -34,19 +34,19 @@ export default {
         },
       },
       borderRadius: {
-        mg: "10px",
+        mg: "12px",
         "ds-control": "6px",
         "mg-tile": "16px",
         "mg-side": "25px",
       },
       boxShadow: {
-        "mg-btn": "0 5px 17px rgba(29,95,191,.35), 0 0 0 4px rgba(29,95,191,.2)",
+        "mg-btn": "0 1px 2px rgba(16,24,40,.12)",
         "mg-card": "0 1px 2px rgba(16,24,40,.06)",
         "ds-popover": "0 8px 24px rgba(16,24,40,.12)",
       },
       backgroundImage: {
-        "mg-hero": "linear-gradient(65.97deg, #0E2647 33.59%, #1D5FBF 122.33%)",
-        "mg-btn": "linear-gradient(100deg, #1D5FBF, #174CA8)",
+        "mg-hero": "linear-gradient(rgb(var(--ds-brand)), rgb(var(--ds-brand)))",
+        "mg-btn": "linear-gradient(rgb(var(--ds-primary)), rgb(var(--ds-primary)))",
         "mg-personal": "radial-gradient(120% 120% at 92% 50%, rgb(var(--mg-personal-glow)) 0, rgb(var(--mg-surface)) 46%)",
       },
     },

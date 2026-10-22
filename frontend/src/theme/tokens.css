@@ -4,42 +4,45 @@
  * Tungi rejim: `.dark` (ThemeContext) yoki `[data-theme="dark"]`.
  */
 :root {
-  --ds-ink: 8 23 44;
-  --ds-brand: 14 38 71;
+  --ds-ink: 11 29 47;
+  --ds-brand: 16 42 67;
   --ds-on-brand: 255 255 255;
-  --ds-on-brand-muted: 201 214 234;
-  --ds-primary: 29 95 191;
-  --ds-primary-hover: 23 76 168;
-  --ds-primary-soft: 238 244 254;
+  --ds-on-brand-muted: 200 212 227;
+  --ds-primary: 21 94 239;
+  --ds-primary-hover: 15 75 200;
+  --ds-primary-soft: 235 242 254;
   --ds-on-primary: 255 255 255;
   --ds-accent: 240 161 74;
   --ds-accent-strong: 192 122 42;
-  --ds-bg: 244 246 250;
+  --ds-bg: 245 247 251;
   --ds-surface: 255 255 255;
-  --ds-border: 221 227 235;
-  --ds-text: 24 33 47;
-  --ds-text-muted: 74 86 104;
-  --ds-success: 24 121 74;
-  --ds-success-bg: 232 246 238;
+  --ds-border: 228 231 236;
+  --ds-text: 23 43 77;
+  --ds-text-muted: 102 112 133;
+  --ds-success: 11 122 99;
+  --ds-success-bg: 230 247 243;
   --ds-warning: 138 83 0;
   --ds-warning-bg: 255 244 224;
-  --ds-danger: 198 40 40;
-  --ds-danger-bg: 253 236 236;
+  --ds-danger: 192 52 63;
+  --ds-danger-bg: 252 236 238;
   --ds-info: 10 95 180;
   --ds-info-bg: 231 241 251;
   --ds-new: 211 47 47;
-  --ds-focus: 29 95 191;
+  --ds-focus: 21 94 239;
 
   /* Ma'lumot seriyalari (3.1): eksport ko'k, import to'q sariq, aylanma neytral */
-  --ds-series-export: 29 95 191;
-  --ds-series-import: 192 122 42;
-  --ds-series-total: 107 122 144;
+  --ds-series-export: 37 99 235;
+  --ds-series-import: 217 119 6;
+  --ds-series-total: 102 112 133;
 
   --ds-radius-control: 6px;
-  --ds-radius-card: 10px;
+  --ds-radius-card: 12px;
   --ds-radius-pill: 999px;
-  --ds-shadow-card: 0 1px 2px rgba(16, 24, 40, 0.06);
-  --ds-shadow-popover: 0 8px 24px rgba(16, 24, 40, 0.12);
+  --ds-shadow-card: 0 1px 2px rgba(16, 24, 40, 0.05);
+
+  /* Ma'lumot vizualizatsiyasi palitrasi (kategoriyalar) */
+  --ds-viz-1: 37 99 235; --ds-viz-2: 6 182 212; --ds-viz-3: 13 148 136; --ds-viz-4: 139 92 246; --ds-viz-5: 245 158 11; --ds-viz-6: 224 93 111;
+  --ds-shadow-popover: 0 6px 16px rgba(16, 24, 40, 0.10);
 }
 
 .dark,

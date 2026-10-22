@@ -53,8 +53,8 @@ function bySizeDesc(features: GeoFeature[]) {
 
 // Chegara to'q kulrang: bir xil sinfdagi qo'shni hududlar (masalan Buxoro va Navoiy) bir-biriga qo'shilib ketmasin
 const PALETTE = {
-  light: { bg: "#f1f5f9", border: "#475569", gap: "#94a3b8", context: "#e2e8f0", hover: "#0f172a" },
-  dark: { bg: "#0b1220", border: "#cbd5e1", gap: "#475569", context: "#334155", hover: "#f9fafb" },
+  light: { bg: "#EEF2F7", border: "#5B6B82", gap: "#98A2B3", context: "#E4E7EC", hover: "#172B4D" },
+  dark: { bg: "#121A28", border: "#D0D5DD", gap: "#475467", context: "#2A3548", hover: "#F5F7FB" },
 };
 
 /** SVG renderer'ga "ma'lumot yo'q" shtrix naqshini qo'shadi (KR-06, N2). */

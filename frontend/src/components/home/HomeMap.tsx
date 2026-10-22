@@ -6,7 +6,7 @@ import type { MapValues } from "../../api/siatMap";
 import { CARD_BY_KEY, HOME_CARDS, REPUBLIC, type HomeCardKey } from "../../config/homeWidgets";
 import { useLang } from "../../i18n/LangContext";
 import { loadBoundaries, type GeoFeature } from "../../utils/mapGeo";
-import { buildScale, colorFor, legendRows, MISSING_COLOR } from "../../utils/mapScale";
+import { buildScale, colorFor, legendRows, MISSING_COLOR, readableOn } from "../../utils/mapScale";
 import InteractiveMap, { type MapTip } from "./InteractiveMap";
 
 const MAP_CARDS = HOME_CARDS.filter((c) => c.regional);
@@ -126,7 +126,7 @@ export default function HomeMap({ region, indicator, onIndicator, onRegion }: {
         <div className="relative mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-mg-muted">
           <div className="flex min-w-[220px] flex-1 overflow-hidden rounded-full ring-1 ring-mg-border" role="list" aria-label={t({ uz: "Rang shkalasi", ru: "Цветовая шкала" })}>
             {rows.map((r) => (
-              <span key={r.color + r.from} role="listitem" className="flex-1 px-1 py-0.5 text-center font-medium tabular-nums text-black/80" style={{ background: r.color }}
+              <span key={r.color + r.from} role="listitem" className="flex-1 px-1 py-0.5 text-center font-medium tabular-nums" style={{ background: r.color, color: readableOn(r.color) }}
                 title={`${def.format(r.from)} – ${def.format(r.to)}`}>{def.format(r.from)}</span>
             ))}
           </div>

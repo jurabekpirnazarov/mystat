@@ -24,10 +24,16 @@ export interface Scale {
   max: number;
 }
 
-// ColorBrewer YlGnBu va RdBu (5 sinf)
-export const SEQUENTIAL = ["#ffffcc", "#a1dab4", "#41b6c4", "#2c7fb8", "#253494"];
-const DIVERGING = ["#ca0020", "#f4a582", "#f7f7f7", "#92c5de", "#0571b0"];
-export const MISSING_COLOR = "#d1d5db";
+// Portal tizimi: bitta ko'k gamma (och → to'q), markazli shkala uchun amber–ko'k (rang ko'rmaslikda ham ajraladi)
+export const SEQUENTIAL = ["#E8EFFD", "#B9CFF8", "#7DA6F1", "#3E79E8", "#1745B5"];
+const DIVERGING = ["#B45309", "#F0BC7E", "#F1F3F6", "#8DB3F2", "#155EEF"];
+export const MISSING_COLOR = "#D0D5DD";
+
+/** Rang ustidagi matn: och fonda to'q, to'q fonda oq (WCAG nisbiy yorqinlik). */
+export function readableOn(hex: string) {
+  const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2] > 0.35 ? "#172B4D" : "#FFFFFF";
+}
 
 export function buildScale(input: ScaleInput, mode: ScaleMode, higherIsBetter: boolean | null): Scale | null {
   const { min, max } = input;
@@ -75,11 +81,11 @@ export function legendRows(scale: Scale) {
   return scale.colors.map((color, i) => ({ from: edges[i], to: edges[i + 1], color }));
 }
 
-// KR-11: bivariate rejim — har ko'rsatkich uchun 3 sinf (tertil), 3×3 matritsa (Stevens palitrasi)
+// KR-11: bivariate rejim — har ko'rsatkich uchun 3 sinf (tertil), 3×3 matritsa (ko'k × amber, portal palitrasi)
 export const BIVARIATE = [
-  ["#e8e8e8", "#e4acac", "#c85a5a"],
-  ["#b0d5df", "#ad9ea5", "#985356"],
-  ["#64acbe", "#627f8c", "#574249"],
+  ["#EEF1F6", "#BFD3F7", "#6C9CF0"],
+  ["#F6DDB8", "#C7BFC4", "#6F88B8"],
+  ["#EBAF55", "#B48A68", "#4A5A78"],
 ];
 
 export function tertiles(values: number[]) {

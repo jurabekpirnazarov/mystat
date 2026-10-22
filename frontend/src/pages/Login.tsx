@@ -127,7 +127,7 @@ const Login = () => {
     <div className="py-2 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
         <div className="text-center mb-8">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-4">
+          <div className="mx-auto w-16 h-16 bg-mg-primary rounded-xl flex items-center justify-center mb-4">
             <Shield className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -286,7 +286,7 @@ const Login = () => {
 
             {userType === "individual" && (
               <div className="text-center py-8">
-                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-4">
+                <div className="mx-auto w-16 h-16 bg-green-700 rounded-xl flex items-center justify-center mb-4">
                   <Shield className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">

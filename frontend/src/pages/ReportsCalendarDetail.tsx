@@ -48,7 +48,7 @@ const ReportsCalendarDetail: React.FC<ReportsCalendarDetailProps> = ({ reports, 
         {/* Header Section */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-8">
           <div className="text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg mb-6">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-mg-primary rounded-2xl shadow-lg mb-6">
               <Building2 className="h-8 w-8 text-white" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -59,7 +59,7 @@ const ReportsCalendarDetail: React.FC<ReportsCalendarDetailProps> = ({ reports, 
             </p>
             
             {/* Company Info */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+            <div className="bg-mg-info/60 rounded-xl p-6 border border-blue-100">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="flex items-center space-x-3">
                   <Hash className="h-5 w-5 text-blue-600" />

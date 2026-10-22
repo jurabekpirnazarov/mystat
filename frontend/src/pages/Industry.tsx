@@ -399,7 +399,7 @@ const Industry: React.FC = () => {
               <div className="mt-6 flex justify-end">
                 <button
                   onClick={goToNextStep}
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-3 px-8 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2"
+                  className="bg-mg-primary hover:bg-mg-primary-dark text-white font-medium py-3 px-8 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2"
                 >
                   <span>Keyingisi</span>
                   <svg

@@ -58,7 +58,7 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
         {/* Progress bar */}
         <div className="w-full h-1 bg-gray-200">
           <div 
-            className="h-full bg-gradient-to-r from-amber-400 to-amber-500 transition-all duration-100 ease-linear"
+            className="h-full bg-amber-500 transition-all duration-100 ease-linear"
             style={{ width: `${progress}%` }}
           />
         </div>

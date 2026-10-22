@@ -43,3 +43,12 @@ export function stripHtml(html: string | null | undefined): string {
 }
 
 export const nowTime = () => new Date().toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" });
+
+/** Xizmat bajarish muddati kodi (backend `Service.DURATION_CHOICES`) -> o'qiladigan matn. */
+const DURATION_LABELS: Record<string, string> = {
+  now: "Darhol",
+  to_1_day: "1 kun",
+  to_1_2_day: "1–2 kun",
+  to_week: "1 hafta",
+};
+export const durationLabel = (code?: string | null): string => (code ? DURATION_LABELS[code] ?? code : "—");

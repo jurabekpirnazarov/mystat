@@ -36,11 +36,11 @@ function OrganizationsKtut() {
         {/* Main Card */}
         <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
           {/* Header with Logo */}
-          {/* <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-8 py-6">
+          {/* <div className="bg-mg-primary px-8 py-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
-                  <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-mg-primary rounded-full flex items-center justify-center">
                     <Globe className="w-5 h-5 text-white" />
                   </div>
                 </div>
@@ -59,7 +59,7 @@ function OrganizationsKtut() {
           <div className="p-8">
             {/* Title */}
             <div className="text-center mb-8">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+              <div className="mx-auto w-16 h-16 bg-mg-primary rounded-2xl flex items-center justify-center mb-4 shadow-lg">
                 <Search className="w-8 h-8 text-white" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -118,7 +118,7 @@ function OrganizationsKtut() {
                 
                 {/* Captcha Display */}
                 <div className="flex items-center space-x-3 mb-4">
-                  <div className="flex-1 bg-gradient-to-r from-green-100 to-green-200 rounded-xl p-4 flex items-center justify-center border-2 border-green-300">
+                  <div className="flex-1 bg-green-100 rounded-xl p-4 flex items-center justify-center border-2 border-green-300">
                     <span className="text-2xl font-bold text-green-800 tracking-wider select-none">
                       {captchaCode}
                     </span>
@@ -148,7 +148,7 @@ function OrganizationsKtut() {
               <button
                 type="submit"
                 disabled={isLoading || !stir || !captcha}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-3 text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="w-full bg-mg-primary hover:bg-mg-primary-dark text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-3 text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 {isLoading ? (
                   <>

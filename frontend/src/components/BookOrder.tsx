@@ -126,7 +126,7 @@ const BookOrder: React.FC<BookOrderProps> = ({
       <div className="max-w-3xl mx-auto">
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 relative">
+          <div className="bg-mg-primary p-6 relative">
             <div className="flex items-center justify-between">
               <h1 className="text-2xl font-bold text-white">Buyurtma rasmiylashtirish</h1>
               <button

@@ -24,7 +24,7 @@ const ServiceHeader: React.FC<ServiceHeaderProps> = ({
   };
 
   return (
-    <div className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 px-8 py-6 text-white shadow-lg">
+    <div className="bg-mg-primary px-8 py-6 text-white shadow-lg">
       <div className="flex items-start gap-4 mb-6">
         <div className="bg-white/20 p-4 rounded-xl shadow-lg backdrop-blur-sm">
           <FileText size={32} />

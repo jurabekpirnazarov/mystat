@@ -173,7 +173,7 @@ const StatisticalClassifications: React.FC = () => {
         <div className="mt-8 flex flex-col items-center space-y-4">
           <button
             onClick={() => setIsRatingModalOpen(true)}
-            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
+            className="px-6 py-3 bg-mg-primary hover:bg-mg-primary-dark text-white font-medium rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
           >
             Xizmatni baholash
           </button>

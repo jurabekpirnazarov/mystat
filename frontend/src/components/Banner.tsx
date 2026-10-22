@@ -107,7 +107,7 @@ const Banner = () => {
       {/* Nuqtali to'r va xarita siluetti — statistik fon, kontrastni buzmaydi */}
       <div className="absolute inset-0 opacity-[0.18]" aria-hidden="true"
         style={{ backgroundImage: "radial-gradient(rgb(255 255 255 / 0.5) 1px, transparent 1px)", backgroundSize: "22px 22px" }} />
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0b2a5b] via-[#0b2a5b]/80 to-[#123f86]/70" aria-hidden="true" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0153B2] via-[#0060D0] to-[#0068E0]" aria-hidden="true" />
       {country && (
         <svg viewBox={`0 0 ${country.w} ${country.h}`} aria-hidden="true"
           className="pointer-events-none absolute -right-24 top-1/2 hidden w-[860px] -translate-y-1/2 opacity-[0.16] lg:block">

@@ -268,7 +268,7 @@ function DataAssets() {
     { label: "Statistik nashrlar", value: data?.books, icon: BookOpen, to: "/books" },
   ];
   return (
-    <div className="rounded-xl border border-slate-200 bg-gradient-to-r from-slate-50 to-white p-5 dark:border-gray-700 dark:from-gray-800 dark:to-gray-800">
+    <div className="rounded-xl border border-slate-200 bg-mg-info/60 p-5 dark:border-gray-700 ">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
           <Database className="h-4 w-4 text-blue-800 dark:text-blue-300" aria-hidden="true" />Ochiq ma'lumotlar bazasi

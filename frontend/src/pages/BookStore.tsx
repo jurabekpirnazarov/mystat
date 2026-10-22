@@ -739,7 +739,7 @@ const BookStore: React.FC = () => {
                   onClick={() => setActiveTab(tab.id)}
                   className={`px-6 py-3 text-sm font-medium rounded-lg transition-all duration-300 ${
                     activeTab === tab.id
-                      ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md"
+                      ? "bg-mg-primary text-white shadow-md"
                       : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
                   }`}
                 >
@@ -944,7 +944,7 @@ const BookStore: React.FC = () => {
                   ) : (
                     <button
                       onClick={() => addToCart(book.id)}
-                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 mb-2"
+                      className="w-full bg-mg-primary hover:bg-mg-primary-dark text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 mb-2"
                     >
                       <ShoppingCart className="w-4 h-4" />
                       <span>Savatga qo'shish</span>
@@ -986,7 +986,7 @@ const BookStore: React.FC = () => {
       return (
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-8 text-center">
+            <div className="bg-mg-primary text-white p-8 text-center">
               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg
                   className="w-10 h-10 text-blue-500"
@@ -1067,7 +1067,7 @@ const BookStore: React.FC = () => {
                 {paymentUrl && (
                   <button
                     onClick={() => window.open(paymentUrl, "_blank")}
-                    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center space-x-2"
+                    className="bg-mg-primary hover:bg-mg-primary-dark text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center space-x-2"
                   >
                     <svg
                       className="w-5 h-5"
@@ -1136,13 +1136,13 @@ const BookStore: React.FC = () => {
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={() => setIsRatingModalOpen(true)}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
+                  className="flex-1 bg-mg-primary hover:bg-mg-primary-dark text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
                 >
                   Xizmatni baholash
                 </button>
                 <button
                   onClick={resetToFirstStep}
-                  className="flex-1 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
+                  className="flex-1 bg-gray-700 hover:bg-gray-800 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
                 >
                   Yangi buyurtma berish
                 </button>
@@ -1163,7 +1163,7 @@ const BookStore: React.FC = () => {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-          <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-8 text-center">
+          <div className="bg-green-700 text-white p-8 text-center">
             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="w-10 h-10 text-green-500" />
             </div>
@@ -1314,13 +1314,13 @@ const BookStore: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-4">
               <button
                 onClick={() => setIsRatingModalOpen(true)}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
+                className="flex-1 bg-mg-primary hover:bg-mg-primary-dark text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
               >
                 Xizmatni baholash
               </button>
               <button
                 onClick={resetToFirstStep}
-                className="flex-1 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
+                className="flex-1 bg-gray-700 hover:bg-gray-800 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
               >
                 Yangi buyurtma berish
               </button>
@@ -1533,7 +1533,7 @@ const BookStore: React.FC = () => {
                       <button
                         onClick={submitOrder}
                         disabled={orderLoading}
-                        className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
+                        className="flex-1 bg-mg-primary hover:bg-mg-primary-dark disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
                       >
                         {orderLoading
                           ? "Buyurtma berilmoqda..."
@@ -1553,7 +1553,7 @@ const BookStore: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-green-50 to-white">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-green-50 ">
               <div className="flex items-center space-x-3">
                 <CheckCircle className="w-6 h-6 text-green-500" />
                 <h2 className="text-xl font-bold text-gray-900">
@@ -1663,7 +1663,7 @@ const BookStore: React.FC = () => {
                 </button>
                 <button
                   onClick={handlePayment}
-                  className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
+                  className="flex-1 bg-green-700 hover:bg-green-800 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
                 >
                   To'lovni amalga oshirish
                 </button>
@@ -1678,7 +1678,7 @@ const BookStore: React.FC = () => {
         <div className="fixed bottom-4 right-4 z-50">
           <div className="relative bg-white rounded-lg p-4 max-w-xs w-72 shadow-lg border border-gray-200 transform transition-all duration-300 overflow-hidden">
             <div
-              className="absolute top-0 left-0 h-1 bg-gradient-to-r from-green-500 to-green-600 transition-all duration-75 ease-out"
+              className="absolute top-0 left-0 h-1 bg-green-700 transition-all duration-75 ease-out"
               style={{ width: `${modalProgress}%` }}
             ></div>
 
@@ -1707,7 +1707,7 @@ const BookStore: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 relative">
+            <div className="bg-mg-primary p-6 relative">
               <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-bold text-white">Kitob haqida</h1>
                 <button
@@ -1802,7 +1802,7 @@ const BookStore: React.FC = () => {
                   <div className="flex gap-3 pt-4">
                     <button
                       onClick={() => addToCart(selectedBook.id)}
-                      className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 shadow-md hover:shadow-lg"
+                      className="flex-1 bg-mg-primary hover:bg-mg-primary-dark text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 shadow-md hover:shadow-lg"
                     >
                       <ShoppingCart className="w-5 h-5" />
                       <span>Savatga qo'shish</span>

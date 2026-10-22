@@ -41,7 +41,7 @@ function Card({ c }: { c: RegionCard }) {
 
 function Infographic({ p }: { p: Profile }) {
   return (
-    <div className="w-[360px] rounded-2xl bg-gradient-to-b from-blue-700 to-blue-900 text-white p-6 space-y-4">
+    <div className="w-[360px] rounded-2xl bg-mg-primary-dark text-white p-6 space-y-4">
       <p className="text-xs uppercase tracking-wider opacity-80">my.stat.uz · {p.year}</p>
       <h3 className="text-2xl font-bold">{p.region.name_uz}</h3>
       {p.cards.slice(0, 6).map((c) => (

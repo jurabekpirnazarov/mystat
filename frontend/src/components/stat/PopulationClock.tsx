@@ -21,7 +21,7 @@ export default function PopulationClock({ clock, compact }: { clock: Clock; comp
 
   return (
     <section aria-label="Aholi soati"
-      className={`rounded-2xl border border-blue-100 dark:border-blue-900 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/40 dark:to-gray-900 ${compact ? "p-4" : "p-6"}`}>
+      className={`rounded-2xl border border-blue-100 dark:border-blue-900 bg-mg-info/60 ${compact ? "p-4" : "p-6"}`}>
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 shrink-0 rounded-lg bg-blue-600/10 flex items-center justify-center">
           <Users className="w-5 h-5 text-blue-600" aria-hidden="true" />

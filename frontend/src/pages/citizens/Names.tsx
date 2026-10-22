@@ -47,7 +47,7 @@ export default function Names() {
               <p className="text-sm">"{q}" ismi topilmadi.{s.suggestions?.length ? <> O'xshashlari: {s.suggestions.map((n) => <button key={n} type="button" className="text-blue-600 underline mx-1" onClick={() => { setInput(n); setParams({ q: n }); }}>{n}</button>)}</> : null}</p>
             ) : s?.name ? (
               <>
-                <div ref={card} className="rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-6">
+                <div ref={card} className="rounded-2xl bg-mg-primary text-white p-6">
                   <p className="text-sm opacity-80">my.stat.uz · ismlar ({s.year}) · NAMUNA</p>
                   <h2 className="text-4xl font-bold mt-1">{s.name} <span className="text-2xl opacity-80">/ {s.name_cyr}</span></h2>
                   <p className="mt-2 text-lg">{s.year}-yilda <b>{nf(s.by_year?.slice(-1)[0]?.count ?? 0)}</b> chaqaloqqa qo'yilgan{s.rank ? <> · reytingda <b>{s.rank}-o'rin</b></> : null}</p>

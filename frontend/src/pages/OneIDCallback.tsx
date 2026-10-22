@@ -119,8 +119,8 @@ const OneIDCallback = () => {
       <div className="text-center">
         <div className={`mx-auto w-16 h-16 rounded-xl flex items-center justify-center mb-4 ${
           error 
-            ? 'bg-gradient-to-br from-red-500 to-red-600' 
-            : 'bg-gradient-to-br from-green-500 to-green-600 animate-pulse'
+            ? 'bg-green-700 ' 
+            : ' animate-pulse'
         }`}>
           {error ? (
             <AlertCircle className="w-8 h-8 text-white" />

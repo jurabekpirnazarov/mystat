@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { durationLabel } from '../utils/format';
 import { Link } from 'react-router-dom';
-import { 
-  Star, 
-  Clock, 
-  Users, 
-  ChevronDown, 
-  ChevronUp, 
-  Heart, 
-  Share2, 
-  Phone, 
-  MapPin, 
+import {
+  Star,
+  Clock,
+  Users,
+  ChevronDown,
+  ChevronUp,
+  Heart,
+  Share2,
+  Phone,
+  MapPin,
   Info,
   ArrowLeft,
   FileText,
@@ -36,10 +37,10 @@ const ExpandableItem: React.FC<ExpandableItemProps> = ({ icon, title, content, i
   <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-500 mb-4 overflow-hidden transform hover:scale-[1.02]">
     <button
       onClick={onToggle}
-      className="w-full p-6 flex items-center justify-between hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 transition-all duration-400"
+      className="w-full p-6 flex items-center justify-between hover:bg-mg-info/50 transition-all duration-400"
     >
       <div className="flex items-center gap-4">
-        <div className="p-2 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg text-blue-600 transition-all duration-300 hover:scale-110 hover:rotate-3">
+        <div className="p-2 bg-mg-info rounded-lg text-blue-600 transition-all duration-300 hover:scale-110 hover:rotate-3">
           {icon}
         </div>
         <span className="text-gray-800 font-medium text-left transition-colors duration-300 hover:text-blue-700">{title}</span>
@@ -51,7 +52,7 @@ const ExpandableItem: React.FC<ExpandableItemProps> = ({ icon, title, content, i
     <div className={`overflow-hidden transition-all duration-700 ease-in-out ${
       isOpen ? 'max-h-40 opacity-100 py-2' : 'max-h-0 opacity-0 py-0'
     }`}>
-      <div className="px-6 pb-6 text-gray-600 bg-gradient-to-r from-gray-50 to-blue-50 transform transition-all duration-500">
+      <div className="px-6 pb-6 text-gray-600 bg-mg-info/60 transform transition-all duration-500">
         {content}
       </div>
     </div>
@@ -91,7 +92,7 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
         setLoading(false);
         return;
       }
-      
+
       try {
         setLoading(true);
         const data = await getServiceInfo(serviceId);
@@ -118,7 +119,7 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
     setExpandedItems(newExpanded);
   };
 
-  const ratingDistribution = serviceData?.rating_counts ? 
+  const ratingDistribution = serviceData?.rating_counts ?
     Object.entries(serviceData.rating_counts)
       .map(([stars, count]: [string, number]) => ({
         stars: parseInt(stars),
@@ -136,7 +137,7 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+      <div className="min-h-screen bg-mg-info/60 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Xizmat ma'lumotlari yuklanmoqda...</p>
@@ -147,7 +148,7 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
 
   if (!serviceData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+      <div className="min-h-screen bg-mg-info/60 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600">Xizmat ma'lumotlari topilmadi</p>
         </div>
@@ -156,14 +157,14 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-mg-info/60 ">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white relative overflow-hidden">
+      <div className="bg-mg-primary text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-black bg-opacity-10"></div>
         <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-l from-white opacity-10 rounded-full -translate-y-48 translate-x-48"></div>
-        
+
         <div className="relative max-w-6xl mx-auto px-6 py-12">
-          <Link 
+          <Link
             to="/services"
             className="inline-flex items-center gap-2 px-4 py-2 mb-6 bg-white bg-opacity-20 backdrop-blur-sm rounded-lg text-white hover:bg-opacity-30 transition-all duration-300 hover:scale-105"
           >
@@ -177,7 +178,7 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
             </div>
             <h1 className="text-3xl font-bold">{serviceData.name_uz}</h1>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-6 hover:bg-opacity-30 transition-all duration-300">
               <div className="flex items-center gap-3 mb-2">
@@ -190,17 +191,17 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
               </div>
               <p className="text-blue-100 transition-colors duration-300 hover:text-white">Mijozlar bahosi</p>
             </div>
-            
+
             <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-6 hover:bg-opacity-30 transition-all duration-400 hover:transform hover:scale-105">
               <div className="flex items-center gap-3 mb-2">
                 <Clock className="text-yellow-300 transition-all duration-300 hover:rotate-12" size={24} />
                 <span className="text-3xl font-bold transform transition-all duration-300 hover:scale-105">
-                  {serviceData.duration === 'to_week' ? '1 hafta' : serviceData.duration}
+                  {durationLabel(serviceData.duration)}
                 </span>
               </div>
               <p className="text-blue-100 transition-colors duration-300 hover:text-white">Bajarish muddati</p>
             </div>
-            
+
             <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-6 hover:bg-opacity-30 transition-all duration-500 hover:transform hover:scale-105">
               <div className="flex items-center gap-3 mb-2">
                 <Users className="text-green-300 transition-all duration-300 hover:scale-110" size={24} />
@@ -211,9 +212,9 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
               <p className="text-blue-100 transition-colors duration-300 hover:text-white">Buyurtma soni</p>
             </div>
           </div>
-          
+
           <div className="flex gap-4 mt-8">
-            <button 
+            <button
               onClick={() => setLiked(!liked)}
               className="bg-white bg-opacity-20 backdrop-blur-sm text-white px-6 py-3 rounded-xl hover:bg-opacity-30 transition-all duration-400 flex items-center gap-2 hover:scale-105 transform hover:-translate-y-1"
             >
@@ -237,7 +238,7 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
               <Info className="text-blue-600" size={24} />
               Xizmat ma'lumotlari
             </h2>
-            
+
             <div className="space-y-4">
               <ExpandableItem
                 icon={<FileText size={20} />}
@@ -246,7 +247,7 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
                 isOpen={expandedItems.has('services')}
                 onToggle={() => toggleItem('services')}
               />
-              
+
               <ExpandableItem
                 icon={<Clock size={20} />}
                 title="Ish vaqti va jadval"
@@ -254,7 +255,7 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
                 isOpen={expandedItems.has('schedule')}
                 onToggle={() => toggleItem('schedule')}
               />
-              
+
               <ExpandableItem
                 icon={<Phone size={20} />}
                 title="Bog'lanish"
@@ -262,7 +263,7 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
                 isOpen={expandedItems.has('contact')}
                 onToggle={() => toggleItem('contact')}
               />
-              
+
               <ExpandableItem
                 icon={<MapPin size={20} />}
                 title="Manzil"
@@ -271,32 +272,32 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
                 onToggle={() => toggleItem('location')}
               />
             </div>
-            
+
             {/* Terms and Conditions Section */}
             <div className="mt-8">
               <div className="bg-white rounded-xl shadow-sm border-2 border-blue-100 p-6">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="p-2 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg text-blue-600">
+                  <div className="p-2 bg-mg-info rounded-lg text-blue-600">
                     <Shield size={20} />
                   </div>
                   <h3 className="text-lg font-semibold text-gray-800">Oferta shartlari bilan tanishish</h3>
                 </div>
-                
+
                 <div className="bg-gray-50 rounded-lg p-4 mb-4">
                   <p className="text-gray-700 text-sm leading-relaxed">
-                    Xizmat ko'rsatish shartlari, to'lov tartibi, mijoz huquqlari va majburiyatlari haqida to'liq ma'lumot. 
-                    Barcha xizmatlar O'zbekiston Respublikasi qonunlariga muvofiq amalga oshiriladi. 
+                    Xizmat ko'rsatish shartlari, to'lov tartibi, mijoz huquqlari va majburiyatlari haqida to'liq ma'lumot.
+                    Barcha xizmatlar O'zbekiston Respublikasi qonunlariga muvofiq amalga oshiriladi.
                     Ma'lumotlar xavfsizligi va mijozlar huquqlari himoyasi kafolatlanadi.
                   </p>
                 </div>
-                
+
                 <div className="flex items-center justify-between mb-4">
                   <button className="flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors duration-200 font-medium">
                     <Download size={16} />
                     Oferta shartlarini yuklash
                   </button>
                 </div>
-                
+
                 <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
@@ -320,7 +321,7 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
                 <MessageCircle className="text-blue-600" size={24} />
                 Mijozlar fikrlari
               </h2>
-              
+
               <div className="mb-8">
                 <div className="flex items-center gap-4 mb-6">
                   <span className="text-5xl font-bold text-gray-800">
@@ -333,7 +334,7 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="space-y-3">
                   {ratingDistribution.map((item) => (
                     <div key={item.stars} className="flex items-center gap-3 group hover:bg-gray-50 rounded-lg p-2 transition-all duration-300">
@@ -341,7 +342,7 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
                       <Star className="text-yellow-400 fill-yellow-400 transition-all duration-300 group-hover:scale-110" size={16} />
                       <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
                         <div
-                          className="bg-gradient-to-r from-yellow-400 to-orange-400 h-2 rounded-full transition-all duration-1000 group-hover:shadow-lg"
+                          className="bg-amber-400 h-2 rounded-full transition-all duration-1000 group-hover:shadow-lg"
                           style={{ width: `${item.percentage}%` }}
                         ></div>
                       </div>
@@ -350,14 +351,14 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
                   ))}
                 </div>
               </div>
-              
+
               {/* Individual Reviews */}
               <div className="space-y-6">
                 {serviceData.reviews && serviceData.reviews.length > 0 ? (
                   serviceData.reviews.map((review: ServiceReview, index: number) => (
                     <div key={index} className="border-l-4 border-blue-400 pl-4 bg-gradient-to-r from-blue-50 to-transparent p-4 rounded-r-lg transition-all duration-400 hover:shadow-md hover:border-l-8 hover:pl-6 transform hover:translate-x-2">
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:rotate-12">
+                        <div className="w-8 h-8 bg-mg-primary-light rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:rotate-12">
                           <User className="text-white" size={16} />
                         </div>
                         <span className="font-semibold text-gray-800 transition-colors duration-300 hover:text-blue-700">
@@ -386,7 +387,7 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
             </div>
           </div>
         </div>
-        
+
         {/* Next Step Button */}
         <div className="mt-12 text-center">
           <button
@@ -394,7 +395,7 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
             onClick={termsAccepted ? onNext : undefined}
             className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-500 flex items-center gap-3 mx-auto transform ${
               termsAccepted
-                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 hover:scale-105 shadow-lg hover:shadow-xl hover:-translate-y-1'
+                ? 'bg-mg-primary text-white hover:bg-mg-primary-dark hover:scale-105 shadow-lg hover:shadow-xl hover:-translate-y-1'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}
           >

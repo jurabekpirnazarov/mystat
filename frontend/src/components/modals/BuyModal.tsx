@@ -14,7 +14,7 @@ const PaymentModal: React.FC<ModalProps> = ({ isOpen, onClose, onPayment }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-500 p-6 text-white relative">
+        <div className="bg-mg-primary p-6 text-white relative">
           <button
             onClick={onClose}
             className="absolute right-4 top-4 text-white hover:text-gray-200 transition-colors"
@@ -85,7 +85,7 @@ const PaymentModal: React.FC<ModalProps> = ({ isOpen, onClose, onPayment }) => {
           </button>
           <button
             onClick={onPayment}
-            className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg hover:from-blue-700 hover:to-blue-600 font-medium shadow-lg"
+            className="flex-1 px-4 py-2 bg-mg-primary text-white rounded-lg hover:bg-mg-primary-dark font-medium shadow-lg"
           >
             To'lovga o'tish
           </button>

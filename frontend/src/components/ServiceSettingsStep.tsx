@@ -545,7 +545,7 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
     <div className="space-y-6 max-w-6xl mx-auto px-6 py-12">
       {/* Progress indicator */}
       <div className="mb-8">
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+        <div className="bg-mg-info/60 rounded-xl p-6 border border-blue-200">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Tahlil parametrlarini sozlash</h2>
           <p className="text-gray-600 text-sm">
             Quyidagi parametrlarni tanlab, tashqi savdo ma'lumotlarini tahlil qiling. 
@@ -1156,7 +1156,7 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
         <button
           onClick={onGetData}
           disabled={isLoading}
-          className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 disabled:from-gray-400 disabled:to-gray-500 text-white px-8 py-3 rounded-lg font-semibold flex items-center space-x-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none"
+          className="bg-green-700 hover:bg-green-800 disabled:bg-gray-400 text-white px-8 py-3 rounded-lg font-semibold flex items-center space-x-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none"
         >
           {isLoading ? (
             <>

@@ -95,7 +95,7 @@ const Contact = () => {
         </div>
 
         {/* Quick Contact */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-8 mb-12 text-center">
+        <div className="bg-mg-primary rounded-xl p-8 mb-12 text-center">
           <h2 className="text-2xl font-bold text-white mb-4">
             Tezkor Murojaat
           </h2>

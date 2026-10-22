@@ -212,7 +212,7 @@ export default function LocationSelector({ onSelectStore, onClose }: LocationSel
         const icon = L.divIcon({
           className: 'custom-cluster-icon',
           html: `<div style="
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            background: #0068E0;
             color: white;
             border-radius: 50%;
             width: ${Math.min(60, 30 + cluster.count * 2)}px;
@@ -244,7 +244,7 @@ export default function LocationSelector({ onSelectStore, onClose }: LocationSel
         const icon = L.divIcon({
           className: 'custom-marker-icon',
           html: `<div style="
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: #1F8F45;
             color: white;
             border-radius: 50%;
             width: 40px;

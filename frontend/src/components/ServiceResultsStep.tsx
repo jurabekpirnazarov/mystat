@@ -117,7 +117,7 @@ const ServiceResultsStep = ({ onPrevious, tradeData, handleDownloadData }: Servi
       <div className="space-y-8 max-w-6xl mx-auto px-6 py-12">
         {/* Empty State Header */}
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-          <div className="bg-gradient-to-r from-gray-500 to-gray-600 p-6">
+          <div className="bg-gray-600 p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <div className="bg-white/20 p-3 rounded-lg">
@@ -166,7 +166,7 @@ const ServiceResultsStep = ({ onPrevious, tradeData, handleDownloadData }: Servi
     <div className="space-y-8 max-w-6xl mx-auto px-6 py-12">
       {/* Results Header */}
       <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-        <div className="bg-gradient-to-r from-green-600 to-green-700 p-6">
+        <div className="bg-green-700 p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="bg-white/20 p-3 rounded-lg">
@@ -422,7 +422,7 @@ const ServiceResultsStep = ({ onPrevious, tradeData, handleDownloadData }: Servi
       </div>
 
       {/* Analysis Summary */}
-      <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl border border-blue-200 p-6">
+      <div className="bg-mg-info/60 rounded-xl border border-blue-200 p-6">
         <h3 className="text-xl font-semibold text-gray-900 mb-4">Tahlil Xulosasi</h3>
         <div className="grid md:grid-cols-2 gap-6">
           <div>

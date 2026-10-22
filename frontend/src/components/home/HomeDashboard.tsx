@@ -71,8 +71,8 @@ export default function HomeDashboard({ className = "mt-10", middle, showCards =
 
   return (
     <section aria-labelledby="home-today" className={className}>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 id="home-today" className="text-[24.5px] font-normal leading-9 text-mg-primary">{t({ uz: "O'zbekiston bugun", ru: "Узбекистан сегодня" })}</h2>
+      <div className="mb-4 flex flex-wrap items-center justify-end gap-3">
+        <h2 id="home-today" className="sr-only">{t({ uz: "O'zbekiston bugun", ru: "Узбекистан сегодня" })}</h2>
         <div className="flex flex-wrap items-center gap-3">
           <RegionSelect value={layout.region} onChange={api.setRegion} />
           <button ref={opener} type="button" onClick={() => setOpen(true)} aria-haspopup="dialog"

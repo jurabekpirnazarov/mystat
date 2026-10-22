@@ -43,15 +43,15 @@ export default function HomeHero() {
   const scroll = (dir: number) => rail.current?.scrollBy({ left: dir * 360, behavior: "smooth" });
 
   return (
-    <section aria-labelledby="hero-title" className="relative overflow-hidden rounded-mg bg-[rgb(var(--ds-brand))] pb-4 pl-4 pt-8 sm:pb-[18px] sm:pl-[28px] sm:pt-[32px]">
+    <section aria-labelledby="hero-title" className="relative overflow-hidden rounded-mg bg-[rgb(var(--ds-panel))] pb-4 pl-4 pt-8 sm:pb-[18px] sm:pl-[28px] sm:pt-[32px]">
       {/* Rasmiy belgi: davlat bayrog'i ranglaridagi ingichka chiziq */}
       <div aria-hidden="true" className="absolute inset-x-0 top-0 flex h-[6px]">
         <span className="flex-1 bg-[#1CA7E8]" /><span className="w-px bg-[#CE1126]" /><span className="flex-1 bg-white" /><span className="w-px bg-[#CE1126]" /><span className="flex-1 bg-[#1EB53A]" />
       </div>
       <div className="relative pr-4 sm:pr-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[rgb(var(--ds-on-brand-muted))]">{t({ uz: "Milliy statistika qo'mitasi · rasmiy portal", ru: "Национальный комитет по статистике · официальный портал" })}</p>
-        <h1 id="hero-title" className="mt-1 text-[26px] font-bold leading-[32px] text-white sm:text-[36px] sm:leading-[42px]">{t(UI.welcome)}</h1>
-        <form role="search" className="mt-5 flex h-12 items-center gap-3 rounded-[10px] bg-white pl-4 pr-1.5"
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[rgb(var(--ds-on-panel-muted))]">{t({ uz: "Milliy statistika qo'mitasi · rasmiy portal", ru: "Национальный комитет по статистике · официальный портал" })}</p>
+        <h1 id="hero-title" className="mt-1 text-[26px] font-bold leading-[32px] text-[rgb(var(--ds-on-panel))] sm:text-[36px] sm:leading-[42px]">{t(UI.welcome)}</h1>
+        <form role="search" className="mt-5 flex h-12 items-center gap-3 rounded-[10px] border border-[rgb(var(--ds-panel-line))] bg-mg-surface pl-4 pr-1.5"
           onSubmit={(e) => { e.preventDefault(); navigate(q.trim() ? `/search?q=${encodeURIComponent(q.trim())}` : "/search"); }}>
           <Search className="h-5 w-5 shrink-0 text-mg-primary" aria-hidden="true" />
           <label htmlFor="hero-search" className="sr-only">{t(UI.search)}</label>

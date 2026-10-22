@@ -30,6 +30,12 @@
   --ds-new: 211 47 47;
   --ds-focus: 21 94 239;
 
+  /* Och kulrang panellar (sidebar, hero, ob-havo): ustidagi matn to'q */
+  --ds-panel: 232 236 241;
+  --ds-panel-line: 208 214 223;
+  --ds-on-panel: 23 43 77;
+  --ds-on-panel-muted: 84 96 117;
+
   /* Ma'lumot seriyalari (3.1): eksport ko'k, import to'q sariq, aylanma neytral */
   --ds-series-export: 37 99 235;
   --ds-series-import: 217 119 6;
@@ -70,6 +76,11 @@
   --ds-info-bg: 18 42 68;
   --ds-new: 242 112 112;
   --ds-focus: 122 164 243;
+
+  --ds-panel: 24 32 45;
+  --ds-panel-line: 52 64 84;
+  --ds-on-panel: 230 234 242;
+  --ds-on-panel-muted: 170 180 198;
 
   --ds-series-export: 91 141 239;
   --ds-series-import: 240 161 74;

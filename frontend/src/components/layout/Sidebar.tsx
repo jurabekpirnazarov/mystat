@@ -23,7 +23,7 @@ function NavList({ expanded, onNavigate }: { expanded: boolean; onNavigate?: () 
         return (
           <div key={g.id} className="mt-2">
             <button type="button" onClick={() => setClosed((c) => ({ ...c, [g.id]: open }))} aria-expanded={open}
-              className={`flex w-full items-center rounded-lg py-2 text-white/90 hover:text-white ${expanded ? "justify-between px-3" : "justify-center"}`}>
+              className={`flex w-full items-center rounded-lg py-2 text-[rgb(var(--ds-on-panel))] hover:text-mg-primary ${expanded ? "justify-between px-3" : "justify-center"}`}>
               <span className={expanded ? "text-[17px] font-bold leading-tight" : "sr-only"}>{t(g.label)}</span>
               <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${open ? "" : "-rotate-90"}`} aria-hidden="true" />
             </button>
@@ -33,13 +33,13 @@ function NavList({ expanded, onNavigate }: { expanded: boolean; onNavigate?: () 
                   const active = isNavActive(item, pathname);
                   const Icon = item.icon;
                   return (
-                    <li key={item.to} className="border-b border-white/15 last:border-b-0">
+                    <li key={item.to} className="border-b border-[rgb(var(--ds-panel-line))] last:border-b-0">
                       <Link to={item.to} onClick={onNavigate} aria-current={active ? "page" : undefined}
                         title={expanded ? undefined : t(item.label)}
-                        className={`flex items-center gap-3 rounded-lg py-3 text-[14px] font-semibold text-white transition-colors ${
+                        className={`flex items-center gap-3 rounded-lg py-3 text-[14px] font-semibold text-[rgb(var(--ds-on-panel))] transition-colors ${
                           expanded ? "px-3" : "justify-center"
-                        } ${active ? "bg-white/15" : "hover:bg-white/10"}`}>
-                        <Icon className="h-[22px] w-[22px] shrink-0 text-emerald-300" aria-hidden="true" />
+                        } ${active ? "bg-mg-surface text-mg-primary shadow-mg-card" : "hover:bg-mg-surface/70"}`}>
+                        <Icon className="h-[22px] w-[22px] shrink-0 text-mg-primary" aria-hidden="true" />
                         <span className={expanded ? "leading-tight" : "sr-only"}>{t(item.label)}</span>
                       </Link>
                     </li>
@@ -59,7 +59,7 @@ function Brand({ expanded }: { expanded: boolean }) {
   return (
     <Link to="/" aria-label={`${t(UI.portalFull)} — ${t(UI.home)}`}
       className={`flex shrink-0 items-center py-5 ${expanded ? "px-5" : "justify-center"}`}>
-      {expanded ? <Logo size={44} tone="dark" org /> : <LogoMark size={44} tone="dark" />}
+      {expanded ? <Logo size={44} tone="light" org /> : <LogoMark size={44} tone="light" />}
     </Link>
   );
 }
@@ -68,7 +68,7 @@ function Brand({ expanded }: { expanded: boolean }) {
 export function DesktopSidebar() {
   return (
     <aside aria-label="Bo'limlar" className="fixed bottom-3 left-[22px] top-3 z-40 hidden lg:block">
-      <div className="flex h-full w-[268px] flex-col rounded-mg-side bg-[rgb(var(--ds-brand))] shadow-mg-card">
+      <div className="flex h-full w-[268px] flex-col rounded-mg-side bg-[rgb(var(--ds-panel))] shadow-mg-card">
         <Brand expanded />
         <NavList expanded />
       </div>
@@ -83,11 +83,11 @@ export function MobileSidebar({ open, onClose }: { open: boolean; onClose: () =>
     <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label={t(UI.groupServices)}
       onKeyDown={(e) => e.key === "Escape" && onClose()}>
       <button type="button" aria-label={t(UI.closeMenu)} onClick={onClose} className="absolute inset-0 bg-slate-900/40" />
-      <div className="absolute bottom-0 left-0 top-0 flex w-[290px] max-w-[85vw] flex-col bg-[rgb(var(--ds-brand))]">
+      <div className="absolute bottom-0 left-0 top-0 flex w-[290px] max-w-[85vw] flex-col bg-[rgb(var(--ds-panel))]">
         <div className="flex items-center justify-between pr-3">
           <Brand expanded />
           <button type="button" onClick={onClose} aria-label={t(UI.closeMenu)} autoFocus
-            className="rounded-lg p-2 text-white hover:bg-white/10">
+            className="rounded-lg p-2 text-[rgb(var(--ds-on-panel))] hover:bg-mg-surface/70">
             <X className="h-6 w-6" aria-hidden="true" />
           </button>
         </div>

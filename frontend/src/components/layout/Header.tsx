@@ -124,24 +124,24 @@ export default function Header({ onOpenMenu }: { onOpenMenu: () => void }) {
   const labels = isAuthenticated ? "hidden 2xl:block" : "hidden xl:block";
 
   return (
-    <header className="flex items-center justify-between gap-3 py-4 md:py-5">
+    <header className="sticky top-3 z-30 mb-4 mt-3 flex items-center justify-between gap-3 rounded-mg border border-[rgb(var(--ds-panel-line))] bg-[rgb(var(--ds-panel))] px-3 py-2 md:px-4">
       <div className="flex min-w-0 items-center gap-3">
-        <button type="button" onClick={onOpenMenu} aria-label={t(UI.openMenu)} className="rounded-lg p-1.5 text-mg-primary hover:bg-mg-primary/5 lg:hidden">
+        <button type="button" onClick={onOpenMenu} aria-label={t(UI.openMenu)} className="rounded-lg p-1.5 text-mg-primary hover:bg-mg-surface/70 lg:hidden">
           <Menu className="h-7 w-7" aria-hidden="true" />
         </button>
         <Link to="/" className="flex min-w-0 items-center gap-3" aria-label={`${t(UI.portalFull)} — ${t(UI.home)}`}>
           <LogoMark size={40} className="shrink-0 lg:hidden" />
           {/* Portal nomi: tor desktopda sidebar'dagi lockup yetarli */}
           <span className={`whitespace-nowrap leading-tight hidden sm:block lg:hidden xl:block`}>
-            <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-mg-muted">{t(UI.portalLine1)}</span>
-            <span className="block text-[15px] font-semibold text-mg-heading">{t(UI.portalLine2)}</span>
+            <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[rgb(var(--ds-on-panel-muted))]">{t(UI.portalLine1)}</span>
+            <span className="block text-[15px] font-semibold text-[rgb(var(--ds-on-panel))]">{t(UI.portalLine2)}</span>
           </span>
         </Link>
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
         {/* Yordamchi panel: qidiruv, hisobot muddati, aloqa, til, maxsus imkoniyatlar — bitta oq "pill" ichida */}
-        <div className="flex h-12 items-center gap-1 rounded-full border border-mg-border bg-mg-surface px-1.5 shadow-sm">
+        <div className="flex h-12 items-center gap-1 rounded-full border border-mg-border bg-mg-surface px-1.5">
           {!isHome && (
             <button type="button" onClick={() => setSearchOpen(true)} aria-label={`${t(UI.search)} (Ctrl+K)`} title={`${t(UI.search)} (Ctrl+K)`}
               className="flex h-9 w-9 items-center justify-center rounded-full text-mg-primary hover:bg-mg-info">

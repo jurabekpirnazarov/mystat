@@ -61,7 +61,7 @@ class TradeDataGetView(CreateAPIView):
 
         # Trade type filter
         trade_type = data.get('trade_type', 1)
-        filters &= Q(trade_type=trade_type)
+        filters &= Q(trade_type__in=(1, 2)) if trade_type == 3 else Q(trade_type=trade_type)
 
         # Year filter
         years = data.get('years', [2022])
@@ -482,11 +482,11 @@ class TradeDataGetView(CreateAPIView):
 
         # trade type label localized
         if lang == 'ru':
-            trade_type_name = "Экспорт" if trade_type == 1 else "Импорт"
+            trade_type_name = {1: "Экспорт", 2: "Импорт", 3: "Оборот"}[trade_type]
         elif lang == 'cry':
-            trade_type_name = "Экспорт" if trade_type == 1 else "Импорт"
+            trade_type_name = {1: "Экспорт", 2: "Импорт", 3: "Айланма"}[trade_type]
         else:
-            trade_type_name = "Export" if trade_type == 1 else "Import"
+            trade_type_name = {1: "Export", 2: "Import", 3: "Aylanma"}[trade_type]
 
         # Determine periods
         periods = quarters if quarters else months

@@ -21,6 +21,8 @@ export const mg = {
     border: "#E3E8EF",
     sos: "#A855A0",
   },
+  /** TRADEINT_DIZAYN TI-02: oqim ranglari barcha tashqi savdo grafiklarida bir xil (eksport ko'k, import amber, aylanma neytral) */
+  flow: { export: "#0068E0", import: "#D97706", total: "#64748B" },
   radius: { card: 14, tile: 16, sidebar: 25, pill: 9999 },
   gradient: {
     hero: "linear-gradient(65.97deg, #0068E0 33.59%, #00DC82 122.33%)",

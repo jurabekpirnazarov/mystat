@@ -2,17 +2,24 @@ import { useCallback, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import SubscribeButton from "../components/SubscribeButton";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { ArrowDownRight, ArrowUpRight, Download, Globe2, Hash, Layers, TrendingUp, X } from "lucide-react";
+import { ArrowUpRight, Download, Globe2, LayoutGrid, Layers, Table2, TrendingUp, X } from "lucide-react";
 import SavedQueries from "../components/SavedQueries";
 import {
   downloadTradeExport,
   fetchTradeDynamics,
   fetchTradeFlows,
   TRADE_VALUE_UNIT,
-  type TradeFlow,
 } from "../api/tradeFlows";
 import useApi from "../hooks/useApi";
 import TradeFlowMap from "../components/externalTrade/TradeFlowMap";
+import { ServiceAbout, ServiceFaq } from "../components/catalog/ServiceAbout";
+import FlowToggle from "../components/externalTrade/FlowToggle";
+import TradeSearch from "../components/externalTrade/TradeSearch";
+import DataQualityNote from "../components/externalTrade/DataQualityNote";
+import { useFlow } from "../components/externalTrade/useFlow";
+import ResultCard, { ChangeBadge } from "../components/common/ResultCard";
+import { mg } from "../theme/tokens";
+import { FLOW_LABEL } from "../api/tradeFlows";
 import { EmptyState, ErrorState, PageHeader, Skeleton, StatCard } from "../components/ui";
 
 const fmt = (n: number, digits = 1) => new Intl.NumberFormat("uz-UZ", { maximumFractionDigits: digits }).format(n).replace(/,/g, " ");
@@ -21,7 +28,14 @@ const compact = (n: number) => (n >= 1e6 ? `${fmt(n / 1e6)} mlrd` : n >= 1e3 ? `
 /** Tashqi savdo oqimlari: xarita, top-20 hamkor, yillar dinamikasi. Filtrlar URL'da (havolani ulashish mumkin). U-09. */
 export default function TradeFlows() {
   const [params, setParams] = useSearchParams();
-  const flow: TradeFlow = params.get("flow") === "import" ? "import" : "export";
+  const [flow] = useFlow();
+  const [view, setViewState] = useState<"cards" | "table">(() => {
+    try { return localStorage.getItem("trade-flows-view") === "table" ? "table" : "cards"; } catch { return "cards"; }
+  });
+  const setView = (v: "cards" | "table") => {
+    setViewState(v);
+    try { localStorage.setItem("trade-flows-view", v); } catch { /* xotira yopiq */ }
+  };
   const year = Number(params.get("year")) || undefined;
   const hs = (params.get("hs") ?? "").replace(/\D/g, "").slice(0, 6);
   const countryId = Number(params.get("country")) || null;
@@ -29,7 +43,6 @@ export default function TradeFlows() {
   const compareId = Number(params.get("compare")) || null;
   const year2 = Number(params.get("year2")) || null;
   const [exportMsg, setExportMsg] = useState<string | null>(null);
-  const [hsInput, setHsInput] = useState(hs);
 
   const update = useCallback(
     (patch: Record<string, string | number | null | undefined>) => {
@@ -66,11 +79,10 @@ export default function TradeFlows() {
     const second = new Map((dynamics2.data ?? []).map((p) => [p.year, p.value]));
     return (dynamics.data ?? []).map((p) => ({ ...p, value2: second.get(p.year) ?? null }));
   }, [dynamics.data, dynamics2.data]);
-  const flowLabel = flow === "export" ? "Eksport" : "Import";
+  const flowLabel = FLOW_LABEL[flow];
+  const unreliable = (data?.warnings?.length ?? 0) > 0;
+  const flowColor = mg.flow[flow];
   const onSelect = useCallback((id: number | null) => update({ country: id }), [update]);
-
-  const toggle = (active: boolean) =>
-    `px-4 py-2 text-sm font-medium transition ${active ? "bg-blue-600 text-white" : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"}`;
 
   return (
     <div className="py-2">
@@ -91,44 +103,23 @@ export default function TradeFlows() {
 
         {/* Filtrlar */}
         <div className="flex flex-wrap items-center gap-3 mb-6">
-          <div className="inline-flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden bg-white dark:bg-gray-800" role="group" aria-label="Oqim">
-            <button type="button" className={toggle(flow === "export")} aria-pressed={flow === "export"} onClick={() => update({ flow: "export" })}>Eksport</button>
-            <button type="button" className={toggle(flow === "import")} aria-pressed={flow === "import"} onClick={() => update({ flow: "import" })}>Import</button>
-          </div>
+          <FlowToggle value={flow} onChange={(f) => update({ flow: f })} />
+          <TradeSearch flow={flow} className="w-full max-w-md" placeholder="Mahsulot (HS) yoki davlat"
+            onPickProduct={(code) => update({ hs: code.replace(/\D/g, "").slice(0, 6) })}
+            onPickCountry={(id) => update({ country: id })} />
           <select
             aria-label="Yil"
             value={data?.year ?? year ?? ""}
             onChange={(e) => update({ year: e.target.value })}
-            className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm px-3 py-2 text-gray-800 dark:text-gray-100"
+            className="rounded-mg border border-mg-border bg-mg-surface text-sm px-3 py-2 text-mg-text"
           >
             {(data?.years ?? (year ? [year] : [])).slice().reverse().map((y) => <option key={y} value={y}>{y}</option>)}
           </select>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              update({ hs: hsInput.replace(/\D/g, "").slice(0, 6) || null });
-            }}
-            className="flex items-center gap-2"
-          >
-            <label htmlFor="hs" className="sr-only">TN VED kodi</label>
-            <div className="relative">
-              <Hash className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true" />
-              <input
-                id="hs"
-                inputMode="numeric"
-                placeholder="TN VED (2–6 raqam)"
-                value={hsInput}
-                onChange={(e) => setHsInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                className="w-44 pl-8 pr-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-800 dark:text-gray-100"
-              />
-            </div>
-            <button type="submit" className="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700">Qo'llash</button>
-            {hs && (
-              <button type="button" onClick={() => { setHsInput(""); update({ hs: null }); }} className="text-sm text-gray-500 hover:text-gray-700" aria-label="Kodni tozalash">
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </form>
+          {hs && (
+            <button type="button" onClick={() => update({ hs: null })} className="inline-flex items-center gap-1 rounded-full bg-mg-info px-3 py-1 text-sm text-mg-primary">
+              HS {hs} <X className="w-4 h-4" aria-hidden="true" /><span className="sr-only">Kodni tozalash</span>
+            </button>
+          )}
           {data && (
             <span className="text-sm text-gray-500 dark:text-gray-400">
               Davr: {data.year}-yil {data.period_label}
@@ -170,6 +161,7 @@ export default function TradeFlows() {
           <EmptyState icon={Globe2} title="Ma'lumot topilmadi" description="Boshqa yil yoki TN VED kodini tanlab ko'ring." />
         ) : (
           <div className="space-y-6">
+            <DataQualityNote notes={data.warnings ?? []} />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard label={`${flowLabel}, jami`} value={compact(data.total_value)} icon={TrendingUp} hint={TRADE_VALUE_UNIT} />
               <StatCard label="Hamkor davlatlar" value={data.countries_count} icon={Globe2} hint={hs ? `TN VED ${hs}*` : "barcha tovarlar"} />
@@ -196,7 +188,31 @@ export default function TradeFlows() {
 
             <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
               <section className="xl:col-span-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 sm:p-5">
-                <h2 className="font-semibold text-gray-900 dark:text-white mb-3">Top-20 hamkor</h2>
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                  <h2 className="font-semibold text-gray-900 dark:text-white">Top-20 hamkor <span className="text-sm font-normal text-mg-muted">· Topildi: {data.countries_count} ta</span></h2>
+                  <div className="flex items-center gap-2">
+                    {(hs || countryId || year2 || compareId) && (
+                      <button type="button" onClick={() => setParams(new URLSearchParams({ flow }), { replace: true })} className="text-sm text-mg-primary hover:underline">Filtrlarni tozalash</button>
+                    )}
+                    <div role="group" aria-label="Ko'rinish" className="inline-flex rounded-mg border border-mg-border p-0.5">
+                      {([["cards", LayoutGrid, "Kartalar"], ["table", Table2, "Jadval"]] as const).map(([v, Icon, label]) => (
+                        <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)} title={label}
+                          className={`rounded-md p-1.5 ${view === v ? "bg-mg-primary text-white" : "text-mg-text"}`}>
+                          <Icon className="h-4 w-4" aria-hidden="true" /><span className="sr-only">{label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                {view === "cards" ? (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {top.map((c, i) => (
+                      <ResultCard key={c.country_id} variant="country" rank={i + 1} title={c.country_name} flowLabel={flowLabel}
+                        value={fmt(c.value)} unit={TRADE_VALUE_UNIT} share={c.share} changePct={c.change_pct} changeSince="o'tgan yilga nisbatan"
+                        unreliable={unreliable} selected={c.country_id === countryId} onClick={() => onSelect(c.country_id === countryId ? null : c.country_id)} />
+                    ))}
+                  </div>
+                ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
@@ -222,20 +238,13 @@ export default function TradeFlows() {
                           <td className="py-2 pr-2">
                             <div className="flex items-center gap-2">
                               <div className="flex-1 h-1.5 rounded bg-gray-100 dark:bg-gray-700 overflow-hidden">
-                                <div className="h-full bg-blue-600" style={{ width: `${Math.min(100, c.share)}%` }} />
+                                <div className="h-full" style={{ width: `${Math.min(100, c.share)}%`, background: flowColor }} />
                               </div>
                               <span className="w-12 text-right tabular-nums text-gray-600 dark:text-gray-300">{c.share.toFixed(1)}%</span>
                             </div>
                           </td>
                           <td className="py-2 text-right tabular-nums whitespace-nowrap">
-                            {c.change_pct === null ? (
-                              <span className="text-gray-400">—</span>
-                            ) : (
-                              <span className={`inline-flex items-center gap-0.5 ${c.change_pct >= 0 ? "text-emerald-700" : "text-red-600"}`}>
-                                {c.change_pct >= 0 ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
-                                {fmt(Math.abs(c.change_pct))}%
-                              </span>
-                            )}
+                            <ChangeBadge pct={c.change_pct} unreliable={unreliable} />
                           </td>
                           {year2 && (
                             <td className="py-2 pl-2 text-right tabular-nums text-gray-600 dark:text-gray-300 whitespace-nowrap">
@@ -247,6 +256,7 @@ export default function TradeFlows() {
                     </tbody>
                   </table>
                 </div>
+                )}
                 <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Qiymatlar: {TRADE_VALUE_UNIT}. O'zgarish — o'tgan yilning xuddi shu davriga nisbatan.</p>
               </section>
 
@@ -278,7 +288,7 @@ export default function TradeFlows() {
                           formatter={(v: number, key) => [`${fmt(v)} ${TRADE_VALUE_UNIT}`, key === "value2" ? compared?.country_name ?? "Taqqoslash" : selected?.country_name ?? flowLabel]}
                           labelFormatter={(y, payload) => `${y}-yil ${payload?.[0]?.payload?.period_label ?? ""}`}
                         />
-                        <Line type="monotone" dataKey="value" stroke="#2563eb" strokeWidth={2.5} dot={{ r: 3 }} isAnimationActive={false} />
+                        <Line type="monotone" dataKey="value" stroke={flowColor} strokeWidth={2.5} dot={{ r: 3 }} isAnimationActive={false} />
                         {compareId && <Line type="monotone" dataKey="value2" stroke="#f97316" strokeWidth={2.5} dot={{ r: 3 }} isAnimationActive={false} connectNulls />}
                       </LineChart>
                     </ResponsiveContainer>
@@ -291,6 +301,8 @@ export default function TradeFlows() {
             </div>
           </div>
         )}
+        <ServiceAbout number={303} />
+        <ServiceFaq number={303} />
       </div>
     </div>
   );

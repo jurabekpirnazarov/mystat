@@ -1,4 +1,10 @@
-import { ArrowRight, ArrowLeft, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
+import { ArrowRight, ArrowLeft, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
+import FlowToggle from './externalTrade/FlowToggle';
+import { FLOW_LABEL, type TradeFlow } from '../api/tradeFlows';
+
+const FLOW_TO_TYPE: Record<TradeFlow, number> = { export: 1, import: 2, total: 3 };
+const TYPE_TO_FLOW: Record<number, TradeFlow> = { 1: 'export', 2: 'import', 3: 'total' };
+
 import Select from 'react-dropdown-select';
 import Checkbox from '@mui/material/Checkbox';
 import { useState, useRef, useEffect } from 'react';
@@ -234,7 +240,6 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
     sitc4,
     setSitc4,
     // Options data
-    tradeFlowOptions,
     yearOptions,
     onLoadMoreYears,
     onSearchYears,
@@ -330,7 +335,7 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
       </span>
       <div className="flex items-center space-x-2">
         {state.values.length > 0 && (
-          <button 
+          <button
             className="text-gray-400 hover:text-red-500 transition-colors duration-200 p-1 rounded-full hover:bg-red-50"
             onClick={(e) => {
               e.stopPropagation();
@@ -371,8 +376,8 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
         )}
         <div className="p-3 border-b border-gray-200 bg-gray-50">
           <div className="flex justify-between items-center">
-            <button 
-              className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200" 
+            <button
+              className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -381,8 +386,8 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
             >
               Hammasini tanlash
             </button>
-            <button 
-              className="text-sm text-red-600 hover:text-red-800 font-medium transition-colors duration-200" 
+            <button
+              className="text-sm text-red-600 hover:text-red-800 font-medium transition-colors duration-200"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -408,8 +413,8 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    
-                    
+
+
                     let newValues: OptionType[];
                     if (isSelected) {
                       // Remove the item from selection
@@ -418,7 +423,7 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
                       // Add the item to selection
                       newValues = [...state.values, option];
                     }
-                    
+
                     // Call onChange directly
                     props.onChange(newValues);
                     // Don't close dropdown for multi-select to allow multiple selections
@@ -478,8 +483,8 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    
-                    
+
+
                     let newValues: OptionType[];
                     if (isSelected) {
                       // For single select, clear the selection if clicking on selected item
@@ -488,7 +493,7 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
                       // Add the item to selection (replace previous selection)
                       newValues = [option];
                     }
-                    
+
                     // Call onChange directly
                     props.onChange(newValues);
                     // For single select, close dropdown only when selecting (not deselecting)
@@ -548,7 +553,7 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
         <div className="bg-mg-info/60 rounded-xl p-6 border border-blue-200">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Tahlil parametrlarini sozlash</h2>
           <p className="text-gray-600 text-sm">
-            Quyidagi parametrlarni tanlab, tashqi savdo ma'lumotlarini tahlil qiling. 
+            Quyidagi parametrlarni tanlab, tashqi savdo ma'lumotlarini tahlil qiling.
             Barcha maydonlar ixtiyoriy, faqat kerakli ma'lumotlarni tanlang.
           </p>
         </div>
@@ -556,7 +561,7 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
 
       {/* Main Options */}
       <div className="bg-white rounded-xl shadow-lg border border-gray-200">
-        <div 
+        <div
           className="p-6 cursor-pointer border-b border-gray-200 hover:bg-gray-50 transition-colors duration-200"
           onClick={() => setIsMainOptionsExpanded(!isMainOptionsExpanded)}
         >
@@ -577,7 +582,7 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
             )}
           </div>
         </div>
-        
+
         {isMainOptionsExpanded && (
           <div className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -586,12 +591,10 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
                   Savdo turi <span className="text-red-500">*</span>
                 </label>
                 <p className="text-xs text-gray-500 mb-2">Qaysi turdagi savdo ma'lumotlarini ko'rmoqchisiz?</p>
-                <Select
-                  options={tradeFlowOptions}
-                  values={tradeFlows}
-                  onChange={onTradeFlowChange || setTradeFlows}
-                  placeholder="Eksport yoki Import tanlang"
-                  {...multiSelectProps}
+                {/* TI-02: Eksport · Import · Aylanma (backend trade_type 1 / 2 / 3) */}
+                <FlowToggle
+                  value={TYPE_TO_FLOW[Number(tradeFlows[0]?.value)] ?? 'export'}
+                  onChange={(f) => (onTradeFlowChange || setTradeFlows)([{ value: FLOW_TO_TYPE[f], label: FLOW_LABEL[f] }])}
                 />
               </div>
 
@@ -615,7 +618,7 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
               <p className="text-xs text-yellow-700 mb-3">
                 Qaysi vaqt davri uchun ma'lumot kerak? Kerakli davrlarni belgilang va tanlang.
               </p>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -702,7 +705,7 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
 
       {/* Additional Options */}
       <div className="bg-white rounded-xl shadow-lg border border-gray-200">
-        <div 
+        <div
           className="p-6 cursor-pointer border-b border-gray-200 hover:bg-gray-50 transition-colors duration-200"
           onClick={() => setIsAdditionalOptionsExpanded(!isAdditionalOptionsExpanded)}
         >
@@ -723,7 +726,7 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
             )}
           </div>
         </div>
-        
+
         {isAdditionalOptionsExpanded && (
           <div className="p-6 space-y-6">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -731,7 +734,7 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
               <p className="text-xs text-blue-700 mb-4">
                 Alohida davlatlar yoki davlatlar guruhini tanlashingiz mumkin. Agar hech narsa tanlamasangiz, barcha davlatlar bo'yicha ma'lumot ko'rsatiladi.
               </p>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700">
@@ -796,7 +799,7 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
 
       {/* Commodity Classification */}
       <div className="bg-white rounded-xl shadow-lg border border-gray-200">
-        <div 
+        <div
           className="p-6 cursor-pointer border-b border-gray-200 hover:bg-gray-50 transition-colors duration-200"
           onClick={() => setIsCommodityClassExpanded(!isCommodityClassExpanded)}
         >
@@ -817,7 +820,7 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
             )}
           </div>
         </div>
-        
+
         {isCommodityClassExpanded && (
           <div className="p-6">
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
@@ -833,7 +836,7 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
 
             {/* HS Classification */}
             <div className="mb-8">
-              <div 
+              <div
                 className="flex items-center justify-between cursor-pointer p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200"
                 onClick={() => setIsHsExpanded(!isHsExpanded)}
               >
@@ -852,15 +855,15 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
                   <ChevronDown className="w-5 h-5 text-blue-600" />
                 )}
               </div>
-              
+
               {isHsExpanded && (
                 <div className="mt-4 space-y-4">
                   <div className="bg-white border border-blue-200 rounded-lg p-4">
                     <p className="text-sm text-gray-600 mb-4">
-                      <strong>HS kodlar:</strong> 2 raqamli (umumiy kategoriya) dan 6 raqamli (aniq mahsulot) gacha bo'ladi. 
+                      <strong>HS kodlar:</strong> 2 raqamli (umumiy kategoriya) dan 6 raqamli (aniq mahsulot) gacha bo'ladi.
                       Qanchalik ko'p raqam bo'lsa, shunchalik aniq ma'lumot olasiz.
                     </p>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
@@ -976,7 +979,7 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
 
             {/* SITC Classification */}
             <div>
-              <div 
+              <div
                 className="flex items-center justify-between cursor-pointer p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors duration-200"
                 onClick={() => setIsSitcExpanded(!isSitcExpanded)}
               >
@@ -995,15 +998,15 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
                   <ChevronDown className="w-5 h-5 text-green-700" />
                 )}
               </div>
-              
+
               {isSitcExpanded && (
                 <div className="mt-4 space-y-4">
                   <div className="bg-white border border-green-200 rounded-lg p-4">
                     <p className="text-sm text-gray-600 mb-4">
-                      <strong>SITC kodlar:</strong> Statistik tahlil uchun maxsus klassifikatsiya. 
+                      <strong>SITC kodlar:</strong> Statistik tahlil uchun maxsus klassifikatsiya.
                       Odatda ixtisoslashgan tahlillar uchun ishlatiladi.
                     </p>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
@@ -1188,13 +1191,13 @@ const CustomCountrySelect: React.FC<{
   placeholder: string;
   onSearch?: (query: string) => void;
   onSelectAll?: () => void;
-}> = ({ 
-  options, 
-  selectedValues, 
-  onChange, 
-  onLoadMore, 
-  loading, 
-  hasMore, 
+}> = ({
+  options,
+  selectedValues,
+  onChange,
+  onLoadMore,
+  loading,
+  hasMore,
   placeholder,
   onSearch,
   onSelectAll
@@ -1248,10 +1251,10 @@ const CustomCountrySelect: React.FC<{
     onChange([]);
   };
 
-  const displayText = selectedValues.length === 0 
-    ? placeholder 
-    : selectedValues.length === 1 
-      ? selectedValues[0].label 
+  const displayText = selectedValues.length === 0
+    ? placeholder
+    : selectedValues.length === 1
+      ? selectedValues[0].label
       : `${selectedValues.length} ta element tanlandi`;
 
   return (
@@ -1319,7 +1322,7 @@ const CustomCountrySelect: React.FC<{
           </div>
 
           {/* Options */}
-          <div 
+          <div
             className="max-h-64 overflow-y-auto"
             onScroll={handleScroll}
           >
@@ -1344,8 +1347,8 @@ const CustomCountrySelect: React.FC<{
                     >
                       <div className="flex-shrink-0">
                         <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
-                          isSelected 
-                            ? 'bg-blue-600 border-blue-600' 
+                          isSelected
+                            ? 'bg-blue-600 border-blue-600'
                             : 'border-gray-300 hover:border-blue-400'
                         }`}>
                           {isSelected && (
@@ -1361,7 +1364,7 @@ const CustomCountrySelect: React.FC<{
                     </div>
                   );
                 })}
-                
+
                 {loading && (
                   <div className="p-4 text-center text-gray-500 border-t border-gray-200">
                     <RefreshCw className="w-5 h-5 animate-spin inline mr-2" />

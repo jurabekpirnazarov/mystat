@@ -1,7 +1,8 @@
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { CheckCircle2, Clock, Star } from "lucide-react";
 import type { ServiceShortStats } from "../../api/portal";
-import type { ServiceCatalogItem } from "../../config/serviceCatalog";
+import type { Access, ServiceCatalogItem } from "../../config/serviceCatalog";
 import { sphereById } from "../../config/spheres";
 import { useLang } from "../../i18n/LangContext";
 import { UI } from "../../i18n/ui";
@@ -12,7 +13,19 @@ import { compactNumber } from "./useServiceStats";
  * my.gov.uz xizmat kartochkasi (MG-00, soha va qidiruv sahifalari): o'ng yuqorida `#raqam`, chapda doira ichida ikonka,
  * nom, pastida reyting · foydalanish soni · bajarish vaqti, o'ng pastda yulduzcha.
  */
-export default function ServiceCard({ s, stats }: { s: ServiceCatalogItem; stats?: ServiceShortStats }) {
+const ACCESS_BADGE: Record<Access, { uz: string; ru: string }> = {
+  open: { uz: "Bepul", ru: "Бесплатно" },
+  login: { uz: "Login", ru: "Вход" },
+  package: { uz: "Paket", ru: "Пакет" },
+  priced: { uz: "Pullik", ru: "Платно" },
+  credits: { uz: "StatCoin", ru: "StatCoin" },
+};
+
+/**
+ * `rich` (TRADEINT_DIZAYN TI-05): kengaytirilgan karta — bir jumlalik tavsif, kirish turi belgisi ("Bepul/Login/Paket")
+ * va real ma'lumotdan kichik prevyu (`preview`). Oddiy ro'yxat kartasi bilan bir komponent.
+ */
+export default function ServiceCard({ s, stats, rich, preview }: { s: ServiceCatalogItem; stats?: ServiceShortStats; rich?: boolean; preview?: ReactNode }) {
   const { t } = useLang();
   const sphere = sphereById(s.sphere)!;
   const Icon = s.icon;
@@ -20,10 +33,10 @@ export default function ServiceCard({ s, stats }: { s: ServiceCatalogItem; stats
   const body = (
     <>
       <span className="absolute right-3 top-2 text-xs text-mg-muted">#{s.number}</span>
-      <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-mg-border ${sphere.tint}`}>
+      <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-mg-border ${rich ? "mt-4" : ""} ${sphere.tint}`}>
         <Icon className="h-6 w-6" aria-hidden="true" />
       </span>
-      <span className="min-w-0 flex-1 py-3 pr-6">
+      <span className={`min-w-0 flex-1 pr-6 ${rich ? "py-4" : "py-3"}`}>
         {soon
           ? <span className="block text-[15px] font-semibold leading-snug text-black dark:text-white">{t(s.title)}</span>
           : (
@@ -48,6 +61,13 @@ export default function ServiceCard({ s, stats }: { s: ServiceCatalogItem; stats
             <Clock className="h-3.5 w-3.5 text-mg-muted" aria-hidden="true" />{t(s.duration)}
           </span>
         </span>
+        {rich && (
+          <>
+            <span className="mt-2 block text-[13px] leading-snug text-mg-text">{t(s.description)}</span>
+            {preview && <span className="mt-3 block">{preview}</span>}
+            <span className="mt-3 inline-block rounded-full bg-mg-info px-2.5 py-0.5 text-[11px] font-semibold text-mg-primary">{t(ACCESS_BADGE[s.access])}</span>
+          </>
+        )}
       </span>
       <span className="absolute bottom-2 right-2 z-10">
         <FavoriteServiceButton number={s.number} title={t(s.title)} />
@@ -55,7 +75,7 @@ export default function ServiceCard({ s, stats }: { s: ServiceCatalogItem; stats
     </>
   );
   return (
-    <div className={`group relative flex min-h-[118px] items-center gap-4 rounded-mg border border-mg-border bg-mg-surface px-4 py-2 transition hover:border-mg-primary/40 hover:shadow-sm ${soon ? "opacity-80" : ""}`}>
+    <div className={`group relative flex ${rich ? "items-start" : "min-h-[118px] items-center"} gap-4 rounded-mg border border-mg-border bg-mg-surface px-4 py-2 transition hover:border-mg-primary/40 hover:shadow-sm ${soon ? "opacity-80" : ""}`}>
       {body}
     </div>
   );

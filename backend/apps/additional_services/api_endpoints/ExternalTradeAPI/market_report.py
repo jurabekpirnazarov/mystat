@@ -63,7 +63,9 @@ def _period_stats(base, year, month, by_country):
         # qiymat ming AQSh $ (OS-10) -> AQSh $ / tonna
         entry[f"{flow}_price"] = round(_f(agg["tonne_value"]) * 1000 / tonnes, 1) if tonnes else None
         entry[f"{flow}_price_coverage"] = round(_f(agg["tonne_value"]) / value * 100, 1) if value else None
-        rows = qs.values("country_id", "country__name_uz", "country__ctrana").annotate(total=Sum("value"))
+        rows = (qs.values("country_id", "country__name_uz", "country__ctrana")
+                .annotate(total=Sum("value"), t_qty=Sum("quantity", filter=Q(unit__code=TONNE_UNIT_CODE)),
+                          t_val=Sum("value", filter=Q(unit__code=TONNE_UNIT_CODE))))
         by_country[(year, month, flow)] = {r["country_id"]: {**r, "value": r["total"]} for r in rows}
     entry["balance"] = entry["export_value"] - entry["import_value"]
     return entry
@@ -96,9 +98,12 @@ def build_market_report(hs):
         out = []
         for r in rows[:limit]:
             p = _f(prev_rows.get(r["country_id"], {}).get("value"))
+            # TI-07/TI-08: davlat bo'yicha o'rtacha narx, USD/kg. Qiymat ming $, og'irlik tonna -> (ming $)/tonna = $/kg
+            price = round(_f(r["t_val"]) / _f(r["t_qty"]), 3) if _f(r["t_qty"]) else None
             out.append({"country_id": r["country_id"], "country": r["country__name_uz"], "value": _f(r["value"]),
                         "share": round(_f(r["value"]) / total * 100, 1) if total else 0,
-                        "change_pct": round((_f(r["value"]) - p) / p * 100, 1) if p else None})
+                        "change_pct": round((_f(r["value"]) - p) / p * 100, 1) if p else None,
+                        "price_kg": price})
         return out
 
     export_rows = [r for r in by_country[(*last_key, "export")].values() if r["country__ctrana"] != OTHER_COUNTRIES_CODE]
@@ -151,8 +156,14 @@ class MarketReportAPIView(APIView):
         if len(hs) < 2:
             return Response({"detail": "HS kodi kamida 2 raqam bo'lishi kerak."}, status=400)
         full = request.query_params.get("full") in ("1", "true")
+        # TI-06: namuna hisobot — login va limitsiz, faqat bitta (avtomatik tanlangan) HS kodi uchun to'liq versiya
+        sample = request.query_params.get("sample") in ("1", "true")
+        if sample:
+            from .trade_hub import sample_hs
+            hs = sample_hs() or hs
+            full = True
         usage = None
-        if full:
+        if full and not sample:
             if not request.user.is_authenticated:
                 raise NotAuthenticated("To'liq hisobot uchun tizimga kiring.")
             usage = consume(request.user, MARKET_REPORT_SLUG, {"hs": hs}, once_per_day=True)
@@ -173,7 +184,11 @@ class MarketReportAPIView(APIView):
             result.pop("shrinking_markets")
             result["concentration"] = None
         result["full"] = full
+        result["sample"] = sample
         result["usage"] = public_usage(usage)
+        from .trade_hub import data_quality
+        quality = data_quality()
+        result["quality_notes"] = [quality[y["year"]] for y in data["dynamics"] if y["year"] in quality]
         return Response(result)
 
 

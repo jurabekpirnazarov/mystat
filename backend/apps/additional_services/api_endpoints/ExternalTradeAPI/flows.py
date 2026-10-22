@@ -15,6 +15,8 @@ from apps.additional_services.models.ex_trade import TradeData
 
 CACHE_SECONDS = 60 * 60
 FLOWS = {"export": 1, "import": 2}
+# TI-02: "aylanma" = eksport + import (TRADEINT_DIZAYN.md). FLOWS ni market_report ikkala oqimni aylanib chiqish uchun ishlatadi
+FLOW_CODES = {"export": [1], "import": [2], "total": [1, 2]}
 # "Boshqa davlatlar" agregat yozuvi — reytingga kiritilmaydi, alohida qaytariladi
 OTHER_COUNTRIES_CODE = "999"
 MONTH_LABELS = ["yanvar", "fevral", "mart", "aprel", "may", "iyun", "iyul", "avgust", "sentabr", "oktabr", "noyabr", "dekabr"]
@@ -41,7 +43,7 @@ def period_label(month_code):
 
 
 def _totals_by_country(year, month, flow, hs):
-    qs = TradeData.objects.filter(year_id=year, month=month, trade_type=FLOWS[flow])
+    qs = TradeData.objects.filter(year_id=year, month=month, trade_type__in=FLOW_CODES[flow])
     if hs:
         qs = qs.filter(product__code__startswith=hs)
     return {
@@ -52,7 +54,7 @@ def _totals_by_country(year, month, flow, hs):
 
 
 class TradeFlowsAPIView(APIView):
-    """GET external-trade/trade-flows/?year=2025&flow=export|import&hs=52&limit=20
+    """GET external-trade/trade-flows/?year=2025&flow=export|import|total&hs=52&limit=20
 
     Javob: davr, jami qiymat va davlatlar (ulush, o'tgan yilning shu davriga nisbatan o'zgarish)."""
     permission_classes = [AllowAny]
@@ -63,8 +65,8 @@ class TradeFlowsAPIView(APIView):
             return Response({"years": [], "countries": []})
 
         flow = request.query_params.get("flow", "export")
-        if flow not in FLOWS:
-            return Response({"detail": "flow: export yoki import"}, status=400)
+        if flow not in FLOW_CODES:
+            return Response({"detail": "flow: export, import yoki total"}, status=400)
         try:
             year = int(request.query_params.get("year") or max(periods))
             limit = max(1, min(int(request.query_params.get("limit") or 20), 300))
@@ -112,10 +114,15 @@ class TradeFlowsAPIView(APIView):
                 "prev_value": float(prev) if prev is not None else None,
                 "change_pct": float((value - prev) / prev * 100) if prev else None,
             })
+        from .trade_hub import data_quality
+        quality = data_quality()
+        # Taqqoslash ishonchsiz bo'lgan yillar: tanlangan yil yoki o'tgan yil ma'lumoti to'liq emas
+        warnings = [quality[y] for y in (year, prev_year) if y in quality]
         return {
             "year": year,
             "flow": flow,
             "hs": hs or None,
+            "warnings": warnings,
             "period": month,
             "period_label": period_label(month),
             "total_value": float(total),
@@ -132,8 +139,8 @@ class TradeFlowDynamicsAPIView(APIView):
 
     def get(self, request):
         flow = request.query_params.get("flow", "export")
-        if flow not in FLOWS:
-            return Response({"detail": "flow: export yoki import"}, status=400)
+        if flow not in FLOW_CODES:
+            return Response({"detail": "flow: export, import yoki total"}, status=400)
         country = request.query_params.get("country")
         if country and not country.isdigit():
             return Response({"detail": "country — davlat id"}, status=400)
@@ -143,7 +150,7 @@ class TradeFlowDynamicsAPIView(APIView):
         if data is None:
             data = []
             for year, month in latest_periods().items():
-                qs = TradeData.objects.filter(year_id=year, month=month, trade_type=FLOWS[flow])
+                qs = TradeData.objects.filter(year_id=year, month=month, trade_type__in=FLOW_CODES[flow])
                 if country:
                     qs = qs.filter(country_id=int(country))
                 value = qs.aggregate(v=Sum("value"))["v"] or 0
@@ -171,8 +178,8 @@ class TradeFlowsExportAPIView(APIView):
 
         periods = latest_periods()
         flow = request.query_params.get("flow", "export")
-        if flow not in FLOWS or not periods:
-            return Response({"detail": "flow: export yoki import"}, status=400)
+        if flow not in FLOW_CODES or not periods:
+            return Response({"detail": "flow: export, import yoki total"}, status=400)
         try:
             year = int(request.query_params.get("year") or max(periods))
         except ValueError:
@@ -181,7 +188,7 @@ class TradeFlowsExportAPIView(APIView):
             return Response({"detail": f"{year}-yil uchun ma'lumot yo'q"}, status=404)
         hs = "".join(ch for ch in (request.query_params.get("hs") or "") if ch.isdigit())[:6]
         detail = request.query_params.get("detail", "country")
-        qs = TradeData.objects.filter(year_id=year, month=periods[year], trade_type=FLOWS[flow])
+        qs = TradeData.objects.filter(year_id=year, month=periods[year], trade_type__in=FLOW_CODES[flow])
         if hs:
             qs = qs.filter(product__code__startswith=hs)
         if detail == "hs4":

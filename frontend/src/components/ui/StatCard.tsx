@@ -22,7 +22,7 @@ export default function StatCard({ label, value, icon: Icon, change, hint, trend
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{label}</p>
-          <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
+          <p className="mt-1 whitespace-nowrap text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
         </div>
         {Icon && (
           <div className="w-10 h-10 shrink-0 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">

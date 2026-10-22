@@ -6,6 +6,7 @@ from apps.additional_services.api_endpoints.ExternalTradeAPI.flows import (
     TradeFlowDynamicsAPIView, TradeFlowsAPIView, TradeFlowsExportAPIView,
 )
 
+from .trade_hub import TradeSearchAPIView, TradeSummaryAPIView
 from .views import (
     CountryGroupViewSet, CountryViewSet, TradeDataExportView, TradeDataGetDataView, UnitViewSet, RegionViewSet,
     SITCViewSet, YearViewSet, ProductViewSet, TradeDataViewSet
@@ -25,6 +26,8 @@ router.register(r'products', ProductViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('trade-data/', TradeDataGetView.as_view(), name='trade-data-list'),
+    path('summary/', TradeSummaryAPIView.as_view(), name='trade-summary'),
+    path('search/', TradeSearchAPIView.as_view(), name='trade-search'),
     path('trade-flows/', TradeFlowsAPIView.as_view(), name='trade-flows'),
     path('trade-flows/dynamics/', TradeFlowDynamicsAPIView.as_view(), name='trade-flows-dynamics'),
     path('trade-flows/export/', TradeFlowsExportAPIView.as_view(), name='trade-flows-export'),

@@ -23,6 +23,8 @@ export interface MarketCountry {
   value: number;
   share: number;
   change_pct: number | null;
+  /** O'rtacha narx, USD/kg (faqat tonnada o'lchangan yozuvlardan) */
+  price_kg?: number | null;
 }
 
 export interface MarketReport {
@@ -42,6 +44,9 @@ export interface MarketReport {
   growing_markets?: { country: string; value: number; prev_value: number; change_pct: number }[];
   shrinking_markets?: { country: string; value: number; prev_value: number; change_pct: number }[];
   notes: string[];
+  /** Ma'lumot to'liq bo'lmagan yillar haqida (backend `data_quality`) */
+  quality_notes?: string[];
+  sample?: boolean;
   full: boolean;
   usage: LimitUsage | null;
 }
@@ -54,6 +59,10 @@ export interface HsOption {
 
 export const fetchMarketReport = async (hs: string, full = false) =>
   (await axiosT.get<MarketReport>("/additional-services/market-report/", { params: { hs, ...(full ? { full: 1 } : {}) } })).data;
+
+/** TI-06: namuna hisobot — login va limitsiz, backend o'zi HS kodini tanlaydi */
+export const fetchSampleReport = async () =>
+  (await axiosT.get<MarketReport>("/additional-services/market-report/", { params: { sample: 1 } })).data;
 
 export const searchHs = async (q: string) =>
   (await axiosT.get<HsOption[]>("/additional-services/hs-search/", { params: { q } })).data;

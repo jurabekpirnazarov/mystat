@@ -9,6 +9,7 @@ import RatingModal from '../components/modals/RatingModal';
 import { createRating } from '../api/rating';
 import type { ApiTradeData, HeaderItem, TradeDataItem } from '../components/ServiceResultsStep';
 import { useLang } from '../i18n/LangContext';
+import TradeHub from '../components/externalTrade/TradeHub';
 
 /** trade-data/ POST so'rovi: filtr ro'yxatlari va bir nechta skalyar maydon */
 type TradeQueryPayload = { [key: string]: (string | number)[] | string | number | undefined } & {
@@ -199,7 +200,7 @@ const ExternalTrade = () => {
     // Check if global is selected or countries are selected
     const hasGlobal = newCountries.some(c => c.value === 'global');
     const hasSpecificCountries = newCountries.some(c => c.value !== 'global');
-    
+
     if (hasSpecificCountries && !hasGlobal) {
       // Clear country groups when specific individual countries are selected
       setCountryGroups([]);
@@ -211,6 +212,7 @@ const ExternalTrade = () => {
     // { value: 'Reexport', label: 'Qayta eksport' },
     { value: 1, label: 'Eksport' },
     { value: 2, label: 'Import' },
+    { value: 3, label: 'Aylanma' },
     // { value: 'Domestic Export', label: 'Ichki eksport' },
     // { value: 'Trade Turnover', label: 'Savdo aylanmasi' },
     // { value: 'Balance', label: 'Balans' },
@@ -1057,29 +1059,29 @@ const ExternalTrade = () => {
 
       // Generate group_by based on available filters
       const groupByOptions = [];
-      
+
       // Determine if countries is global
       const isGlobal = payload.countries.includes('global');
-      
+
       // Add region if available
       if (payload.regions && payload.regions.length > 0) {
         groupByOptions.push('region');
       }
-      
+
       // Add country or country_group based on what's available and global status
       if (!isGlobal && payload.countries && payload.countries.length > 0) {
         groupByOptions.push('country');
       } else if (isGlobal && payload.country_groups && payload.country_groups.length > 0) {
         groupByOptions.push('country_group');
       }
-      
+
       // Add HS or SITC based on what's available
       if (hasHsCodes && !hasSitcCodes) {
         groupByOptions.push('hs');
       } else if (hasSitcCodes && !hasHsCodes) {
         groupByOptions.push('sitc');
       }
-      
+
       // Only add group_by if there are options
       if (groupByOptions.length > 0) {
         payload.group_by = groupByOptions;
@@ -1093,7 +1095,7 @@ const ExternalTrade = () => {
       if (response.success && response.data) {
         // Store the complete API response with metadata
         setApiTradeData(applyMeasurement(response, String(measurementUnit[0]?.value ?? 'thousand')));
-        
+
       } else {
         // Fallback for other formats
         console.warn('Unexpected API response format:', response);
@@ -1160,7 +1162,7 @@ const ExternalTrade = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     // Show rating after download
     setTimeout(() => {
       setShowRatingModal(true);
@@ -1200,6 +1202,9 @@ const ExternalTrade = () => {
             </div>
           </div>
         </div> */}
+
+        {/* TRADEINT_DIZAYN: sahifa boshi — qidiruv, raqamlar, grafiklar (faqat birinchi qadamda) */}
+        {currentStep === 'info' && <div className="mb-8"><TradeHub /></div>}
 
         {/* Steps Navigation */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -1413,7 +1418,7 @@ const ExternalTrade = () => {
           />
         )}
       </div>
-      
+
       <RatingModal
         isOpen={showRatingModal}
         onClose={() => setShowRatingModal(false)}

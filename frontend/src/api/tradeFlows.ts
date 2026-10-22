@@ -1,6 +1,9 @@
 import axiosT from "./baseUrl";
 
-export type TradeFlow = "export" | "import";
+/** `total` — aylanma (eksport + import), TI-02 */
+export type TradeFlow = "export" | "import" | "total";
+
+export const FLOW_LABEL: Record<TradeFlow, string> = { export: "Eksport", import: "Import", total: "Aylanma" };
 
 /** Bazadagi TradeData.value birligi. Statistika qo'mitasi tashqi savdoni odatda ming AQSh dollarida beradi —
  *  egasi tomonidan tasdiqlanishi kerak (ISH_REJASI.md, OS-10). */
@@ -27,6 +30,8 @@ export interface TradeFlowsResponse {
   total_value: number;
   other_countries_value: number;
   countries_count: number;
+  /** Ma'lumot sifati haqida ogohlantirishlar (taqqoslangan yillar to'liq bo'lmasa) */
+  warnings?: string[];
   years: number[];
   countries: TradeFlowCountry[];
 }

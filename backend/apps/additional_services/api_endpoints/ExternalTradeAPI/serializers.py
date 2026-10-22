@@ -163,7 +163,7 @@ class TradeDataGetDataSerializer(serializers.Serializer):
     )
     
     trade_type = serializers.ChoiceField(
-        choices=[(1, 'Export'), (2, 'Import')], 
+        choices=[(1, 'Export'), (2, 'Import'), (3, 'Turnover')],  # 3 = aylanma (eksport + import), TI-02
         default=1
     )
     

@@ -25,6 +25,9 @@ import toast from 'react-hot-toast';
 import { getServiceInfo } from '../api/serviceInfo';
 import type { ServiceInfoData, ServiceReview } from '../api/serviceInfo';
 
+/** Mijozlar fikrlari: dastlab faqat 2 tasi, qolgani tugma bilan */
+const REVIEWS_PREVIEW = 2;
+
 interface ExpandableItemProps {
   icon: React.ReactNode;
   title: string;
@@ -83,6 +86,7 @@ interface BookStep1Props {
 const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [liked, setLiked] = useState(false);
+  const [showAllReviews, setShowAllReviews] = useState(false);
   const [serviceData, setServiceData] = useState<ServiceInfoData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -355,7 +359,7 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
               {/* Individual Reviews */}
               <div className="space-y-6">
                 {serviceData.reviews && serviceData.reviews.length > 0 ? (
-                  serviceData.reviews.map((review: ServiceReview, index: number) => (
+                  (showAllReviews ? serviceData.reviews : serviceData.reviews.slice(0, REVIEWS_PREVIEW)).map((review: ServiceReview, index: number) => (
                     <div key={index} className="border-l-4 border-blue-400 pl-4 bg-gradient-to-r from-blue-50 to-transparent p-4 rounded-r-lg transition-all duration-400 hover:shadow-md hover:border-l-8 hover:pl-6 transform hover:translate-x-2">
                       <div className="flex items-center gap-3 mb-2">
                         <div className="w-8 h-8 bg-mg-primary-light rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:rotate-12">
@@ -382,6 +386,17 @@ const IndustryStep1: React.FC<BookStep1Props> = ({ onNext, serviceId }) => {
                     <p className="text-gray-500">Hozircha hech qanday sharh yo'q</p>
                     <p className="text-sm text-gray-400 mt-1">Birinchi bo'lib fikr bildiring!</p>
                   </div>
+                )}
+                {serviceData.reviews && serviceData.reviews.length > REVIEWS_PREVIEW && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllReviews((v) => !v)}
+                    aria-expanded={showAllReviews}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-mg-border bg-white px-4 py-3 text-sm font-semibold text-mg-primary transition hover:bg-mg-info"
+                  >
+                    {showAllReviews ? "Kamroq ko'rsatish" : `Barcha fikrlarni ko'rish (${serviceData.reviews.length})`}
+                    <ChevronDown className={`h-4 w-4 transition-transform ${showAllReviews ? 'rotate-180' : ''}`} aria-hidden="true" />
+                  </button>
                 )}
               </div>
             </div>

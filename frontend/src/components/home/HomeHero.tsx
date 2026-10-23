@@ -61,6 +61,21 @@ export default function HomeHero({ showTiles = true }: { showTiles?: boolean }) 
           <button type="submit" className="h-9 shrink-0 rounded-lg bg-[rgb(var(--ds-accent))] px-4 text-sm font-semibold text-[rgb(24_33_47)] transition hover:brightness-95">{t({ uz: "Izlash", ru: "Найти" })}</button>
         </form>
       </div>
+      {!showTiles && (
+        <nav aria-label={t({ uz: "Asosiy xizmatlar", ru: "Основные услуги" })} className="relative mt-4 pr-4 sm:pr-6">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-[rgb(var(--ds-on-panel-muted))]">{t({ uz: "Asosiy xizmatlar", ru: "Основные услуги" })}</p>
+          <ul className="flex flex-wrap gap-2">
+            {POPULAR.slice(0, 8).map((s) => (
+              <li key={s.number}>
+                <Link to={`/service/${s.number}`}
+                  className="inline-flex h-9 items-center rounded-full border border-[rgb(var(--ds-panel-line))] bg-mg-surface px-4 text-sm font-medium text-[rgb(var(--ds-on-panel))] transition hover:border-[rgb(var(--ds-brand))] hover:bg-[rgb(var(--ds-brand))] hover:text-white">
+                  {t(SHORT[s.number] ?? s.title)}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
       {showTiles && (
       <div className="relative mt-6">
         <ul ref={rail} aria-label={t(UI.popular)}

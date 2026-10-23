@@ -85,7 +85,7 @@ export default function HomeMap({ region, indicator, onIndicator, onRegion }: {
 
   return (
     <section ref={box} aria-label={t({ uz: "O'zbekiston kartasi", ru: "Карта Узбекистана" })}
-      className="relative flex h-full min-h-[360px] flex-col overflow-hidden rounded-[12px] border border-[rgb(var(--ds-panel-line))] bg-[rgb(var(--ds-panel))] p-5">
+      className="relative flex h-full min-h-[320px] flex-col overflow-hidden rounded-[12px] border border-[rgb(var(--ds-panel-line))] bg-[rgb(var(--ds-panel))] p-5">
       <div className="relative flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-[rgb(var(--ds-on-panel-muted))]">{t({ uz: "Hududlar kesimida", ru: "По регионам" })}</p>

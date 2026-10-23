@@ -5,20 +5,20 @@
  */
 :root {
   --ds-ink: 17 24 39;
-  --ds-brand: 31 41 55;
+  --ds-brand: 17 43 82;
   --ds-on-brand: 255 255 255;
   --ds-on-brand-muted: 209 213 219;
-  --ds-primary: 21 94 239;
-  --ds-primary-hover: 15 75 200;
-  --ds-primary-soft: 232 237 245;
+  --ds-primary: 0 94 184;
+  --ds-primary-hover: 0 74 148;
+  --ds-primary-soft: 230 240 250;
   --ds-on-primary: 255 255 255;
-  --ds-accent: 240 161 74;
-  --ds-accent-strong: 192 122 42;
-  --ds-bg: 245 247 251;
-  --ds-surface: 252 253 254;
-  --ds-border: 228 231 236;
-  --ds-text: 23 43 77;
-  --ds-text-muted: 102 112 133;
+  --ds-accent: 242 178 52;
+  --ds-accent-strong: 156 100 8;
+  --ds-bg: 245 247 250;
+  --ds-surface: 255 255 255;
+  --ds-border: 223 229 237;
+  --ds-text: 22 32 48;
+  --ds-text-muted: 92 105 125;
   --ds-success: 11 122 99;
   --ds-success-bg: 230 247 243;
   --ds-warning: 138 83 0;
@@ -28,13 +28,13 @@
   --ds-info: 10 95 180;
   --ds-info-bg: 231 241 251;
   --ds-new: 211 47 47;
-  --ds-focus: 21 94 239;
+  --ds-focus: 0 94 184;
 
   /* Och kulrang panellar (sidebar, hero, ob-havo): ustidagi matn to'q */
-  --ds-panel: 221 226 233;
-  --ds-panel-line: 195 202 212;
-  --ds-on-panel: 23 43 77;
-  --ds-on-panel-muted: 77 89 110;
+  --ds-panel: 232 238 245;
+  --ds-panel-line: 203 212 225;
+  --ds-on-panel: 22 32 48;
+  --ds-on-panel-muted: 70 84 106;
 
   /* Ma'lumot seriyalari (3.1): eksport ko'k, import to'q sariq, aylanma neytral */
   --ds-series-export: 37 99 235;

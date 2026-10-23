@@ -1,39 +1,36 @@
 import { Link } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { SPHERES } from "../../config/spheres";
 import { featuredOfSphere } from "../../config/serviceCatalog";
 import { useLang } from "../../i18n/LangContext";
-import { UI } from "../../i18n/ui";
 
 /**
- * MG-05: "Sohalar" to'ri — har kartochkada soha nomi, 2 ta xizmat (nuqtali ro'yxat), "› Barchasi" va o'ng pastda
- * och doira ichidagi soha ikonkasi (MG-00 dagi my.gov.uz kartochkasi).
+ * Ixcham "Sohalar" to'ri: kartochka tepasida ikonka-belgi va soha nomi (butun sarlavha havola, strelka bilan),
+ * ostida 2 ta xizmat nozik chiziqlar bilan ajratilgan qatorlarda. Hover'da kartochka chegarasi va ikonka brend rangiga o'tadi.
  */
 export default function SpheresGrid() {
   const { t } = useLang();
   return (
-    <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
       {SPHERES.map((sp) => {
         const Icon = sp.icon;
         return (
-          <article key={sp.id} className="relative flex min-h-[260px] flex-col rounded-mg bg-mg-surface p-5">
-            <h3 className="mb-4 text-[22px] font-bold leading-[30px] text-black dark:text-white">
-              <Link to={`/spheres/${sp.id}`} className="hover:text-mg-primary">{t(sp.title)}</Link>
-            </h3>
-            <ul className="flex-1 space-y-3.5 pr-16">
+          <article key={sp.id}
+            className="group flex flex-col rounded-[12px] border border-[rgb(var(--ds-panel-line))] bg-mg-surface p-4 transition hover:border-[rgb(var(--ds-brand))] hover:shadow-mg-card">
+            <Link to={`/spheres/${sp.id}`} className="flex items-center gap-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[rgb(var(--ds-brand))]">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-[rgb(var(--ds-panel))] text-[rgb(var(--ds-on-panel))] transition group-hover:bg-[rgb(var(--ds-brand))] group-hover:text-white" aria-hidden="true">
+                <Icon className="h-5 w-5" strokeWidth={1.7} />
+              </span>
+              <h3 className="flex-1 text-[15px] font-semibold leading-tight text-mg-heading">{t(sp.title)}</h3>
+              <ArrowUpRight className="h-4 w-4 shrink-0 text-mg-muted opacity-0 transition group-hover:opacity-100" aria-hidden="true" />
+            </Link>
+            <ul className="mt-3 divide-y divide-[rgb(var(--ds-panel-line))]/60 border-t border-[rgb(var(--ds-panel-line))]/60">
               {featuredOfSphere(sp.id).map((s) => (
-                <li key={s.number} className="flex gap-2 text-[17px] font-medium leading-snug">
-                  <span className="text-black dark:text-white" aria-hidden="true">•</span>
-                  <Link to={`/service/${s.number}`} className="text-mg-text hover:text-mg-primary hover:underline">{t(s.title)}</Link>
+                <li key={s.number}>
+                  <Link to={`/service/${s.number}`} className="block py-2 text-[14px] leading-snug text-mg-text hover:text-mg-primary hover:underline">{t(s.title)}</Link>
                 </li>
               ))}
             </ul>
-            <Link to={`/spheres/${sp.id}`} className="mt-4 inline-flex items-center gap-1 pl-1 text-base font-semibold text-mg-muted hover:text-mg-primary hover:underline">
-              <ChevronRight className="h-5 w-5" aria-hidden="true" />{t(UI.all)}
-            </Link>
-            <span className={`absolute bottom-5 right-4 flex h-20 w-20 items-center justify-center rounded-full border border-mg-border opacity-70 ${sp.tint}`} aria-hidden="true">
-              <Icon className="h-9 w-9" strokeWidth={1.5} />
-            </span>
           </article>
         );
       })}

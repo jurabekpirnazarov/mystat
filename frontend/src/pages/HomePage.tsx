@@ -47,9 +47,12 @@ export default function HomePage() {
   return (
     <div>
       <HomeHero showTiles={false} />
-      <HomeDashboard className="mt-10" showCards={false} showControls={false} />
+      <Section id="home-popular" title={t(UI.popular)} link badge={<DemoBadge show={isSample} />}>
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {POPULAR.slice(0, 6).map((s) => <ServiceCard key={s.number} s={s} stats={stats[s.number]} />)}
+        </div>
+      </Section>
       <div className="mt-9"><PersonalBlocks /></div>
-      <Section id="home-spheres" title={t(UI.spheres)} link><SpheresGrid /></Section>
       <Section id="home-situations" title={t(UI.situations)}>
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {SITUATIONS.map((s) => <SituationCard key={s.slug} slug={s.slug} />)}
@@ -57,11 +60,8 @@ export default function HomePage() {
       </Section>
       <Section id="home-features" title={t(UI.portalFeatures)}><PortalFeatures /></Section>
       <div className="mt-10"><PortalNumbers /></div>
-      <Section id="home-popular" title={t(UI.popular)} link badge={<DemoBadge show={isSample} />}>
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {POPULAR.slice(0, 6).map((s) => <ServiceCard key={s.number} s={s} stats={stats[s.number]} />)}
-        </div>
-      </Section>
+      <Section id="home-spheres" title={t(UI.spheres)} link><SpheresGrid /></Section>
+      <HomeDashboard className="mt-10" showCards={false} showControls={false} />
     </div>
   );
 }

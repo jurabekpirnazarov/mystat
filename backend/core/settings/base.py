@@ -13,6 +13,10 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-produc
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
+# Sintetik ("Namuna") ma'lumotni ko'rsatish va `seed_demo` ni ruxsat etish. DEBUG=True da doim yoqiq;
+# production'da faqat .env da SYNTHETIC_DATA=True bo'lsa (egasining qarori, 2026-10-23).
+SYNTHETIC_DATA = config('SYNTHETIC_DATA', default=False, cast=bool)
+
 # ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
 ALLOWED_HOSTS = ['*']
 

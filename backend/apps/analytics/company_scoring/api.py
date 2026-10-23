@@ -12,7 +12,6 @@ sinf, ustunlar, ko'rsatkich baholari (0–100) va bayroq nomi (S-10, K-02 qoidas
 """
 import statistics
 
-from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Avg, Count, Max
 from django.http import Http404
@@ -21,6 +20,8 @@ from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from apps.common.synthetic import synthetic_enabled
 
 from . import config
 from .service import cache_version
@@ -63,7 +64,7 @@ def _cached(key, build):
 
 
 def is_public():
-    if settings.DEBUG:
+    if synthetic_enabled():
         return True
     from apps.common.models import SiteSettings
 
@@ -85,7 +86,7 @@ def latest_year(cfg):
 
 
 def is_synthetic(data_source):
-    return settings.DEBUG and data_source != "real"
+    return synthetic_enabled() and data_source != "real"
 
 
 def size_label(cfg, key, lang):
@@ -366,7 +367,7 @@ def distribution_payload(cfg, preset, year, lang, filters):
         "histogram": [{"from": i * 10, "to": i * 10 + 10, "count": c} for i, c in enumerate(bins)],
         "data_source": ("real" if sources.get("real", 0) == total else
                         "synthetic" if set(sources) <= {"synthetic"} else "mixed") if total else "real",
-        "is_synthetic": settings.DEBUG and not sources.get("real"),
+        "is_synthetic": synthetic_enabled() and not sources.get("real"),
         "disclaimer": DISCLAIMER[lang],
     }
 

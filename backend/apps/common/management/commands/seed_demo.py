@@ -6,7 +6,7 @@
     python manage.py seed_demo --dry-run            # yozmaydi, nima bo'lishini ko'rsatadi
     python manage.py seed_demo --demographics       # sintetik demografiya parquet (B-08)
 
-DEBUG=False bo'lsa ishlamaydi (atayin, production uchun bayroq yo'q).
+DEBUG=False bo'lsa faqat .env da SYNTHETIC_DATA=True bo'lganda ishlaydi (production'ga namuna ma'lumot — egasining qarori).
 """
 import shutil
 from collections import Counter, defaultdict
@@ -20,6 +20,7 @@ from django.db.models.deletion import Collector
 
 from apps.common.models import SyntheticRecord
 from apps.common.seeders import registry
+from apps.common.synthetic import synthetic_enabled
 
 
 class DryRunRollback(Exception):
@@ -59,7 +60,7 @@ ALLOWED_CASCADE = {
 
 
 class Command(BaseCommand):
-    help = "Lokal/dev uchun sintetik ma'lumot yaratadi yoki o'chiradi (faqat DEBUG=True)."
+    help = "Lokal/dev uchun sintetik ma'lumot yaratadi yoki o'chiradi (DEBUG=True yoki SYNTHETIC_DATA=True)."
 
     def add_arguments(self, parser):
         parser.add_argument("--only", help="Vergul bilan seeder nomlari: " + ", ".join(registry()))
@@ -68,8 +69,8 @@ class Command(BaseCommand):
         parser.add_argument("--demographics", action="store_true", help="Sintetik demografiya parquet faylini yaratish")
 
     def handle(self, *args, **options):
-        if not settings.DEBUG:
-            raise CommandError("seed_demo faqat DEBUG=True muhitida ishlaydi.")
+        if not synthetic_enabled():
+            raise CommandError("seed_demo faqat DEBUG=True yoki .env da SYNTHETIC_DATA=True bo'lganda ishlaydi.")
 
         seeders = registry()
         only = [s.strip() for s in (options["only"] or "").split(",") if s.strip()]

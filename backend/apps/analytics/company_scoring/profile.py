@@ -14,9 +14,9 @@ chuqur tahlil "guruhdagi o'rni" (0–100) orqali beriladi. Xodimlar soni faqat o
 """
 import math
 
-from django.conf import settings
 from django.http import Http404
 
+from apps.common.synthetic import synthetic_enabled
 from apps.credits import service as credits
 
 from . import config, explain
@@ -151,7 +151,7 @@ def general_section(cfg, stir, base, score, lang):
             "year": score.year, "data_source": score.data_source, "is_synthetic": is_synthetic(score.data_source)},
         # Rekvizitlarning manbasi: KTUT'da OKED, hudud va mulkchilik yo'q — demo muhitda ular ham namuna
         "real_fields": sorted(k for k, v in sources.items() if v == "real"),
-        "requisites_synthetic": bool(ind) and settings.DEBUG and sources.get("oked_section") != "real",
+        "requisites_synthetic": bool(ind) and synthetic_enabled() and sources.get("oked_section") != "real",
     }
 
 

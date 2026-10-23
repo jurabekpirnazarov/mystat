@@ -8,6 +8,8 @@ from typing import Iterable
 import pandas as pd
 from django.conf import settings
 
+from apps.common.synthetic import synthetic_enabled
+
 
 PARQUET_DIR = Path(settings.MEDIA_ROOT) / "demographics"
 PARQUET_PATH = PARQUET_DIR / "data.parquet"
@@ -19,7 +21,7 @@ def data_source() -> str | None:
     """"real" | "synthetic" | None. Sintetik fayl faqat DEBUG=True va asosiy fayl yo'q bo'lsa ishlatiladi."""
     if PARQUET_PATH.exists():
         return "real"
-    if settings.DEBUG and SYNTHETIC_PATH.exists():
+    if synthetic_enabled() and SYNTHETIC_PATH.exists():
         return "synthetic"
     return None
 

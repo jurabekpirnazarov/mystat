@@ -7,6 +7,11 @@ from rest_framework import serializers
 from .models import SyntheticRecord
 
 
+def synthetic_enabled():
+    """Sintetik ma'lumot ko'rsatiladimi: DEBUG=True yoki .env da SYNTHETIC_DATA=True."""
+    return bool(settings.DEBUG or getattr(settings, "SYNTHETIC_DATA", False))
+
+
 def get_or_create_synthetic(model, seed_key, defaults=None):
     """`seed_key` bo'yicha sintetik obyektni qaytaradi yoki yaratadi. -> (obj, created)"""
     record = SyntheticRecord.objects.filter(seed_key=seed_key).first()

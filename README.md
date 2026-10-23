@@ -93,6 +93,10 @@ python manage.py seed_demo --only notifications,classifications
 python manage.py seed_demo --dry-run       # yozmasdan ko'rsatadi
 python manage.py seed_demo --flush         # faqat sintetik yozuvlarni o'chiradi
 python manage.py seed_demo --demographics  # sintetik demografiya parquet (asosiy fayl yo'q bo'lsa)
+
+**Production'ga namuna ma'lumot** (egasining qarori, 2026-10-23): serverning `.env` iga `SYNTHETIC_DATA=True` qo'shiladi,
+so'ng `python manage.py seed_demo` (qo'shimcha: `DEMO_USER_PASSWORD`, demo parol `.env` dan). Bu bayroq `DEBUG=True` bilan bir xil
+ishlaydi: `seed_demo` ruxsat etiladi, korxona scoringi ochiq, "Namuna" belgisi saqlanadi. Olib tashlash: `seed_demo --flush`, bayroqni o'chirish.
 ```
 
 - Real yozuvlar o'zgartirilmaydi va o'chirilmaydi. Har bir sintetik yozuv `common.SyntheticRecord` reyestriga tushadi,

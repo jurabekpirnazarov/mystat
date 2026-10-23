@@ -45,6 +45,45 @@ def _money(pricing):
     return {k: (str(v) if not isinstance(v, int) else v) for k, v in pricing.items()}
 
 
+def _statcoin(package):
+    """KR-41: paket beradigan StatCoin (`kind`: monthly | topup | None). Miqdor admin qiymati."""
+    if package.statcoin_kind not in ("monthly", "topup") or not package.statcoin_amount:
+        return None
+    return {"kind": package.statcoin_kind, "amount": float(package.statcoin_amount),
+            "plan": package.statcoin_plan, "months": max(1, round(package.duration_days / 30))
+            if package.statcoin_kind == "monthly" else None, "opens": _opens(package)}
+
+
+PROFILE_LEVELS = (("basis", "profile_basis", "Korxona profili: ball nimaga asoslangan"),
+                  ("deep", "profile_deep", "Korxona profili: chuqur tahlil"))
+
+
+def _opens(package):
+    """Paket bilan nimalar ochiladi: tarif darajasiga ko'ra korxona profili bo'limlari (narxi bilan) va barcha
+    StatCoin xizmatlari. Qo'shimcha paket tarif bermaydi, shuning uchun profil bo'limlari uchun mavjud tarif kerak."""
+    from apps.credits import service as credits
+    from apps.credits.models import CreditWallet
+
+    rank = CreditWallet.PLAN_RANK.get(package.statcoin_plan, 0)
+    profile = []
+    for level, code, name in PROFILE_LEVELS:
+        price = credits.price_of(code)
+        if price is not None and rank >= credits.LEVEL_MIN_PLAN[level]:
+            profile.append({"level": level, "name": name, "credits": float(price)})
+    return {"profile": profile, "services": _statcoin_services(),
+            "needs_plan_for_profile": package.statcoin_kind == "topup"}
+
+
+def _statcoin_services():
+    """Paket limiti o'rniga StatCoin bilan to'lanadigan xizmatlar (faol `CreditPrice`): slug, nomi, narxi."""
+    from apps.credits.models import CreditPrice
+    from apps.services.limits import STATCOIN_ACTIONS
+
+    prices = {p.action_code: p for p in CreditPrice.objects.filter(is_active=True, action_code__in=STATCOIN_ACTIONS.values())}
+    return [{"slug": slug, "name": prices[code].name, "credits": float(prices[code].credits)}
+            for slug, code in STATCOIN_ACTIONS.items() if code in prices]
+
+
 class TariffCompareView(APIView):
     """GET /api/services/tariff-compare/?sector=<id> — paketlar × xizmatlar jadvali va narxlar."""
     permission_classes = (AllowAny,)
@@ -56,7 +95,7 @@ class TariffCompareView(APIView):
         rows = {}
         for item in items:
             ps = item.package_service
-            row = rows.setdefault(ps.id, {"id": ps.id, "name": _clean(ps.name_uz), "cells": {}})
+            row = rows.setdefault(ps.id, {"id": ps.id, "slug": ps.slug, "name": _clean(ps.name_uz), "cells": {}})
             row["cells"].setdefault(str(item.package_id), []).append({
                 "name": _clean(item.name_uz), "limit": item.limit, "unlimited": item.is_unlimited})
         priced = sorted(((p, package_price(p, sector)) for p in packages), key=lambda x: x[1]["price"])
@@ -66,8 +105,9 @@ class TariffCompareView(APIView):
             "user_sector_id": getattr(_user_sector(request), "id", None),
             "sectors": [{"id": s.id, "code": s.code, "name": _clean(s.name_uz or s.name).capitalize()}
                         for s in Sector.objects.filter(pk__in=sector_ids).order_by("code")],
-            "packages": [{"id": p.id, "name": p.name, "pricing": _money(pr)} for p, pr in priced],
+            "packages": [{"id": p.id, "name": p.name, "pricing": _money(pr), "statcoin": _statcoin(p)} for p, pr in priced],
             "rows": sorted(rows.values(), key=lambda r: r["id"]),
+            "statcoin_services": _statcoin_services(),
         })
 
 

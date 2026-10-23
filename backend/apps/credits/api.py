@@ -85,3 +85,36 @@ class UnlockView(APIView):
         except service.CreditError as exc:
             return Response(exc.as_dict(), status=exc.status)
         return Response({"stir": stir, "level": level, **result})
+
+
+class ActivationView(APIView):
+    """KR-41/OS-20: StatCoin paketini faollashtirish holati.
+    GET ?package=<id> — shu paket bo'yicha foydalanuvchi shartnomalari (to'lov holati) va paket faolmi;
+    POST {package} — to'lovni tekshirib, to'liq to'langan shartnomalarni hoziroq faollashtiradi (Celery'ni kutmasdan)."""
+    permission_classes = (IsAuthenticated,)
+
+    @staticmethod
+    def _state(user, package_id):
+        from apps.contracts.models import Contract
+        from apps.services.models import UserServicePackage
+
+        contracts = [{"id": c.id, "number": c.contract_number, "status": c.status, "total": float(c.total_amount),
+                      "paid": float(c.payed_amount), "signed_by_client": c.signed_by_client,
+                      "activated": c.activated_packages.exists()}
+                     for c in Contract.objects.filter(user=user, package_id=package_id).order_by("-id")[:5]]
+        wallet = service.wallet_of(user)
+        return {"contracts": contracts,
+                "active": UserServicePackage.objects.filter(created_by_user=user, service_id=package_id).exists(),
+                "balance": float(service.balance(wallet)), "plan": wallet.plan if wallet else ""}
+
+    def get(self, request):
+        return Response(self._state(request.user, int(request.query_params.get("package") or 0)))
+
+    def post(self, request):
+        from . import packages
+
+        package_id = int(request.data.get("package") or 0)
+        activated = packages.activate_paid_contracts(request.user)
+        out = self._state(request.user, package_id)
+        out["activated_now"] = [u.service.name for u in activated]
+        return Response(out)

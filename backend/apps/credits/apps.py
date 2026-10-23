@@ -5,3 +5,6 @@ class CreditsConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "apps.credits"
     verbose_name = "StatCoin"
+
+    def ready(self):
+        from . import signals  # noqa: F401

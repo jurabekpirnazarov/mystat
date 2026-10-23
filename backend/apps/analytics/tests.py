@@ -12,6 +12,7 @@ from apps.services.models import (PackageService, PackageServiceItem, ServicePac
 
 from .models import EnterpriseIndicator
 from .stats import percentile_rank, quantile
+from apps.credits.testing import use_package_limits
 
 
 class StatsTests(TestCase):
@@ -30,6 +31,7 @@ class BenchmarkTests(APITestCase):
     url = "/api/analytics/benchmark/"
 
     def setUp(self):
+        use_package_limits()   # eski paket limiti tartibi (StatCoin yo'li: apps/credits/tests_services.py)
         self.section = Sector.objects.create(code="C", name_uz="Sanoat")
         self.region = Region.objects.create(name="Test v.", code="9901")
         district = District.objects.create(name="Test t.", region=self.region, code="990101")

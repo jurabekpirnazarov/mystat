@@ -56,7 +56,7 @@ class ServiceReviewAdmin(admin.ModelAdmin):
 
 @admin.register(ServicePackage)
 class ServicePackageAdmin(admin.ModelAdmin):
-    list_display = ('name_uz', 'price', 'duration_days', 'is_active')
+    list_display = ('name_uz', 'price', 'duration_days', 'statcoin_kind', 'statcoin_amount', 'is_active')
     search_fields = ('name_uz', 'description_uz')
     list_filter = ('is_active',)
     inlines = [PackageServiceItemInline]

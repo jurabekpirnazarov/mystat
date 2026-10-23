@@ -13,12 +13,26 @@ interface Props {
 
 /**
  * Xizmat xatolari uchun umumiy holat:
- * 403 + upgrade_url — paket limiti tugagan; 404 — tushuntiruvchi bo'sh holat; boshqasi — qayta urinish.
+ * 402 + upgrade_url — StatCoin yetarli emas; 403 + upgrade_url — paket limiti tugagan; 404 — tushuntiruvchi bo'sh holat; boshqasi — qayta urinish.
  */
 export default function ApiErrorState({ error, onRetry, notFoundAction }: Props) {
   const res = asApiError(error).response;
   const data = res?.data ?? {};
   const detail = typeof data.detail === "string" ? data.detail : undefined;
+  if (res?.status === 402 && typeof data.upgrade_url === "string") {
+    return (
+      <EmptyState
+        icon={Lock}
+        title="StatCoin yetarli emas"
+        description={`${detail ?? "Bu xizmat StatCoin bilan to'lanadi."}${typeof data.required === "number" ? ` Kerak: ${data.required}, hamyonda: ${data.balance ?? 0}.` : ""}`}
+        action={
+          <Link to={data.upgrade_url} className="inline-flex px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700">
+            Tariflar va StatCoin
+          </Link>
+        }
+      />
+    );
+  }
   if (res?.status === 403 && typeof data.upgrade_url === "string") {
     return (
       <EmptyState

@@ -12,10 +12,12 @@ from apps.services.models import (PackageService, PackageServiceItem, ServicePac
 
 from .models import Consultant, ConsultationBooking, ConsultationSlot
 from .tasks import consultation_reminders
+from apps.credits.testing import use_package_limits
 
 
 class ConsultationTests(APITestCase):
     def setUp(self):
+        use_package_limits()   # eski paket limiti tartibi (StatCoin yo'li: apps/credits/tests_services.py)
         self.c_user = User.objects.create_user(username="cons", password="x", role="employee")
         self.consultant = Consultant.objects.create(user=self.c_user, title="T")
         self.slot = ConsultationSlot.objects.create(consultant=self.consultant, starts_at=timezone.now() + timedelta(days=3))

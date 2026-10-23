@@ -87,6 +87,20 @@ class ServicePackage(BaseModel):
     file = models.FileField(upload_to='service_packages/', blank=True, null=True, verbose_name=_("Fayl"))
     is_enterprise = models.BooleanField(default=False, verbose_name=_("Korxona paketimi"))
 
+    # KR-41: paket faollashganda hamyonga beriladigan StatCoin (apps.credits.packages). Bo'sh `statcoin_kind` — mavjud
+    # (eski) paketlar: ular StatCoin bermaydi va o'zgarmaydi.
+    STATCOIN_KINDS = (("", _("StatCoin bermaydi")), ("monthly", _("Oylik StatCoin")), ("topup", _("Bir martalik qo'shimcha")))
+    STATCOIN_PLANS = (("", _("Tarifsiz")), ("s50", "Scoring 50"), ("s60", "Scoring 60"), ("s90", "Scoring 90"),
+                      ("corp", _("Korporativ")))
+    statcoin_kind = models.CharField(max_length=10, choices=STATCOIN_KINDS, blank=True, default="",
+                                     verbose_name=_("StatCoin turi"),
+                                     help_text=_("Oylik: har oy shu miqdor beriladi (ishlatilmagani keyingi oyga o'tmaydi). "
+                                                 "Qo'shimcha: bir marta, paket muddati (standart 365 kun) amal qiladi."))
+    statcoin_amount = models.DecimalField(max_digits=8, decimal_places=1, default=0, verbose_name=_("StatCoin miqdori"))
+    statcoin_plan = models.CharField(max_length=10, choices=STATCOIN_PLANS, blank=True, default="",
+                                     verbose_name=_("Scoring tarifi darajasi"),
+                                     help_text=_("Oylik paket faol bo'lsa hamyonning tarifi shunga o'rnatiladi."))
+
     @property
     def name(self):
         """Shartnoma kodi (`service_package.name`) uchun: modelda `name` maydoni yo'q edi → AttributeError/500."""
@@ -217,6 +231,9 @@ class UserServicePackage(BaseModel):
     month = models.IntegerField(verbose_name=_("Oy"))
     service = models.ForeignKey(ServicePackage, on_delete=models.CASCADE, related_name='user_service_packages', verbose_name=_("Servis"))
     created_by_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_service_package_users', verbose_name=_("Tomonidan yaratilgan"))
+    # KR-41: StatCoin paketi to'langan shartnoma asosida avtomatik faollashganda shartnoma shu yerda (idempotentlik)
+    contract = models.ForeignKey('contracts.Contract', on_delete=models.SET_NULL, null=True, blank=True,
+                                 related_name='activated_packages', verbose_name=_("Shartnoma"))
     # B-07: mavjud (eski) yozuvlarda NULL — muddatsiz hisoblanadi
     starts_at = models.DateField(null=True, blank=True, verbose_name=_("Boshlanish sanasi"))
     expires_at = models.DateField(null=True, blank=True, verbose_name=_("Tugash sanasi"),

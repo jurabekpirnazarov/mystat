@@ -6,12 +6,14 @@ from rest_framework.test import APITestCase
 
 from apps.accounts.models import User
 from apps.additional_services.models.ex_trade import SITC, Country, Product, Region, TradeData, Unit, Year
+from apps.credits.testing import use_package_limits
 
 
 class MarketReportTests(APITestCase):
     url = "/api/additional-services/market-report/"
 
     def setUp(self):
+        use_package_limits()   # eski paket limiti tartibi (StatCoin yo'li: apps/credits/tests_services.py)
         cache.clear()
         self.tonne = Unit.objects.create(code="168", name="Тонна", short_name="т")
         self.piece = Unit.objects.create(code="796", name="Штуки", short_name="шт.")

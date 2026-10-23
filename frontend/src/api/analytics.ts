@@ -5,6 +5,8 @@ export interface LimitUsage {
   configured: boolean;
   limit: number | null;
   used: number;
+  /** Xizmat StatCoin bilan to'lanadi: shu so'rovda yechilgan miqdor va qoldiq (yoki narx va balans). */
+  statcoin?: { charged?: number; price?: number; balance: number };
 }
 
 export interface BenchmarkMetric {

@@ -105,6 +105,9 @@ class SiteSettings(SingletonModel):
     last_didox_update = models.DateTimeField(blank=True, null=True)
     # KORXONA_SCORING.md 7-bo'lim, OS-18: productionda begona korxona bali ochiq ko'rinsinmi (standart — yo'q)
     company_score_public = models.BooleanField(default=False, verbose_name=_("Korxona bali ochiq ko'rinsin"))
+    # KR-41, OS-20 (egasi: "xizmatdan foydalanish yoqilsin", 2026-10-23): StatCoin paketlari uchun shartnoma to'liq
+    # to'langanda paket avtomatik faollashadi. Eski 4 paket va `payment` app'iga tegilmaydi (faqat o'qiladi).
+    statcoin_auto_activate = models.BooleanField(default=True, verbose_name=_("StatCoin paketi to'lovdan keyin avtomatik faollashsin"))
 
     def __str__(self):
         return "Sayt sozlamalari"

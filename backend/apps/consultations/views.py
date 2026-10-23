@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.notifications.models import Notification
-from apps.services.limits import consume
+from apps.services.limits import consume, refund_statcoin
 
 from .models import Consultant, ConsultationBooking, ConsultationSlot
 
@@ -127,6 +127,8 @@ class BookingDetailView(APIView):
                 booking.limit_use = None
                 # BaseModel.delete() yumshoq (is_active=False), limit esa barcha yozuvlarni sanaydi — shuning uchun hard_delete
                 use.hard_delete()
+            elif refunded:
+                refund_statcoin(request.user, CONSULTATION_SLUG, {"slot": booking.slot_id})   # StatCoin bilan to'langan
             booking.status, booking.cancelled_at = "cancelled", timezone.now()
             booking.save(update_fields=["status", "cancelled_at", "limit_use"])
             booking.slot.is_booked = False

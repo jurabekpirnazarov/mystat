@@ -242,6 +242,7 @@ class ServicePackageSerializer(serializers.ModelSerializer):
             "id", "name_uz", "name_ru", "name_cry",
             "description_uz", "description_ru", "description_cry",
             "price", "price_range", "is_active", "duration_days", "file",
+            "statcoin_kind", "statcoin_amount", "statcoin_plan",
             "package_services",
         ]
 

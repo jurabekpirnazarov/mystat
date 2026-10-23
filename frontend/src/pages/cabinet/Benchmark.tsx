@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { BarChart3, Download } from "lucide-react";
 import { fetchBenchmark, type BenchmarkMetric } from "../../api/analytics";
+import { formatCredits } from "../../api/credits";
 import useApi from "../../hooks/useApi";
 import { ApiErrorState, Skeleton, SourceBadge } from "../../components/ui";
 import { exportElementToPdf } from "../../utils/exportPdf";
@@ -174,6 +175,12 @@ export default function Benchmark() {
           </div>
           {/* KORXONA_SCORING.md KR-36: guruhdagi ball taqsimoti va ustunlar p25–p75 */}
           <ScoreBenchmark />
+          {data.usage.statcoin && (
+            <p className="text-xs text-gray-500">
+              {data.usage.statcoin.charged ? `${formatCredits(data.usage.statcoin.charged)} yechildi` : "Bugun bu hisobot uchun StatCoin yechilgan"}
+              {" "}· hamyonda {formatCredits(data.usage.statcoin.balance)} (bir kunda bir xil hisobot qayta sanalmaydi)
+            </p>
+          )}
           {data.usage.configured && data.usage.limit !== null && (
             <p className="text-xs text-gray-500">Paket limiti: {data.usage.used} / {data.usage.limit} (bir kunda bir xil hisobot qayta sanalmaydi)</p>
           )}

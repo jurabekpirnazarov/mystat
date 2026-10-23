@@ -9,12 +9,14 @@ from apps.accounts.models import User
 from apps.additional_services.api_endpoints.PartnersAPI import legal_form
 from apps.additional_services.models import IndustrialProduct, IndustrialProductCategory, SavedQuery, Skp
 from apps.common.models import Region
+from apps.credits.testing import use_package_limits
 
 
 class PartnerSearchTests(APITestCase):
     url = "/api/additional-services/partners/search/"
 
     def setUp(self):
+        use_package_limits()   # eski paket limiti tartibi (StatCoin yo'li: apps/credits/tests_services.py)
         cache.clear()
         self.tash = Region.objects.create(name="Тошкент ш.", code="1726")
         self.sam = Region.objects.create(name="Самарқанд в.", code="1718")

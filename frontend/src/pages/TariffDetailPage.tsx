@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import OfferTermsModal from "../components/modals/OfferTermsModal";
 import { useAuth } from "../contexts/AuthContext";
 import { getServicePackages } from "../api/reports";
+import StatCoinPackagePanel from "../components/tariff/StatCoinPackagePanel";
 
 const TariffDetailPage = () => {
   const { id } = useParams();
@@ -144,6 +145,7 @@ const TariffDetailPage = () => {
               <h2 className="mb-5 text-gray-700 text-3xl font-semibold dark:text-white">
                 {selectedPlan.name} tarifi
               </h2>
+              {id && <StatCoinPackagePanel packageId={Number(id)} />}
               <div className="grid grid-cols-1 lg:grid-cols-1 gap-4">
                 {selectedPlan.detailedFeatures.map((item) => (
                   <div

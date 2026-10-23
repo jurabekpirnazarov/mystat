@@ -452,6 +452,15 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.credits.tasks.expire_credits_task",
         "schedule": crontab(hour=2, minute=10),
     },
+    # KR-41: oylik tarif paketlari uchun navbatdagi oy StatCoin'i (muddati o'tganlar 02:10 da yopiladi)
+    "credits-activate-paid": {
+        "task": "apps.credits.tasks.activate_paid_packages_task",
+        "schedule": crontab(minute="*/10"),
+    },
+    "credits-monthly-grant": {
+        "task": "apps.credits.tasks.grant_monthly_statcoin_task",
+        "schedule": crontab(hour=2, minute=30),
+    },
 }
 
 DIDOX_BASE_URL = config('DIDOX_BASE_URL', default='https://api.didox.com')

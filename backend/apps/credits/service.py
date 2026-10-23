@@ -142,13 +142,20 @@ def spend(wallet, credits, *, action_code, object_ref="", user=None, kind="spend
 
 
 def refund(wallet, *, action_code, object_ref, user=None, reason=""):
-    """Oxirgi shu amal/obyekt bo'yicha yechilgan kreditni o'sha grant'larga qaytaradi."""
+    """Shu amal/obyekt bo'yicha yechilgan va hali qaytarilmagan kreditni o'sha grant'larga qaytaradi.
+    Idempotent: ikkinchi chaqiruv (yoki avval qaytarilgan yechish) qayta qaytarmaydi."""
     with transaction.atomic():
         wallet = CreditWallet.objects.select_for_update().get(pk=wallet.pk)
-        spent = CreditLedger.objects.filter(wallet=wallet, kind="spend", action_code=action_code, object_ref=object_ref)
-        for row in spent:
-            CreditLedger.objects.create(wallet=wallet, kind="refund", amount=-row.amount, grant=row.grant,
-                                        action_code=action_code, object_ref=object_ref, created_by=user, reason=reason)
+        rows = CreditLedger.objects.filter(wallet=wallet, kind__in=("spend", "refund"), action_code=action_code,
+                                           object_ref=object_ref, grant__isnull=False)
+        net = {}   # grant_id -> hali qaytarilmagan miqdor (spend manfiy, refund musbat)
+        for row in rows:
+            net[row.grant_id] = net.get(row.grant_id, ZERO) - row.amount
+        for grant_id, left in net.items():
+            if left > 0:
+                CreditLedger.objects.create(wallet=wallet, kind="refund", amount=left, grant_id=grant_id,
+                                            action_code=action_code, object_ref=object_ref, created_by=user,
+                                            reason=reason)
     return balance(wallet)
 
 

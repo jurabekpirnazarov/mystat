@@ -5,5 +5,7 @@ class SubmittedReportSerializer(serializers.Serializer):
     stir_number = serializers.CharField()
 
     def validate_stir_number(self, value):
-        if not len(value) != 9 or not str(value).isdigit():
+        value = str(value).strip()
+        if len(value) != 9 or not value.isdigit():
             raise serializers.ValidationError("Invalid stir number")
+        return value

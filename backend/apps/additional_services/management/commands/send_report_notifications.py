@@ -117,23 +117,15 @@ class Command(BaseCommand):
         reports = ReportList.objects.filter(
             id__in=report_ids,
             is_active=True,
-            deadline__isnull=False
         )
 
-        print(f"DEBUG: Jami {reports.count()} ta hisobot topildi")
-
         for report in reports:
-            print(f"DEBUG: Report ID={report.id}, type={report.report_type}, deadline={report.deadline}")
-
             deadline_this_period = self.calculate_next_deadline(
                 report, today
             )
 
-            print(f"DEBUG: Hisoblangan deadline: {deadline_this_period}")
-
             if deadline_this_period:
                 days_left = (deadline_this_period - today).days
-                print(f"DEBUG: Qolgan kunlar: {days_left}")
 
                 if 0 <= days_left <= days_threshold:
                     upcoming.append({
@@ -141,7 +133,6 @@ class Command(BaseCommand):
                         'deadline': deadline_this_period,
                         'days_left': days_left
                     })
-                    print(f"DEBUG: Hisobot qo'shildi!")
 
         # Muddati yaqinlashganlari bo'yicha tartiblash
         upcoming.sort(key=lambda x: x['days_left'])
@@ -149,98 +140,9 @@ class Command(BaseCommand):
         return upcoming
 
     def calculate_next_deadline(self, report, today):
-        """
-        report_type bo'yicha keyingi deadlineni hisoblash.
-        - monthly: har oyda deadline.day kuni
-        - quarterly: 3, 6, 9, 12 oylarda
-        - yearly: faqat deadline.month va deadline.day bo'yicha
-        """
-        if not report.deadline:
-            return None
-
-        report_type = report.report_type
-        deadline_day = report.deadline.day
-        deadline_month = report.deadline.month
-
-        current_year = today.year
-        current_month = today.month
-
-        try:
-            if report_type == 'monthly':
-                # Har oyda deadline_day kuni
-                # Agar bu oyda o'tib ketgan bo'lsa, keyingi oyga
-                try:
-                    this_month_deadline = date(current_year, current_month, deadline_day)
-                except ValueError:
-                    # Oy oxirgi kunlari uchun (masalan, 31-kun fevralda)
-                    import calendar
-                    last_day = calendar.monthrange(current_year, current_month)[1]
-                    this_month_deadline = date(current_year, current_month, min(deadline_day, last_day))
-
-                if this_month_deadline >= today:
-                    return this_month_deadline
-                else:
-                    # Keyingi oy
-                    next_month = current_month + 1
-                    next_year = current_year
-                    if next_month > 12:
-                        next_month = 1
-                        next_year += 1
-                    try:
-                        return date(next_year, next_month, deadline_day)
-                    except ValueError:
-                        import calendar
-                        last_day = calendar.monthrange(next_year, next_month)[1]
-                        return date(next_year, next_month, min(deadline_day, last_day))
-
-            elif report_type == 'quarterly':
-                # Kvartal oylari: 3, 6, 9, 12
-                quarterly_months = [3, 6, 9, 12]
-
-                for qm in quarterly_months:
-                    try:
-                        q_deadline = date(current_year, qm, deadline_day)
-                    except ValueError:
-                        import calendar
-                        last_day = calendar.monthrange(current_year, qm)[1]
-                        q_deadline = date(current_year, qm, min(deadline_day, last_day))
-
-                    if q_deadline >= today:
-                        return q_deadline
-
-                # Bu yilda qolmadi, keyingi yilning 1-kvartali
-                try:
-                    return date(current_year + 1, 3, deadline_day)
-                except ValueError:
-                    return date(current_year + 1, 3, 28)
-
-            elif report_type == 'yearly':
-                # Faqat deadline.month va deadline.day bo'yicha
-                try:
-                    this_year_deadline = date(current_year, deadline_month, deadline_day)
-                except ValueError:
-                    import calendar
-                    last_day = calendar.monthrange(current_year, deadline_month)[1]
-                    this_year_deadline = date(current_year, deadline_month, min(deadline_day, last_day))
-
-                if this_year_deadline >= today:
-                    return this_year_deadline
-                else:
-                    # Keyingi yil
-                    try:
-                        return date(current_year + 1, deadline_month, deadline_day)
-                    except ValueError:
-                        import calendar
-                        last_day = calendar.monthrange(current_year + 1, deadline_month)[1]
-                        return date(current_year + 1, deadline_month, min(deadline_day, last_day))
-
-            else:
-                # report_type aniqlanmagan bo'lsa, deadline bo'yicha
-                return None
-
-        except Exception as e:
-            logger.error(f"Deadline hisoblashda xatolik: {e}")
-            return None
+        """Keyingi muddat — HT-01 yagona servisidan."""
+        from apps.additional_services.deadlines import next_occurrence
+        return next_occurrence(report, today)
 
     def prepare_message(self, user, organization, upcoming_reports, today):
         """Telegram xabarini tayyorlash"""

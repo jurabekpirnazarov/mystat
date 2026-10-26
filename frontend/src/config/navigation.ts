@@ -22,7 +22,7 @@ export const NAV_GROUPS: { id: string; label: I18nText; items: NavItem[] }[] = [
     items: [
       { to: "/popular", label: UI.popular, icon: Sparkles },
       { to: "/spheres", label: UI.spheres, icon: LayoutGrid, match: ["/spheres", "/service/"] },
-      { to: "/report-calendar", label: UI.reportCalendar, icon: CalendarDays },
+      { to: "/reporting", label: UI.reportCalendar, icon: CalendarDays, match: ["/reporting", "/report-calendar", "/reglaments", "/stat-codes"] },
       { to: "/check", label: UI.checkCompany, icon: BadgeCheck, match: ["/check", "/company/"] },
       { to: "/regions", label: UI.regionsMap, icon: MapIcon },
       { to: "/dashboards", label: UI.openData, icon: Database, match: ["/dashboards", "/release-calendar", "/developers"] },

@@ -24,6 +24,9 @@ class ReportList(BaseModel):
         ),
         db_index=True, null=True, blank=True
     )
+    # HT-01: davr qoidasi (`Q+25d`, `Y+03-15`), qarang apps/additional_services/deadlines.py.
+    # Bo'sh bo'lsa eski `deadline` zaxira sifatida ishlatiladi.
+    deadline_rule = models.CharField(max_length=20, blank=True, default="", verbose_name=_("Muddat qoidasi"))
 
     class Meta:
         verbose_name = _("Hisobot Ro'yxati")
@@ -66,3 +69,56 @@ class ReportReminder(models.Model):
         unique_together = ("user", "report")
         verbose_name = _("Hisobot eslatmasi")
         verbose_name_plural = _("Hisobot eslatmalari")
+
+
+
+class ReportDeadlineOverride(models.Model):
+    """HT-01: rasmiy muddat buyruq bilan o'zgarganda bitta davr uchun qo'lda sana (`period` = `2026-Q3`, `2025-Y`)."""
+    report = models.ForeignKey(ReportList, on_delete=models.CASCADE, related_name="deadline_overrides")
+    period = models.CharField(max_length=12, help_text="2026-M09, 2026-Q3, 2026-H1, 2025-Y")
+    date = models.DateField(verbose_name=_("Muddat"))
+    reason = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        unique_together = ("report", "period")
+        verbose_name = _("Muddat istisnosi")
+        verbose_name_plural = _("Muddat istisnolari")
+
+    def __str__(self):
+        return f"{self.report_id} {self.period}: {self.date}"
+
+
+class Holiday(models.Model):
+    """HT-10: bayram kunlari (muddatni keyingi ish kuniga ko'chirish yoqilganda)."""
+    date = models.DateField(unique=True)
+    name = models.CharField(max_length=120, blank=True)
+
+    class Meta:
+        ordering = ["date"]
+        verbose_name = _("Bayram kuni")
+        verbose_name_plural = _("Bayram kunlari")
+
+    def __str__(self):
+        return f"{self.date} {self.name}"
+
+
+class ReportReminderPreference(models.Model):
+    """HT-06: yuridik shaxs uchun eslatma standart yoqilgan (muddatdan 5 va 1 kun oldin); bu yerda o'chiriladi.
+    Shakl uchun alohida `ReportReminder` bo'lsa, o'sha ustun turadi."""
+    user = models.OneToOneField("accounts.User", on_delete=models.CASCADE, related_name="report_reminder_pref")
+    enabled = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = _("Eslatma sozlamasi")
+        verbose_name_plural = _("Eslatma sozlamalari")
+
+
+class CalendarFeedToken(models.Model):
+    """YF-02: kalendarga doimiy obuna uchun shaxsiy maxfiy havola tokeni."""
+    user = models.OneToOneField("accounts.User", on_delete=models.CASCADE, related_name="calendar_feed")
+    token = models.CharField(max_length=64, unique=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("Kalendar obuna tokeni")
+        verbose_name_plural = _("Kalendar obuna tokenlari")

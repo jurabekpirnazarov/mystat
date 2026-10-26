@@ -56,6 +56,16 @@ def sector_label(sector, with_code=True):
     return f"{sector.code} · {name}" if with_code else name
 
 
+def clean_excel_text(value):
+    """Excel'dan import qilingan matn: `_x000D_` (qator oxiri belgisi) va ortiqcha bo'shliqlar bitta probelga almashadi.
+    Bazadagi qiymatga tegilmaydi, faqat API javobida tozalanadi."""
+    import re
+
+    if not isinstance(value, str):
+        return value
+    return re.sub(r"\s+", " ", value.replace("_x000D_", " ")).strip()
+
+
 def rich_to_plain(html_text):
     """RichTextField (CKEditor) qiymati — oddiy matn: teglar, `&lsquo;` kabi entity'lar, ortiqcha bo'shliq va
     oxiridagi ":" olib tashlanadi. Nom sifatida ko'rsatiladigan maydonlar uchun (masalan `PackageService.name_uz`)."""

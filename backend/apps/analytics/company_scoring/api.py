@@ -79,6 +79,15 @@ def can_see(request, stir):
     return bool(org and org.tin == stir)
 
 
+def discipline_public():
+    """HT-11: hisobot topshirish intizomi (`s_reports`) muddat va holat manbasi tuzalguncha ko'rsatilmaydi."""
+    from apps.common.models import SiteSettings
+    return bool(SiteSettings.objects.filter(pk=1).values_list("reporting_discipline_public", flat=True).first())
+
+
+DISCIPLINE_CODES = {"s_reports"}
+
+
 def latest_year(cfg):
     from ..models import EnterpriseScore
 
@@ -189,6 +198,8 @@ def detail_payload(cfg, stir, preset, year, lang, own=False):
     score = qs.filter(year=year, preset=preset).first() or base
     indicators = []
     for code, ind in cfg["indicators"].items():
+        if code in DISCIPLINE_CODES and not discipline_public():
+            continue
         d = (base.indicators or {}).get(code)
         if d is None:
             continue
@@ -243,6 +254,8 @@ def recommendations(cfg, base, stir, year, lang):
     row = EnterpriseIndicator.objects.filter(stir=stir, year=year).first()
     out = []
     for code in (base.indicators or {}).get("_rec", []):
+        if code in DISCIPLINE_CODES and not discipline_public():
+            continue
         tpl = templates.get(code) or templates["default"]
         ind = cfg["indicators"].get(code, {})
         d = (base.indicators or {}).get(code, {})

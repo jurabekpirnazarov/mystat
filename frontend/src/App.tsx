@@ -105,6 +105,7 @@ const Consultation = lazy(() => import("./pages/Consultation"));
 const Dashboards = lazy(() => import("./pages/stat/Dashboards"));
 const ReleaseCalendarPage = lazy(() => import("./pages/stat/ReleaseCalendar"));
 const EmbedIndicator = lazy(() => import("./pages/stat/EmbedIndicator"));
+const ReportingHub = lazy(() => import("./pages/portal/ReportingHub"));
 const StatCodes = lazy(() => import("./pages/stat/StatCodes"));
 const CertificateVerify = lazy(() => import("./pages/stat/CertificateVerify"));
 // IHAMKOR_MUQOBIL.md IH-08
@@ -189,6 +190,7 @@ function AppRoutes() {
           <Route path="/orginfo" element={<OrgInfoPage />} />
           <Route path="/cpi-calculator" element={<CpiCalculator />} />
           <Route path="/statistical-classifications" element={<StatisticalClassifications />} />
+          <Route path="/reporting" element={<ReportingHub />} />
           <Route path="/report-calendar" element={<ReportCalendar />} />
           <Route path="/release-calendar" element={<ReleaseCalendarPage />} />
           <Route path="/dashboards" element={<Dashboards />} />

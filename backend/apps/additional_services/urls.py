@@ -5,6 +5,7 @@ from apps.additional_services.api_endpoints.IndustrialProductAPI import Industri
 from apps.additional_services.api_endpoints.PriceIndexAPI import PriceIndexAPIView
 from apps.additional_services.api_endpoints.PriceIndexAPI.series import CpiSeriesAPIView
 from apps.additional_services.views.service_views import SubmittedReportAPIView
+from apps.additional_services.api_endpoints.KtutReportAPI.feed import CalendarFeedAPIView, CalendarFeedIcsView, ReminderPreferenceAPIView
 from apps.additional_services.views.trade_data_views import TradeDataAPIView
 from apps.additional_services.api_endpoints.StaticClassificationAPI.views import StatisticClassificationCategoryAPIView
 from apps.additional_services.api_endpoints.KtutReportAPI.calendar import ReportCalendarAPIView, ReportReminderAPIView
@@ -29,6 +30,9 @@ urlpatterns = [
     path('statistic-classification/categories/', StatisticClassificationCategoryAPIView.as_view(), name='statistic-classification-categories'),
     path('reportlist/calendar/', ReportCalendarAPIView.as_view(), name='reportlist-calendar'),
     path('my-reports/', MyReportsAPIView.as_view(), name='my-reports'),
+    path('calendar-feed/', CalendarFeedAPIView.as_view(), name='calendar-feed'),
+    path('calendar/<str:token>.ics', CalendarFeedIcsView.as_view(), name='calendar-feed-ics'),
+    path('report-reminder-settings/', ReminderPreferenceAPIView.as_view(), name='report-reminder-settings'),
     path('market-report/', MarketReportAPIView.as_view(), name='market-report'),
     path('hs-search/', HsSearchAPIView.as_view(), name='hs-search'),
     path('partners/search/', PartnerSearchAPIView.as_view(), name='partners-search'),

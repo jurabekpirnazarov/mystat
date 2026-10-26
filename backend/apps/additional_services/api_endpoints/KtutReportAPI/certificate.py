@@ -66,6 +66,9 @@ def _organization_codes(stir):
     }
 
 
+from apps.additional_services.deadlines import next_occurrence  # noqa: E402
+
+
 def build_certificate(ktut, issued_at=None):
     issued_at = issued_at or timezone.now()
     today = timezone.localdate()
@@ -79,8 +82,7 @@ def build_certificate(ktut, issued_at=None):
             "id": r.id, "form": _clean(r.type_uz or r.type), "title": _clean(r.formsname_uz or r.formsname),
             "periodicity": r.report_type, "periodicity_label": PERIOD_LABELS.get(r.report_type, ""),
             "deadline_rule": _clean(r.srok_uz or r.srok),
-            # ReportList.deadline yangilanmay qolgan bo'lishi mumkin (CLAUDE_HISOBOT 5.6) — o'tgan sana berilmaydi
-            "next_deadline": r.deadline if r.deadline and r.deadline >= today else None,
+            "next_deadline": next_occurrence(r, today),
         } for r in reports],
         "issued_at": issued_at, "verify_code": code, "verify_path": f"/stat-codes/verify?code={code}",
         "source": "KTUT (Korxona va tashkilotlarning yagona davlat registri), my.stat.uz",

@@ -1,9 +1,8 @@
 """Hisobot kalendari: oy ko'rinishi va eslatmalar (U-13).
 
-Bazadagi `ReportList.deadline` bitta aniq sana (masalan 2025-yil). Kalendar uchun u `report_type`
-bo'yicha takrorlanadi: oylik — har oy shu kuni, choraklik — har 3 oyda, yillik — har yili shu sanada.
+Muddatlar `deadlines.deadlines_for` dan: `ReportList.deadline_rule` (masalan `Q+25d`), qoida bo'lmasa eski
+`deadline` sanasi `report_type` bo'yicha takrorlanadi.
 """
-import calendar
 from datetime import date
 
 from rest_framework import status
@@ -11,38 +10,10 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+# HT-01: nom eski importlar uchun shu yerda qoladi
+from apps.additional_services.deadlines import next_occurrence, occurrences_in_month, shift_enabled  # noqa: F401
 from apps.additional_services.models import ReportList, ReportReminder
-
-
-def _safe_date(year, month, day):
-    return date(year, month, min(day, calendar.monthrange(year, month)[1]))
-
-
-def occurrences_in_month(report, year, month):
-    d = report.deadline
-    if d is None:
-        return []
-    kind = report.report_type
-    if kind == "monthly":
-        return [_safe_date(year, month, d.day)]
-    if kind == "quarterly":
-        return [_safe_date(year, month, d.day)] if (month - d.month) % 3 == 0 else []
-    if kind == "yearly":
-        return [_safe_date(year, month, d.day)] if month == d.month else []
-    return [d] if (d.year, d.month) == (year, month) else []
-
-
-def next_occurrence(report, today):
-    """Bugundan boshlab eng yaqin muddat (24 oy ichida)."""
-    year, month = today.year, today.month
-    for _ in range(24):
-        for day in occurrences_in_month(report, year, month):
-            if day >= today:
-                return day
-        month += 1
-        if month > 12:
-            year, month = year + 1, 1
-    return None
+from apps.common.text import clean_excel_text
 
 
 class ReportCalendarAPIView(APIView):
@@ -64,14 +35,15 @@ class ReportCalendarAPIView(APIView):
             reminded = set(ReportReminder.objects.filter(user=request.user).values_list("report_id", flat=True))
 
         items = []
-        for report in ReportList.objects.filter(is_active=True, deadline__isnull=False):
-            for day in occurrences_in_month(report, year, month):
+        shift = shift_enabled()
+        for report in ReportList.objects.filter(is_active=True).prefetch_related("deadline_overrides"):
+            for day in occurrences_in_month(report, year, month, shift=shift):
                 items.append({
                     "report_id": report.id,
                     "date": day.isoformat(),
-                    "type_uz": report.type_uz or report.type,
-                    "formsname_uz": report.formsname_uz or report.formsname,
-                    "srok_uz": report.srok_uz,
+                    "type_uz": clean_excel_text(report.type_uz or report.type),
+                    "formsname_uz": clean_excel_text(report.formsname_uz or report.formsname),
+                    "srok_uz": clean_excel_text(report.srok_uz),
                     "report_type": report.report_type,
                     "reminded": report.id in reminded,
                 })

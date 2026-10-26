@@ -109,6 +109,15 @@ class SiteSettings(SingletonModel):
     # to'langanda paket avtomatik faollashadi. Eski 4 paket va `payment` app'iga tegilmaydi (faqat o'qiladi).
     statcoin_auto_activate = models.BooleanField(default=True, verbose_name=_("StatCoin paketi to'lovdan keyin avtomatik faollashsin"))
 
+    # HT-11: "Statistik intizom" (o'z vaqtida topshirish ulushi) muddat va holat manbasi tuzalguncha yashirin
+    reporting_discipline_public = models.BooleanField(default=False, verbose_name=_("Statistik intizom ko'rsatkichi ochiq"))
+    # HT-10 / OS-HT-02: muddat dam olish yoki bayramga tushsa keyingi ish kuniga ko'chsin (tasdiqlanmaguncha o'chiq)
+    deadline_shift_to_workday = models.BooleanField(default=False, verbose_name=_("Muddat dam olish kuniga tushsa keyingi ish kuniga ko'chsin"))
+
+    # HT-07 / OS-HT-03: hisobot topshiriladigan rasmiy tizim (kabinetda shakl to'ldirilmaydi). Bo'sh bo'lsa blok ko'rinmaydi.
+    report_submit_system_name = models.CharField(max_length=120, blank=True, default="", verbose_name=_("Hisobot topshirish tizimi nomi"))
+    report_submit_system_url = models.URLField(blank=True, default="", verbose_name=_("Hisobot topshirish tizimi havolasi"))
+
     def __str__(self):
         return "Sayt sozlamalari"
     

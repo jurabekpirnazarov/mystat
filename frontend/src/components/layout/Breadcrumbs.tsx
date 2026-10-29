@@ -41,7 +41,8 @@ type Crumb = { label: string; to?: string };
 export default function Breadcrumbs() {
   const { pathname, search } = useLocation();
   const { t } = useLang();
-  if (pathname === "/" || pathname.startsWith("/spheres/") || pathname.startsWith("/service/") || pathname.startsWith("/situations/")) return null;
+  // Sohalar, xizmat pasporti va hayotiy vaziyatlar sahifalari (ro'yxat ham, ichki ham) breadcrumb'ini o'zi chizadi
+  if (pathname === "/" || /^\/(spheres|situations|service)(\/|$)/.test(pathname)) return null;
 
   const service = serviceForPath(pathname, search);
   const crumbs: Crumb[] = [{ label: t(UI.home), to: "/" }];

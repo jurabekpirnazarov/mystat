@@ -17,3 +17,8 @@ backend/media/contracts/
 
 # Ishga tushirish loglari
 *_run.log
+
+# Binar va lokal baza fayllari repoga tushmasin
+*.apk
+*.db
+*.sqlite3

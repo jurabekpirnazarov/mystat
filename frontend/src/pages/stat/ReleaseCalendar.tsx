@@ -55,6 +55,8 @@ export default function ReleaseCalendar() {
   const [error, setError] = useState<unknown>(null);
   const [attempt, setAttempt] = useState(0);
   const [theme, setTheme] = useState("");
+  /** LX (UI_QAYTA_TUZISH.md 5-bo'lim): Bugun · Haftalik · Oylik · Kalendar */
+  const [range, setRange] = useState<"all" | "today" | "week" | "month">("all");
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -66,15 +68,20 @@ export default function ReleaseCalendar() {
   }, [attempt]);
 
   const filter = (items: ReleaseItem[]) => (theme ? items.filter((i) => i.theme === theme) : items);
+  const inRange = (item: ReleaseItem) => {
+    if (range === "all" || !data) return true;
+    const days = Math.round((Date.parse(item.date) - Date.parse(data.today)) / 86_400_000);
+    return range === "today" ? days === 0 : range === "week" ? days >= 0 && days <= 7 : days >= 0 && days <= 31;
+  };
   const months = useMemo(() => {
     const groups = new Map<string, ReleaseItem[]>();
-    for (const item of filter(data?.upcoming ?? [])) {
+    for (const item of filter(data?.upcoming ?? []).filter(inRange)) {
       const key = item.date.slice(0, 7);
       groups.set(key, [...(groups.get(key) ?? []), item]);
     }
     return [...groups.entries()];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, theme]);
+  }, [data, theme, range]);
   const recent = filter(data?.recent ?? []);
   const icsUrl = releasesIcsUrl();
 
@@ -118,6 +125,14 @@ export default function ReleaseCalendar() {
           <Skeleton variant="table" rows={8} />
         ) : (
           <>
+            <div role="tablist" aria-label="Davr" className="mb-4 flex border-b border-gray-200 dark:border-gray-700">
+              {([["today", "Bugun"], ["week", "Haftalik"], ["month", "Oylik"], ["all", "Kalendar"]] as const).map(([k, label]) => (
+                <button key={k} type="button" role="tab" aria-selected={range === k} onClick={() => setRange(k)}
+                  className={`px-4 py-2 text-sm font-semibold border-b-2 ${range === k ? "border-blue-600 text-blue-700 dark:text-blue-300" : "border-transparent text-gray-500 hover:text-gray-800 dark:hover:text-gray-200"}`}>
+                  {label}
+                </button>
+              ))}
+            </div>
             <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Mavzu bo'yicha saralash">
               {[{ key: "", label: "Hammasi" }, ...data.themes].map((t) => (
                 <button key={t.key} type="button" onClick={() => setTheme(t.key)} aria-pressed={theme === t.key}
@@ -133,7 +148,7 @@ export default function ReleaseCalendar() {
               <section className="lg:col-span-2" aria-labelledby="upcoming">
                 <h2 id="upcoming" className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Kutilayotgan e'lonlar</h2>
                 {months.length === 0 ? (
-                  <EmptyState title="Yaqin 12 oyda e'lon yo'q" description="Mavzu filtrini o'zgartirib ko'ring." />
+                  <EmptyState title={range === "all" ? "Yaqin 12 oyda e'lon yo'q" : "Tanlangan davrda e'lon yo'q"} description="Mavzu yoki davr filtrini o'zgartirib ko'ring." />
                 ) : months.map(([key, items]) => {
                   const [y, m] = key.split("-").map(Number);
                   return (

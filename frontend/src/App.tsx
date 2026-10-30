@@ -68,8 +68,6 @@ const ExternalTrade = lazy(() => import("./pages/ExternalTrade"));
 const Demographics = lazy(() => import("./pages/Demographics"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const TradeFlows = lazy(() => import("./pages/TradeFlows"));
-const OrganizationsRegistr = lazy(() => import("./pages/OrganizationsRegistr"));
-const Organizations = lazy(() => import("./pages/Organizations"));
 const OrganizationsKtut = lazy(() => import("./pages/OrganizationsKtut"));
 const Industry = lazy(() => import("./pages/Industry"));
 const Reports = lazy(() => import("./pages/Reports"));
@@ -104,6 +102,10 @@ const Consultation = lazy(() => import("./pages/Consultation"));
 // JAHON_TAJRIBASI_TAKLIFLAR.md: JT-10, JT-17 (+JT-02), JT-15, JT-04
 const Dashboards = lazy(() => import("./pages/stat/Dashboards"));
 const ReleaseCalendarPage = lazy(() => import("./pages/stat/ReleaseCalendar"));
+// UI_QAYTA_TUZISH.md 5-bo'lim: mavzular va ko'rsatkichlar ro'yxati
+const IndicatorsPage = lazy(() => import("./pages/stat/Indicators").then((m) => ({ default: m.Indicators })));
+const IndicatorPage = lazy(() => import("./pages/stat/IndicatorPage"));
+const TopicsPage = lazy(() => import("./pages/stat/Indicators").then((m) => ({ default: m.Topics })));
 const EmbedIndicator = lazy(() => import("./pages/stat/EmbedIndicator"));
 const ReportingHub = lazy(() => import("./pages/portal/ReportingHub"));
 const StatCodes = lazy(() => import("./pages/stat/StatCodes"));
@@ -157,12 +159,13 @@ function AppRoutes() {
           <Route path="/book-order" element={<BookOrderPage />} />
           <Route path="/book-order/map" element={<BookOrderMapPage />} />
           <Route path="/ex-trade" element={<ExternalTrade />} />
-          <Route path="/statistical-data" element={<Demographics />} />
+          <Route path="/statistical-data" element={<Navigate to="/demographics" replace />} />
           <Route path="/demographics" element={<Demographics />} />
-          <Route path="/foreign-trade" element={<TradeFlows />} />
+          <Route path="/foreign-trade" element={<Navigate to="/trade-flows" replace />} />
           <Route path="/trade-flows" element={<TradeFlows />} />
-          <Route path="/organizations-register" element={<OrganizationsRegistr />} />
-          <Route path="/organizations" element={<Organizations />} />
+          {/* Eski manzillar: bo'sh sahifa (stub) o'rniga ishlaydigan sahifaga yo'naltiriladi */}
+          <Route path="/organizations-register" element={<Navigate to="/organizations-ktut" replace />} />
+          <Route path="/organizations" element={<Navigate to="/organizations-ktut" replace />} />
           <Route path="/organizations-ktut" element={<OrganizationsKtut />} />
           <Route path="/industry" element={<Industry />} />
           <Route path="/reports" element={<Reports />} />
@@ -173,7 +176,8 @@ function AppRoutes() {
           <Route path="/citizens" element={<CitizensHub />} />
           <Route path="/regions" element={<Regions />} />
           <Route path="/methodology/company-score" element={<CompanyScoreMethodology />} />
-          <Route path="/company-score/components" element={<CompanyScoreShowcase />} />
+          {/* KR-34: komponentlar namoyishi faqat ishlab chiqishda (production'da ochiq sahifa bo'lmasin) */}
+          {import.meta.env.DEV && <Route path="/company-score/components" element={<CompanyScoreShowcase />} />}
           <Route path="/company/:stir" element={<CompanyProfile />} />
           <Route path="/regions/:id" element={<RegionProfile />} />
           <Route path="/my-salary" element={<MySalary />} />
@@ -193,6 +197,10 @@ function AppRoutes() {
           <Route path="/reporting" element={<ReportingHub />} />
           <Route path="/report-calendar" element={<ReportCalendar />} />
           <Route path="/release-calendar" element={<ReleaseCalendarPage />} />
+          <Route path="/indicators" element={<IndicatorsPage />} />
+          <Route path="/indicators/:key" element={<IndicatorPage />} />
+          <Route path="/topics" element={<TopicsPage />} />
+          <Route path="/topics/:slug" element={<TopicsPage />} />
           <Route path="/dashboards" element={<Dashboards />} />
           <Route path="/dashboards/:slug" element={<Dashboards />} />
           <Route path="/embed/indicator/:key" element={<EmbedIndicator />} />

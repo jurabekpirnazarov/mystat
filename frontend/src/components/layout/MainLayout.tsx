@@ -1,5 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { AlertTriangle } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import PublicLayout from "./PublicLayout";
 import { useLang } from "../../i18n/LangContext";
 import { UI } from "../../i18n/ui";
 import FloatingSupport from "../FloatingSupport";
@@ -15,7 +17,16 @@ import TypoReporter from "./TypoReporter";
  * <main> → oxirgi o'zgarish sanasi va fikr vidjeti → Footer. Kabinet ham shu layout ichida (MG-12).
  * Kontent sidebar'dan o'ngda: 22px chekka + 268px doim ochiq sidebar, ichki bo'shliq 30px.
  */
+/** UI_QAYTA_TUZISH.md H10: ommaviy qobiq v2 `VITE_PUBLIC_V2=1` bayrog'i ichida; H12 da bayroq olib tashlanadi. */
+const PUBLIC_V2 = import.meta.env.VITE_PUBLIC_V2 === "1";
+
 export default function MainLayout({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation();
+  if (PUBLIC_V2 && !pathname.startsWith("/cabinet")) return <PublicLayout>{children}</PublicLayout>;
+  return <LegacyLayout>{children}</LegacyLayout>;
+}
+
+function LegacyLayout({ children }: { children: ReactNode }) {
   const { t } = useLang();
   const [menuOpen, setMenuOpen] = useState(false);
   return (

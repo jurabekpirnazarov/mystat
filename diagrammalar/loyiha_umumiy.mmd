@@ -1,0 +1,72 @@
+%% my.stat.uz: umumiy loyiha (tuzilma, app'lar, xizmatlar). Sana: 2026-10-29
+flowchart TB
+  subgraph FOYD["Foydalanuvchilar"]
+    direction LR
+    U1["Mehmon / fuqaro"]
+    U2["Korxona (yuridik shaxs)"]
+    U3["Tadqiqotchi / API"]
+    U4["Konsultant va admin"]
+  end
+
+  subgraph FE["Frontend: React 18 + Vite + TypeScript"]
+    direction TB
+    PUB["Ommaviy sahifalar<br/>bosh sahifa, sohalar, ommabop xizmatlar,<br/>hayotiy vaziyatlar, savol-javob"]
+    DATA["Statistika<br/>hududlar xaritasi, mavzuli panellar,<br/>e'lonlar kalendari, aholi soati"]
+    CAB["Kabinet<br/>hisobotlarim, shartnomalar, StatCoin hamyoni,<br/>benchmark, konsultatsiyalar, API kalitlar"]
+    CITIZEN["Fuqarolar uchun<br/>inflyatsiya kalkulyatori, maosh,<br/>narxlar, so'rovnomalar"]
+    COMP["Kontragent kartasi<br/>korxona profili /company/:stir, ball, PDF"]
+    REP["Hisobot topshirish<br/>/reporting, kalendar, reglamentlar,<br/>statistik kodlar ma'lumotnomasi"]
+  end
+
+  subgraph BE["Backend: Django 5 + DRF"]
+    direction TB
+    A1["accounts / organizations<br/>kirish, OneID, profillar"]
+    A2["services / contracts<br/>tariflar, paketlar, shartnomalar"]
+    A3["payment<br/>Click (tegilmaydi)"]
+    A4["credits<br/>StatCoin hamyoni, ledger, unlock"]
+    A5["siat<br/>hududlar, scoring, prognoz, e'lonlar"]
+    A6["analytics<br/>korxona scoringi"]
+    A7["additional_services<br/>KTUT hisobot, muddat qoidasi, ma'lumotnoma"]
+    A8["portal / common<br/>xizmatlar katalogi, qidiruv, seed_demo"]
+    A9["citizens, consultations, open_api,<br/>book_market, notifications"]
+  end
+
+  subgraph INFRA["Infratuzilma"]
+    direction LR
+    PG[("PostgreSQL 14")]
+    RD[("Redis")]
+    CEL["Celery + Beat<br/>sinxronlash, eslatmalar,<br/>paket muddati"]
+    NG["nginx"]
+    CI["GitLab CI<br/>systemd + venv"]
+  end
+
+  subgraph EXT["Tashqi manbalar"]
+    direction LR
+    SIAT["SIAT / stat.uz"]
+    KTUT["KTUT reyestri"]
+    CLICK["Click"]
+    ONEID["OneID"]
+  end
+
+  U1 --> PUB
+  U1 --> DATA
+  U1 --> CITIZEN
+  U2 --> CAB
+  U2 --> COMP
+  U2 --> REP
+  U3 --> DATA
+  U4 --> CAB
+
+  FE -->|"REST /api"| NG --> BE
+  A2 --> A3
+  A2 --> A4
+  A6 --> A4
+  A5 --> A6
+  BE --> PG
+  BE --> RD
+  CEL --> BE
+  SIAT --> A5
+  KTUT --> A7
+  CLICK --> A3
+  ONEID --> A1
+  CI -.-> NG

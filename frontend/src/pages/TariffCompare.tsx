@@ -7,11 +7,11 @@ import useApi from "../hooks/useApi";
 import { ErrorState, PageHeader, Skeleton } from "../components/ui";
 import { formatMoney } from "../utils/format";
 
-/** Paket StatCoin'i matni: "50 StatCoin / oy" yoki "+20 StatCoin (bir marta)". */
+/** Paket summasi: "824 000 so'm / oy" yoki "+412 000 so'm (bir marta)". */
 const statcoinLabel = (s: NonNullable<TariffCompare["packages"][number]["statcoin"]>) =>
   s.kind === "monthly" ? `${formatCredits(s.amount)} / oy` : `+${formatCredits(s.amount)} (bir marta)`;
 
-/** StatCoin bilan to'lanadigan xizmatlar jadvalda emas, alohida ro'yxatda: ularni "rasmiy xizmatlar"dan ajratamiz. */
+/** Hamyondan to'lanadigan xizmatlar jadvalda emas, alohida ro'yxatda: ularni "rasmiy xizmatlar"dan ajratamiz. */
 const isStatCoinRow = (data: TariffCompare, slug: string | null) => !!slug && data.statcoin_services.some((s) => s.slug === slug);
 
 /** K-09 + KR-41: StatCoin tariflari, StatCoin bilan to'lanadigan xizmatlar va sektor bo'yicha narx kalkulyatori.
@@ -29,7 +29,7 @@ export default function TariffCompare() {
       <div className="w-full">
         <PageHeader
           title="Tariflarni taqqoslash"
-          description="StatCoin tariflari, xizmatlar narxi va tarmog'ingiz bo'yicha yakuniy narx."
+          description="Hamyon tariflari, xizmatlar narxi va tarmog'ingiz bo'yicha yakuniy narx."
           breadcrumbs={[{ label: "Bosh sahifa", to: "/" }, { label: "Xizmatlar", to: "/services" }, { label: "Tariflar" }]}
         />
         {loading && !data ? (
@@ -65,11 +65,11 @@ export default function TariffCompare() {
             {data.packages.some((p) => p.statcoin) && (
               <section aria-labelledby="statcoin-tariffs" className="rounded-2xl border border-mg-border bg-mg-surface p-5">
                 <h2 id="statcoin-tariffs" className="mb-1 flex items-center gap-2 font-semibold text-mg-heading">
-                  <Coins className="h-5 w-5 text-mg-primary" aria-hidden="true" /> StatCoin tariflari
+                  <Coins className="h-5 w-5 text-mg-primary" aria-hidden="true" /> Hamyon tariflari
                 </h2>
                 <p className="mb-4 text-sm text-mg-muted">
-                  StatCoin — korxona profillarining pullik bo'limlarini ochish uchun hisob birligi. Oylik tarif har oy hamyoningizga
-                  StatCoin qo'shadi (ishlatilmagani keyingi oyga o'tmaydi); qo'shimcha paket bir marta qo'shiladi va paket muddati davomida amal qiladi.
+                  To'langan summa hamyoningizga so'mda tushadi va korxona profillarining pullik bo'limlari hamda xizmatlar uchun sarflanadi.
+                  Oylik tarif har oy hamyoningizga shu summani qo'shadi (ishlatilmagani keyingi oyga o'tmaydi); qo'shimcha paket bir marta qo'shiladi va paket muddati davomida amal qiladi.
                   Paket shartnoma imzolanib, to'lov tasdiqlangach faollashadi.
                 </p>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -80,7 +80,7 @@ export default function TariffCompare() {
                       <span className="mt-1 font-semibold text-mg-heading">{p.name}</span>
                       <span className="mt-2 text-lg font-bold text-mg-heading">{statcoinLabel(p.statcoin!)}</span>
                       {p.statcoin!.plan && <span className="text-xs text-mg-muted">Daraja: {PLAN_NAMES[p.statcoin!.plan] ?? p.statcoin!.plan}</span>}
-                      <span className="mt-3 text-sm font-semibold text-mg-primary">{formatMoney(p.pricing.price)}</span>
+                      <span className="mt-3 text-sm text-mg-muted">To'lov: {formatMoney(p.pricing.price)}</span>
                     </Link>
                   ))}
                   <Link to="/contact" className="flex flex-col rounded-mg border border-dashed border-mg-border p-4 transition hover:border-mg-primary/50">
@@ -94,11 +94,11 @@ export default function TariffCompare() {
                 </div>
                 {topups.length > 0 && (
                   <p className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-mg-muted">
-                    <span>Qo'shimcha StatCoin (bir marta, paket muddati davomida amal qiladi):</span>
+                    <span>Hamyonni qo'shimcha to'ldirish (bir marta, paket muddati davomida amal qiladi):</span>
                     {topups.map((p) => (
                       <Link key={p.id} to={`/tariff/${p.id}`}
                         className="rounded-full border border-mg-border px-3 py-1 font-semibold text-mg-heading hover:border-mg-primary/50">
-                        +{p.statcoin!.amount} · {formatMoney(p.pricing.price)}
+                        +{formatCredits(p.statcoin!.amount)}
                       </Link>
                     ))}
                   </p>
@@ -108,9 +108,9 @@ export default function TariffCompare() {
 
             {data.statcoin_services.length > 0 && (
               <section aria-labelledby="statcoin-services" className="rounded-2xl border border-mg-border bg-mg-surface p-5">
-                <h2 id="statcoin-services" className="mb-1 font-semibold text-mg-heading">StatCoin bilan to'lanadigan xizmatlar</h2>
+                <h2 id="statcoin-services" className="mb-1 font-semibold text-mg-heading">Hamyondan to'lanadigan xizmatlar</h2>
                 <p className="mb-4 text-sm text-mg-muted">
-                  Har bir foydalanish hamyoningizdagi StatCoin'dan yechiladi, paket limiti kerak emas. Narxlar o'zgarishi mumkin.
+                  Har bir foydalanish hamyoningizdan so'mda yechiladi, paket limiti kerak emas. Narxlar o'zgarishi mumkin.
                   Eski paketingizda limit qolgan bo'lsa, avval o'sha ishlatiladi.
                 </p>
                 <ul className="divide-y divide-mg-border rounded-mg border border-mg-border">
@@ -128,7 +128,7 @@ export default function TariffCompare() {
               <section aria-labelledby="official-services" className="rounded-2xl border border-mg-border bg-mg-surface p-5">
                 <h2 id="official-services" className="mb-1 font-semibold text-mg-heading">Rasmiy xizmatlar (shartnoma asosida)</h2>
                 <p className="mb-3 text-sm text-mg-muted">
-                  Bu xizmatlar StatCoin bilan emas, alohida shartnoma va to'lov bilan ko'rsatiladi.
+                  Bu xizmatlar hamyondan emas, alohida shartnoma va to'lov bilan ko'rsatiladi.
                 </p>
                 <ul className="list-disc space-y-1 pl-5 text-sm text-mg-text">
                   {officialRows.map((r) => <li key={r.id}>{r.name}</li>)}

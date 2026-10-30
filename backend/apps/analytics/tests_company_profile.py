@@ -9,6 +9,7 @@ from rest_framework.test import APITestCase
 from apps.accounts.models import User
 from apps.credits import service as credits
 from apps.credits.models import CreditLedger, CreditWallet
+from apps.credits.testing import use_unit_prices
 from apps.organizations.models import Organization
 
 from .company_scoring import config, explain
@@ -68,6 +69,7 @@ class ProfileApiTests(APITestCase):
         cls.user = User.objects.create_user(username="pr_user", password="x")
         org = Organization.objects.create(user=cls.user, name="Demo", tin="300000777")
         cls.wallet = CreditWallet.objects.create(organization=org, plan="s50")
+        use_unit_prices()
         credits.grant(cls.wallet, 3, expires_at=timezone.now() + timedelta(days=30))
 
     def setUp(self):

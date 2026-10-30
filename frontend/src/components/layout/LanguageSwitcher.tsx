@@ -6,7 +6,7 @@ import { UI } from "../../i18n/ui";
 import { useDismiss } from "./useDismiss";
 
 /** MG-03: til almashtirgich — "O'zbekcha · Ўзбекча · Русский". URL'da til prefiksi bo'lsa, u ham almashadi. */
-export default function LanguageSwitcher() {
+export default function LanguageSwitcher({ variant = "menu" }: { variant?: "menu" | "inline" }) {
   const { lang, setLang, t } = useLang();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -22,6 +22,24 @@ export default function LanguageSwitcher() {
     const first = pathname.split("/")[1];
     if (isLang(first)) navigate(`/${code}${pathname.slice(first.length + 1)}${search}${hash}`, { replace: true });
   };
+
+  // LX-01: til kodlari qatorda (O'ZB · ЎЗБ · РУС), joriysi qalin va aria-current
+  const CODES: Record<Lang, string> = { uz: "O'ZB", cry: "ЎЗБ", ru: "РУС" };
+  const HTML_LANG: Record<Lang, string> = { uz: "uz-Latn", cry: "uz-Cyrl", ru: "ru" };
+  if (variant === "inline") {
+    return (
+      <ul className="flex items-center gap-0.5" aria-label={t(UI.language)}>
+        {LANGS.map((l) => (
+          <li key={l.code}>
+            <button type="button" lang={HTML_LANG[l.code]} onClick={() => choose(l.code)} aria-current={l.code === lang ? "true" : undefined}
+              className={`rounded px-1.5 py-1 text-xs hover:bg-white/15 ${l.code === lang ? "font-bold underline underline-offset-4" : "font-medium opacity-85"}`}>
+              {CODES[l.code]}
+            </button>
+          </li>
+        ))}
+      </ul>
+    );
+  }
 
   return (
     <div className="relative" ref={ref}>

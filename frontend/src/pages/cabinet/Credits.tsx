@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Building2, CalendarClock, Coins, Plus } from "lucide-react";
-import { fetchCredits, formatCredits, type CreditLedgerRow } from "../../api/credits";
+import { fetchCredits, formatSom, type CreditLedgerRow } from "../../api/credits";
 import useApi from "../../hooks/useApi";
 import { EmptyState, ErrorState, Skeleton } from "../../components/ui";
 
@@ -45,11 +45,11 @@ export default function Credits() {
     <div className="p-4 sm:p-6 space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">StatCoin hamyoni</h2>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">StatCoin — korxona profillarining pullik bo'limlarini ochish uchun ichki hisob birligi</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Hamyon</h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Hamyon — korxona profillarining pullik bo'limlari va xizmatlar uchun to'lov balansi (so'mda)</p>
         </div>
         <Link to="/tariffs#scoring" className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-          <Plus className="h-4 w-4" aria-hidden="true" />{data.plan ? "StatCoin qo'shish" : "Tarif tanlang"}
+          <Plus className="h-4 w-4" aria-hidden="true" />{data.plan ? "Hamyonni to'ldirish" : "Tarif tanlang"}
         </Link>
       </div>
 
@@ -59,7 +59,7 @@ export default function Credits() {
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"><Coins className="h-5 w-5" aria-hidden="true" /></span>
             <div className="min-w-0">
               <p className="text-xs text-gray-500 dark:text-gray-400">Balans</p>
-              <p className="text-xl font-bold tabular-nums text-gray-900 dark:text-white">{formatCredits(data.balance)}</p>
+              <p className="text-xl font-bold tabular-nums text-gray-900 dark:text-white">{formatSom(data.balance)}</p>
             </div>
           </div>
           <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Tarif: <span className="font-medium text-gray-700 dark:text-gray-200">{data.plan_name}</span></p>
@@ -72,7 +72,7 @@ export default function Credits() {
               <p className="text-xl font-bold tabular-nums text-gray-900 dark:text-white">{nextExpiry ? fmtDate(nextExpiry.expires_at) : "—"}</p>
             </div>
           </div>
-          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">{nextExpiry ? `${formatCredits(nextExpiry.left)} shu kungacha amal qiladi` : "Muddati tugaydigan StatCoin yo'q"}</p>
+          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">{nextExpiry ? `${formatSom(nextExpiry.left)} shu kungacha amal qiladi` : "Muddati tugaydigan mablag' yo'q"}</p>
         </div>
         <div className="rounded-xl border border-gray-200 p-4 dark:border-gray-700">
           <div className="flex items-center gap-3">
@@ -88,11 +88,11 @@ export default function Credits() {
 
       {data.expiring.length > 0 && (
         <section className="rounded-xl border border-gray-200 dark:border-gray-700">
-          <h3 className="border-b border-gray-200 px-4 py-3 font-semibold text-gray-900 dark:border-gray-700 dark:text-white">StatCoin'lar muddati</h3>
+          <h3 className="border-b border-gray-200 px-4 py-3 font-semibold text-gray-900 dark:border-gray-700 dark:text-white">Muddati tugaydigan mablag'</h3>
           <ul className="divide-y divide-gray-100 text-sm dark:divide-gray-700">
             {data.expiring.map((e) => (
               <li key={e.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
-                <span className="text-gray-800 dark:text-gray-100"><span className="font-semibold tabular-nums">{formatCredits(e.left)}</span> · {e.reason}</span>
+                <span className="text-gray-800 dark:text-gray-100"><span className="font-semibold tabular-nums">{formatSom(e.left)}</span> · {e.reason}</span>
                 <span className="text-gray-500 dark:text-gray-400">{fmtDate(e.expires_at)} gacha</span>
               </li>
             ))}
@@ -127,7 +127,7 @@ export default function Credits() {
                   <th className="px-4 py-2 font-medium">Sana</th>
                   <th className="px-4 py-2 font-medium">Turi</th>
                   <th className="px-4 py-2 font-medium">Izoh</th>
-                  <th className="px-4 py-2 text-right font-medium">StatCoin</th>
+                  <th className="px-4 py-2 text-right font-medium">Summa</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
@@ -138,7 +138,7 @@ export default function Credits() {
                       <span className={`rounded px-2 py-0.5 text-xs font-medium ${KIND_TONE[r.kind] ?? KIND_TONE.adjust}`}>{r.kind_name}</span>
                     </td>
                     <td className="px-4 py-3 text-gray-800 dark:text-gray-100">{describe(r)}</td>
-                    <td className={`whitespace-nowrap px-4 py-3 text-right font-semibold tabular-nums ${r.amount < 0 ? "text-red-600" : "text-emerald-700 dark:text-emerald-400"}`}>{r.amount > 0 ? "+" : ""}{r.amount}</td>
+                    <td className={`whitespace-nowrap px-4 py-3 text-right font-semibold tabular-nums ${r.amount < 0 ? "text-red-600" : "text-emerald-700 dark:text-emerald-400"}`}>{r.amount > 0 ? "+" : ""}{formatSom(r.amount)}</td>
                   </tr>
                 ))}
               </tbody>

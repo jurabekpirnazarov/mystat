@@ -101,3 +101,33 @@
 [data-tnum] {
   font-feature-settings: "tnum";
 }
+
+/* UI_QAYTA_TUZISH.md 4.7: ommaviy qobiq (lex.uz andozasi) tokenlari. Ranglar o'zgarmaydi. */
+:root {
+  --ds-font-scale: 1;
+  --ds-nav-height: 48px;
+  --ds-header-height: 72px;
+  --ds-nav-case: uppercase;
+  --ds-nav-tracking: 0.04em;
+  --ds-note-bg: var(--ds-bg);
+  --ds-note-border: var(--ds-border);
+}
+@media (max-width: 1023px) {
+  :root { --ds-header-height: 56px; }
+}
+/* LX-13: ro'yxat va jadvallar zichligi (faqat ommaviy zonada) */
+[data-density="list"] {
+  --ds-row-height: 44px;
+  --ds-body-size: 15px;
+  --ds-body-leading: 22px;
+  --ds-section-gap: 32px;
+}
+@media (min-width: 1024px) {
+  [data-density="list"] { --ds-section-gap: 40px; }
+}
+/* "Metodologik izoh": kulrang blok, chap chegarasi 3 px */
+.ds-note {
+  background: rgb(var(--ds-note-bg));
+  border-left: 3px solid rgb(var(--ds-note-border));
+  padding: 12px 16px;
+}

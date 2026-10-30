@@ -1,0 +1,103 @@
+/*
+ * H1 (HIBRID_DIZAYN.md 3-bo'lim): yagona `--ds-*` tokenlari. RGB uchliklari — Tailwind shaffofligi uchun.
+ * Eski `--mg-*` nomlari (index.css) shu tokenlarga ulanadi, shuning uchun mavjud komponentlar rangni avtomatik oladi.
+ * Tungi rejim: `.dark` (ThemeContext) yoki `[data-theme="dark"]`.
+ */
+:root {
+  --ds-ink: 17 24 39;
+  --ds-brand: 17 43 82;
+  --ds-on-brand: 255 255 255;
+  --ds-on-brand-muted: 209 213 219;
+  --ds-primary: 0 94 184;
+  --ds-primary-hover: 0 74 148;
+  --ds-primary-soft: 230 240 250;
+  --ds-on-primary: 255 255 255;
+  --ds-accent: 242 178 52;
+  --ds-accent-strong: 156 100 8;
+  --ds-bg: 245 247 250;
+  --ds-surface: 255 255 255;
+  --ds-border: 223 229 237;
+  --ds-text: 22 32 48;
+  --ds-text-muted: 92 105 125;
+  --ds-success: 11 122 99;
+  --ds-success-bg: 230 247 243;
+  --ds-warning: 138 83 0;
+  --ds-warning-bg: 255 244 224;
+  --ds-danger: 192 52 63;
+  --ds-danger-bg: 252 236 238;
+  --ds-info: 10 95 180;
+  --ds-info-bg: 231 241 251;
+  --ds-new: 211 47 47;
+  --ds-focus: 0 94 184;
+
+  /* Och kulrang panellar (sidebar, hero, ob-havo): ustidagi matn to'q */
+  --ds-panel: 232 238 245;
+  --ds-panel-line: 203 212 225;
+  --ds-on-panel: 22 32 48;
+  --ds-on-panel-muted: 70 84 106;
+
+  /* Ma'lumot seriyalari (3.1): eksport ko'k, import to'q sariq, aylanma neytral */
+  --ds-series-export: 37 99 235;
+  --ds-series-import: 217 119 6;
+  --ds-series-total: 102 112 133;
+
+  --ds-radius-control: 6px;
+  --ds-radius-card: 12px;
+  --ds-radius-pill: 999px;
+  --ds-shadow-card: 0 1px 2px rgba(16, 24, 40, 0.05);
+
+  /* Ma'lumot vizualizatsiyasi palitrasi (kategoriyalar) */
+  --ds-viz-1: 37 99 235; --ds-viz-2: 6 182 212; --ds-viz-3: 13 148 136; --ds-viz-4: 139 92 246; --ds-viz-5: 245 158 11; --ds-viz-6: 224 93 111;
+  --ds-shadow-popover: 0 6px 16px rgba(16, 24, 40, 0.10);
+}
+
+.dark,
+[data-theme="dark"] {
+  --ds-ink: 10 14 22;
+  --ds-brand: 24 32 45;
+  --ds-on-brand-muted: 184 196 214;
+  --ds-primary: 91 141 239;
+  --ds-primary-hover: 122 164 243;
+  --ds-primary-soft: 27 42 69;
+  --ds-on-primary: 15 21 32;
+  --ds-accent-strong: 240 161 74;
+  --ds-bg: 15 21 32;
+  --ds-surface: 22 30 44;
+  --ds-border: 38 50 74;
+  --ds-text: 230 234 242;
+  --ds-text-muted: 154 166 188;
+  --ds-success: 76 195 138;
+  --ds-success-bg: 18 48 31;
+  --ds-warning: 240 180 90;
+  --ds-warning-bg: 51 37 13;
+  --ds-danger: 242 112 112;
+  --ds-danger-bg: 58 22 22;
+  --ds-info: 106 168 240;
+  --ds-info-bg: 18 42 68;
+  --ds-new: 242 112 112;
+  --ds-focus: 122 164 243;
+
+  --ds-panel: 24 32 45;
+  --ds-panel-line: 52 64 84;
+  --ds-on-panel: 230 234 242;
+  --ds-on-panel-muted: 170 180 198;
+
+  --ds-series-export: 91 141 239;
+  --ds-series-import: 240 161 74;
+  --ds-series-total: 154 166 188;
+}
+
+/* Zichlik (3.4): layout o'zi qo'yadi */
+[data-density="compact"] {
+  --ds-body-size: 14px;
+  --ds-body-leading: 22px;
+}
+[data-density="comfortable"] {
+  --ds-body-size: 16px;
+  --ds-body-leading: 24px;
+}
+
+.tnum,
+[data-tnum] {
+  font-feature-settings: "tnum";
+}

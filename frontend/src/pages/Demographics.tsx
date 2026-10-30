@@ -25,9 +25,73 @@ function isYear(f: DemographicFilter) {
   return f.ui === "range_or_list";
 }
 
+// Yosh filtri 0–100 va "101+" ni alohida ro'yxat qilib berardi; mantiqiy guruhlar va aniq oraliq bilan almashtirildi.
+const AGE_GROUPS = [
+  { label: "Bolalar", hint: "0–14", min: 0, max: 14 },
+  { label: "Yoshlar", hint: "15–29", min: 15, max: 29 },
+  { label: "Kattalar", hint: "30–59", min: 30, max: 59 },
+  { label: "Keksalar", hint: "60+", min: 60, max: Infinity },
+];
+type AgeGroup = (typeof AGE_GROUPS)[number];
+const isAge = (f: DemographicFilter) => /^(yosh|age)$/i.test(f.label.trim()) || /^(yosh|age)$/i.test(f.column.trim());
+const ageNum = (o: string | number) => parseInt(String(o), 10);
+
+function AgeFilter({ filter, value, onChange }: { filter: DemographicFilter; value: FilterValue | undefined; onChange: (v: FilterValue | undefined) => void }) {
+  const selectCls = "rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm px-2 py-1.5 text-gray-800 dark:text-gray-100";
+  const chip = (active: boolean) =>
+    `px-3 py-1 rounded-full text-sm border ${active ? "bg-blue-600 border-blue-600 text-white" : "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"}`;
+  const ages = filter.options.filter((o) => !Number.isNaN(ageNum(o)));
+  const selected = new Set((Array.isArray(value) ? value : []).map(String));
+  const inGroup = (g: AgeGroup) => ages.filter((o) => ageNum(o) >= g.min && ageNum(o) <= g.max);
+  const groupOn = (g: AgeGroup) => { const opts = inGroup(g); return opts.length > 0 && opts.every((o) => selected.has(String(o))); };
+  const toggleGroup = (g: AgeGroup) => {
+    const next = new Set(selected);
+    const opts = inGroup(g).map(String);
+    if (groupOn(g)) opts.forEach((o) => next.delete(o)); else opts.forEach((o) => next.add(o));
+    const list = filter.options.filter((o) => next.has(String(o)));
+    onChange(list.length ? list : undefined);
+  };
+  // Aniq oraliq (dan–gacha): tanlangan qiymatlarning eng kichigi va kattasi
+  const picked = ages.filter((o) => selected.has(String(o))).map(ageNum);
+  const from: number | "" = picked.length ? Math.min(...picked) : "";
+  const to: number | "" = picked.length ? Math.max(...picked) : "";
+  const setRange = (lo: number | "", hi: number | "") => {
+    if (lo === "" && hi === "") return onChange(undefined);
+    const a = lo === "" ? 0 : lo, b = hi === "" ? Infinity : hi;
+    const list = ages.filter((o) => ageNum(o) >= a && ageNum(o) <= b);
+    onChange(list.length ? list : undefined);
+  };
+  const num = (v: string): number | "" => (v === "" ? "" : Number(v));
+  const opt = (o: string | number) => <option key={o} value={ageNum(o)}>{o}</option>;
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-1.5">
+        <button type="button" className={chip(selected.size === 0)} onClick={() => onChange(undefined)}>Hammasi</button>
+        {AGE_GROUPS.map((g) => (
+          <button key={g.label} type="button" aria-pressed={groupOn(g)} className={chip(groupOn(g))} onClick={() => toggleGroup(g)}>
+            {g.label} <span className="opacity-75">{g.hint}</span>
+          </button>
+        ))}
+      </div>
+      <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+        <span>Aniq oraliq:</span>
+        <select aria-label="Yosh dan" className={selectCls} value={from} onChange={(e) => setRange(num(e.target.value), to)}>
+          <option value="">dan</option>{ages.map(opt)}
+        </select>
+        <span>—</span>
+        <select aria-label="Yosh gacha" className={selectCls} value={to} onChange={(e) => setRange(from, num(e.target.value))}>
+          <option value="">gacha</option>{ages.map(opt)}
+        </select>
+      </div>
+    </div>
+  );
+}
+
 function FilterControl({ filter, value, onChange }: { filter: DemographicFilter; value: FilterValue | undefined; onChange: (v: FilterValue | undefined) => void }) {
   const [q, setQ] = useState("");
   const selectCls = "rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm px-2 py-1.5 text-gray-800 dark:text-gray-100";
+
+  if (isAge(filter)) return <AgeFilter filter={filter} value={value} onChange={onChange} />;
 
   if (isYear(filter)) {
     const range = (value && !Array.isArray(value) ? value : {}) as { min?: number; max?: number };

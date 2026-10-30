@@ -27,7 +27,7 @@ const ACCESS: Record<Access, I18nText> = {
   login: { uz: "Tizimga kirish talab qilinadi", ru: "Требуется вход в систему" },
   package: { uz: "Tarif paketi bo'yicha (limitdan yechiladi)", ru: "По тарифному пакету (списывается с лимита)" },
   priced: { uz: "Alohida narx bo'yicha", ru: "По отдельной цене" },
-  credits: { uz: "Asosiy qismi bepul, batafsil tahlil StatCoin bilan", ru: "Основная часть бесплатно, подробный анализ — за StatCoin" },
+  credits: { uz: "Asosiy qismi bepul, batafsil tahlil pullik (hamyondan)", ru: "Основная часть бесплатно, подробный анализ — платно (из кошелька)" },
 };
 
 function Stars({ value, size = "h-5 w-5" }: { value: number; size?: string }) {

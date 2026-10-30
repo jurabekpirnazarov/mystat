@@ -37,7 +37,7 @@ class PackageGrantTests(TestCase):
         self.assertEqual(self.wallet.plan, "s60")
         row = CreditLedger.objects.get(kind="grant")
         self.assertEqual(row.source_package_id, usp.pk * packages.KEY_STEP)
-        self.assertTrue(Notification.objects.filter(recipient=self.user, title__icontains="StatCoin").exists())
+        self.assertTrue(Notification.objects.filter(recipient=self.user, title__icontains="Hamyoningiz").exists())
 
     def test_resave_and_repeat_do_not_grant_twice(self):
         usp = activate(self.user, make_package())

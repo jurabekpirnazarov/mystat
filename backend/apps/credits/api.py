@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from . import service
 from .models import CreditLedger, CreditPrice, CreditUnlock
 
-TAG = ["StatCoin"]
+TAG = ["Hamyon"]
 PAGE = 20
 LEVEL_ALIASES = {"profile_basis": "basis", "profile_deep": "deep"}
 
@@ -36,7 +36,7 @@ def _names(stirs):
 class CreditsMeView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    @extend_schema(tags=TAG, summary="StatCoin hamyonim: balans, muddati yaqinlar, ledger, ochilgan korxonalar",
+    @extend_schema(tags=TAG, summary="Hamyonim: balans, muddati yaqinlar, ledger, ochilgan korxonalar",
                    parameters=[OpenApiParameter("page", int)], responses={200: OpenApiTypes.OBJECT})
     def get(self, request):
         wallet = service.wallet_of(request.user)
@@ -71,7 +71,7 @@ class CreditsMeView(APIView):
 class UnlockView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    @extend_schema(tags=TAG, summary="Korxona profili bo'limini StatCoin bilan ochish (30 kun)",
+    @extend_schema(tags=TAG, summary="Korxona profili bo'limini hamyondan ochish (30 kun)",
                    request=UnlockSerializer, responses={200: OpenApiTypes.OBJECT, 402: OpenApiTypes.OBJECT,
                                                         403: OpenApiTypes.OBJECT, 409: OpenApiTypes.OBJECT})
     def post(self, request):

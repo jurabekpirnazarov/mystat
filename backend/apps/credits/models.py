@@ -25,8 +25,8 @@ class CreditWallet(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = _("StatCoin hamyoni")
-        verbose_name_plural = _("StatCoin hamyonlari")
+        verbose_name = _("Hamyon")
+        verbose_name_plural = _("Hamyonlar")
         constraints = [models.CheckConstraint(
             check=Q(organization__isnull=False, user__isnull=True) | Q(organization__isnull=True, user__isnull=False),
             name="credit_wallet_one_owner")]
@@ -62,8 +62,8 @@ class CreditLedger(models.Model):
     class Meta:
         ordering = ["-created_at", "-id"]
         indexes = [models.Index(fields=["wallet", "kind", "expires_at"])]
-        verbose_name = _("StatCoin yozuvi")
-        verbose_name_plural = _("StatCoin ledger")
+        verbose_name = _("Hamyon yozuvi")
+        verbose_name_plural = _("Hamyon yozuvlari")
 
     def __str__(self):
         return f"{self.get_kind_display()} {self.amount}"
@@ -96,12 +96,12 @@ class CreditPrice(models.Model):
 
     action_code = models.CharField(max_length=40, unique=True, verbose_name=_("Amal kodi"))
     name = models.CharField(max_length=120, blank=True, verbose_name=_("Nomi"))
-    credits = models.DecimalField(max_digits=8, decimal_places=1, verbose_name=_("StatCoin"))
+    credits = models.DecimalField(max_digits=8, decimal_places=1, verbose_name=_("Narx (so'm)"))
     is_active = models.BooleanField(default=True, verbose_name=_("Faol"))
 
     class Meta:
-        verbose_name = _("StatCoin narxi")
-        verbose_name_plural = _("StatCoin narxlari")
+        verbose_name = _("Amal narxi")
+        verbose_name_plural = _("Amal narxlari")
 
     def __str__(self):
         return f"{self.action_code} = {self.credits}"

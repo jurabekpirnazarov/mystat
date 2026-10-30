@@ -124,7 +124,7 @@ const PersonalCabinet = () => {
     { id: "consultations", label: "Konsultatsiyalarim", icon: CalendarCheck, audience: "legal" },
     { id: "plan", label: "Faoliyat rejasi", icon: CalendarRange, audience: "legal" },
     { id: "subscriptions", label: "Obunalarim", icon: BellRing, audience: "all" },
-    { id: "credits", label: "StatCoin hamyoni", icon: Coins, audience: "all" },
+    { id: "credits", label: "Hamyon", icon: Coins, audience: "all" },
     { id: "api-keys", label: "API kalitlarim", icon: KeyRound, audience: "all" },
     { id: "profile", label: "Sozlamalar", icon: Settings, audience: "all" },
     { id: "support", label: "Qo'llab quvatlash", icon: HelpCircle, audience: "all" },

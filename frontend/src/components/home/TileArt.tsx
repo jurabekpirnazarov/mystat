@@ -252,6 +252,9 @@ const SCENES: Record<number, (sh: string) => ReactNode> = {
   ),
 };
 
+/** Xizmat uchun sahna bormi (yo'q bo'lsa chaqiruvchi ikonkaga qaytadi) */
+export const hasTileArt = (number: number) => number in SCENES;
+
 export default function TileArt({ number, className = "" }: { number: number; className?: string }) {
   const id = useId().replace(/:/g, "");
   const scene = SCENES[number];

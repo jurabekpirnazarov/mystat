@@ -1,0 +1,87 @@
+%% my.stat.uz: dizayn tizimi v2 (HIBRID_DIZAYN.md + UI_QAYTA_TUZISH.md v2: lex.uz andozasi + gov.uz qoidalari). Sana: 2026-10-30
+%% "LX" = lex.uz dan, "GV" = gov.uz dan
+flowchart TB
+  subgraph TOK["Dizayn tokenlari (--ds-*)"]
+    direction LR
+    T1["Ranglar o'zgarmaydi<br/>ink, brand (to'q ko'k), primary,<br/>accent, bg, surface, border"]
+    T2["Holatlar<br/>success, warning, danger, info"]
+    T3["LX: Ko'rinish A A A<br/>font-scale 1 / 1.15 / 1.3,<br/>kontrast, rangsiz"]
+    T4["LX: zichlik list<br/>qator 44 px, matn 15/22,<br/>katta harfli menyu"]
+  end
+
+  subgraph QOBIQ["Ommaviy qobiq (lex.uz andozasi)"]
+    direction TB
+    Q1["TopBar: ijtimoiy · hisobot kalendari · tel ·<br/>Ko'rinish A A A ◐ · O'ZB ЎЗБ РУС · Kirish"]
+    Q2["PublicHeader: logo + ikki qatorli rasmiy nom"]
+    Q3["MainNav 6 band, katta harf:<br/>STATISTIK MA'LUMOTLAR · XIZMATLAR ·<br/>HISOBOT TOPSHIRUVCHILARGA · MA'LUMOTNOMALAR ·<br/>PORTAL HAQIDA · TUSHUNTIRISHLAR"]
+    Q4["Footer ixcham: havolalar, RSS,<br/>ilovalar, ijtimoiy, ©; xarita /sitemap da"]
+    Q1 --> Q2 --> Q3
+  end
+
+  subgraph ZONA["Uch zona"]
+    direction LR
+    S["S · Statistika<br/>lex.uz ro'yxatlari va rekvizitlari<br/>+ Statista grafigi<br/>DataPage"]
+    G["G · Katalog<br/>my.gov.uz pasporti<br/>+ lex.uz ro'yxatlari<br/>CatalogPage, ServicePage, InfoPage"]
+    M["M · Kabinet (o'zgarmaydi)<br/>my.soliq / my.mehnat<br/>AppShell"]
+  end
+
+  subgraph HOME["Bosh sahifa v3"]
+    direction TB
+    H1["1 LX: Qidiruv paneli<br/>Tezkor / Kengaytirilgan + aholi soni"]
+    H2["2 Kirganlarga bir qatorli AlertStrip"]
+    H3["3 LX: Statistika mavzulari<br/>LinkGrid, Hammasini ochish"]
+    H4["4 LX: Yangi e'lon qilingan ma'lumotlar<br/>DocList: E'lon qilingan / Kutilayotgan"]
+    H5["5 LX: Portaldagi ma'lumotlar<br/>CountGrid"]
+    H6["6 Ommabop xizmatlar 8 qator<br/>7 Foydali resurslar"]
+    H1 --> H2 --> H3 --> H4 --> H5 --> H6
+  end
+
+  subgraph IND["Ko'rsatkich sahifasi v2"]
+    direction TB
+    I1["LX: RequisitesBlock<br/>kod, manba, davriylik, yangilangan,<br/>keyingi e'lon, holat"]
+    I2["LX: VintageNav<br/>oldingi / keyingi nashr, ?asof="]
+    I3["LX: Tablar: Ma'lumot · Rekvizitlar ·<br/>Metodologiya · Qayta ko'rib chiqishlar ·<br/>Bog'liq"]
+    I4["Statista: ChartCard + ToolRail<br/>+ DownloadPanel, LX: element havolasi"]
+    I1 --> I2 --> I3 --> I4
+  end
+
+  subgraph SAH["Boshqa sahifalar"]
+    direction LR
+    P1["/search, /indicators<br/>LX: SearchPanel + DocList"]
+    P2["/topics, /spheres: LX LinkGrid<br/>/release-calendar: Bugun/Hafta/Oy"]
+    P3["/service/:n, /situations<br/>GV: lex.uz havolalari"]
+    P4["/regions: GV xarita / ro'yxat<br/>/statistics: CountGrid"]
+    P5["/cabinet"]
+  end
+
+  subgraph KOMP["Komponentlar components/ds/"]
+    direction LR
+    C1["LX yangi: SearchPanel, LinkGrid,<br/>DocList, CountGrid, RequisitesBlock,<br/>VintageNav, ViewControls, MainNav"]
+    C2["GV: SectionHeader, ExternalLink,<br/>ActionCard, SituationTile,<br/>RegionCountList, LegacyLink"]
+    C3["Mavjud: ChartCard, ToolRail,<br/>StatCard, SourceNote, ServiceCard,<br/>TopicTile, IndicatorCard"]
+  end
+
+  subgraph QOIDA["Qoidalar"]
+    direction LR
+    R1["Lighthouse a11y >= 95"]
+    R2["360 / 768 / 1280 px,<br/>A A A 130% da ham"]
+    R3["Har raqamda manba va davr"]
+    R4["Yuklanishda 0 emas · karusel yo'q ·<br/>imlo va yozuv aralashmasin"]
+    R5["Bosh sahifada grafik<br/>kutubxonasi yuklanmaydi"]
+  end
+
+  TOK --> QOBIQ
+  TOK --> M
+  QOBIQ --> S
+  QOBIQ --> G
+  S --> HOME
+  S --> IND
+  S --> P1
+  S --> P2
+  G --> P3
+  S --> P4
+  M --> P5
+  HOME --> KOMP
+  IND --> KOMP
+  SAH --> KOMP
+  KOMP --- QOIDA

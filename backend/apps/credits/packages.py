@@ -59,8 +59,8 @@ def _notify(user, wallet, ledger, usp, package, amount):
 
     plan = f"{package.name} faollashdi" if package.statcoin_kind == "monthly" else f"{package.name} qo'shildi"
     Notification.objects.create(
-        recipient=user, title="StatCoin hamyoningiz to'ldirildi",
-        message=f"{plan}: hamyonga {amount.normalize():f} StatCoin qo'shildi.",
+        recipient=user, title="Hamyoningiz to'ldirildi",
+        message=f"{plan}: hamyonga {f'{amount:,.0f}'.replace(',', ' ')} so'm qo'shildi.",
         notification_type="success", content_type=ContentType.objects.get_for_model(CreditLedger),
         object_id=ledger.pk, extra_data={"package_id": package.pk, "user_package_id": usp.pk,
                                          "statcoin": float(amount)})

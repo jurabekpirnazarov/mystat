@@ -1,0 +1,72 @@
+%% my.stat.uz: dizayn tizimi (HIBRID_DIZAYN.md bo'yicha). Sana: 2026-10-29
+flowchart TB
+  subgraph ASOS["Nimaga asoslangan (egasi qarori 2026-10-22: gibrid)"]
+    direction LR
+    B1["Statista<br/>ommaviy statistika, bosh sahifa<br/>STATISTA_DIZAYN.md"]
+    B2["my.gov.uz<br/>xizmatlar katalogi, sohalar,<br/>sidebar layout. MYGOV_DIZAYN.md"]
+    B3["my.soliq.uz / my.mehnat.uz<br/>shaxsiy kabinet<br/>MEHNAT_SOLIQ_DIZAYN.md"]
+    B4["Tashqi savdo, iHamkor<br/>TRADEINT_DIZAYN.md,<br/>IHAMKOR_MUQOBIL.md"]
+    B5["Faqat tuzilma va xatti-harakat olinadi,<br/>logo, shrift, rasm, matn ko'chirilmaydi"]
+  end
+  ASOS --> TOK
+
+  subgraph TOK["Dizayn tokenlari (--ds-*)"]
+    direction LR
+    T1["Ranglar<br/>ink, brand, primary,<br/>accent, bg, surface, border"]
+    T2["Holatlar<br/>success, warning, danger, info"]
+    T3["Tema<br/>kunduzgi / tungi<br/>(ThemeContext)"]
+    T4["Til<br/>uz / cry / ru"]
+  end
+
+  subgraph ZONA["Uch zona"]
+    direction LR
+    S["S · Statistika<br/>uslub: Statista<br/>DataPage"]
+    G["G · Katalog<br/>uslub: my.gov.uz<br/>CatalogPage, ServicePage, InfoPage"]
+    M["M · Kabinet<br/>uslub: my.soliq / my.mehnat<br/>AppShell"]
+  end
+
+  subgraph LAY["Layout"]
+    direction LR
+    L1["MainLayout<br/>sidebar + Header + Breadcrumbs"]
+    L2["Embed<br/>navbarsiz /embed/indicator"]
+  end
+
+  subgraph SAH["Sahifalar"]
+    direction LR
+    P1["/ bosh sahifa<br/>qidiruv, asosiy xizmatlar,<br/>Sohalar, vidjetlar"]
+    P2["/spheres, /service/:n<br/>/popular, /situations"]
+    P3["/regions, /dashboards<br/>/release-calendar"]
+    P4["/reporting, /check<br/>/company/:stir"]
+    P5["/cabinet<br/>hisobotlar, StatCoin,<br/>shartnomalar"]
+  end
+
+  subgraph KOMP["Umumiy komponentlar"]
+    direction LR
+    C1["ui: PageHeader, StatCard,<br/>EmptyState, Skeleton, DemoBadge"]
+    C2["Namuna belgisi<br/>faqat DEBUG yoki SYNTHETIC_DATA"]
+    C3["Logo (grafit tizimi),<br/>ShareBar, CommandPalette Ctrl+K"]
+  end
+
+  subgraph SIN["Sinovdagi yo'nalish"]
+    AIC["AI Community uslubi<br/>iliq fon, lojuvard, oltin,<br/>girih naqshi, Unbounded"]
+    AIC -. "faqat ommaviy sahifalarda<br/>(qaror kutilmoqda)" .-> G
+  end
+
+  subgraph QOIDA["Qoidalar"]
+    direction LR
+    Q1["Lighthouse a11y >= 95"]
+    Q2["360 / 768 / 1280 px<br/>gorizontal skroll yo'q"]
+    Q3["Har raqamda manba va davr"]
+    Q4["StatCoin: ichki hisob,<br/>ko'rinishda so'm"]
+  end
+
+  TOK --> ZONA
+  ZONA --> LAY
+  S --> P3
+  G --> P1
+  G --> P2
+  G --> P4
+  M --> P5
+  LAY --> SAH
+  SAH --> KOMP
+  KOMP --- QOIDA

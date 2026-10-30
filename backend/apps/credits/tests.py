@@ -11,6 +11,7 @@ from apps.accounts.models import User
 from apps.organizations.models import Organization
 
 from . import service
+from .testing import use_unit_prices
 from .models import CreditLedger, CreditPrice, CreditUnlock, CreditWallet
 
 
@@ -18,6 +19,7 @@ def make_wallet(username="w_user", tin="300000001", plan="s50", amount=None, exp
     user = User.objects.create_user(username=username, password="x")
     org = Organization.objects.create(user=user, name=f"Org {username}", tin=tin)
     wallet = CreditWallet.objects.create(organization=org, plan=plan)
+    use_unit_prices()
     if amount:
         service.grant(wallet, amount, expires_at=timezone.now() + timedelta(days=expires_days))
     return user, wallet
@@ -62,8 +64,9 @@ class LedgerTests(TestCase):
         self.assertEqual(service.refund(wallet, action_code="profile_basis", object_ref="7"), 3)
 
     def test_default_prices(self):
-        self.assertEqual(service.price_of("profile_basis"), 1)
-        self.assertEqual(service.price_of("profile_deep"), 3)
+        """Haqiqiy narxlar so'mda (migratsiya): 1 birlik = 16 500 so'm (Scoring 50: 824 000 so'm ≈ 50 birlik)."""
+        self.assertEqual(service.price_of("profile_basis"), 16500)
+        self.assertEqual(service.price_of("profile_deep"), 49500)
         CreditPrice.objects.filter(action_code="profile_basis").update(is_active=False)
         self.assertIsNone(service.price_of("profile_basis"))
 

@@ -1,3 +1,4 @@
+import { formatCredits } from "../../api/credits";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { CartesianGrid, Line, LineChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -75,8 +76,10 @@ export default function CompanyScoreCard({ stir, mode = "public", preset: initia
   const profileUrl = `/company/${data.stir}`;
   if (data.locked) return <LockedCard data={data} box={box} />;
   // Baholanmagan ustun radarda 0 bo'lib chizilmasin (chalg'itadi) — faqat bahosi borlari
-  const radar = data.pillars_detail.filter((p) => p.applicable && p.score !== null).map((p) => ({ name: p.name, v: p.score ?? 0, avg: 50 }));
-  const byPillar = data.pillars_detail.map((p) => ({ ...p, indicators: data.indicators.filter((i) => i.pillar === p.key) }));
+  const pillarsDetail = data.pillars_detail ?? [];
+  const indicators = data.indicators ?? [];   // 'basis' darajasida bo'lmaydi (faqat 'deep' da keladi)
+  const radar = pillarsDetail.filter((p) => p.applicable && p.score !== null).map((p) => ({ name: p.name, v: p.score ?? 0, avg: 50 }));
+  const byPillar = pillarsDetail.map((p) => ({ ...p, indicators: indicators.filter((i) => i.pillar === p.key) }));
 
   return (
     <section aria-label="Korxona bali" className={`${box} space-y-4`}>
@@ -220,7 +223,7 @@ function LockedCard({ data, box }: { data: CompanyScoreLocked; box: string }) {
       </div>
       {!none && (
         <p className="text-sm text-gray-700 dark:text-gray-200">
-          Ball nimaga asoslangan (6 ustun, ball tarkibi, tengdoshlar orasidagi o'rin) — korxona profilida{basis?.credits ? `, ${basis.credits} StatCoin` : ""}.
+          Ball nimaga asoslangan (6 ustun, ball tarkibi, tengdoshlar orasidagi o'rin) — korxona profilida{basis?.credits ? `, ${formatCredits(basis.credits)}` : ""}.
         </p>
       )}
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 pt-2 text-xs text-gray-500 dark:border-gray-700">

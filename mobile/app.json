@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "my.stat.uz",
+    "slug": "mystat-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": { "supportsTablet": true, "bundleIdentifier": "uz.stat.my.demo" },
+    "android": {
+      "package": "uz.stat.my.demo",
+      "adaptiveIcon": {
+        "backgroundColor": "#1F2937",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": ["expo-sqlite", "expo-asset"]
+  }
+}

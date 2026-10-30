@@ -82,9 +82,8 @@ class ContractCreateSerializer(serializers.Serializer):
         if not service_package:
             raise serializers.ValidationError("Service package not found or access denied.")
         
-        if not service_package.file:
-            raise serializers.ValidationError("Service package does not have a file attached.")
-            
+        # Paket fayli shartnoma matniga ta'sir qilmaydi (matn shablondan olinadi),
+        # StatCoin paketlarida (KR-41) fayl yo'q — shuning uchun talab qilinmaydi.
         return value
 
     def _prepare_didox_payload(self, org, service_package):

@@ -1,0 +1,25 @@
+@import "@fontsource-variable/inter";
+@import "./theme/tokens.css";
+@import "./theme/a11y.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* `--mg-*` nomlari `--ds-*` tokenlariga ulangan: Tailwind'dagi `bg-mg-surface`, `text-mg-muted` va h.k. shu orqali ishlaydi */
+:root {
+  --mg-primary: var(--ds-primary);
+  --mg-primary-dark: var(--ds-primary-hover);
+  --mg-accent: var(--ds-accent);
+  --mg-success: var(--ds-success);
+  --mg-bg: var(--ds-bg);
+  --mg-surface: var(--ds-surface);
+  --mg-info: var(--ds-primary-soft);
+  --mg-heading: var(--ds-text);
+  --mg-text: var(--ds-text);
+  --mg-muted: var(--ds-text-muted);
+  --mg-border: var(--ds-border);
+}
+body { font-family: "Inter Variable", system-ui, "Segoe UI", Roboto, Arial, sans-serif; background-color: rgb(var(--mg-bg)); }
+:focus-visible { outline: 2px solid rgb(var(--mg-primary)); outline-offset: 2px; }
+.skip-link { position: absolute; left: 1rem; top: -3rem; z-index: 100; padding: .5rem 1rem; border-radius: .5rem; background: rgb(var(--mg-primary)); color: #fff; }
+.skip-link:focus { top: 1rem; }

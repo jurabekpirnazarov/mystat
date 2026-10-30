@@ -89,14 +89,14 @@ class ServicePackage(BaseModel):
 
     # KR-41: paket faollashganda hamyonga beriladigan StatCoin (apps.credits.packages). Bo'sh `statcoin_kind` — mavjud
     # (eski) paketlar: ular StatCoin bermaydi va o'zgarmaydi.
-    STATCOIN_KINDS = (("", _("StatCoin bermaydi")), ("monthly", _("Oylik StatCoin")), ("topup", _("Bir martalik qo'shimcha")))
+    STATCOIN_KINDS = (("", _("Hamyonga qo'shmaydi")), ("monthly", _("Oylik hamyon to'ldirish")), ("topup", _("Bir martalik qo'shimcha")))
     STATCOIN_PLANS = (("", _("Tarifsiz")), ("s50", "Scoring 50"), ("s60", "Scoring 60"), ("s90", "Scoring 90"),
                       ("corp", _("Korporativ")))
     statcoin_kind = models.CharField(max_length=10, choices=STATCOIN_KINDS, blank=True, default="",
-                                     verbose_name=_("StatCoin turi"),
+                                     verbose_name=_("Hamyon turi"),
                                      help_text=_("Oylik: har oy shu miqdor beriladi (ishlatilmagani keyingi oyga o'tmaydi). "
                                                  "Qo'shimcha: bir marta, paket muddati (standart 365 kun) amal qiladi."))
-    statcoin_amount = models.DecimalField(max_digits=8, decimal_places=1, default=0, verbose_name=_("StatCoin miqdori"))
+    statcoin_amount = models.DecimalField(max_digits=8, decimal_places=1, default=0, verbose_name=_("Hamyonga qo'shiladigan summa (so'm)"))
     statcoin_plan = models.CharField(max_length=10, choices=STATCOIN_PLANS, blank=True, default="",
                                      verbose_name=_("Scoring tarifi darajasi"),
                                      help_text=_("Oylik paket faol bo'lsa hamyonning tarifi shunga o'rnatiladi."))

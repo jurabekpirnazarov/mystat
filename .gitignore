@@ -14,3 +14,6 @@ backend/datas/
 backend/media/demo/
 backend/media/demographics/
 backend/media/contracts/
+
+# Ishga tushirish loglari
+*_run.log

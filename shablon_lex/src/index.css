@@ -1,0 +1,9 @@
+@import "@fontsource-variable/montserrat";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body { font-family: "Montserrat Variable", "Montserrat", system-ui, "Segoe UI", sans-serif; color: #212529; background: #fff; }
+:focus-visible { outline: 2px solid #0C57A6; outline-offset: 2px; }
+.skip-link { position: absolute; left: 1rem; top: -3rem; z-index: 100; padding: .5rem 1rem; background: #0C57A6; color: #fff; }
+.skip-link:focus { top: 1rem; }

@@ -6,6 +6,7 @@ import { SERVICES, matchesFilters, serviceByNumber } from "../../config/serviceC
 import { useLang, type I18nText } from "../../i18n/LangContext";
 import ServiceCard from "../../components/catalog/ServiceCard";
 import { useServiceStats } from "../../components/catalog/useServiceStats";
+import { SEARCH_TYPES } from "../../config/searchFilters";
 
 /** "Ommabop so'rovlar" chip'lari (my.gov.uz qidiruv sahifasidagi kabi). */
 const POPULAR_QUERIES: I18nText[] = [
@@ -26,6 +27,8 @@ export default function Search() {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const q = params.get("q") ?? "";
+  /** LX-04: ma'lumot turi filtri (URL'da `type=`): services | companies | faq | articles | glossary */
+  const type = params.get("type") ?? "";
   const [input, setInput] = useState(q);
   const [remote, setRemote] = useState<SearchGroup[]>([]);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -51,7 +54,11 @@ export default function Search() {
     };
   }, [q]);
 
-  const services = useMemo(() => (q.trim() ? SERVICES.filter((s) => matchesFilters(s, null, null, q.replace(/^#/, ""))) : []), [q]);
+  const services = useMemo(() => (q.trim() && (!type || type === "services") ? SERVICES.filter((s) => matchesFilters(s, null, null, q.replace(/^#/, ""))) : []), [q, type]);
+
+  const visibleRemote = useMemo(() => remote.filter((g) => !type || g.type === type), [remote, type]);
+
+  const withType = (extra: Record<string, string>) => ({ ...extra, ...(type ? { type } : {}) });
 
   const submit = (value: string) => {
     const num = /^#?(\d{3,4})$/.exec(value.trim());
@@ -60,7 +67,7 @@ export default function Search() {
       navigate(`/service/${service.number}`);
       return;
     }
-    setParams(value.trim() ? { q: value.trim() } : {});
+    setParams(value.trim() ? withType({ q: value.trim() }) : withType({}));
   };
 
   const section = (key: string, title: string, count: number, children: React.ReactNode) => (
@@ -79,7 +86,7 @@ export default function Search() {
     </section>
   );
 
-  const nothing = q.trim().length >= 2 && services.length === 0 && remote.every((g) => g.items.length === 0);
+  const nothing = q.trim().length >= 2 && services.length === 0 && visibleRemote.every((g) => g.items.length === 0);
 
   return (
     <div>
@@ -92,6 +99,16 @@ export default function Search() {
           placeholder={t({ uz: "Xizmatni izlash, masalan — bozor tahlili yoki #302", ru: "Поиск услуги, например — анализ рынка или #302" })}
           className="w-full bg-transparent text-base outline-none placeholder:text-slate-400 focus-visible:outline-none" />
       </form>
+
+      <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Ma'lumot turi">
+        {SEARCH_TYPES.map((x) => (
+          <button key={x.key} type="button" aria-pressed={type === x.key}
+            onClick={() => setParams({ ...(q ? { q } : {}), ...(x.key ? { type: x.key } : {}) })}
+            className={`rounded-full border px-3 py-1 text-sm ${type === x.key ? "border-mg-primary bg-mg-primary text-white" : "border-mg-border text-mg-text hover:bg-mg-info"}`}>
+            {x.label}
+          </button>
+        ))}
+      </div>
 
       <h2 className="mt-8 text-lg font-semibold text-mg-primary">{t({ uz: "Ommabop so'rovlar", ru: "Популярные запросы" })}</h2>
       <div className="mt-3 flex flex-wrap gap-2.5">
@@ -109,7 +126,7 @@ export default function Search() {
         </div>
       ))}
 
-      {remote.filter((g) => g.items.length).map((g) => {
+      {visibleRemote.filter((g) => g.items.length).map((g) => {
         const Icon = GROUP_ICONS[g.type] ?? FileText;
         const items = expanded[g.type] ? g.items : g.items.slice(0, PREVIEW);
         return section(g.type, g.label, g.items.length, (

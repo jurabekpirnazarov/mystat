@@ -128,7 +128,7 @@ def spend(wallet, credits, *, action_code, object_ref="", user=None, kind="spend
         sources = _sources(wallet, now)
         have = sum((left for _, left in sources), ZERO)
         if have < credits:
-            raise CreditError("insufficient", "StatCoin yetarli emas.", status=402, balance=float(have),
+            raise CreditError("insufficient", "Hamyonda mablag' yetarli emas.", status=402, balance=float(have),
                               required=float(credits))
         need = credits
         for row, left in sources:

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { formatSom } from "../../api/credits";
 import { Lock, Info } from "lucide-react";
 import { asApiError } from "../../api/errors";
 import EmptyState from "./EmptyState";
@@ -23,11 +24,11 @@ export default function ApiErrorState({ error, onRetry, notFoundAction }: Props)
     return (
       <EmptyState
         icon={Lock}
-        title="StatCoin yetarli emas"
-        description={`${detail ?? "Bu xizmat StatCoin bilan to'lanadi."}${typeof data.required === "number" ? ` Kerak: ${data.required}, hamyonda: ${data.balance ?? 0}.` : ""}`}
+        title="Hamyonda mablag' yetarli emas"
+        description={`${detail ?? "Bu xizmat hamyondan to'lanadi."}${typeof data.required === "number" ? ` Kerak: ${formatSom(data.required)}, hamyonda: ${formatSom(Number(data.balance ?? 0))}.` : ""}`}
         action={
           <Link to={data.upgrade_url} className="inline-flex px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700">
-            Tariflar va StatCoin
+            Tariflar va hamyon
           </Link>
         }
       />

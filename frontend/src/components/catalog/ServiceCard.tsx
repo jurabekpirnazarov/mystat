@@ -18,7 +18,7 @@ const ACCESS_BADGE: Record<Access, { uz: string; ru: string }> = {
   login: { uz: "Login", ru: "Вход" },
   package: { uz: "Paket", ru: "Пакет" },
   priced: { uz: "Pullik", ru: "Платно" },
-  credits: { uz: "StatCoin", ru: "StatCoin" },
+  credits: { uz: "Hamyondan", ru: "Из кошелька" },
 };
 
 /**

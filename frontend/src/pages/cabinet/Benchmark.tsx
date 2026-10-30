@@ -177,7 +177,7 @@ export default function Benchmark() {
           <ScoreBenchmark />
           {data.usage.statcoin && (
             <p className="text-xs text-gray-500">
-              {data.usage.statcoin.charged ? `${formatCredits(data.usage.statcoin.charged)} yechildi` : "Bugun bu hisobot uchun StatCoin yechilgan"}
+              {data.usage.statcoin.charged ? `${formatCredits(data.usage.statcoin.charged)} yechildi` : "Bugun bu hisobot uchun to'lov yechilgan"}
               {" "}· hamyonda {formatCredits(data.usage.statcoin.balance)} (bir kunda bir xil hisobot qayta sanalmaydi)
             </p>
           )}

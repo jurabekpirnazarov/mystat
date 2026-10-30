@@ -45,7 +45,7 @@ export default function StatCoinPackagePanel({ packageId }: { packageId: number 
     try {
       const { data } = await axiosT.post<Activation>("/credits/activation/", { package: packageId });
       setState(data);
-      setMessage(data.activated_now?.length ? "Paket faollashdi, StatCoin hamyonga qo'shildi." : "To'lov hali to'liq tasdiqlanmagan.");
+      setMessage(data.activated_now?.length ? "Paket faollashdi, summa hamyonga qo'shildi." : "To'lov hali to'liq tasdiqlanmagan.");
     } catch {
       setMessage("Tekshirib bo'lmadi. Keyinroq urinib ko'ring.");
     } finally {
@@ -66,12 +66,12 @@ export default function StatCoinPackagePanel({ packageId }: { packageId: number 
         <p className="mt-2 text-lg font-bold text-mg-heading">{monthly ? `${formatCredits(sc.amount)} har oy` : `${formatCredits(sc.amount)} bir marta`}</p>
         <p className="mt-1 text-sm text-mg-muted">
           {monthly
-            ? "Oylik StatCoin hamyoningizga har oy qo'shiladi; ishlatilmagani keyingi oyga o'tmaydi."
-            : "StatCoin hamyoningizga bir marta qo'shiladi va paket muddati davomida amal qiladi."}
+            ? "Oylik summa hamyoningizga har oy qo'shiladi; ishlatilmagani keyingi oyga o'tmaydi."
+            : "Summa hamyoningizga bir marta qo'shiladi va paket muddati davomida amal qiladi."}
           {sc.plan && ` Hamyon darajasi: ${PLAN_NAMES[sc.plan] ?? sc.plan}.`}
         </p>
 
-        <h4 className="mt-4 text-sm font-semibold text-mg-heading">StatCoin bilan nimalar ochiladi</h4>
+        <h4 className="mt-4 text-sm font-semibold text-mg-heading">Hamyon bilan nimalar ochiladi</h4>
         <ul className="mt-2 divide-y divide-mg-border rounded-mg border border-mg-border text-sm">
           {[...sc.opens.profile, ...sc.opens.services.map((s) => ({ ...s, level: s.slug }))].map((o) => (
             <li key={o.level} className="flex items-center justify-between gap-4 px-4 py-2.5">
@@ -84,7 +84,7 @@ export default function StatCoinPackagePanel({ packageId }: { packageId: number 
           ))}
         </ul>
         {sc.opens.needs_plan_for_profile && (
-          <p className="mt-2 text-xs text-mg-muted">Korxona profili bo'limlari uchun oylik Scoring tarifi ham kerak; xizmatlar esa faqat StatCoin bilan ishlaydi.</p>
+          <p className="mt-2 text-xs text-mg-muted">Korxona profili bo'limlari uchun oylik Scoring tarifi ham kerak; xizmatlar esa faqat hamyon bilan ishlaydi.</p>
         )}
       </section>
 
@@ -94,7 +94,7 @@ export default function StatCoinPackagePanel({ packageId }: { packageId: number 
           {state?.active ? (
             <p className="mt-2 flex items-center gap-2 text-sm text-mg-text">
               <CheckCircle2 className="h-5 w-5 text-green-600" aria-hidden="true" /> Paket faol. Hamyonda: <b>{formatCredits(state.balance)}</b>.{" "}
-              <Link to="/cabinet?tab=credits" className="font-semibold text-mg-primary hover:underline">StatCoin hamyoni</Link>
+              <Link to="/cabinet?tab=credits" className="font-semibold text-mg-primary hover:underline">Hamyon</Link>
             </p>
           ) : last ? (
             <p className="mt-2 text-sm text-mg-text">

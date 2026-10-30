@@ -14,7 +14,7 @@ import { translate, type I18nText } from "../i18n/LangContext";
  * va docs/MYGOV_DIZAYN.md 3-bo'lim (sohalar). Raqam = soha id × 100 + tartib; raqam o'zgarmaydi.
  */
 export type Audience = "all" | "legal" | "individual";
-/** open — kirishsiz; login — ro'yxatdan o'tgach bepul; package — tarif paketi limitidan; priced — alohida narx; credits — StatCoin */
+/** open — kirishsiz; login — ro'yxatdan o'tgach bepul; package — tarif paketi limitidan; priced — alohida narx; credits — hamyondan (so'm) */
 export type Access = "open" | "login" | "package" | "priced" | "credits";
 
 export interface ServiceCatalogItem {
@@ -134,10 +134,10 @@ export const SERVICES: ServiceCatalogItem[] = [
   {
     ...base, number: 107, sphere: 1, subcategory: "score",
     title: { uz: "Korxona bali", ru: "Балл предприятия" },
-    description: { uz: "Korxonaning umumiy bali va sinfi; batafsil tahlil StatCoin bilan ochiladi", ru: "Общий балл и класс предприятия; подробный анализ открывается за StatCoin" },
+    description: { uz: "Korxonaning umumiy bali va sinfi; batafsil tahlil hamyondan to'lanadi", ru: "Общий балл и класс предприятия; подробный анализ оплачивается из кошелька" },
     route: "/company-score/components", icon: Gauge, duration: T.instant, users: "all", access: "credits",
-    price: { uz: "Umumiy ball — bepul; \"Ball nimaga asoslangan\" — 1 StatCoin; \"Chuqur tahlil\" — 3 StatCoin (30 kun ochiq)", ru: "Общий балл — бесплатно; «Из чего состоит балл» — 1 StatCoin; «Глубокий анализ» — 3 StatCoin (30 дней)" },
-    requiredDocs: T.stirOnly, howItWorks: [STEP.stir, { uz: "Umumiy ballni ko'ring", ru: "Посмотрите общий балл" }, { uz: "Kerak bo'lsa batafsil bo'limlarni StatCoin bilan oching", ru: "При необходимости откройте подробные разделы за StatCoin" }],
+    price: { uz: "Umumiy ball — bepul; \"Ball nimaga asoslangan\" — 16 500 so'm; \"Chuqur tahlil\" — 49 500 so'm (30 kun ochiq)", ru: "Общий балл — бесплатно; «Из чего состоит балл» — 16 500 сум; «Глубокий анализ» — 49 500 сум (30 дней)" },
+    requiredDocs: T.stirOnly, howItWorks: [STEP.stir, { uz: "Umumiy ballni ko'ring", ru: "Посмотрите общий балл" }, { uz: "Kerak bo'lsa batafsil bo'limlarni hamyon hisobidan oching", ru: "При необходимости откройте подробные разделы из кошелька" }],
     keywords: ["scoring", "reyting", "ball"],
   },
   {
@@ -485,8 +485,8 @@ export const SERVICES: ServiceCatalogItem[] = [
   },
   {
     ...base, number: 1404, sphere: 14, subcategory: "packages",
-    title: { uz: "StatCoin hamyoni", ru: "Кошелёк StatCoin" },
-    description: { uz: "Korxona profilini ochish uchun StatCoin balansi va tarixi", ru: "Баланс и история StatCoin для открытия профилей предприятий" },
+    title: { uz: "Hamyon", ru: "Кошелёк" },
+    description: { uz: "Korxona profilini ochish va xizmatlar uchun so'mdagi balans va tarix", ru: "Баланс в сумах и история для открытия профилей и услуг" },
     route: "/cabinet?tab=credits", icon: Coins, duration: T.instant, users: "all", access: "login", price: T.freeLogin,
     howItWorks: [STEP.login, STEP.cabinet, STEP.result],
   },

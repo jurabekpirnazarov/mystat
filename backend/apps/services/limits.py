@@ -113,7 +113,7 @@ def _charge_statcoin(user, slug, price, request_data, once_per_day):
         left = credits.spend(wallet, price, action_code=code, object_ref=ref, user=user)
     except credits.CreditError as e:
         if e.code == "insufficient":
-            raise StatCoinRequired("StatCoin yetarli emas. Hamyonni to'ldiring yoki tarif tanlang.",
+            raise StatCoinRequired("Hamyonda mablag' yetarli emas. Hamyonni to'ldiring yoki tarif tanlang.",
                                    balance=e.extra.get("balance"), required=float(price))
         raise LimitExceeded(e.message)
     return {"configured": True, "limit": None, "used": 0,

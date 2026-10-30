@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { AlertTriangle, Droplets, Wind } from "lucide-react";
 import { loadWeather, type Weather, type WeatherCode } from "../../api/homeWidgets";
 import { useLang } from "../../i18n/LangContext";
@@ -17,7 +17,7 @@ const STALE_MS = 2 * 60 * 60 * 1000;
  * 3.2: tanlangan hudud markazi ob-havosi. Ma'lumot backend'dan (30 daqiqa kesh); xato bo'lsa faqat shu vidjet xabar beradi.
  * Harorat rangga bo'yalmaydi (kontrast va rang ko'rmaslik); `aria-live` hudud almashganda yangi qiymatni o'qiydi.
  */
-export default function WeatherWidget({ region, forecast, onError }: { region: string; forecast: boolean; onError?: (failed: boolean) => void }) {
+export default function WeatherWidget({ region, forecast, onError, bare = false, headerRight }: { region: string; forecast: boolean; onError?: (failed: boolean) => void; bare?: boolean; headerRight?: ReactNode }) {
   const { t, lang } = useLang();
   const [w, setW] = useState<Weather | null>(null);
   const [failed, setFailed] = useState(false);
@@ -38,9 +38,18 @@ export default function WeatherWidget({ region, forecast, onError }: { region: s
 
   return (
     <section aria-label={t({ uz: "Ob-havo", ru: "Погода" })}
-      className={`relative flex flex-col overflow-hidden rounded-[12px] border border-[rgb(var(--ds-panel-line))] p-5 text-[rgb(var(--ds-on-panel))] ${failed ? "bg-slate-700" : sky}`}>
-      <p className="relative text-xs font-semibold uppercase tracking-wider text-[rgb(var(--ds-on-panel-muted))]">{t({ uz: "Ob-havo", ru: "Погода" })}</p>
-      <h3 className="relative text-xl font-bold">{w ? w.city : " "}</h3>
+      className={`relative flex flex-col overflow-hidden text-[rgb(var(--ds-on-panel))] ${bare ? "" : `rounded-[12px] border border-[rgb(var(--ds-panel-line))] p-5 ${failed ? "bg-slate-700" : sky}`}`}>
+      {headerRight ? (
+        <div className="relative flex items-center justify-between gap-2">
+          <h3 className="min-w-0 truncate text-xl font-bold">{w ? w.city : " "}</h3>
+          {headerRight}
+        </div>
+      ) : (
+        <>
+          <p className="relative text-xs font-semibold uppercase tracking-wider text-[rgb(var(--ds-on-panel-muted))]">{t({ uz: "Ob-havo", ru: "Погода" })}</p>
+          <h3 className="relative text-xl font-bold">{w ? w.city : " "}</h3>
+        </>
+      )}
       {failed ? (
         <p role="alert" className="relative mt-6 text-sm text-[rgb(var(--ds-on-panel))]">{t({ uz: "Ob-havo hozircha mavjud emas", ru: "Погода временно недоступна" })}</p>
       ) : !w ? (
@@ -52,6 +61,7 @@ export default function WeatherWidget({ region, forecast, onError }: { region: s
               <p className="text-[40px] font-bold leading-none tracking-tight tabular-nums">{sign(w.current.temp)}</p>
               <p className="mt-1 text-sm font-medium">{t(WEATHER_LABEL[w.current.code])}</p>
               <p className="text-sm text-[rgb(var(--ds-on-panel-muted))]">{t({ uz: "his qilinadi", ru: "ощущается" })} {sign(w.current.feels_like)}</p>
+              {bare && w.daily[0] && <p className="text-sm text-[rgb(var(--ds-on-panel-muted))]">{t({ uz: "Kun davomida", ru: "В течение дня" })}: {sign(w.daily[0].t_min)} … {sign(w.daily[0].t_max)}</p>}
             </div>
             <span className="text-[rgb(var(--ds-on-panel))]"><WeatherIcon code={w.current.code} size={60} /></span>
           </div>

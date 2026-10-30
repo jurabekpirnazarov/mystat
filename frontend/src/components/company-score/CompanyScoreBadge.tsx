@@ -20,7 +20,7 @@ interface Props {
 
 /**
  * KORXONA_SCORING.md 6-bo'lim, 13.1: sinf harfi rangli doirachada + ball ("B · 63") — bepul umumiy ball. Ustiga olib
- * borilganda (yoki fokusda) sinf nomi, "Ball nimaga asoslangan: profilda, 1 StatCoin" va "Namuna" izohi. Ustunlar
+ * borilganda (yoki fokusda) sinf nomi, "Ball nimaga asoslangan: profilda, pullik" va "Namuna" izohi. Ustunlar
  * ro'yxatlarga kelmaydi (KR-39). To'liqlik < 0.6 — kulrang "—" va "Ma'lumot yetarli emas".
  * `undefined` — yuklanmoqda, `null` — ball yo'q (`emptyReason` berilmasa badge chiqmaydi).
  */
@@ -58,7 +58,7 @@ export default function CompanyScoreBadge({ score, size = "sm", className = "", 
       {open && tip && (
         <span role="tooltip" className="absolute z-30 top-full left-0 mt-1 w-60 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 text-xs text-gray-700 dark:text-gray-200 shadow-lg">
           <span className="block font-semibold">{label}</span>
-          {score && !none && <span className="mt-1 block text-gray-600 dark:text-gray-300">Ball nimaga asoslangan: profilda, 1 StatCoin.</span>}
+          {score && !none && <span className="mt-1 block text-gray-600 dark:text-gray-300">Ball nimaga asoslangan: profilda, pullik.</span>}
           {score?.is_synthetic && <span className="mt-2 block text-amber-700 dark:text-amber-300">Namuna: ball sintetik ko'rsatkichlardan, haqiqiy statistika emas.</span>}
           {score && <span className="mt-1 block text-gray-400">Taxminiy baho, rasmiy baho emas.</span>}
         </span>

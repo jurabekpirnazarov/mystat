@@ -35,7 +35,7 @@ function LegacyLayout({ children }: { children: ReactNode }) {
       <DesktopSidebar />
       <MobileSidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
       <div className="lg:pl-[290px]">
-        <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-[30px]">
+        <div className="mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-[30px]">
           <Header onOpenMenu={() => setMenuOpen(true)} />
           <p className="mb-4 flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
             <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />

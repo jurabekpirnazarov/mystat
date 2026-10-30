@@ -20,7 +20,7 @@ export function TopBar() {
   const { isAuthenticated } = useAuth();
   return (
     <div className="hidden bg-[rgb(var(--ds-ink))] text-white lg:block">
-      <div className="mx-auto flex h-9 max-w-[1200px] items-center justify-between gap-4 px-6 text-xs">
+      <div className="mx-auto flex h-9 max-w-[1600px] items-center justify-between gap-4 px-6 text-xs">
         <div className="flex items-center gap-4">
           <ul className="flex items-center gap-1">
             {SOCIALS.map((s) => {
@@ -61,7 +61,7 @@ export function PublicHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
   const [searchOpen, setSearchOpen] = useState(false);
   return (
     <div className="bg-[rgb(var(--ds-brand))] text-[rgb(var(--ds-on-brand))]">
-      <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-3 px-4 sm:px-6" style={{ height: "var(--ds-header-height)" }}>
+      <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-3 px-4 sm:px-6" style={{ height: "var(--ds-header-height)" }}>
         <Link to="/" className="flex min-w-0 items-center gap-3" aria-label={`${t(UI.portalFull)} — ${t(UI.home)}`}>
           <LogoMark size={40} tone="dark" />
           <span className="min-w-0 leading-tight">
@@ -131,7 +131,7 @@ export function MainNav() {
   const close = useCallback(() => setOpenIdx(null), []);
   return (
     <nav aria-label={t(UI.home)} className="sticky top-0 z-40 hidden border-t border-white/10 bg-[rgb(var(--ds-brand))] text-[rgb(var(--ds-on-brand))] lg:block">
-      <ul className="mx-auto flex max-w-[1200px] px-3" style={{ height: "var(--ds-nav-height)" }}>
+      <ul className="mx-auto flex max-w-[1600px] px-3" style={{ height: "var(--ds-nav-height)" }}>
         {PUBLIC_MENU.map((g, i) => (
           <Dropdown key={i} group={g} open={openIdx === i} onToggle={() => setOpenIdx(openIdx === i ? null : i)} onClose={close} />
         ))}

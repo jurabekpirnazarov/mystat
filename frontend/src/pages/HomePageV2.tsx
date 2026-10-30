@@ -152,11 +152,11 @@ export default function HomePageV2() {
           <p className="mb-5 mt-1 max-w-2xl text-sm text-[rgb(var(--ds-on-brand-muted))]">Milliy statistika qo'mitasining ko'rsatkichlari, e'lonlari va xizmatlari bir joyda</p>
         </div>
         {/* Bitta qator: qidiruv | ko'p ishlatiladigan xizmatlar | aholi, ob-havo va e'lon */}
-        <div className="relative grid gap-5 lg:grid-cols-[320px_1fr_300px]">
+        <div className="relative grid gap-5 lg:grid-cols-[300px_1fr_300px] xl:grid-cols-[360px_1fr_340px]">
           <SearchPanel compact />
-          <section aria-labelledby="home-top" className="rounded-mg border border-mg-border bg-mg-surface p-4">
+          <section aria-labelledby="home-top" className="rounded-mg border border-mg-border bg-mg-surface p-5">
             <h2 id="home-top" className="mb-3 text-sm font-semibold uppercase tracking-wide text-mg-muted">Ko'p ishlatiladigan xizmatlar</h2>
-            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-2">
+            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3">
               {ranked.slice(0, 6).map((x) => (
                 <li key={x.number}>
                   <Link to={`/service/${x.number}`} className="group flex h-full flex-col items-center rounded-mg border border-mg-border bg-mg-bg px-2 pb-3 pt-2 text-center transition hover:border-mg-primary/50 hover:bg-mg-surface hover:shadow-sm">

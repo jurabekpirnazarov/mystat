@@ -27,7 +27,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
       <PublicHeader onOpenMenu={() => setMenuOpen(true)} />
       <MainNav />
       <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
-      <div className="mx-auto w-full max-w-[1200px] px-4 pt-4 sm:px-6">
+      <div className="mx-auto w-full max-w-[1600px] px-4 pt-4 sm:px-6">
         <Breadcrumbs />
         <main id="main-content" tabIndex={-1} className="min-h-[70vh] focus:outline-none">{children}</main>
         <PageFeedback />

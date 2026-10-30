@@ -13,7 +13,7 @@ export default function PublicFooter() {
   const link = "text-sm text-mg-muted hover:text-mg-heading hover:underline";
   return (
     <footer className="mt-10 border-t border-mg-border bg-mg-surface">
-      <div className="mx-auto max-w-[1200px] space-y-4 px-4 py-6 sm:px-6">
+      <div className="mx-auto max-w-[1600px] space-y-4 px-4 py-6 sm:px-6">
         <ul className="flex flex-wrap gap-x-6 gap-y-1">
           {FOOTER_LINKS.map((l) => <li key={l.to}><Link to={l.to} className={link}>{t(l.label)}</Link></li>)}
         </ul>

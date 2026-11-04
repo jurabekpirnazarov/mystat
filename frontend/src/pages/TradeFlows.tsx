@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import SubscribeButton from "../components/SubscribeButton";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { ArrowUpRight, Download, Globe2, LayoutGrid, Layers, Table2, TrendingUp, X } from "lucide-react";
+import { ArrowUpRight, Download, Globe2, LayoutGrid, Layers, Table2, X } from "lucide-react";
 import SavedQueries from "../components/SavedQueries";
 import {
   downloadTradeExport,
@@ -16,11 +16,14 @@ import { ServiceAbout, ServiceFaq } from "../components/catalog/ServiceAbout";
 import FlowToggle from "../components/externalTrade/FlowToggle";
 import TradeSearch from "../components/externalTrade/TradeSearch";
 import DataQualityNote from "../components/externalTrade/DataQualityNote";
+import TradeAdvisor from "../components/externalTrade/TradeAdvisor";
+import TradeKpiBand from "../components/externalTrade/TradeKpiBand";
+import ComtradePanel from "../components/externalTrade/ComtradePanel";
 import { useFlow } from "../components/externalTrade/useFlow";
 import ResultCard, { ChangeBadge } from "../components/common/ResultCard";
 import { mg } from "../theme/tokens";
 import { FLOW_LABEL } from "../api/tradeFlows";
-import { EmptyState, ErrorState, PageHeader, Skeleton, StatCard } from "../components/ui";
+import { EmptyState, ErrorState, PageHeader, Skeleton } from "../components/ui";
 
 const fmt = (n: number, digits = 1) => new Intl.NumberFormat("uz-UZ", { maximumFractionDigits: digits }).format(n).replace(/,/g, " ");
 const compact = (n: number) => (n >= 1e6 ? `${fmt(n / 1e6)} mlrd` : n >= 1e3 ? `${fmt(n / 1e3)} mln` : fmt(n));
@@ -162,17 +165,14 @@ export default function TradeFlows() {
         ) : (
           <div className="space-y-6">
             <DataQualityNote notes={data.warnings ?? []} />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatCard label={`${flowLabel}, jami`} value={compact(data.total_value)} icon={TrendingUp} hint={TRADE_VALUE_UNIT} />
-              <StatCard label="Hamkor davlatlar" value={data.countries_count} icon={Globe2} hint={hs ? `TN VED ${hs}*` : "barcha tovarlar"} />
-              <StatCard label="Eng yirik hamkor" value={top[0]?.country_name ?? "—"} icon={ArrowUpRight} hint={top[0] ? `${top[0].share.toFixed(1)}% ulush` : undefined} />
-              <StatCard
-                label="Davlati ko'rsatilmagan"
-                value={`${data.total_value ? ((data.other_countries_value / data.total_value) * 100).toFixed(1) : 0}%`}
-                icon={Layers}
-                hint={"\"Boshqa davlatlar\" yozuvi"}
-              />
+            <TradeKpiBand year={data.year} hs={hs} periodLabel={`${data.year}-yil ${data.period_label}`} />
+            <div className="flex flex-wrap gap-2 text-sm">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--pp-soft)] px-3 py-1.5"><Globe2 className="h-4 w-4" aria-hidden="true" />{flowLabel}: <b>{data.countries_count}</b> hamkor davlat{hs ? ` · TN VED ${hs}*` : ""}</span>
+              {top[0] && <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--pp-soft)] px-3 py-1.5"><ArrowUpRight className="h-4 w-4" aria-hidden="true" />Eng yirik: <b>{top[0].country_name}</b> ({top[0].share.toFixed(1)}%)</span>}
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--pp-soft)] px-3 py-1.5"><Layers className="h-4 w-4" aria-hidden="true" />Davlati ko'rsatilmagan: <b>{data.total_value ? ((data.other_countries_value / data.total_value) * 100).toFixed(1) : 0}%</b></span>
             </div>
+
+            <TradeAdvisor year={data.year} hs={hs} />
 
             <section className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 sm:p-5">
               <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -301,6 +301,7 @@ export default function TradeFlows() {
             </div>
           </div>
         )}
+        <ComtradePanel hs={hs} />
         <ServiceAbout number={303} />
         <ServiceFaq number={303} />
       </div>

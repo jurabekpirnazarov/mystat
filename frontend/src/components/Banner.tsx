@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CalendarDays, ClipboardList, LayoutGrid, Map as MapIcon, Search, ShieldCheck } from "lucide-react";
+import { ArrowRight, CalendarDays, LayoutGrid, Map as MapIcon, Search, ShieldCheck } from "lucide-react";
 import { banner_stat } from "../api/apiUrls";
 import { getRequest } from "../api/request";
 import { fetchDashboards, type PopulationClock } from "../api/statPublic";
@@ -27,7 +27,6 @@ const QUICK_LINKS = [
   { to: "/dashboards", label: "Mavzuli panellar", icon: LayoutGrid },
   { to: "/check", label: "Kontragentni tekshirish", icon: ShieldCheck },
   { to: "/release-calendar", label: "E'lonlar kalendari", icon: CalendarDays },
-  { to: "/report-calendar", label: "Hisobot kalendari", icon: ClipboardList },
 ];
 
 /** GeoJSON -> SVG path (teng masofali proyeksiya, kenglik bo'yicha cos tuzatish) */

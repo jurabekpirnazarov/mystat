@@ -14,9 +14,14 @@ export function currentPath(): string {
   return window.location.pathname + window.location.search + window.location.hash;
 }
 
-export function loginUrl(from: string = currentPath()): string {
+/** `role` — kirish sahifasida oldindan tanlanadigan rol (individual — fuqaro/OneID, legal — korxona). */
+export function loginUrl(from: string = currentPath(), role?: "individual" | "legal"): string {
   const next = safeReturnPath(from);
-  return next ? `/login?next=${encodeURIComponent(next)}` : "/login";
+  const p = new URLSearchParams();
+  if (next) p.set("next", next);
+  if (role) p.set("role", role);
+  const qs = p.toString();
+  return qs ? `/login?${qs}` : "/login";
 }
 
 export function rememberReturnTo(path: string | null | undefined): void {

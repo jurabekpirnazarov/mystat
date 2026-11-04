@@ -48,7 +48,6 @@ export const PUBLIC_MENU: MenuGroup[] = [
     label: { uz: "Hisobot topshiruvchilarga", ru: "Отчитывающимся" },
     groups: [{
       links: [
-        { to: "/report-calendar", label: { uz: "Hisobot kalendari", ru: "Календарь отчётности" } },
         { to: "/reports", label: { uz: "Hisobot shakllari", ru: "Формы отчётов" } },
         { to: "/reglaments", label: { uz: "Reglamentlar", ru: "Регламенты" } },
         { to: "/stat-codes", label: { uz: "Statistik kodlar", ru: "Статистические коды" } },

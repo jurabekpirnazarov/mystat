@@ -47,3 +47,13 @@ export const fetchSupportThread = async (id: number, token?: string) =>
 
 export const postSupportMessage = async (id: number, text: string, token?: string) =>
   (await axiosT.post<SupportThread>(`/common/support/${id}/`, { text }, { params: token ? { token } : {} })).data;
+
+export interface AiSearchReply {
+  enabled: boolean;
+  services: number[];
+  answer: string;
+}
+
+/** Lokal LLM (Gemma) bo'yicha xizmat tavsiyasi. `enabled: false` — AI o'chiq yoki javob bermadi (oddiy qidiruv ishlayveradi). */
+export const aiSearch = async (q: string, catalog: { n: number; t: string; d: string }[], signal?: AbortSignal) =>
+  (await axiosT.post<AiSearchReply>("/common/ai-search/", { q, catalog }, { signal })).data;

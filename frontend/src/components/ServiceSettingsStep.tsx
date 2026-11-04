@@ -1,5 +1,7 @@
-import { ArrowRight, ArrowLeft, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
+import { ArrowRight, ArrowLeft, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
+
 import FlowToggle from './externalTrade/FlowToggle';
+import ResultOptions, { resultOptsCount, type ResultOpts } from './externalTrade/ResultOptions';
 import { FLOW_LABEL, type TradeFlow } from '../api/tradeFlows';
 
 const FLOW_TO_TYPE: Record<TradeFlow, number> = { export: 1, import: 2, total: 3 };
@@ -22,6 +24,9 @@ interface ServiceSettingsStepProps {
   onPrevious: () => void;
   onGetData: () => void;
   isLoading: boolean;
+  // Natijani sozlash (qo'shimcha filtrlar)
+  resultOpts: ResultOpts;
+  setResultOpts: (value: ResultOpts) => void;
   // Expansion states
   isMainOptionsExpanded: boolean;
   setIsMainOptionsExpanded: (value: boolean) => void;
@@ -176,6 +181,8 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
   const {
     onPrevious,
     onGetData,
+    resultOpts,
+    setResultOpts,
     isLoading,
     // Expansion states
     isMainOptionsExpanded,
@@ -523,6 +530,8 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
       </div>
     );
   };
+
+  const [isResultOptsExpanded, setIsResultOptsExpanded] = useState(false);
 
   const singleSelectProps = {
     multi: false,
@@ -1142,6 +1151,52 @@ const ServiceSettingsStep = (props: ServiceSettingsStepProps) => {
                 </div>
               )}
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Result options */}
+      <div className="bg-white rounded-xl shadow-lg border border-gray-200">
+        <div
+          className="p-6 cursor-pointer border-b border-gray-200 hover:bg-gray-50 transition-colors duration-200"
+          onClick={() => setIsResultOptsExpanded(!isResultOptsExpanded)}
+          role="button"
+          aria-expanded={isResultOptsExpanded}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                <span className="text-amber-700 font-bold">4</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Natijani sozlash
+                  {resultOptsCount(resultOpts) > 0 && <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">{resultOptsCount(resultOpts)} ta filtr</span>}
+                </h3>
+                <p className="text-sm text-gray-500">Qidiruv, qiymat oralig'i, saralash, top-N, ulush va o'sish</p>
+              </div>
+            </div>
+            {isResultOptsExpanded ? <ChevronUp className="w-5 h-5 text-gray-500" /> : <ChevronDown className="w-5 h-5 text-gray-500" />}
+          </div>
+        </div>
+        {isResultOptsExpanded && (
+          <div className="p-6">
+            <ResultOptions
+              value={resultOpts}
+              onChange={setResultOpts}
+              excludeSlot={
+                <CustomCountrySelect
+                  options={countryOptions}
+                  selectedValues={resultOpts.excluded}
+                  onChange={(v) => setResultOpts({ ...resultOpts, excluded: v })}
+                  onLoadMore={onLoadMoreCountries}
+                  onSearch={onSearchCountries}
+                  loading={countryLoading}
+                  hasMore={hasMoreCountries}
+                  placeholder="Chiqariladigan davlatlar"
+                />
+              }
+            />
           </div>
         )}
       </div>

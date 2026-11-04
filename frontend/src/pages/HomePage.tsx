@@ -58,7 +58,7 @@ function LegacyHomePage() {
       <section aria-labelledby="home-actions" className="mt-10">
         <SectionHeader id="home-actions" title="Nima qilmoqchisiz?" />
         <div className="grid gap-5 md:grid-cols-3">
-          <ActionCard icon={CalendarDays} title="Hisobot muddati" text="Shaklingiz bo'yicha topshirish muddatini va qolgan kunlarni biling." actionLabel="Kalendarni ochish" href="/report-calendar" />
+          <ActionCard icon={CalendarDays} title="Hisobot topshirish" text="Reglamentlar, statistik kodlar va hisobotlar bo'yicha yo'riqnoma." actionLabel="Hisobotlarga o'tish" href="/reporting" />
           <ActionCard icon={LineChart} title="Ko'rsatkich topish" text="Iqtisodiyot, aholi, mehnat va narxlar bo'yicha rasmiy raqamlar." actionLabel="Ko'rsatkichlarga o'tish" href="/dashboards" />
           <ActionCard icon={BadgeCheck} title="Kontragent tekshirish" text="STIR bo'yicha korxona ma'lumoti va ishonchlilik bahosi." actionLabel="STIR bo'yicha izlash" href="/check" />
         </div>

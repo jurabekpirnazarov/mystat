@@ -105,3 +105,47 @@ class CreditPrice(models.Model):
 
     def __str__(self):
         return f"{self.action_code} = {self.credits}"
+
+
+class DataOffer(models.Model):
+    """AI agent topgan ma'lumot to'plami va narxi (taklif). Foydalanuvchi qabul qilsa hamyondan yechiladi,
+    rad etsa yoki muddati o'tsa o'chiriladi. Narx kodda hisoblanadi (agent faqat topadi); qabul paytida
+    narx shu yerda saqlangan qiymatdan olinadi, mijoz yuborgan summaga ishonilmaydi."""
+
+    STATUS = (("open", "Ochiq"), ("accepted", "Qabul qilindi"))
+
+    wallet = models.ForeignKey(CreditWallet, on_delete=models.CASCADE, related_name="data_offers")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    query = models.CharField(max_length=300)
+    items = models.JSONField(default=list)       # [{id, kind, title, rows, price, owned, spec, teaser}]
+    total = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+    status = models.CharField(max_length=10, choices=STATUS, default="open")
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Ma'lumot taklifi"
+        verbose_name_plural = "Ma'lumot takliflari"
+
+
+class DataPurchase(models.Model):
+    """Sotib olingan ma'lumot to'plami (tarix). `fingerprint` = ma'lumot turi + mahsulot + yil/davr; shu hamyon uchun
+    bir marta to'lanadi, keyin xuddi shu ma'lumot va davr qayta to'lovsiz ochiladi va yuklanadi."""
+
+    wallet = models.ForeignKey(CreditWallet, on_delete=models.CASCADE, related_name="data_purchases")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    fingerprint = models.CharField(max_length=64)
+    kind = models.CharField(max_length=20)
+    title = models.CharField(max_length=200)
+    query = models.CharField(max_length=300, blank=True)
+    spec = models.JSONField(default=dict)
+    rows = models.PositiveIntegerField(default=0)
+    price = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        constraints = [models.UniqueConstraint(fields=["wallet", "fingerprint"], name="data_purchase_once")]
+        verbose_name = "Sotib olingan ma'lumot"
+        verbose_name_plural = "Sotib olingan ma'lumotlar"

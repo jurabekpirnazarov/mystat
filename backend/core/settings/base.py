@@ -17,6 +17,18 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 # production'da faqat .env da SYNTHETIC_DATA=True bo'lsa (egasining qarori, 2026-10-23).
 SYNTHETIC_DATA = config('SYNTHETIC_DATA', default=False, cast=bool)
 
+# Lokal LLM (vLLM, OpenAI-mos API) — qidiruvdagi "AI tavsiyasi". LLM_BASE_URL bo'sh bo'lsa AI o'chiq, oddiy qidiruv ishlaydi.
+LLM_BASE_URL = config('LLM_BASE_URL', default='')
+LLM_API_KEY = config('LLM_API_KEY', default='')
+LLM_MODEL = config('LLM_MODEL', default='google/gemma-4-26B-A4B-it')
+LLM_TIMEOUT = config('LLM_TIMEOUT', default=25, cast=int)
+
+# UN Comtrade+ (comtradeplus.un.org). Kalit bo'sh bo'lsa faqat ochiq "preview" API ishlaydi (so'rovga 500 qatorgacha).
+# Bepul kalit: comtradeplus.un.org > Sign in > APIs > Subscribe (kuniga 500 so'rov, so'rovga 100 000 qator).
+COMTRADE_API_KEY = config('COMTRADE_API_KEY', default='')
+COMTRADE_PAUSE = config('COMTRADE_PAUSE', default=1.5, cast=float)   # so'rovlar orasida kutish (soniya)
+COMTRADE_SYNC_ENABLED = config('COMTRADE_SYNC_ENABLED', default=bool(COMTRADE_API_KEY), cast=bool)
+
 # ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
 ALLOWED_HOSTS = ['*']
 
@@ -426,6 +438,9 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.notifications.tasks.dispatch_indicator_updates",
         "schedule": crontab(minute=5),
     },
+    # UN Comtrade+: har dushanba 03:00 oxirgi yillar yangilanadi (kalit va COMTRADE_SYNC_ENABLED bo'lsa)
+    **({"comtrade-sync": {"task": "apps.additional_services.tasks.comtrade_sync_task",
+                          "schedule": crontab(hour=3, minute=0, day_of_week=1)}} if COMTRADE_SYNC_ENABLED else {}),
     "consultation-reminders": {
         "task": "apps.consultations.tasks.consultation_reminders",
         "schedule": 15 * 60,

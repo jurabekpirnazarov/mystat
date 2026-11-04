@@ -12,11 +12,16 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Inter Variable", "system-ui", "Segoe UI", "Roboto", "Arial", ...defaultTheme.fontFamily.sans],
+        sans: ["Onest", "Inter Variable", "system-ui", "Segoe UI", "Roboto", "Arial", ...defaultTheme.fontFamily.sans],
         // Portal yozuvi "my.stat.uz" (docs/LOGO.md)
         brand: ["Literata", "Georgia", ...defaultTheme.fontFamily.serif],
       },
       colors: {
+        // "Shaffof xizmat pasporti" brend palitrasi (Bayroq ko'ki): `blue-*` sinflari butun saytda shu rangga o'tadi
+        blue: {
+          50: "#E8F8FB", 100: "#D4F1F7", 200: "#A6E1EE", 300: "#6CCBE0", 400: "#33B6D1",
+          500: "#0A8DB5", 600: "#0077A0", 700: "#00668A", 800: "#004E6B", 900: "#003A52", 950: "#022B3D",
+        },
         mg: {
           primary: v("primary"),
           "primary-dark": v("primary-dark"),
@@ -34,7 +39,7 @@ export default {
         },
       },
       borderRadius: {
-        mg: "12px",
+        mg: "16px",
         "ds-control": "6px",
         "mg-tile": "16px",
         "mg-side": "25px",

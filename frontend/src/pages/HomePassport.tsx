@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Sparkles } from "lucide-react";
+import { Activity, Bot, Clock, Layers, Search, Sparkles, Star, Wallet } from "lucide-react";
 import { POPULAR, SERVICES, type Access, type ServiceCatalogItem } from "../config/serviceCatalog";
 import { SPHERES, sphereById } from "../config/spheres";
 import { POPULAR_QUERIES, searchUrl } from "../config/searchFilters";
@@ -9,6 +9,7 @@ import { useLang, type I18nText } from "../i18n/LangContext";
 import { UI } from "../i18n/ui";
 import { compactNumber, useServiceStats } from "../components/catalog/useServiceStats";
 import type { ServiceShortStats } from "../api/portal";
+import HeroChat from "../components/home/HeroChat";
 
 /**
  * "Shaffof xizmat pasporti" (Variant P) bosh sahifasi. Hamma xizmat `serviceCatalog.ts` dan o'qiladi (takroriy ro'yxat yo'q):
@@ -48,6 +49,7 @@ function Hero({ featured, stats, isSample }: { featured: ServiceCatalogItem[]; s
   const [q, setQ] = useState("");
   const [i, setI] = useState(0);
   const [hold, setHold] = useState(false);
+  const [chat, setChat] = useState(false);
 
   useEffect(() => {
     if (hold || featured.length < 2) return;
@@ -108,6 +110,10 @@ function Hero({ featured, stats, isSample }: { featured: ServiceCatalogItem[]; s
               <Link key={c} to={searchUrl(c)} className="rounded-full border border-white/25 bg-white/15 px-3 py-1 text-xs font-semibold text-white hover:bg-white/25 hover:no-underline">{c}</Link>
             ))}
           </div>
+          <button type="button" onClick={() => setChat(true)} className="inline-flex h-12 items-center gap-2.5 self-start rounded-full bg-white/95 px-5 text-[15px] font-bold text-[var(--p800)] shadow-[0_14px_28px_-14px_rgba(0,0,0,0.5)] hover:bg-white">
+            <Bot className="h-5 w-5" aria-hidden="true" />{t({ uz: "AI yordamchi bilan suhbat", ru: "Чат с ИИ-помощником" })}
+          </button>
+          <HeroChat open={chat} onClose={() => setChat(false)} />
         </div>
 
         {s && Icon && (
@@ -164,36 +170,53 @@ function Hero({ featured, stats, isSample }: { featured: ServiceCatalogItem[]; s
 function TopServices({ items, stats, isSample }: { items: ServiceCatalogItem[]; stats: Record<string, ServiceShortStats>; isSample: boolean }) {
   const { t } = useLang();
   const max = Math.max(1, ...items.map((s) => stats[s.number]?.usage ?? 0));
+  const chip = "inline-flex items-center gap-1.5 rounded-full bg-[var(--pp-soft)] px-3 py-1 text-[13px] font-semibold";
   return (
-    <section aria-labelledby="pp-top" className="flex flex-col gap-3.5">
-      <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <div className="flex flex-col gap-0.5">
-          <h2 id="pp-top" className="m-0 text-[28px] font-extrabold tracking-[-0.03em]">{t({ uz: "Eng ko'p foydalaniladigan xizmatlar", ru: "Самые востребованные услуги" })}</h2>
-          <span className="text-[13px] text-[var(--pp-muted)]">
-            {t({ uz: "Foydalanishlar soni bo'yicha", ru: "По числу использований" })}{isSample ? ` · ${t({ uz: "namuna ma'lumot", ru: "образец данных" })}` : ""}
+    <section aria-labelledby="pp-top" className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <h2 id="pp-top" className="m-0 text-[32px] font-extrabold tracking-[-0.03em]">{t({ uz: "Eng ko'p foydalaniladigan xizmatlar", ru: "Самые востребованные услуги" })}</h2>
+          <span className="text-[15px] text-[var(--pp-muted)]">
+            {t({ uz: "Foydalanuvchilar eng ko'p ochgan xizmatlar: reyting, narx va bajarish vaqti bilan.", ru: "Чаще всего открываемые услуги: рейтинг, цена и срок выполнения." })}
+            {isSample ? ` ${t({ uz: "(demo ma'lumot)", ru: "(демо-данные)" })}` : ""}
           </span>
         </div>
-        <span className="text-[13px] text-[var(--pp-muted)]">{items.length} {t({ uz: "ta xizmat", ru: "услуг" })}</span>
+        <Link to="/spheres" className="text-sm font-semibold">{t({ uz: "Barcha xizmatlar →", ru: "Все услуги →" })}</Link>
       </div>
-      <div className="grid gap-3.5 [grid-template-columns:repeat(auto-fit,minmax(270px,1fr))]">
+      <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr))]">
         {items.map((s, n) => {
           const Icon = s.icon;
-          const use = stats[s.number]?.usage ?? 0;
+          const st = stats[s.number];
+          const use = st?.usage ?? 0;
+          const sphere = sphereById(s.sphere);
           return (
-            <Link key={s.number} to={`/service/${s.number}`} className={`${cardLink} pp-fu flex flex-col gap-3.5 p-[18px]`}>
-              <span className="flex items-start justify-between gap-2">
-                <span aria-hidden="true" className="flex h-[52px] w-[52px] items-center justify-center rounded-[18px] bg-[var(--btn)] text-white shadow-[0_8px_18px_-10px_var(--btn)]"><Icon className="h-6 w-6" strokeWidth={1.9} /></span>
-                <span className="mono rounded-full bg-[var(--p50)] px-2.5 py-1 text-xs font-bold text-[var(--p800)]">#{n + 1}</span>
+            <Link key={s.number} to={`/service/${s.number}`} className={`${cardLink} pp-fu flex min-h-[300px] flex-col gap-4 border-[var(--pp-line)] p-6`}>
+              <span className="flex items-start justify-between gap-3">
+                <span aria-hidden="true" className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-[var(--btn)] text-white shadow-[0_10px_22px_-10px_var(--btn)]"><Icon className="h-8 w-8" strokeWidth={1.8} /></span>
+                <span className="flex flex-col items-end gap-1">
+                  <span className="mono rounded-full bg-[var(--p50)] px-3 py-1 text-sm font-bold text-[var(--p800)]">#{n + 1}</span>
+                  {sphere && <span className="max-w-[180px] truncate text-xs text-[var(--pp-muted)]">{t(sphere.title)}</span>}
+                </span>
               </span>
-              <span className="flex flex-col gap-1">
-                <span className="flex flex-wrap items-center gap-2 text-lg font-bold tracking-[-0.01em]">{t(s.title)}{s.status === "soon" && <Soon />}</span>
-                <span className="line-clamp-2 text-sm text-[var(--pp-muted)]">{t(s.description)}</span>
+              <span className="flex flex-col gap-2">
+                <span className="flex flex-wrap items-center gap-2 text-[22px] font-extrabold leading-tight tracking-[-0.02em]">{t(s.title)}{s.status === "soon" && <Soon />}</span>
+                <span className="line-clamp-3 text-[15px] leading-relaxed text-[var(--pp-muted)]">{t(s.description)}</span>
               </span>
-              <span className="mt-auto flex items-center justify-between gap-2">
-                <span className="mono text-xs text-[var(--pp-muted)]">{use ? `${compactNumber(use)} ${t({ uz: "marta", ru: "раз" })}` : t(s.duration)}</span>
-                <span className="text-sm font-bold text-[var(--btn)]">{t({ uz: "Boshlash →", ru: "Начать →" })}</span>
+              <span className="flex flex-wrap gap-2">
+                <span className={chip}><Clock className="h-4 w-4" aria-hidden="true" />{t(s.duration)}</span>
+                <span className={chip}>{t(ACCESS_SHORT[s.access])} · {t(ACCESS_NOTE[s.access])}</span>
+                {st?.rating != null && <span className={chip}><Star className="h-4 w-4 fill-current text-amber-500" aria-hidden="true" />{st.rating.toFixed(1)}</span>}
               </span>
-              <span className="block h-[5px] overflow-hidden rounded-full bg-[var(--pp-soft)]"><span className="block h-full rounded-full bg-[var(--btn)]" style={{ width: `${use ? Math.max(6, (use / max) * 100) : 6}%` }} /></span>
+              <span className="mt-auto flex flex-col gap-3">
+                <span className="flex flex-col gap-1.5">
+                  <span className="flex items-baseline justify-between text-[13px] text-[var(--pp-muted)]">
+                    <span>{t({ uz: "Foydalanishlar soni", ru: "Количество использований" })}</span>
+                    <span className="mono text-base font-bold text-[var(--pp-text)]">{use ? use.toLocaleString("ru-RU") : "—"}</span>
+                  </span>
+                  <span className="block h-2 overflow-hidden rounded-full bg-[var(--pp-soft)]"><span className="block h-full rounded-full bg-[var(--btn)]" style={{ width: `${use ? Math.max(6, (use / max) * 100) : 4}%` }} /></span>
+                </span>
+                <span className="flex h-12 items-center justify-center rounded-2xl bg-[var(--p50)] text-base font-extrabold text-[var(--p800)]">{t({ uz: "Xizmatdan foydalanish →", ru: "Перейти к услуге →" })}</span>
+              </span>
             </Link>
           );
         })}
@@ -202,7 +225,187 @@ function TopServices({ items, stats, isSample }: { items: ServiceCatalogItem[]; 
   );
 }
 
-function AllServices({ stats }: { stats: Record<string, ServiceShortStats> }) {
+/** 0 dan qiymatgacha silliq sanaydi (harakat kamaytirilgan bo'lsa darhol ko'rsatadi). */
+function useCountUp(target: number, ms = 700) {
+  const [v, setV] = useState(target);
+  useEffect(() => {
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      setV(target);
+      return;
+    }
+    const t0 = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - t0) / ms);
+      setV(Math.round(target * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, ms]);
+  return v;
+}
+
+const MIX_LABEL: Record<Access, I18nText> = {
+  open: { uz: "Kirishsiz", ru: "Без входа" },
+  login: { uz: "Kirish bilan", ru: "После входа" },
+  package: { uz: "Paket", ru: "Пакет" },
+  priced: { uz: "Pullik", ru: "Платно" },
+  credits: { uz: "Hamyondan", ru: "Из кошелька" },
+};
+const ACCESS_COLOR: Record<Access, string> = { open: "#1eb53a", login: "#33b6d1", package: "#0077a0", priced: "#f2b234", credits: "#e0408a" };
+
+/** Halqa diagramma: har qism `v` ulushi, `c` rangi. */
+function Ring({ parts, size = 84 }: { parts: { k: string; v: number; c: string }[]; size?: number }) {
+  const total = parts.reduce((a, p) => a + p.v, 0) || 1;
+  const r = 15.9155;
+  let off = 25;
+  return (
+    <svg width={size} height={size} viewBox="0 0 36 36" aria-hidden="true" className="shrink-0">
+      <circle cx="18" cy="18" r={r} fill="none" stroke="var(--pp-soft)" strokeWidth="4.2" />
+      {parts.filter((p) => p.v > 0).map((p) => {
+        const len = (p.v / total) * 100;
+        const dash = Math.max(0, len - 0.8);
+        const el = <circle key={p.k} cx="18" cy="18" r={r} fill="none" stroke={p.c} strokeWidth="4.2" strokeDasharray={`${dash} ${100 - dash}`} strokeDashoffset={off} />;
+        off -= len;
+        return el;
+      })}
+    </svg>
+  );
+}
+
+function Stars({ value }: { value: number }) {
+  return (
+    <span className="flex gap-0.5" aria-hidden="true">
+      {[1, 2, 3, 4, 5].map((n) => {
+        const fill = Math.max(0, Math.min(1, value - (n - 1)));
+        return (
+          <span key={n} className="relative inline-block h-[18px] w-[18px]">
+            <Star className="absolute inset-0 h-[18px] w-[18px] text-[var(--pp-line)]" />
+            <span className="absolute inset-0 overflow-hidden" style={{ width: `${fill * 100}%` }}><Star className="h-[18px] w-[18px] fill-amber-400 text-amber-400" /></span>
+          </span>
+        );
+      })}
+    </span>
+  );
+}
+
+/** Tanlangan soha bo'yicha jonli ko'rsatkichlar: xizmatlar soni, tarif aralashmasi, foydalanish, baho. Hammasi katalog va statistikadan. */
+function Kpis({ list, stats, isSample }: { list: ServiceCatalogItem[]; stats: Record<string, ServiceShortStats>; isSample: boolean }) {
+  const { t } = useLang();
+  const total = list.length;
+  const free = list.filter((s) => s.access === "open" || s.access === "login").length;
+  const usage = list.map((s) => stats[s.number]?.usage ?? 0);
+  const uses = usage.reduce((a, b) => a + b, 0);
+  const rated = list.map((s) => stats[s.number]?.rating).filter((r): r is number => r != null);
+  const avg = rated.length ? rated.reduce((a, b) => a + b, 0) / rated.length : 0;
+  const soon = list.filter((s) => s.status === "soon").length;
+  const nTotal = useCountUp(total);
+  const nUses = useCountUp(uses, 900);
+  const nFree = useCountUp(total ? Math.round((free / total) * 100) : 0, 900);
+  const mix = (Object.keys(ACCESS_COLOR) as Access[]).map((k) => ({ k, c: ACCESS_COLOR[k], v: list.filter((s) => s.access === k).length }));
+  const bars = [...usage].sort((a, b) => b - a).slice(0, 14);
+  const barMax = Math.max(1, ...bars);
+  const tile = "relative flex min-w-0 flex-col gap-3 overflow-hidden rounded-[26px] border border-[var(--pp-line)] bg-[var(--pp-card)] p-5 transition-shadow hover:shadow-[0_20px_40px_-24px_rgb(0_78_107/.45)]";
+  const label = "flex items-center gap-2 text-xs font-bold tracking-[0.1em] text-[var(--pp-muted)]";
+  const chipIcon = "flex h-8 w-8 items-center justify-center rounded-[11px] bg-[var(--p50)] text-[var(--p800)]";
+  return (
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className={`${tile} text-white`} style={{ background: "linear-gradient(145deg, var(--p800) 0%, var(--btn) 70%, var(--pacc) 130%)", borderColor: "transparent" }}>
+        <svg aria-hidden="true" viewBox="0 0 200 200" className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 opacity-25">
+          <circle cx="100" cy="100" r="90" fill="none" stroke="#fff" strokeWidth="1.5" />
+          <circle cx="100" cy="100" r="62" fill="none" stroke="#fff" strokeWidth="1.5" strokeDasharray="3 6" />
+          <circle cx="100" cy="100" r="34" fill="#fff" fillOpacity=".25" />
+        </svg>
+        <span className="flex items-center gap-2 text-xs font-bold tracking-[0.1em] text-white/85"><Layers className="h-4 w-4" aria-hidden="true" />{t({ uz: "XIZMATLAR", ru: "УСЛУГ" })}</span>
+        <span className="mono relative text-[68px] font-extrabold leading-none tracking-[-0.05em]">{nTotal}</span>
+        <span className="relative inline-flex items-center gap-2 self-start rounded-full bg-white/15 px-3 py-1 text-[13px] font-semibold">
+          <span className="h-2 w-2 rounded-full bg-[#5be37a]" aria-hidden="true" />
+          {soon ? t({ uz: `${total - soon} ta ishlayapti · ${soon} tez orada`, ru: `${total - soon} работают · ${soon} скоро` }) : t({ uz: "hammasi ishlayapti", ru: "все работают" })}
+        </span>
+      </div>
+
+      <div className={tile}>
+        <span className={label}><span className={chipIcon}><Wallet className="h-4 w-4" aria-hidden="true" /></span>{t({ uz: "TARIF VA NARX", ru: "ТАРИФ И ЦЕНА" })}</span>
+        <div className="flex items-center gap-4">
+          <span className="relative flex shrink-0 items-center justify-center">
+            <Ring parts={mix} size={108} />
+            <span className="mono absolute text-[22px] font-extrabold tracking-[-0.03em]">{nFree}%</span>
+          </span>
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <span className="text-[15px] font-bold leading-tight">{t({ uz: "bepul xizmatlar", ru: "бесплатных услуг" })}</span>
+            <span className="text-[13px] text-[var(--pp-muted)]">{free} / {total}</span>
+          </div>
+        </div>
+        <span className="flex flex-wrap gap-1.5 text-xs">
+          {mix.filter((m) => m.v > 0).map((m) => (
+            <span key={m.k} className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-semibold" style={{ background: `${m.c}22` }}>
+              <span className="h-2 w-2 rounded-full" style={{ background: m.c }} />{t(MIX_LABEL[m.k])} <span className="mono">{m.v}</span>
+            </span>
+          ))}
+        </span>
+      </div>
+
+      <div className={tile}>
+        <span className={label}><span className={chipIcon}><Activity className="h-4 w-4" aria-hidden="true" /></span>{t({ uz: "JAMI FOYDALANISH", ru: "ВСЕГО ИСПОЛЬЗОВАНИЙ" })}</span>
+        <span className="mono text-[44px] font-extrabold leading-none tracking-[-0.04em] text-[var(--btn)]">{uses ? nUses.toLocaleString("ru-RU") : "—"}</span>
+        {uses > 0 && (
+          <span className="flex h-14 items-end gap-[3px]" aria-hidden="true">
+            {bars.map((b, i) => (
+              <span key={i} className="flex-1 rounded-t-[4px] bg-[linear-gradient(180deg,var(--pacc),var(--btn))] transition-[height] duration-700" style={{ height: `${Math.max(8, (b / barMax) * 100)}%`, opacity: 1 - i * 0.04 }} />
+            ))}
+          </span>
+        )}
+        <span className="text-[13px] text-[var(--pp-muted)]">
+          {total && uses ? t({ uz: `o'rtacha ${Math.round(uses / total).toLocaleString("ru-RU")} marta / xizmat`, ru: `в среднем ${Math.round(uses / total).toLocaleString("ru-RU")} на услугу` }) : ""}
+          {isSample ? ` · ${t({ uz: "demo", ru: "демо" })}` : ""}
+        </span>
+      </div>
+
+      <div className={tile}>
+        <span className={label}><span className={chipIcon}><Star className="h-4 w-4" aria-hidden="true" /></span>{t({ uz: "FOYDALANUVCHILAR BAHOSI", ru: "ОЦЕНКА ПОЛЬЗОВАТЕЛЕЙ" })}</span>
+        <div className="flex items-end gap-2"><span className="mono text-[56px] font-extrabold leading-none tracking-[-0.04em]">{avg ? avg.toFixed(1) : "—"}</span><span className="pb-2 text-base text-[var(--pp-muted)]">/ 5</span></div>
+        <Stars value={avg} />
+        <span className="block h-2 overflow-hidden rounded-full bg-[var(--pp-soft)]" aria-hidden="true"><span className="block h-full rounded-full bg-[linear-gradient(90deg,#f2b234,#ffe08a)] transition-[width] duration-700" style={{ width: `${(avg / 5) * 100}%` }} /></span>
+        <span className="text-[13px] text-[var(--pp-muted)]">{rated.length} {t({ uz: "ta xizmat baholangan", ru: "услуг оценено" })}</span>
+      </div>
+    </div>
+  );
+}
+
+/** Eng faol 6 soha: gorizontal ustunlar, bosilsa shu sohaga filtrlanadi. */
+function SphereBars({ stats, active, onPick }: { stats: Record<string, ServiceShortStats>; active: number; onPick: (id: number) => void }) {
+  const { t } = useLang();
+  const rows = SPHERES.map((sp) => {
+    const items = SERVICES.filter((s) => s.sphere === sp.id);
+    return { sp, n: items.length, uses: items.reduce((a, s) => a + (stats[s.number]?.usage ?? 0), 0) };
+  }).sort((a, b) => b.uses - a.uses || b.n - a.n).slice(0, 6);
+  const max = Math.max(1, ...rows.map((r) => r.uses || r.n));
+  return (
+    <div className="flex flex-col gap-2 rounded-[24px] border border-[var(--pp-line)] bg-[var(--pp-card)] p-5">
+      <span className="text-xs font-bold tracking-[0.1em] text-[var(--pp-muted)]">{t({ uz: "ENG FAOL SOHALAR", ru: "САМЫЕ АКТИВНЫЕ СФЕРЫ" })}</span>
+      {rows.map(({ sp, n, uses }) => {
+        const Icon = sp.icon;
+        const val = uses || n;
+        return (
+          <button key={sp.id} type="button" onClick={() => onPick(active === sp.id ? 0 : sp.id)} aria-pressed={active === sp.id}
+            className={`pp-focus flex items-center gap-3 rounded-2xl px-2 py-1.5 text-left hover:bg-[var(--pp-soft)] ${active === sp.id ? "bg-[var(--p50)]" : ""}`}>
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-[var(--p50)] text-[var(--p800)]"><Icon className="h-4 w-4" aria-hidden="true" /></span>
+            <span className="flex min-w-0 flex-1 flex-col gap-1">
+              <span className="flex items-baseline justify-between gap-2 text-[13px]">
+                <span className="truncate font-semibold">{t(sp.title)}</span>
+                <span className="mono shrink-0 text-xs text-[var(--pp-muted)]">{uses ? uses.toLocaleString("ru-RU") : `${n} ${t({ uz: "xizmat", ru: "услуг" })}`}</span>
+              </span>
+              <span className="block h-2 overflow-hidden rounded-full bg-[var(--pp-soft)]"><span className="block h-full rounded-full bg-[linear-gradient(90deg,var(--btn),var(--pacc))] transition-[width] duration-700" style={{ width: `${Math.max(5, (val / max) * 100)}%` }} /></span>
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function AllServices({ stats, isSample }: { stats: Record<string, ServiceShortStats>; isSample: boolean }) {
   const { t } = useLang();
   const [sphere, setSphere] = useState<number | 0>(0);
   const list = useMemo(() => {
@@ -212,11 +415,11 @@ function AllServices({ stats }: { stats: Record<string, ServiceShortStats> }) {
   const count = (id: number) => SERVICES.filter((s) => s.sphere === id || s.alsoIn?.includes(id)).length;
   const tab = (on: boolean) => `pp-focus rounded-full px-3.5 py-2 text-[13px] font-semibold ${on ? "bg-[var(--btn)] text-white" : "text-[var(--pp-muted)] hover:bg-[var(--pp-soft)]"}`;
   return (
-    <section aria-labelledby="pp-all" className="flex flex-col gap-3.5">
+    <section aria-labelledby="pp-all" className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-col gap-0.5">
           <h2 id="pp-all" className="m-0 text-2xl font-extrabold tracking-[-0.03em]">{t({ uz: "Barcha xizmatlar", ru: "Все услуги" })}</h2>
-          <span className="text-[13px] text-[var(--pp-muted)]">{t({ uz: "Har bir sohada ko'p foydalaniladigani birinchi", ru: "В каждой сфере сначала самые востребованные" })}</span>
+          <span className="text-[13px] text-[var(--pp-muted)]">{t({ uz: "Raqamlar tanlangan soha bo'yicha o'zgaradi", ru: "Цифры меняются по выбранной сфере" })}</span>
         </div>
         <div role="tablist" aria-label={t({ uz: "Soha", ru: "Сфера" })} className="flex max-w-full flex-wrap gap-1 rounded-[22px] border border-[var(--pp-line)] bg-[var(--pp-card)] p-1">
           <button type="button" role="tab" aria-selected={sphere === 0} onClick={() => setSphere(0)} className={tab(sphere === 0)}>
@@ -229,26 +432,13 @@ function AllServices({ stats }: { stats: Record<string, ServiceShortStats> }) {
           ))}
         </div>
       </div>
-      <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(240px,1fr))]">
-        {list.map((s) => {
-          const Icon = s.icon;
-          const use = stats[s.number]?.usage;
-          const sp = sphereById(s.sphere);
-          return (
-            <Link key={s.number} to={`/service/${s.number}`} className={`${cardLink} flex items-start gap-3 p-4`}>
-              <span aria-hidden="true" className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-[14px] bg-[var(--p50)] text-[var(--p800)]"><Icon className="h-5 w-5" strokeWidth={1.9} /></span>
-              <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
-                <span className="flex flex-wrap items-center gap-1.5 text-[15px] font-bold leading-tight">{t(s.title)}{s.status === "soon" && <Soon />}</span>
-                <span className="line-clamp-2 text-[13px] leading-snug text-[var(--pp-muted)]">{t(s.description)}</span>
-                <span className="mt-1 flex flex-wrap items-center gap-2 text-xs text-[var(--pp-muted)]">
-                  {sp && <span className="max-w-full truncate rounded-full bg-[var(--pp-soft)] px-2 py-0.5">{t(sp.title)}</span>}
-                  <span className="mono">{use ? `${compactNumber(use)} ${t({ uz: "marta", ru: "раз" })}` : t(ACCESS_SHORT[s.access])}</span>
-                </span>
-              </span>
-            </Link>
-          );
-        })}
+      <div className="grid gap-3 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <Kpis list={list} stats={stats} isSample={isSample} />
+        <SphereBars stats={stats} active={sphere} onPick={setSphere} />
       </div>
+      <Link to={sphere ? `/spheres/${sphere}` : "/spheres"} className="flex h-12 items-center justify-center rounded-2xl border border-[var(--pp-line)] bg-[var(--pp-card)] text-[15px] font-bold text-[var(--p800)] hover:bg-[var(--pp-soft)] hover:no-underline">
+        {sphere ? t({ uz: "Shu sohadagi xizmatlarni ochish →", ru: "Открыть услуги этой сферы →" }) : t({ uz: "Barcha xizmatlar ro'yxatini ochish →", ru: "Открыть полный список услуг →" })}
+      </Link>
     </section>
   );
 }
@@ -316,7 +506,7 @@ export default function HomePassport() {
     <div className="flex flex-col gap-6 px-4 pb-7 pt-5 sm:px-6">
       <Hero featured={top.slice(0, 6)} stats={stats} isSample={isSample} />
       <TopServices items={top} stats={stats} isSample={isSample} />
-      <AllServices stats={stats} />
+      <AllServices stats={stats} isSample={isSample} />
       <Situations />
       <HelpBlock />
     </div>

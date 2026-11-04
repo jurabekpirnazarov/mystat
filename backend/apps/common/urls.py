@@ -10,7 +10,7 @@ from .views import (
 
 from django.urls import path
 
-from .support_views import AssistantAPIView, GlobalSearchAPIView, SupportStartAPIView, SupportThreadAPIView
+from .support_views import AiSearchAPIView, AssistantAPIView, ChatAPIView, GlobalSearchAPIView, SupportStartAPIView, SupportThreadAPIView
 from .weather import WeatherAPIView
 from apps.analytics.region_profile import DistrictProfileView, RegionMapView, RegionProfileView
 
@@ -30,6 +30,8 @@ urlpatterns = [
     path('weather/', WeatherAPIView.as_view(), name='weather'),
     path('search/', GlobalSearchAPIView.as_view(), name='search'),
     path('assistant/', AssistantAPIView.as_view(), name='assistant'),
+    path('ai-search/', AiSearchAPIView.as_view(), name='ai-search'),
+    path('chat/', ChatAPIView.as_view(), name='chat'),
     path('support/', SupportStartAPIView.as_view(), name='support-start'),
     path('support/<int:pk>/', SupportThreadAPIView.as_view(), name='support-thread'),
     path('contact-create/', ContactCreateAPIView.as_view(), name='contact-create'),

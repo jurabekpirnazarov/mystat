@@ -72,3 +72,54 @@ export const fetchTradeDynamics = async (flow: TradeFlow, country?: number | nul
   if (country) query.country = String(country);
   return (await axiosT.get<TradeDynamicsPoint[]>(`${BASE}dynamics/`, { params: query })).data;
 };
+
+export interface TradeAdviceBlock {
+  summary: string[];
+  risks: string[];
+  opportunities: string[];
+  recommendations: string[];
+  /** Savolga javob (savol berilgan bo'lsa) */
+  answer: string;
+  /** ai — lokal Gemma; rules — raqamlarga asoslangan qoidalar */
+  source: "ai" | "rules";
+}
+
+export interface TradeAdviceResponse {
+  snapshot: { year: number; period_label: string; hs: string | null; warnings: string[] };
+  advice: TradeAdviceBlock;
+}
+
+/** Eksport/import bo'yicha maslahatchi tahlili (AI yoki qoidalar). Raqamlar serverda bazadan olinadi. */
+export const fetchTradeAdvice = async (params: { year?: number; hs?: string; question?: string }) =>
+  (await axiosT.post<TradeAdviceResponse>(`${BASE}advice/`, params)).data;
+
+/** Shu tahlilni Word (.docx) hisobot qilib yuklab oladi. */
+export const downloadTradeAdviceDocx = async (params: { year?: number; hs?: string; question?: string }) => {
+  const res = await axiosT.post(`${BASE}advice/docx/`, params, { responseType: "blob" });
+  const url = URL.createObjectURL(res.data as Blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `tashqi-savdo-tahlil-${params.year ?? ""}${params.hs ? `-${params.hs}` : ""}.docx`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+export interface ComtradeOverview {
+  years: number[];
+  year: number | null;
+  hs: string;
+  hs_options: { code: string; name: string }[];
+  /** AQSh dollarida (Comtrade); bojxona ma'lumoti ming $ da, `compare` da dollarga o'girilgan */
+  totals: { export?: number; import?: number };
+  partners: { code: number; country: string; export: number; import: number }[];
+  compare: null | {
+    customs_period: string;
+    note: string;
+    rows: Record<"export" | "import", { customs_usd: number | null; comtrade_usd: number | null; diff_pct: number | null }>;
+  };
+  last_sync: null | { status: string; finished_at: string | null; rows: number; error: string };
+}
+
+/** UN Comtrade+ (O'zbekiston hisoboti) va bojxona ma'lumoti bilan solishtirish. */
+export const fetchComtradeOverview = async (params: { year?: number; hs?: string }) =>
+  (await axiosT.get<ComtradeOverview>("/additional-services/external-trade/comtrade/overview/", { params })).data;

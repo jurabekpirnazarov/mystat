@@ -74,7 +74,6 @@ const Reports = lazy(() => import("./pages/Reports"));
 const OneIDCallback = lazy(() => import("./pages/OneIDCallback"));
 const CpiCalculator = lazy(() => import("./pages/CpiCalculator"));
 const StatisticalClassifications = lazy(() => import("./pages/StatisticalClassifications"));
-const ReportCalendar = lazy(() => import("./pages/ReportCalendar"));
 const Reglaments = lazy(() => import("./pages/Reglaments"));
 const BookOrderPage = lazy(() => import("./pages/BookOrderPage"));
 const BookOrderMapPage = lazy(() => import("./pages/BookOrderMapPage"));
@@ -195,7 +194,7 @@ function AppRoutes() {
           <Route path="/cpi-calculator" element={<CpiCalculator />} />
           <Route path="/statistical-classifications" element={<StatisticalClassifications />} />
           <Route path="/reporting" element={<ReportingHub />} />
-          <Route path="/report-calendar" element={<ReportCalendar />} />
+          <Route path="/report-calendar" element={<Navigate to="/reporting" replace />} />
           <Route path="/release-calendar" element={<ReleaseCalendarPage />} />
           <Route path="/indicators" element={<IndicatorsPage />} />
           <Route path="/indicators/:key" element={<IndicatorPage />} />

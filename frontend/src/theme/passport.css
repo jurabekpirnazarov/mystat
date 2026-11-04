@@ -38,11 +38,13 @@
 .pp-fu { animation: pp-fu .7s cubic-bezier(.2, .7, .2, 1) both; }
 @keyframes pp-slide { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
 .pp-slide { animation: pp-slide .7s cubic-bezier(.2, .7, .2, 1) both; }
+@keyframes pp-fade { from { opacity: 0; } to { opacity: 1; } }
+.pp-fade { animation: pp-fade .2s ease-out both; }
 @keyframes pp-marq { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 .pp-mq { display: flex; width: max-content; animation: pp-marq 90s linear infinite; }
 .pp-mqw:hover .pp-mq, .pp-mqw:focus-within .pp-mq { animation-play-state: paused; }
 @keyframes pp-flash { 0% { background: rgb(30 181 58 / .3); } 100% { background: transparent; } }
 .pp-flash { animation: pp-flash 1.4s ease; }
 @media (prefers-reduced-motion: reduce) {
-  .pp-mq, .pp-fu, .pp-slide, .pp-flash { animation: none !important; }
+  .pp-mq, .pp-fu, .pp-slide, .pp-flash, .pp-fade { animation: none !important; }
 }

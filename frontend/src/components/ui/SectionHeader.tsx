@@ -11,7 +11,7 @@ export default function SectionHeader({ id, title, description, moreHref, moreLa
   return (
     <div className="mb-5 flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
       <div className="min-w-0">
-        <h2 id={id} className="flex items-center gap-3 text-[20px] font-semibold leading-8 text-mg-heading sm:text-[24.5px] sm:leading-9">{accent && <span className="h-6 w-1 rounded-full bg-[rgb(var(--ds-accent))]" aria-hidden="true" />}{title}{badge}</h2>
+        <h2 id={id} className="flex items-center gap-3 text-[20px] font-extrabold leading-8 tracking-[-0.02em] text-mg-heading sm:text-[24px] sm:leading-9">{accent && <span className="h-6 w-1 rounded-full bg-[rgb(var(--ds-accent))]" aria-hidden="true" />}{title}{badge}</h2>
         {description && <p className="mt-1 text-sm text-mg-muted">{description}</p>}
       </div>
       {moreHref && moreLabel && (

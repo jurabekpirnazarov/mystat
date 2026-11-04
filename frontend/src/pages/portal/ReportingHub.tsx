@@ -1,11 +1,10 @@
 import { Link } from "react-router-dom";
-import { BadgeCheck, CalendarDays, ClipboardList, FileText, HelpCircle, ScrollText } from "lucide-react";
+import { BadgeCheck, ClipboardList, FileText, HelpCircle, ScrollText } from "lucide-react";
 import { PageHeader } from "../../components/ui";
 
 /** HT-09: hisobot topshiruvchilar uchun yagona kirish sahifasi. Eski manzillar o'z joyida qoladi. */
 const TILES = [
-  { to: "/report-calendar", icon: CalendarDays, title: "Hisobot kalendari", text: "STIR bo'yicha majburiy shakllar va ularning muddatlari." },
-  { to: "/cabinet?tab=reports", icon: ClipboardList, title: "Hisobotlarim", text: "Davrlar, muddatlar, eslatmalar va kalendarga ulash (kirish kerak)." },
+  { to: "/cabinet?tab=reports", icon: ClipboardList, title: "Hisobotlarim", text: "Davrlar va muddatlar bo'yicha hisobotlaringiz (kirish kerak)." },
   { to: "/reglaments", icon: ScrollText, title: "Reglamentlar", text: "Hisobot shakllari va topshirish tartibi bo'yicha reglamentlar." },
   { to: "/stat-codes", icon: FileText, title: "Statistik kodlar ma'lumotnomasi", text: "Korxonaning statistik kodlari va hisobotlari, QR bilan tekshiriladigan PDF." },
   { to: "/check", icon: BadgeCheck, title: "Korxonani tekshirish", text: "STIR bo'yicha ochiq ma'lumotlar va majburiy hisobotlar." },

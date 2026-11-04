@@ -221,6 +221,28 @@ class TradeDataGetDataSerializer(serializers.Serializer):
         help_text="4-digit SITC codes"
     )
     
+    # Qo'shimcha filtrlar va natijani sozlash (hammasi ixtiyoriy)
+    exclude_countries = serializers.ListField(
+        child=serializers.CharField(max_length=100), required=False,
+        help_text="Natijadan chiqarib tashlanadigan davlatlar (ctrana kodi)"
+    )
+    search = serializers.CharField(
+        max_length=60, required=False, allow_blank=True,
+        help_text="Davlat, hudud yoki mahsulot nomi bo'yicha qidiruv"
+    )
+    min_value = serializers.DecimalField(
+        max_digits=20, decimal_places=2, required=False, min_value=0,
+        help_text="Oxirgi tanlangan davrdagi qiymat (ming $) shundan kam bo'lgan qatorlar tashlanadi"
+    )
+    max_value = serializers.DecimalField(
+        max_digits=20, decimal_places=2, required=False, min_value=0,
+        help_text="Oxirgi tanlangan davrdagi qiymat (ming $) shundan katta bo'lgan qatorlar tashlanadi"
+    )
+    sort_by = serializers.ChoiceField(choices=['value_desc', 'value_asc', 'name'], required=False)
+    top_n = serializers.IntegerField(min_value=1, max_value=1000, required=False)
+    show_share = serializers.BooleanField(required=False, default=False)
+    show_growth = serializers.BooleanField(required=False, default=False)
+
     # Group by - ikki xil kombinatsiya
     group_by = serializers.ListField(
         child=serializers.ChoiceField(choices=[
@@ -235,6 +257,9 @@ class TradeDataGetDataSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 "Quarter va month bir vaqtda tanlab bo'lmaydi"
             )
+
+        if data.get('min_value') is not None and data.get('max_value') is not None and data['min_value'] > data['max_value']:
+            raise serializers.ValidationError("Eng kam qiymat eng ko'p qiymatdan katta bo'lmasligi kerak")
         
         hs_fields = ['hs2_codes', 'hs4_codes', 'hs6_codes']
         sitc_fields = ['sitc1_codes', 'sitc2_codes', 'sitc3_codes', 'sitc4_codes']

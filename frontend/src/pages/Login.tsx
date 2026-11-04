@@ -11,14 +11,16 @@ import type { LoginResponse } from "../types/api";
 import { rememberReturnTo, safeReturnPath, takeReturnTo } from "../utils/loginRedirect";
 
 const Login = () => {
+  const [searchParams] = useSearchParams();
+  // `?role=` — xizmat auditoriyasiga ko'ra oldindan tanlangan rol (rol tanlash ekrani)
+  const roleParam = searchParams.get("role");
   const [userType, setUserType] = useState<"individual" | "legal">(
-    "individual"
+    roleParam === "legal" ? "legal" : "individual"
   );
   const [formData, setFormData] = useState({
     username: "",
     password: "",
   });
-  const [searchParams] = useSearchParams();
   const [error, setError] = useState<string | null>(null);
 
   const { login } = useAuth();
@@ -150,9 +152,15 @@ const Login = () => {
 
         {/* User Type Selection */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Foydalanuvchi Turi
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+            {next ? "Xizmatdan foydalanish uchun rolingizni tanlang" : "Foydalanuvchi Turi"}
           </h2>
+          {next && (
+            <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
+              Fuqaro OneID orqali, korxona login va parol bilan kiradi. Kirgach xizmatga qaytasiz.
+            </p>
+          )}
+          {!next && <div className="mb-3" />}
 
           <div className="grid grid-cols-2 gap-4">
             <button

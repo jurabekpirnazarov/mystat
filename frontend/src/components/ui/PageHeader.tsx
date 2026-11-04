@@ -22,7 +22,7 @@ export default function PageHeader({ title, description, actions, badge }: PageH
     <header className="mb-6">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl sm:text-[28px] font-semibold text-mg-primary flex items-center gap-3 flex-wrap">
+          <h1 className="text-2xl sm:text-[30px] font-extrabold tracking-[-0.03em] text-mg-heading flex items-center gap-3 flex-wrap">
             {title}
             {badge}
           </h1>

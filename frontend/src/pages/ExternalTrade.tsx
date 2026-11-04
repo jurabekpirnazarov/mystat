@@ -10,9 +10,10 @@ import { createRating } from '../api/rating';
 import type { ApiTradeData, HeaderItem, TradeDataItem } from '../components/ServiceResultsStep';
 import { useLang } from '../i18n/LangContext';
 import TradeHub from '../components/externalTrade/TradeHub';
+import { DEFAULT_RESULT_OPTS, resultOptsPayload, type ResultOpts } from '../components/externalTrade/ResultOptions';
 
 /** trade-data/ POST so'rovi: filtr ro'yxatlari va bir nechta skalyar maydon */
-type TradeQueryPayload = { [key: string]: (string | number)[] | string | number | undefined } & {
+type TradeQueryPayload = { [key: string]: (string | number)[] | string | number | boolean | undefined } & {
   countries?: (string | number)[];
   regions?: (string | number)[];
   country_groups?: (string | number)[];
@@ -85,6 +86,7 @@ const ExternalTrade = () => {
   const [isSitcExpanded, setIsSitcExpanded] = useState(false);
 
   // Form State
+  const [resultOpts, setResultOpts] = useState<ResultOpts>(DEFAULT_RESULT_OPTS);
   const [tradeFlows, setTradeFlows] = useState<OptionType[]>([{ value: 1, label: 'Eksport' }]);
   const [selectedYear, setSelectedYear] = useState<OptionType[]>([{ value: 2022, label: '2022' }]);
   const [isYearEnabled, setIsYearEnabled] = useState(true);
@@ -1088,6 +1090,8 @@ const ExternalTrade = () => {
       }
 
 
+      Object.assign(payload, resultOptsPayload(resultOpts));
+
       // Make POST API call
       const response = await postRequest<ApiTradeData>(post_get_data_api, payload);
 
@@ -1267,6 +1271,8 @@ const ExternalTrade = () => {
             onPrevious={goToPrevious}
             onGetData={handleGetData}
             isLoading={isLoading}
+            resultOpts={resultOpts}
+            setResultOpts={setResultOpts}
             // Pass all form states
             isMainOptionsExpanded={isMainOptionsExpanded}
             setIsMainOptionsExpanded={setIsMainOptionsExpanded}

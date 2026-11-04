@@ -32,7 +32,6 @@ export const SPHERES: Sphere[] = [
     id: 2, slug: "reporting", icon: ClipboardList, tint: "text-[rgb(var(--ds-on-panel-muted))] bg-[rgb(var(--ds-panel))]",
     title: { uz: "Hisobot topshirish", ru: "Сдача отчётности" },
     subcategories: [
-      { id: "calendar", title: { uz: "Kalendar", ru: "Календарь" } },
       { id: "forms", title: { uz: "Shakllar", ru: "Формы" } },
     ],
   },

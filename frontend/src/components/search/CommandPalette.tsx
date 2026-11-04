@@ -20,7 +20,6 @@ const PAGES: SearchItem[] = [
   { id: "p-industry", title: "Sanoat mahsulotlari", subtitle: "Sahifa", url: "/industry" },
   { id: "p-ktut", title: "Korxonalar reyestri (KTUT)", subtitle: "Sahifa", url: "/organizations-ktut" },
   { id: "p-cpi", title: "Narx indeksi kalkulyatori", subtitle: "Sahifa", url: "/cpi-calculator" },
-  { id: "p-calendar", title: "Hisobot kalendari", subtitle: "Sahifa", url: "/report-calendar" },
   { id: "p-releases", title: "E'lonlar kalendari", subtitle: "Qaysi ko'rsatkich qachon e'lon qilinadi", url: "/release-calendar" },
   { id: "p-dashboards", title: "Mavzuli panellar", subtitle: "Iqtisodiyot, mehnat bozori, aholi bir qarashda", url: "/dashboards" },
   { id: "p-check", title: "Kontragentni tekshirish", subtitle: "STIR yoki nom bo'yicha bepul korxona kartasi", url: "/check" },

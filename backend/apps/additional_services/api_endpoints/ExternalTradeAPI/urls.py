@@ -6,6 +6,8 @@ from apps.additional_services.api_endpoints.ExternalTradeAPI.flows import (
     TradeFlowDynamicsAPIView, TradeFlowsAPIView, TradeFlowsExportAPIView,
 )
 
+from .advisor import TradeAdviceAPIView, TradeAdviceDocxAPIView
+from .comtrade_api import ComtradeOverviewAPIView
 from .trade_hub import TradeSearchAPIView, TradeSummaryAPIView
 from .views import (
     CountryGroupViewSet, CountryViewSet, TradeDataExportView, TradeDataGetDataView, UnitViewSet, RegionViewSet,
@@ -31,5 +33,8 @@ urlpatterns = [
     path('trade-flows/', TradeFlowsAPIView.as_view(), name='trade-flows'),
     path('trade-flows/dynamics/', TradeFlowDynamicsAPIView.as_view(), name='trade-flows-dynamics'),
     path('trade-flows/export/', TradeFlowsExportAPIView.as_view(), name='trade-flows-export'),
+    path('comtrade/overview/', ComtradeOverviewAPIView.as_view(), name='comtrade-overview'),
+    path('trade-flows/advice/', TradeAdviceAPIView.as_view(), name='trade-flows-advice'),
+    path('trade-flows/advice/docx/', TradeAdviceDocxAPIView.as_view(), name='trade-flows-advice-docx'),
     
 ]

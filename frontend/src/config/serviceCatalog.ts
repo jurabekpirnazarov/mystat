@@ -1,8 +1,8 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  BadgeCheck, BarChart3, BookMarked, BookOpen, Building, Building2, Calculator, CalendarClock, CalendarDays,
+  BadgeCheck, BookMarked, BookOpen, Building2, Calculator, CalendarDays,
   ClipboardCheck, ClipboardList, Coins, FileBarChart, FileSearch, FileSignature, FileText, Gauge, Globe2,
-  HandCoins, Handshake, Landmark, LayoutDashboard, LineChart, Map as MapIcon, MessageCircleQuestion, Newspaper,
+  HandCoins, Handshake, Landmark, LayoutDashboard, LineChart, Map as MapIcon, MessageCircleQuestion, 
   PackageSearch, Percent, ScrollText, ShoppingBasket, Ship, SpellCheck, Tags, UserCheck, Users, Vote,
   Wallet, Webhook, BellRing, Factory,
 } from "lucide-react";
@@ -131,48 +131,17 @@ export const SERVICES: ServiceCatalogItem[] = [
     route: "/organizations-ktut", icon: Landmark, duration: T.instant, users: "all", access: "login", price: T.freeLogin,
     requiredDocs: T.stirOnly, howItWorks: [STEP.login, STEP.stir, STEP.result], keywords: ["ktut", "reyestr"],
   },
-  {
-    ...base, number: 107, sphere: 1, subcategory: "score",
-    title: { uz: "Korxona bali", ru: "Балл предприятия" },
-    description: { uz: "Korxonaning umumiy bali va sinfi; batafsil tahlil hamyondan to'lanadi", ru: "Общий балл и класс предприятия; подробный анализ оплачивается из кошелька" },
-    route: "/company-score/components", icon: Gauge, duration: T.instant, users: "all", access: "credits",
-    price: { uz: "Umumiy ball — bepul; \"Ball nimaga asoslangan\" — 16 500 so'm; \"Chuqur tahlil\" — 49 500 so'm (30 kun ochiq)", ru: "Общий балл — бесплатно; «Из чего состоит балл» — 16 500 сум; «Глубокий анализ» — 49 500 сум (30 дней)" },
-    requiredDocs: T.stirOnly, howItWorks: [STEP.stir, { uz: "Umumiy ballni ko'ring", ru: "Посмотрите общий балл" }, { uz: "Kerak bo'lsa batafsil bo'limlarni hamyon hisobidan oching", ru: "При необходимости откройте подробные разделы из кошелька" }],
-    keywords: ["scoring", "reyting", "ball"],
-  },
-  {
-    ...base, number: 108, sphere: 1, subcategory: "score",
-    title: { uz: "Korxona pasporti", ru: "Паспорт предприятия" },
-    description: { uz: "O'z korxonangiz bali, tavsiyalar va dinamika", ru: "Балл вашего предприятия, рекомендации и динамика" },
-    route: "/cabinet/organization", icon: Building, duration: T.instant, users: "legal", access: "login", price: T.freeLogin,
-    howItWorks: [STEP.login, STEP.result],
-  },
 
   // 2. Hisobot topshirish
   {
-    ...base, number: 201, sphere: 2, subcategory: "calendar", featured: true, popularOrder: 3,
-    title: { uz: "Hisobot kalendari", ru: "Календарь отчётности" },
-    description: { uz: "Statistik hisobotlarni topshirish muddatlari, eslatma va .ics eksport", ru: "Сроки сдачи статистической отчётности, напоминания и экспорт .ics" },
-    route: "/report-calendar", icon: CalendarDays, duration: T.instant, users: "all", access: "open", price: T.free,
-    howItWorks: [STEP.open, { uz: "Oy yoki STIR bo'yicha muddatlarni ko'ring", ru: "Посмотрите сроки по месяцу или ИНН" }, { uz: "Eslatma qo'ying yoki kalendarga eksport qiling", ru: "Поставьте напоминание или экспортируйте в календарь" }],
-    keywords: ["muddat", "deadline", "kalendar"],
-  },
-  {
-    ...base, number: 202, sphere: 2, subcategory: "calendar", featured: true,
-    title: { uz: "Hisobotlarim", ru: "Мои отчёты" },
-    description: { uz: "Korxonangiz topshirishi kerak bo'lgan hisobotlar va ularning muddatlari", ru: "Отчёты, которые должно сдать ваше предприятие, и их сроки" },
-    route: "/cabinet?tab=reports", icon: CalendarClock, duration: T.instant, users: "legal", access: "login", price: T.freeLogin,
-    howItWorks: [STEP.login, STEP.cabinet, STEP.result],
-  },
-  {
-    ...base, number: 203, sphere: 2, subcategory: "forms",
+    ...base, number: 203, sphere: 2, subcategory: "forms", featured: true,
     title: { uz: "Taqdim etiladigan hisobotlar ro'yxati", ru: "Перечень представляемой отчётности" },
     description: { uz: "Tasdiqlangan statistik hisobot shakllari va STIR bo'yicha majburiy hisobotlar", ru: "Утверждённые формы статистической отчётности и обязательные отчёты по ИНН" },
     route: "/reports", icon: ClipboardList, duration: T.instant, users: "all", access: "open", price: T.free,
     howItWorks: [STEP.open, STEP.stir, STEP.result], keywords: ["shakl", "forma"],
   },
   {
-    ...base, number: 204, sphere: 2, subcategory: "forms",
+    ...base, number: 204, sphere: 2, subcategory: "forms", featured: true,
     title: { uz: "Reglamentlar", ru: "Регламенты" },
     description: { uz: "Xizmat ko'rsatish reglamentlari va me'yoriy hujjatlar", ru: "Регламенты оказания услуг и нормативные документы" },
     route: "/reglaments", icon: FileText, duration: T.instant, users: "all", access: "open", price: T.free,
@@ -212,13 +181,6 @@ export const SERVICES: ServiceCatalogItem[] = [
     route: "/partners", icon: Handshake, duration: T.oneMin, users: "all", access: "package",
     price: pkg("qidiruv bepul; XLSX eksport 1/3/10/30 ta"),
     howItWorks: [STEP.open, STEP.filter, { uz: "Ro'yxatni ko'ring yoki XLSX qilib yuklab oling", ru: "Посмотрите список или скачайте XLSX" }],
-  },
-  {
-    ...base, number: 402, sphere: 4, subcategory: "benchmark", featured: true,
-    title: { uz: "Tarmoq benchmarki", ru: "Отраслевой бенчмарк" },
-    description: { uz: "Korxonangiz ko'rsatkichlarini tarmoqdagi tengdoshlar bilan solishtirish", ru: "Сравнение показателей вашего предприятия с отраслевыми аналогами" },
-    route: "/cabinet?tab=benchmark", icon: BarChart3, duration: T.oneMin, users: "legal", access: "package",
-    price: pkg("1/3/10/30 ta"), howItWorks: [STEP.login, STEP.limit, STEP.cabinet, STEP.result],
   },
   {
     ...base, number: 403, sphere: 4, subcategory: "order",
@@ -347,20 +309,6 @@ export const SERVICES: ServiceCatalogItem[] = [
     requiredDocs: { uz: "Yetkazish uchun pochta bo'limi", ru: "Почтовое отделение для доставки" },
     howItWorks: [STEP.login, { uz: "Nashrni tanlab savatga qo'shing", ru: "Выберите издание и добавьте в корзину" }, { uz: "Pochta bo'limini tanlab Click orqali to'lang", ru: "Выберите почтовое отделение и оплатите через Click" }],
     actionType: "apply",
-  },
-  {
-    ...base, number: 1002, sphere: 10, subcategory: "bulletins", featured: true,
-    title: { uz: "Statistik byulletenlar", ru: "Статистические бюллетени" },
-    description: { uz: "Byulletenlarni kabinetdan yuklab olish", ru: "Скачивание бюллетеней из кабинета" },
-    route: "/cabinet?tab=services", icon: Newspaper, duration: T.instant, users: "legal", access: "package",
-    price: pkg("1/3/5/7 ta"), howItWorks: [STEP.login, STEP.limit, STEP.cabinet],
-  },
-  {
-    ...base, number: 1003, sphere: 10, subcategory: "bulletins",
-    title: { uz: "Statistik to'plamlar", ru: "Статистические сборники" },
-    description: { uz: "Yillik statistik to'plamlarning elektron nusxasi", ru: "Электронные копии ежегодных статистических сборников" },
-    route: "/cabinet?tab=services", icon: BookOpen, duration: T.instant, users: "legal", access: "package",
-    price: pkg("1/3/5 ta, 4-tarifda — barchasi"), howItWorks: [STEP.login, STEP.limit, STEP.cabinet],
   },
 
   // 11. Tasniflagichlar va metodologiya

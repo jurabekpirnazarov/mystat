@@ -38,6 +38,7 @@ export default function PublicFooter() {
         </div>
         <p className="border-t border-mg-border pt-4 text-xs text-mg-muted">
           © {new Date().getFullYear()} {t(UI.portalLine1)} · {t(UI.typoHint)}
+          <span className="ml-2 opacity-70" title={__BUILD_DATE__}>· build {__BUILD_ID__}</span>
         </p>
       </div>
     </footer>

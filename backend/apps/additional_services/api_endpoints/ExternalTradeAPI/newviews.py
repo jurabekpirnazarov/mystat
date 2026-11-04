@@ -78,6 +78,14 @@ class TradeDataGetView(CreateAPIView):
         # Product filters
         filters &= self._get_product_filters(data)
 
+        # Qo'shimcha filtrlar: davlatni chiqarib tashlash va nom bo'yicha qidiruv
+        if data.get('exclude_countries'):
+            filters &= ~Q(country__ctrana__in=data['exclude_countries'])
+        term = (data.get('search') or '').strip()
+        if term:
+            filters &= (Q(country__name_uz__icontains=term) | Q(product__name_uz__icontains=term)
+                        | Q(region__name_uz__icontains=term) | Q(sitc__name_uz__icontains=term))
+
         return TradeData.objects.filter(filters).select_related(
             'product', 'country', 'region', 'sitc', 'year', 'unit',
             'country__country_group'
@@ -616,6 +624,8 @@ class TradeDataGetView(CreateAPIView):
 
         total_label = f"{trade_type_name}, {labels.get('Total','Total')}:"
         total_row = {'label': total_label, 'isGroupSummary': True}
+        # Jami qator hamma qatorlar bo'yicha (tanlov va top-N dan oldin) hisoblanadi
+        value_cols = [f"{value_prefix}{c}" for c in columns]
         # Davlat guruhi bo'yicha guruhlashda yig'indi emas, unique jami (guruhlar kesishishi mumkin)
         dims = config.get('dimensions') or []
         unique = getattr(self, '_true_totals', None) if 'country_group' in dims else None
@@ -625,6 +635,7 @@ class TradeDataGetView(CreateAPIView):
             total_row[f"{value_prefix}{col_name}"] = round(total_values[col_name]['value'], 2)
             if include_quantity:
                 total_row[f"{quantity_prefix}{col_name}"] = round(total_values[col_name]['quantity'], 2)
+        extra_headers = self._shape_rows(data_rows, total_row, value_cols, columns, data, lang)
         data_rows.append(total_row)
 
         total = field_map.get('total')
@@ -643,6 +654,7 @@ class TradeDataGetView(CreateAPIView):
         # Build headers
         headers = self._build_headers(config, columns, period_type, include_quantity, lang=lang,
                                      field_map=field_map, labels=labels)
+        headers.extend(extra_headers)
 
         # Build final response
         units = ['USD 1000']
@@ -671,6 +683,53 @@ class TradeDataGetView(CreateAPIView):
             response['filters']['months'] = periods
 
         return response
+
+    SHARE_FIELD, GROWTH_FIELD = 'ulush_foiz', 'osish_foiz'
+    EXTRA_LABELS = {
+        'uz': ("Ulush, % (oxirgi davr)", "O'sish, % (oxirgi davr oldingisiga nisbatan)"),
+        'ru': ("Доля, % (последний период)", "Рост, % (к предыдущему периоду)"),
+        'cry': ("Улуш, % (охирги давр)", "Ўсиш, % (олдингисига нисбатан)"),
+    }
+
+    def _shape_rows(self, rows, total_row, value_cols, columns, data, lang):
+        """Qatorlarni qiymat oralig'i bo'yicha saralaydi, tartiblaydi, top-N ga qisqartiradi va ixtiyoriy ulush/o'sish
+        ustunlarini qo'shadi. Jami qator o'zgarmaydi (ulush ham to'liq jamiga nisbatan). -> qo'shimcha sarlavhalar."""
+        def amount(r):
+            # Oylar kumulyativ bo'lgani uchun davrlarni qo'shmaymiz: oxirgi tanlangan davr qiymati olinadi
+            return (r.get(value_cols[-1]) or 0) if value_cols else 0
+
+        low, high = data.get('min_value'), data.get('max_value')
+        if low is not None:
+            rows[:] = [r for r in rows if amount(r) >= float(low)]
+        if high is not None:
+            rows[:] = [r for r in rows if amount(r) <= float(high)]
+
+        sort_by = data.get('sort_by')
+        if sort_by in ('value_desc', 'value_asc'):
+            rows.sort(key=amount, reverse=sort_by == 'value_desc')
+        elif sort_by == 'name':
+            name_key = next((k for k in (rows[0] if rows else {}) if k.endswith(('_nomi', '_номи', '_наименование', '_name'))), None)
+            if name_key:
+                rows.sort(key=lambda r: str(r.get(name_key) or '').lower())
+        if data.get('top_n'):
+            del rows[data['top_n']:]
+
+        headers = []
+        last = value_cols[-1] if value_cols else None
+        prev = value_cols[-2] if len(value_cols) > 1 else None
+        share_label, growth_label = self.EXTRA_LABELS.get(lang, self.EXTRA_LABELS['uz'])
+        if data.get('show_share') and last:
+            whole = total_row.get(last) or 0
+            for r in rows:
+                r[self.SHARE_FIELD] = round((r.get(last) or 0) / whole * 100, 1) if whole else None
+            total_row[self.SHARE_FIELD] = 100.0 if whole else None
+            headers.append({'field': self.SHARE_FIELD, 'label': share_label})
+        if data.get('show_growth') and prev:
+            for r in rows + [total_row]:
+                before = r.get(prev) or 0
+                r[self.GROWTH_FIELD] = round(((r.get(last) or 0) - before) / before * 100, 1) if before else None
+            headers.append({'field': self.GROWTH_FIELD, 'label': growth_label})
+        return headers
 
     # -------------------------
     # Localized headers builder

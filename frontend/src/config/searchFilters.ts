@@ -7,6 +7,7 @@ export interface SearchType { key: string; label: string }
 export const SEARCH_TYPES: SearchType[] = [
   { key: "", label: "Hammasi" },
   { key: "services", label: "Xizmatlar" },
+  { key: "indicators", label: "Ko'rsatkichlar" },
   { key: "companies", label: "Korxonalar" },
   { key: "faq", label: "Savollar" },
   { key: "articles", label: "Maqolalar" },

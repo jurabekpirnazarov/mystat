@@ -17,7 +17,7 @@ export const UI = {
   groupHelp: { uz: "Yordam va qo'llab-quvvatlash", ru: "Помощь и поддержка" },
   popular: { uz: "Ommabop xizmatlar", ru: "Популярные услуги" },
   spheres: { uz: "Sohalar", ru: "Сферы" },
-  reportCalendar: { uz: "Hisobot kalendari", ru: "Календарь отчётности" },
+  reportCalendar: { uz: "Hisobotlar", ru: "Отчётность" },
   checkCompany: { uz: "Kontragentni tekshirish", ru: "Проверка контрагента" },
   regionsMap: { uz: "Hududlar xaritasi", ru: "Карта регионов" },
   openData: { uz: "Ochiq ma'lumotlar", ru: "Открытые данные" },

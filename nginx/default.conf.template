@@ -41,9 +41,12 @@ server {
         proxy_read_timeout 180s;
     }
 
+    # index.html HECH QACHON keshlanmasin: aks holda brauzer eski index.html (eski /assets/*.js nomlari) bilan eski dizaynni
+    # ko'rsatib turadi. /assets/* esa nomida hash bor, shuning uchun 1 yil keshlanaveradi.
     location / {
         root /usr/share/nginx/html;
         try_files $uri $uri/ /index.html;
+        add_header Cache-Control "no-cache";
     }
 
     # PWA: service worker va manifest keshlanmasin, aks holda yangi versiya kech yetadi

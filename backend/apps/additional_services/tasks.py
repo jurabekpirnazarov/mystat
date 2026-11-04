@@ -99,3 +99,11 @@ def _default_reminders(today, ct):
                                                         "deadline": due.isoformat()})
                 created += 1
     return created
+
+
+@shared_task
+def comtrade_sync_task(years=None, hs=None):
+    """UN Comtrade+: O'zbekiston ma'lumotini yangilash (beat: har dushanba, kalit bo'lsa). Qo'lda: apps.additional_services.tasks.comtrade_sync_task.delay()"""
+    from apps.additional_services.services import comtrade
+    entry = comtrade.sync(years=years, hs=hs)
+    return {"status": entry.status, "calls": entry.calls, "rows": entry.rows}

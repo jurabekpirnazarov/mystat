@@ -26,12 +26,12 @@ export const SITUATIONS: Situation[] = [
     description: { uz: "Tovar bo'yicha savdo hajmi, narxlar va hamkor davlatlar.", ru: "Объём торговли по товару, цены и страны-партнёры." },
   },
   {
-    slug: "reporting", icon: ClipboardList, services: [201, 202, 203, 103, 1402],
+    slug: "reporting", icon: ClipboardList, services: [203, 103, 1402],
     title: { uz: "Hisobot topshirish", ru: "Сдача отчётности" },
     description: { uz: "Qaysi hisobotlar va qachongacha topshiriladi, savol bo'lsa — konsultatsiya.", ru: "Какие отчёты и в какие сроки сдавать, при вопросах — консультация." },
   },
   {
-    slug: "check-partner", icon: BadgeCheck, services: [102, 107, 103, 104],
+    slug: "check-partner", icon: BadgeCheck, services: [102, 103, 104],
     title: { uz: "Hamkorni tekshirish", ru: "Проверка партнёра" },
     description: { uz: "Korxona kartasi, bali va statistik kodlari.", ru: "Карточка, балл и статистические коды предприятия." },
   },

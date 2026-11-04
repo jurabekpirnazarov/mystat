@@ -55,9 +55,9 @@ function Sidebar({ open, onToggle }: { open: boolean; onToggle: () => void }) {
   return (
     <aside aria-label={t({ uz: "Bo'limlar", ru: "Разделы" })}
       style={{ width: open ? 252 : 80, flexBasis: open ? 252 : 80 }}
-      className="sticky top-4 hidden shrink-0 flex-col gap-3 self-start rounded-3xl border border-[var(--pp-line)] bg-[var(--pp-card)] p-3 transition-[width] duration-300 lg:flex">
+      className="sticky top-4 hidden shrink-0 flex-col gap-3 self-start rounded-3xl border border-[var(--pp-line)] bg-[var(--pp-card)] p-3 transition-[width,flex-basis] duration-200 ease-out lg:flex">
       <div className={`flex items-center gap-2 pb-1 ${open ? "justify-between" : "justify-center"}`}>
-        {open && <span className="pl-1.5 text-xs font-semibold tracking-[0.06em] text-[var(--pp-muted)]">{t({ uz: "MENYU", ru: "МЕНЮ" })}</span>}
+        {open && <span className="pp-fade pl-1.5 text-xs font-semibold tracking-[0.06em] text-[var(--pp-muted)]">{t({ uz: "MENYU", ru: "МЕНЮ" })}</span>}
         <button type="button" onClick={onToggle} aria-expanded={open} aria-label={open ? t({ uz: "Menyuni yig'ish", ru: "Свернуть меню" }) : t({ uz: "Menyuni ochish", ru: "Развернуть меню" })}
           className="pp-focus flex h-10 w-10 items-center justify-center rounded-[14px] border border-[var(--pp-line)] bg-[var(--pp-card)] hover:bg-[var(--pp-soft)]">
           {open ? <ChevronLeft className="h-[18px] w-[18px]" aria-hidden="true" /> : <ChevronRight className="h-[18px] w-[18px]" aria-hidden="true" />}
@@ -66,7 +66,7 @@ function Sidebar({ open, onToggle }: { open: boolean; onToggle: () => void }) {
       {NAV_GROUPS.map((g) => (
         <div key={g.id} className="flex flex-col gap-1">
           {open
-            ? <span className="px-2 pb-0.5 pt-2 text-[11px] font-semibold tracking-[0.06em] text-[var(--pp-muted)]">{t(g.label).toUpperCase()}</span>
+            ? <span className="pp-fade whitespace-nowrap px-2 pb-0.5 pt-2 text-[11px] font-semibold tracking-[0.06em] text-[var(--pp-muted)]">{t(g.label).toUpperCase()}</span>
             : <span aria-hidden="true" className="mx-3.5 my-2 block h-px bg-[var(--pp-line)]" />}
           {g.items.map((it) => {
             const cur = isNavActive(it, pathname);
@@ -78,7 +78,7 @@ function Sidebar({ open, onToggle }: { open: boolean; onToggle: () => void }) {
                 <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] ${cur ? "bg-[var(--btn)] text-white" : "bg-[var(--pp-soft)] text-[var(--pp-muted)]"}`}>
                   <Icon className="h-5 w-5" aria-hidden="true" />
                 </span>
-                {open ? <span className="min-w-0 flex-1 truncate text-left">{label}</span> : <span className="tip" aria-hidden="true">{label}</span>}
+                {open ? <span className="pp-fade min-w-0 flex-1 truncate text-left">{label}</span> : <span className="tip" aria-hidden="true">{label}</span>}
               </Link>
             );
           })}
@@ -89,7 +89,7 @@ function Sidebar({ open, onToggle }: { open: boolean; onToggle: () => void }) {
           {isAuthenticated ? (user?.name?.[0] ?? "U").toUpperCase() : "M"}
         </span>
         {open && (
-          <span className="flex min-w-0 flex-col leading-tight">
+          <span className="pp-fade flex min-w-0 flex-col leading-tight">
             <span className="truncate text-sm font-semibold">{isAuthenticated ? user?.name : t({ uz: "Mehmon", ru: "Гость" })}</span>
             {isAuthenticated
               ? <Link to="/cabinet" className="text-[13px] font-medium text-[var(--btn)]">{t(UI.cabinet)}</Link>
@@ -179,6 +179,32 @@ export default function PassportShell({ children }: { children: ReactNode }) {
       return !v;
     });
   };
+
+  // Bosh sahifada "Eng ko'p foydalaniladigan xizmatlar" ko'ringanda menyu to'liq ochiladi (tanlov saqlanmaydi);
+  // tepaga qaytilsa foydalanuvchi tanlagan holatga qaytadi.
+  useEffect(() => {
+    if (!home) return;
+    let raf = 0;
+    let target: HTMLElement | null = null;
+    const check = () => {
+      raf = 0;
+      target ??= document.getElementById("pp-top");
+      if (!target) return;
+      const reached = target.getBoundingClientRect().top < window.innerHeight * 0.65;
+      setOpen(reached ? true : readOpen());
+    };
+    const onScroll = () => {
+      if (!raf) raf = window.requestAnimationFrame(check);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    onScroll();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) window.cancelAnimationFrame(raf);
+    };
+  }, [home]);
 
   // Ctrl+K / Cmd+K va sahifadagi qidiruv maydonlari yuboradigan `open-global-search`
   useEffect(() => {

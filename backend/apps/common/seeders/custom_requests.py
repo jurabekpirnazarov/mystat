@@ -58,6 +58,9 @@ class CustomRequestsSeeder(Seeder):
 
         users = demo_users()
         clients = [users[n] for n in sorted(users) if n.startswith("demo_yuridik")]
+        if not clients:
+            self.log("  ! demo_yuridik foydalanuvchilar yo'q — namunaviy buyurtmalar o'tkazib yuborildi")
+            return
         employee = users.get("demo_employee")
         regions = list(Region.objects.order_by("code"))
         types = list(TARIFFS)

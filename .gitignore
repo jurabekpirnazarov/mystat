@@ -22,7 +22,3 @@ backend/media/contracts/
 *.apk
 *.db
 *.sqlite3
-
-# DWH: yuklanadigan fayllar repoga tushmasin
-dwh/data/*
-!dwh/data/.gitkeep

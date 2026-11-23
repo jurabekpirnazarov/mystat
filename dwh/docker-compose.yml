@@ -1,0 +1,53 @@
+# DWH (ma'lumotlar ombori) — mystat'dan mustaqil alohida stek.
+# Ishga tushirish: cd dwh && cp .env.example .env && docker compose up -d
+name: dwh
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DWH_DB:-dwh}
+      POSTGRES_USER: ${DWH_ADMIN_USER:-dwh_admin}
+      POSTGRES_PASSWORD: ${DWH_ADMIN_PASSWORD:?DWH_ADMIN_PASSWORD .env da berilishi shart}
+      DWH_LOADER_PASSWORD: ${DWH_LOADER_PASSWORD:?DWH_LOADER_PASSWORD .env da berilishi shart}
+      DWH_READER_PASSWORD: ${DWH_READER_PASSWORD:?DWH_READER_PASSWORD .env da berilishi shart}
+    command:
+      - postgres
+      - -c
+      - shared_buffers=${DWH_SHARED_BUFFERS:-1GB}
+      - -c
+      - effective_cache_size=${DWH_EFFECTIVE_CACHE_SIZE:-3GB}
+      - -c
+      - work_mem=${DWH_WORK_MEM:-64MB}
+      - -c
+      - maintenance_work_mem=${DWH_MAINTENANCE_WORK_MEM:-512MB}
+      - -c
+      - max_wal_size=4GB
+    shm_size: 1gb
+    volumes:
+      - dwh_pgdata:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "${DWH_BIND:-0.0.0.0}:${DWH_PORT:-5440}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  # Bir martalik yuklagich: docker compose run --rm loader <fayl> [--table nom]
+  loader:
+    build: ./loader
+    image: dwh-loader
+    profiles: ["tools"]
+    environment:
+      DWH_DSN: postgresql+psycopg2://dwh_loader:${DWH_LOADER_PASSWORD}@db:5432/${DWH_DB:-dwh}
+    volumes:
+      - ./data:/data:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  dwh_pgdata:

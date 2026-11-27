@@ -21,7 +21,16 @@
   - Eksport: `GET external-trade/trade-flows/export/?file=csv|xlsx` (10 000 qator limit, `X-Rows`/`X-Truncated`), frontend `api/tradeFlows.ts` ishlatadi. CSV/XLSX yaratilishi tekshirildi.
   - Lokal ishga tushirish: Postgres 16 (SQLite migratsiyada yiqiladi), `logs/` papkasi kerak, `.env` da `CLICK_*`, `MERCHANT_*`, `RETURN_URL` majburiy.
 
+- **Tashqi savdo import/eksport tuzatildi (2026-11-27):**
+  - `trade_data_services.py` qayta yozildi: kodlar matn sifatida o'qiladi (bosh nollar saqlanadi), CSV qo'llab-quvvatlanadi, yilni almashtirish bitta atomik transaksiyada (hamma qator rad etilsa eski ma'lumot saqlanadi), hisobotda `missing_codes` (qaysi kodlar topilmadi), `mode=replace|fill` (`fill`: bazada bor davr (oy+oqim) o'zgarmaydi, yo'qlari fayldan qo'shiladi).
+  - `trade-flows/?compare_year=` : bir xil davr bo'yicha taqqoslash (`compare_value`, `compare_pct`, `compare.comparable`), `limit` 1000 gacha. Eksport: `year2` ustunlari, chegara 1 000 000 qator, XLSX `write_only`.
+  - Frontend `TradeFlows.tsx`: taqqoslashda jadval, "Farq" ustuni, ogohlantirish, "Hammasi" tugmasi.
+
 ## 5. Qolgan ishlar
+- `dwh` bazasiga (host `db`) cloud'dan ulanib bo'lmaydi, haqiqiy ma'lumot hali ko'rilmagan. Dump yoki kompyuter ulanishi kerak; keyin `mode=fill` bilan yuklash.
+- Admin importi (`TradeDataExcelResource`) hali eski: kalit faqat (yil, davlat, mahsulot), `GOD` formati. Yagona servisga o'tkazish kerak.
+- Import uchun avtomatik test yozilmagan (bosh nol, fill rejimi, atomiklik).
+- Taqqoslashda `change_pct` (o'tgan yilga nisbatan) qisqartirilgan davr bilan hisoblanmaydi.
 - **Xato:** `process_excel_file` `dtype_dict` ni ishlatmaydi, `pd.read_excel` kodlarni songa aylantiradi (`'010121'` -> `10121`), natijada barcha qatorlar `missing_map` bilan rad etiladi. `dtype=str` kerak.
 - **Xato:** yil eski ma'lumotlari pool'dan oldin o'chiriladi va transaksiya yo'q: import yiqilsa, yil bo'sh qoladi. Xato qatorlar (noma'lum davlat) jimgina tashlanadi, fayl bo'yicha hisobot yo'q.
 - `services/excel_to_sqlite.py` hech qayerda ishlatilmaydi va modellarga mos emas (`name_uz_lat`, `country_group` FK; modelda `name_uz`, M2M). O'chirish yoki tuzatish kerak.
@@ -36,3 +45,4 @@
 ## 7. Sessiyalar jurnali
 - **2026-11-03:** Variant P asosiy UI qilindi (4-bo'limga qarang). Commit qilinmagan, branch `feat/mobil-ilova-demo`.
 - **2026-11-19:** Tashqi savdo import/eksport tahlil qilindi, frontend (5173) va backend (8000, Postgres 16) lokal ishga tushirildi (4 va 5-bo'limlarga qarang).
+- **2026-11-27:** Import servisi, `trade-flows` taqqoslash va eksport tuzatildi; dwh ulanishi bloklangan (5-bo'lim).

@@ -19,6 +19,10 @@ export interface TradeFlowCountry {
   share: number;
   prev_value: number | null;
   change_pct: number | null;
+  /** compare_year berilganda: taqqoslangan yil qiymati (bir xil davr) va farq */
+  compare_value?: number | null;
+  compare_diff?: number;
+  compare_pct?: number | null;
 }
 
 export interface TradeFlowsResponse {
@@ -34,6 +38,7 @@ export interface TradeFlowsResponse {
   warnings?: string[];
   years: number[];
   countries: TradeFlowCountry[];
+  compare?: { year: number; period: string; period_label: string; total_value: number; period_trimmed: boolean; comparable: boolean } | null;
 }
 
 export interface TradeDynamicsPoint {
@@ -45,18 +50,20 @@ export interface TradeDynamicsPoint {
 
 const BASE = "/additional-services/external-trade/trade-flows/";
 
-export const fetchTradeFlows = async (params: { flow: TradeFlow; year?: number; hs?: string; limit?: number }) => {
+export const fetchTradeFlows = async (params: { flow: TradeFlow; year?: number; hs?: string; limit?: number; compareYear?: number | null }) => {
   const query: Record<string, string> = { flow: params.flow, limit: String(params.limit ?? 300) };
   if (params.year) query.year = String(params.year);
   if (params.hs) query.hs = params.hs;
+  if (params.compareYear) query.compare_year = String(params.compareYear);
   return (await axiosT.get<TradeFlowsResponse>(BASE, { params: query })).data;
 };
 
-/** U-16: joriy jadvalni yuklab olish (server ko'pi bilan 10 000 qator qaytaradi). */
-export const downloadTradeExport = async (params: { flow: TradeFlow; year?: number; hs?: string; detail: "country" | "hs4"; format: "csv" | "xlsx" }) => {
+/** U-16: joriy jadvalni yuklab olish (server ko'pi bilan 1 000 000 qator qaytaradi). */
+export const downloadTradeExport = async (params: { flow: TradeFlow; year?: number; hs?: string; detail: "country" | "hs4"; format: "csv" | "xlsx"; year2?: number | null }) => {
   const query: Record<string, string> = { flow: params.flow, detail: params.detail, file: params.format };
   if (params.year) query.year = String(params.year);
   if (params.hs) query.hs = params.hs;
+  if (params.year2) query.year2 = String(params.year2);
   const res = await axiosT.get(`${BASE}export/`, { params: query, responseType: "blob" });
   const url = URL.createObjectURL(res.data as Blob);
   const a = document.createElement("a");

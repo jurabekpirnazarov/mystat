@@ -56,25 +56,27 @@ export default function TradeFlows() {
     [params, setParams]
   );
 
-  const flows = useApi(() => fetchTradeFlows({ flow, year, hs: hs.length >= 2 ? hs : undefined }), [flow, year, hs]);
+  const flows = useApi(() => fetchTradeFlows({ flow, year, hs: hs.length >= 2 ? hs : undefined, compareYear: year2 }), [flow, year, hs, year2]);
   const dynamics = useApi(() => fetchTradeDynamics(flow, countryId), [flow, countryId]);
   const dynamics2 = useApi(() => (compareId ? fetchTradeDynamics(flow, compareId) : Promise.resolve(null)), [flow, compareId]);
-  const flows2 = useApi(() => (year2 ? fetchTradeFlows({ flow, year: year2, hs: hs.length >= 2 ? hs : undefined }) : Promise.resolve(null)), [flow, year2, hs]);
   const doExport = async (detail: "country" | "hs4", format: "csv" | "xlsx") => {
     setExportMsg("Tayyorlanmoqda…");
     try {
-      const r = await downloadTradeExport({ flow, year, hs: hs.length >= 2 ? hs : undefined, detail, format });
-      setExportMsg(r.truncated ? `Yuklandi: ${r.rows} qator (server chegarasi — 10 000 qator).` : `Yuklandi: ${r.rows} qator.`);
+      const r = await downloadTradeExport({ flow, year, hs: hs.length >= 2 ? hs : undefined, detail, format, year2 });
+      setExportMsg(r.truncated ? `Yuklandi: ${r.rows} qator (server chegarasi — 1 000 000 qator).` : `Yuklandi: ${r.rows} qator.`);
     } catch {
       setExportMsg("Eksport qilib bo'lmadi.");
     }
   };
 
   const data = flows.data;
-  const top = useMemo(() => (data?.countries ?? []).slice(0, 20), [data]);
+  const [showAll, setShowAll] = useState(false);
+  const top = useMemo(() => (data?.countries ?? []).slice(0, showAll ? 1000 : 20), [data, showAll]);
+  const cmp = data?.compare ?? null;
+  // Taqqoslashda ikkinchi qiymat faqat jadvalda ko'rinadi, shuning uchun jadval ko'rinishi majburiy
+  const effectiveView = year2 ? "table" : view;
   const selected = data?.countries.find((c) => c.country_id === countryId) ?? null;
   const compared = data?.countries.find((c) => c.country_id === compareId) ?? null;
-  const year2Values = useMemo(() => new Map((flows2.data?.countries ?? []).map((c) => [c.country_id, c.value])), [flows2.data]);
   const chartData = useMemo(() => {
     const second = new Map((dynamics2.data ?? []).map((p) => [p.year, p.value]));
     return (dynamics.data ?? []).map((p) => ({ ...p, value2: second.get(p.year) ?? null }));
@@ -161,7 +163,7 @@ export default function TradeFlows() {
           <EmptyState icon={Globe2} title="Ma'lumot topilmadi" description="Boshqa yil yoki TN VED kodini tanlab ko'ring." />
         ) : (
           <div className="space-y-6">
-            <DataQualityNote notes={data.warnings ?? []} />
+            <DataQualityNote notes={[...(data.warnings ?? []), ...(cmp && !cmp.comparable ? [`${year}-yil va ${cmp.year}-yil davrlari mos kelmaydi: taqqoslash ishonchsiz.`] : []), ...(cmp?.period_trimmed ? [`Taqqoslash bir xil davr bo'yicha: ${cmp.period_label}.`] : [])]} />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard label={`${flowLabel}, jami`} value={compact(data.total_value)} icon={TrendingUp} hint={TRADE_VALUE_UNIT} />
               <StatCard label="Hamkor davlatlar" value={data.countries_count} icon={Globe2} hint={hs ? `TN VED ${hs}*` : "barcha tovarlar"} />
@@ -189,8 +191,11 @@ export default function TradeFlows() {
             <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
               <section className="xl:col-span-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 sm:p-5">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                  <h2 className="font-semibold text-gray-900 dark:text-white">Top-20 hamkor <span className="text-sm font-normal text-mg-muted">· Topildi: {data.countries_count} ta</span></h2>
+                  <h2 className="font-semibold text-gray-900 dark:text-white">{showAll ? "Barcha hamkorlar" : "Top-20 hamkor"} <span className="text-sm font-normal text-mg-muted">· Topildi: {data.countries_count} ta</span></h2>
                   <div className="flex items-center gap-2">
+                    {data.countries_count > 20 && (
+                      <button type="button" onClick={() => setShowAll((v) => !v)} className="text-sm text-mg-primary hover:underline">{showAll ? "Top-20" : `Hammasi (${data.countries_count})`}</button>
+                    )}
                     {(hs || countryId || year2 || compareId) && (
                       <button type="button" onClick={() => setParams(new URLSearchParams({ flow }), { replace: true })} className="text-sm text-mg-primary hover:underline">Filtrlarni tozalash</button>
                     )}
@@ -204,7 +209,7 @@ export default function TradeFlows() {
                     </div>
                   </div>
                 </div>
-                {view === "cards" ? (
+                {effectiveView === "cards" ? (
                   <div className="grid gap-3 sm:grid-cols-2">
                     {top.map((c, i) => (
                       <ResultCard key={c.country_id} variant="country" rank={i + 1} title={c.country_name} flowLabel={flowLabel}
@@ -223,6 +228,7 @@ export default function TradeFlows() {
                         <th className="py-2 pr-2 font-medium w-40">Ulush</th>
                         <th className="py-2 font-medium text-right">O'zgarish</th>
                         {year2 && <th className="py-2 pl-2 font-medium text-right">{year2}-yil</th>}
+                        {year2 && <th className="py-2 pl-2 font-medium text-right">Farq</th>}
                       </tr>
                     </thead>
                     <tbody>
@@ -248,7 +254,12 @@ export default function TradeFlows() {
                           </td>
                           {year2 && (
                             <td className="py-2 pl-2 text-right tabular-nums text-gray-600 dark:text-gray-300 whitespace-nowrap">
-                              {year2Values.has(c.country_id) ? fmt(year2Values.get(c.country_id) as number) : "—"}
+                              {c.compare_value != null ? fmt(c.compare_value) : "—"}
+                            </td>
+                          )}
+                          {year2 && (
+                            <td className="py-2 pl-2 text-right tabular-nums whitespace-nowrap">
+                              <ChangeBadge pct={c.compare_pct ?? null} unreliable={cmp ? !cmp.comparable : false} />
                             </td>
                           )}
                         </tr>

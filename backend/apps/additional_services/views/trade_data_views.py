@@ -18,7 +18,7 @@ class TradeDataAPIView(APIView):
         file_obj = serializer.validated_data['file']
         save_dir = os.path.join(settings.BASE_DIR, "datas")
         os.makedirs(save_dir, exist_ok=True)
-        save_path = os.path.join(save_dir, file_obj.name)
+        save_path = os.path.join(save_dir, os.path.basename(file_obj.name))
 
         with open(save_path, "wb") as f:
             for chunk in file_obj.chunks() if hasattr(file_obj, "chunks") else [file_obj.read()]:
@@ -31,5 +31,9 @@ class TradeDataAPIView(APIView):
         format = serializer.validated_data['format']
 
 
-        result = process_file(file_path=save_path,year=year, format=format)
+        try:
+            result = process_file(file_path=save_path, year=year, format=format,
+                                  mode=serializer.validated_data['mode'])
+        except RuntimeError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"status": "ok", "result": result})

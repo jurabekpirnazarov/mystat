@@ -69,22 +69,26 @@ class TradeFlowsAPIView(APIView):
             return Response({"detail": "flow: export, import yoki total"}, status=400)
         try:
             year = int(request.query_params.get("year") or max(periods))
-            limit = max(1, min(int(request.query_params.get("limit") or 20), 300))
+            limit = max(1, min(int(request.query_params.get("limit") or 20), 1000))
+            compare_year = int(request.query_params.get("compare_year") or 0) or None
         except ValueError:
             return Response({"detail": "year/limit butun son bo'lishi kerak"}, status=400)
         if year not in periods:
             return Response({"detail": f"{year}-yil uchun ma'lumot yo'q", "years": list(periods)}, status=404)
         hs = (request.query_params.get("hs") or "").strip()[:6]
 
-        key = f"trade_flows:{year}:{flow}:{hs}:{limit}"
+        if compare_year and (compare_year not in periods or compare_year == year):
+            return Response({"detail": f"{compare_year}-yil taqqoslash uchun mavjud emas", "years": list(periods)}, status=404)
+
+        key = f"trade_flows:{year}:{flow}:{hs}:{limit}:{compare_year or ''}"
         data = cache.get(key)
         if data is None:
-            data = self._build(periods, year, flow, hs, limit)
+            data = self._build(periods, year, flow, hs, limit, compare_year)
             cache.set(key, data, CACHE_SECONDS)
         return Response(data)
 
     @staticmethod
-    def _build(periods, year, flow, hs, limit):
+    def _build(periods, year, flow, hs, limit, compare_year=None):
         month = periods[year]
         current = _totals_by_country(year, month, flow, hs)
         # O'tgan yilning xuddi shu davri (agar shu oy mavjud bo'lsa)
@@ -92,6 +96,22 @@ class TradeFlowsAPIView(APIView):
         previous = {}
         if prev_year in periods and _month_num(periods[prev_year]) >= _month_num(month):
             previous = _totals_by_country(prev_year, month, flow, hs)
+
+        # Yil bilan taqqoslash: ikkala yil uchun BIR XIL davr (qisqaroq yilning oxirgi oyi) olinadi,
+        # aks holda to'liq yilni to'liq bo'lmagan yil bilan solishtirib, noto'g'ri "pasayish" chiqadi.
+        cmp_rows, cmp_month = {}, None
+        if compare_year:
+            cmp_month = month if _month_num(periods[compare_year]) >= _month_num(month) else periods[compare_year]
+            cmp_rows = _totals_by_country(compare_year, cmp_month, flow, hs)
+            if cmp_month != month:
+                trimmed = _totals_by_country(year, cmp_month, flow, hs)
+                if trimmed:
+                    current = trimmed
+                else:
+                    # Tanlangan yilda shu oy yo'q: davrlar mos kelmaydi, taqqoslash ishonchsiz
+                    cmp_month = None
+                    cmp_rows = _totals_by_country(compare_year, periods[compare_year], flow, hs)
+        shown_month = cmp_month or month
 
         total = sum((row["value"] or Decimal(0)) for row in current.values())
         other = sum((r["value"] or Decimal(0)) for r in current.values() if r["country__ctrana"] == OTHER_COUNTRIES_CODE)
@@ -103,7 +123,7 @@ class TradeFlowsAPIView(APIView):
         for row in rows[:limit]:
             value = row["value"] or Decimal(0)
             prev = previous.get(row["country_id"], {}).get("value")
-            countries.append({
+            item = {
                 "country_id": row["country_id"],
                 "country_name": row["country__name_uz"],
                 "country_name_en": row["country__name_en"],
@@ -113,7 +133,13 @@ class TradeFlowsAPIView(APIView):
                 "share": float(value / total * 100) if total else 0.0,
                 "prev_value": float(prev) if prev is not None else None,
                 "change_pct": float((value - prev) / prev * 100) if prev else None,
-            })
+            }
+            if compare_year:
+                cv = cmp_rows.get(row["country_id"], {}).get("value")
+                item["compare_value"] = float(cv) if cv is not None else None
+                item["compare_diff"] = float(value - (cv or 0))
+                item["compare_pct"] = float((value - cv) / cv * 100) if cv else None
+            countries.append(item)
         from .trade_hub import data_quality
         quality = data_quality()
         # Taqqoslash ishonchsiz bo'lgan yillar: tanlangan yil yoki o'tgan yil ma'lumoti to'liq emas
@@ -123,8 +149,14 @@ class TradeFlowsAPIView(APIView):
             "flow": flow,
             "hs": hs or None,
             "warnings": warnings,
-            "period": month,
-            "period_label": period_label(month),
+            "period": shown_month,
+            "period_label": period_label(shown_month),
+            "compare": ({
+                "year": compare_year, "period": shown_month, "period_label": period_label(shown_month),
+                "total_value": float(sum((r["value"] or Decimal(0)) for r in cmp_rows.values())),
+                "period_trimmed": shown_month != month,
+                "comparable": cmp_month is not None or _month_num(periods[compare_year]) == _month_num(month),
+            } if compare_year else None),
             "total_value": float(total),
             "other_countries_value": float(other),
             "countries_count": len(rows),
@@ -159,13 +191,13 @@ class TradeFlowDynamicsAPIView(APIView):
         return Response(data)
 
 
-EXPORT_MAX_ROWS = 10_000
+EXPORT_MAX_ROWS = 1_000_000  # XLSX chegarasi 1 048 576 qator
 
 
 class TradeFlowsExportAPIView(APIView):
     """GET external-trade/trade-flows/export/?year=&flow=&hs=&detail=country|hs4&file=csv|xlsx — U-16.
 
-    Server ko'pi bilan 10 000 qator qaytaradi; kesilgan bo'lsa fayl oxirida aytiladi.
+    Server ko'pi bilan 1 000 000 qator qaytaradi; kesilgan bo'lsa fayl oxirida aytiladi.
     """
     permission_classes = [AllowAny]
 
@@ -188,7 +220,17 @@ class TradeFlowsExportAPIView(APIView):
             return Response({"detail": f"{year}-yil uchun ma'lumot yo'q"}, status=404)
         hs = "".join(ch for ch in (request.query_params.get("hs") or "") if ch.isdigit())[:6]
         detail = request.query_params.get("detail", "country")
-        qs = TradeData.objects.filter(year_id=year, month=periods[year], trade_type__in=FLOW_CODES[flow])
+        month = periods[year]
+        try:
+            year2 = int(request.query_params.get("year2") or 0) or None
+        except ValueError:
+            return Response({"detail": "year2 butun son"}, status=400)
+        if year2 and (year2 not in periods or year2 == year):
+            return Response({"detail": f"{year2}-yil taqqoslash uchun mavjud emas"}, status=404)
+        if year2 and _month_num(periods[year2]) < _month_num(month):
+            if TradeData.objects.filter(year_id=year, month=periods[year2]).exists():
+                month = periods[year2]  # bir xil davr
+        qs = TradeData.objects.filter(year_id=year, month=month, trade_type__in=FLOW_CODES[flow])
         if hs:
             qs = qs.filter(product__code__startswith=hs)
         if detail == "hs4":
@@ -201,17 +243,31 @@ class TradeFlowsExportAPIView(APIView):
                     .annotate(total=Sum("value"), qty=Sum("quantity")).order_by("-total"))
             header = ["Davlat", "ISO kod", "Qiymat (ming AQSh $)", "Miqdor"]
             keys = ("country__name_uz", "country__ctrana")
-        data = [[r[keys[0]], r[keys[1]], float(r["total"] or 0), float(r["qty"] or 0)]
-                for r in rows[:EXPORT_MAX_ROWS + 1]]
+        cmp_vals = {}
+        if year2 and detail != "hs4":
+            cmp_qs = TradeData.objects.filter(year_id=year2, month=periods[year2] if _month_num(periods[year2]) < _month_num(month) else month, trade_type__in=FLOW_CODES[flow])
+            if hs:
+                cmp_qs = cmp_qs.filter(product__code__startswith=hs)
+            cmp_vals = {r["country__ctrana"]: float(r["total"] or 0)
+                        for r in cmp_qs.values("country__ctrana").annotate(total=Sum("value"))}
+            header = header + [f"{year2}-yil qiymati", "Farq", "Farq, %"]
+        data = []
+        for r in rows[:EXPORT_MAX_ROWS + 1]:
+            line = [r[keys[0]], r[keys[1]], float(r["total"] or 0), float(r["qty"] or 0)]
+            if cmp_vals or (year2 and detail != "hs4"):
+                cv = cmp_vals.get(r[keys[1]])
+                line += [cv, (line[2] - (cv or 0)), ((line[2] - cv) / cv * 100) if cv else None]
+            data.append(line)
         truncated = len(data) > EXPORT_MAX_ROWS
         data = data[:EXPORT_MAX_ROWS]
-        note = (f"Manba: my.stat.uz, tashqi savdo, {year}-yil {period_label(periods[year])}, {flow}"
+        note = (f"Manba: my.stat.uz, tashqi savdo, {year}-yil {period_label(month)}, {flow}"
+                + (f", {year2}-yil bilan taqqoslangan" if year2 and detail != "hs4" else "")
                 + (f", HS {hs}*" if hs else "") + (f". Natija {EXPORT_MAX_ROWS} qatorda kesildi." if truncated else "."))
         name = f"tashqi-savdo-{flow}-{year}{'-' + hs if hs else ''}"
         if request.query_params.get("file") == "xlsx":  # "format" — DRF parametri, shuning uchun "file"
             from openpyxl import Workbook
-            wb = Workbook()
-            ws = wb.active
+            wb = Workbook(write_only=True)  # katta fayllar uchun xotirani tejaydi
+            ws = wb.create_sheet()
             ws.append(header)
             for row in data:
                 ws.append(row)
